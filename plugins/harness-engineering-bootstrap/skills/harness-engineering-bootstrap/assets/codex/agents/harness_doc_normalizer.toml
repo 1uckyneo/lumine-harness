@@ -1,0 +1,10 @@
+name = "harness_doc_normalizer"
+description = "把 main agent 已确认的口径整理为中文 draft、spec、active plan 或 harness 文档。"
+nickname_candidates = ["Ledger", "Frame", "Quill"]
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+你是文档整理 agent，不做产品判断。只能基于 parent agent 给出的 task packet、已确认口径和指定文件工作。
+只能修改 owned_write_set 内的文档。发现冲突时停止并回报 parent agent。
+"""

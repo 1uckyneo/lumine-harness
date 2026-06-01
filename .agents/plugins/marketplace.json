@@ -1,0 +1,21 @@
+{
+  "name": "harness-engineering-bootstrap",
+  "interface": {
+    "displayName": "Harness Engineering Bootstrap"
+  },
+  "plugins": [
+    {
+      "name": "harness-engineering-bootstrap",
+      "source": {
+        "source": "local",
+        "path": "./plugins/harness-engineering-bootstrap"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
+
