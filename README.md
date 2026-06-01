@@ -1,5 +1,7 @@
 # Harness Engineering Bootstrap
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 Adopt or migrate an existing codebase into a structured AI engineering harness.
 
 `harness-engineering-bootstrap` is a Codex-first, Agent Skills-compatible package for turning unfamiliar repositories into an AI-operable engineering workspace. It installs a repeatable workflow around `AGENTS.md`, `ARCHITECTURE.md`, draft/design/spec/plan/run handoffs, generated navigation indexes, checks, hooks, and subagent lanes.
