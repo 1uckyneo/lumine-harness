@@ -1,11 +1,11 @@
 ---
 name: lumine-harness
-description: 当需要使用 Lumine Harness 把陌生 workspace、单仓、前后端多端仓、纯后端、纯前端或传统项目改造为 Agent 可恢复、可约束、可验证的工程环境时使用；会以 AGENTS.md、共享 .agents/skills/lumine-harness-*、draft/design/spec/plan/run、generated、checks、通用 .harness Core 和按产品选择的薄 Adapter 为基准重构目标仓库的 Agent 工程流程。
+description: Use when adopting or migrating a single- or multi-repository project into a recoverable, constrained, and verifiable Agent engineering environment with persistent context, staged workflow artifacts, checks, and host adapters.
 ---
 
 # Lumine Harness
 
-Lumine Harness 是一套面向 Agent 的项目级工程工作流，用于将单仓或多仓 workspace 建设为可恢复、可约束、可验证的研发环境。Lumine 中文写作“卢米安”。默认语义是 `adopt / migrate`，不是保守增量补丁。
+Lumine Harness 是一套面向 Agent 的项目级工程工作流，用于将单仓或多仓 workspace 建设为可恢复、可约束、可验证的研发环境。Lumine 中文写作“[卢米安](https://weibo.com/u/3316905545)”。默认语义是 `adopt / migrate`，不是保守增量补丁。
 
 本 skill 必须自包含：不要读取或依赖任何特定 workspace 的文件来决定模板内容。
 

@@ -2,7 +2,9 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-Lumine Harness 是一套项目级 Agent 工程工作流。它帮助 Agent 在不同会话和长时间任务中，持续读取同一套产品目标、架构边界、执行状态和验证证据。Lumine 中文写作“卢米安”。
+[![skills.sh](https://skills.sh/b/1uckyneo/lumine-harness)](https://skills.sh/1uckyneo/lumine-harness)
+
+Lumine Harness 是一套项目级 Agent 工程工作流。它帮助 Agent 在不同会话和长时间任务中，持续读取同一套产品目标、架构边界、执行状态和验证证据。Lumine 中文写作“[卢米安](https://weibo.com/u/3316905545)”。
 
 它既可以改造单个代码仓库，也可以改造由多个关联仓库组成的工程。最终得到的是一套让 Agent 更容易理解、恢复、约束、验证和持续改进的研发环境。
 
@@ -26,37 +28,38 @@ Lumine Harness 不是：
 
 ## 三分钟开始使用
 
-只需要让准备检查工程的 Agent 能够读取规范 `lumine-harness` Skill。
+### 推荐：使用 `skills` CLI
 
-### 通用方式：从本仓库读取 Skill
+准备好 Node.js 18 或更高版本后，在终端中运行。[`skills` CLI](https://github.com/vercel-labs/skills)（来自 Vercel Labs）会读取本仓库，并把 `lumine-harness` 安装到检测到的 Agent 对应目录。
 
-先把仓库克隆到 Agent 可以读取的位置：
+使用官方文档中的 `npx` 方式：
 
 ```bash
-git clone https://github.com/1uckyneo/lumine-harness.git
+npx skills add 1uckyneo/lumine-harness -g
 ```
 
-然后向 Agent 发送类似下面的消息：
+使用 pnpm 的等价方式：
 
-```text
-请完整读取 <克隆目录>/skills/lumine-harness/SKILL.md。
-
-检查 <目标工程目录>，识别项目结构并给出 Migration Proposal。
-在我确认提案前不要修改文件。
+```bash
+pnpm dlx skills add 1uckyneo/lumine-harness -g
 ```
 
-不同 Agent 产品不一定具备相同的全局 Skill 安装机制。明确读取规范 `SKILL.md` 是通用方式；工程采用完成后，会得到自己的公共阶段 Skills 和所选产品 Adapter。
+`-g` 表示全局安装，适合用同一个入口 Skill 改造多个工程。如果只希望在当前项目中使用，可以省略 `-g`。
 
-### Codex：直接安装 Skill
+安装完成后，请开启新的 Agent 会话，让宿主重新发现 Skill。然后从准备采用 Harness 的目标工程根目录开始使用。
 
-Codex 用户可以把下面这段话发送给 Codex。它不是终端命令：
+`skills` CLI 安装的是负责首次采用或迁移的入口 `lumine-harness` Skill。工程采用完成后，日常开发使用的是生成到目标工程内的 `AGENTS.md`、`.agents/skills/lumine-harness-*`、工程记录、Harness Core 和所选 Adapter。
 
-```text
-请使用 $skill-installer 安装这个 Skill：
-https://github.com/1uckyneo/lumine-harness/tree/main/skills/lumine-harness
+### 更新 Skill
+
+```bash
+npx skills update lumine-harness -g -y
+
+# 使用 pnpm
+pnpm dlx skills update lumine-harness -g -y
 ```
 
-安装后的 Skill 会在下一轮对话中可用。建议开启一个新任务，让安装状态和目标工程上下文更加明确。
+更新后同样建议开启新会话，让 Agent 载入新的 Skill 内容。
 
 ## 选择正确的目标工程根目录
 
@@ -69,10 +72,10 @@ https://github.com/1uckyneo/lumine-harness/tree/main/skills/lumine-harness
 
 这个共同父目录本身不要求是 Git 仓库。关键是 Agent 从这里能够访问所有关联仓库。如果只打开其中一个子仓，跨仓上下文、检查和生命周期恢复都会不完整。
 
-让 Agent 能够读取 Lumine Harness Skill 后，从准备采用 Harness 的工程根目录启动，并发送：
+安装 Lumine Harness Skill 后，从准备采用 Harness 的工程根目录启动 Agent，并发送：
 
 ```text
-请使用 $lumine-harness 检查当前工程。
+请使用 lumine-harness Skill 检查当前工程。
 
 先识别这是单仓项目还是多仓协同项目，确认合适的 Harness 根目录，
 然后给出 Migration Proposal。在我确认前不要修改文件。
@@ -264,7 +267,7 @@ Kimi Code 用户级 Hooks、ZCode 本地 Plugin、DeepSeek Harness profile bundl
 
 ### 安装后看不到全局 Skill
 
-Codex Skill Installer 安装的新 Skill 会在下一轮对话中可用。请开启新任务并确认能够发现 `lumine-harness`，再尝试其他安装方式。
+先运行 `npx skills list -g` 或 `pnpm dlx skills list -g`，确认 `lumine-harness` 已经安装到目标 Agent。然后开启新会话，让宿主重新加载 Skill。使用 Codex Skill Installer 安装时，新 Skill 同样会在下一轮对话中可用。
 
 ### Agent 只发现了其中一个子仓
 
@@ -281,6 +284,36 @@ Codex Skill Installer 安装的新 Skill 会在下一轮对话中可用。请开
 ### Doctor 提示需要人工步骤
 
 请在对应产品中完成该操作。当仓库自动化无法证明产品侧设置时，Harness 会保留 `needs_manual_app_step`，不会伪装成已经完成。
+
+## 其他安装方式
+
+### 手动读取仓库
+
+如果当前 Agent 不支持 `skills` CLI，先把仓库克隆到它能够读取的位置：
+
+```bash
+git clone https://github.com/1uckyneo/lumine-harness.git
+```
+
+然后向 Agent 发送：
+
+```text
+请完整读取 <克隆目录>/skills/lumine-harness/SKILL.md。
+
+检查 <目标工程目录>，识别项目结构并给出 Migration Proposal。
+在我确认提案前不要修改文件。
+```
+
+### Codex Skill Installer
+
+Codex 用户也可以把下面这段话发送给 Codex。它不是终端命令：
+
+```text
+请使用 $skill-installer 安装这个 Skill：
+https://github.com/1uckyneo/lumine-harness/tree/main/skills/lumine-harness
+```
+
+安装后的 Skill 会在下一轮对话中可用。
 
 ## 可选扩展：Codex Plugin
 

@@ -2,6 +2,8 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+[![skills.sh](https://skills.sh/b/1uckyneo/lumine-harness)](https://skills.sh/1uckyneo/lumine-harness)
+
 Lumine Harness is a project-level Agent engineering workflow. It helps an Agent keep reading the same product goals, architecture boundaries, execution state, and validation evidence across sessions and long-running tasks.
 
 It can adopt a single repository or a project composed of several related repositories. The result is an engineering environment that is easier for an Agent to understand, recover, constrain, verify, and improve.
@@ -26,37 +28,38 @@ The installed or directly referenced `lumine-harness` Skill performs the initial
 
 ## Start In Three Minutes
 
-You only need to make the canonical `lumine-harness` Skill readable to the Agent that will inspect the project.
+### Recommended: use the `skills` CLI
 
-### Any Agent: read the Skill from this repository
+With Node.js 18 or newer installed, run one of these commands in a terminal. The [`skills` CLI](https://github.com/vercel-labs/skills) from Vercel Labs reads this repository and installs `lumine-harness` for the detected Agent.
 
-First clone the repository in a location that the Agent can read:
+Use the official `npx` form:
 
 ```bash
-git clone https://github.com/1uckyneo/lumine-harness.git
+npx skills add 1uckyneo/lumine-harness -g
 ```
 
-Then send the Agent a message like this:
+Or use the equivalent pnpm form:
 
-```text
-Read <clone-path>/skills/lumine-harness/SKILL.md completely.
-
-Inspect <target-project-path>, identify its project structure, and present a Migration Proposal.
-Do not modify files until I confirm the proposal.
+```bash
+pnpm dlx skills add 1uckyneo/lumine-harness -g
 ```
 
-Agent products do not all share the same global Skill installation mechanism. Explicitly reading the canonical `SKILL.md` is the portable method; the adopted project will receive its own shared phase Skills and selected product Adapters.
+`-g` installs the Skill globally, which is convenient when adopting several projects. Omit `-g` to install it only in the current project.
 
-### Codex: install the Skill directly
+After installation, start a new Agent session so the host can discover the Skill, then work from the root of the project that will adopt Harness.
 
-Codex users can send this message to Codex. It is not a terminal command:
+The CLI installs the top-level `lumine-harness` Skill used for initial adoption or migration. Once adoption is complete, everyday development uses the target project's generated `AGENTS.md`, `.agents/skills/lumine-harness-*`, engineering records, Harness Core, and selected Adapters.
 
-```text
-Use $skill-installer to install this Skill:
-https://github.com/1uckyneo/lumine-harness/tree/main/skills/lumine-harness
+### Update the Skill
+
+```bash
+npx skills update lumine-harness -g -y
+
+# With pnpm
+pnpm dlx skills update lumine-harness -g -y
 ```
 
-The Skill becomes available on the next turn. Starting a new task makes the installation and target-project context unambiguous.
+Start a new session after updating so the Agent loads the refreshed Skill files.
 
 ## Choose The Correct Project Root
 
@@ -69,10 +72,10 @@ The target is not necessarily a “workspace repository.” Choose the directory
 
 The common parent directory does not have to be a Git repository. What matters is that the Agent can access every related repository from that scope. Opening only one child repository makes cross-repository context, checks, and lifecycle recovery incomplete.
 
-After making the Lumine Harness Skill available, start the Agent from the intended project root and send:
+After installing the Lumine Harness Skill, start the Agent from the intended project root and send:
 
 ```text
-Use $lumine-harness to inspect this project.
+Use the lumine-harness Skill to inspect this project.
 
 First determine whether this is a single-repository or multi-repository project,
 confirm the correct Harness root, and present a Migration Proposal.
@@ -265,7 +268,7 @@ Some products require an explicit install command, such as Kimi Code user Hooks,
 
 ### The global Skill is not visible
 
-The Codex Skill Installer makes a newly installed Skill available on the next turn. Start a new task and confirm that `lumine-harness` appears before trying another installation path.
+Run `npx skills list -g` or `pnpm dlx skills list -g` first and confirm that `lumine-harness` is installed for the intended Agent. Then start a new session so the host reloads its Skills. A Skill installed with Codex Skill Installer also becomes available on the next turn.
 
 ### The Agent found only one child repository
 
@@ -282,6 +285,36 @@ Refreshing generated files performs the deterministic scan. The Agent must then 
 ### Doctor reports a manual step
 
 Complete that step in the target product. Harness checks intentionally preserve `needs_manual_app_step` when repository automation cannot prove a product-side setting.
+
+## Other Installation Options
+
+### Read the repository manually
+
+If the current Agent cannot use the `skills` CLI, clone the repository somewhere it can read:
+
+```bash
+git clone https://github.com/1uckyneo/lumine-harness.git
+```
+
+Then send the Agent:
+
+```text
+Read <clone-path>/skills/lumine-harness/SKILL.md completely.
+
+Inspect <target-project-path>, identify its project structure, and present a Migration Proposal.
+Do not modify files until I confirm the proposal.
+```
+
+### Codex Skill Installer
+
+Codex users can also send the following message to Codex. It is not a terminal command:
+
+```text
+Use $skill-installer to install this Skill:
+https://github.com/1uckyneo/lumine-harness/tree/main/skills/lumine-harness
+```
+
+The Skill becomes available on the next turn.
 
 ## Optional Extension: Codex Plugin
 
