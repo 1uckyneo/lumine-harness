@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [{ "command": "node .harness/adapters/cursor/hooks/session-start.mjs", "timeout": 30 }],
+    "afterAgentResponse": [{ "command": "node .harness/adapters/cursor/hooks/after-agent-response.mjs", "timeout": 10 }],
+    "stop": [{ "command": "node .harness/adapters/cursor/hooks/stop.mjs", "timeout": 120, "loop_limit": 1 }]
+  }
+}

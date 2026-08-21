@@ -1,0 +1,17 @@
+{
+  "name": "@lumine/dsh-harness-adapter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DeepSeek Harness profile bundle for a workspace Lumine Harness Core",
+  "type": "module",
+  "files": ["cordis.patch.yml"],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-hooks-codex": "0.1.0-rc.7"
+  }
+}

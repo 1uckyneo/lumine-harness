@@ -1,10 +1,10 @@
-# Harness Engineering Bootstrap
+# Lumine Harness
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 Adopt or migrate an existing codebase into a structured AI engineering harness.
 
-`harness-engineering-bootstrap` is a Codex-first, Agent Skills-compatible package for turning unfamiliar repositories into an AI-operable engineering workspace. It installs a repeatable workflow around `AGENTS.md`, `ARCHITECTURE.md`, draft/design/spec/plan/run handoffs, generated navigation indexes, checks, hooks, and subagent lanes.
+Lumine Harness is a project-level engineering workflow for turning single-repository or multi-repository workspaces into recoverable, constrained, and verifiable Agent-ready environments. It uses `AGENTS.md`, `ARCHITECTURE.md`, draft/design/spec/plan/run handoffs, generated navigation indexes, checks, a shared lifecycle core, and thin adapters for eight Agent hosts.
 
 ## When To Use
 
@@ -19,7 +19,7 @@ Do not use it for a single feature implementation inside an already-adopted harn
 Install the skill directly from this repository:
 
 ```bash
-$skill-installer install https://github.com/1uckyneo/harness-engineering-bootstrap/tree/main/skills/harness-engineering-bootstrap
+$skill-installer install https://github.com/1uckyneo/harness-engineering-bootstrap/tree/main/skills/lumine-harness
 ```
 
 Restart Codex after installing new skills.
@@ -32,7 +32,7 @@ Add this repository as a Codex plugin marketplace:
 codex plugin marketplace add 1uckyneo/harness-engineering-bootstrap
 ```
 
-Then open the Codex plugin browser, install **Harness Engineering Bootstrap**, and start a new thread.
+Then open the Codex plugin browser, install **Lumine Harness**, and start a new thread.
 
 ### Manual Install
 
@@ -40,17 +40,17 @@ Copy the skill folder into your user skills directory:
 
 ```bash
 mkdir -p ~/.codex/skills
-cp -R skills/harness-engineering-bootstrap ~/.codex/skills/
+cp -R skills/lumine-harness ~/.codex/skills/
 ```
 
 Restart Codex after copying the skill.
 
 ## Usage
 
-Ask Codex to adopt a target repository:
+Ask an Agent that supports this Skill to adopt a target repository:
 
 ```text
-Use harness-engineering-bootstrap to adopt /path/to/my-project
+Use lumine-harness to adopt /path/to/my-project
 ```
 
 The skill first inspects the target and presents a migration proposal before writing. The proposal identifies the detected topology, files to create or replace, conflicting AI workflow files, generated indexes, checks, and profile-specific not-applicable items.
@@ -60,8 +60,9 @@ The skill first inspects the target and presents a migration proposal before wri
 - A root `AGENTS.md` as the agent entry map.
 - A root `ARCHITECTURE.md` as the detailed architecture map.
 - `docs/drafts`, `docs/design-docs`, `docs/product-specs`, `docs/exec-plans`, `docs/generated`, and `docs/validation` conventions.
-- A local `./harness` wrapper for generated refreshes and checks.
-- Codex hooks, checks, generated-index refresh tooling, project skills, and subagent lane definitions.
+- A local `./.harness/cli` for generated refreshes, checks, Adapter diagnosis, and session status.
+- Seven shared project Skills named `lumine-harness-*` under `.agents/skills`.
+- A common lifecycle core plus thin Adapters for Codex, Qoder, Trae, Kimi Code, Cursor, OpenCode, ZCode, and DeepSeek Harness.
 
 ## Safety Model
 
@@ -76,17 +77,18 @@ The generated indexes are navigation aids. They do not replace source inspection
 Run the bundled checks from the repository root:
 
 ```bash
-bash skills/harness-engineering-bootstrap/scripts/check-skill-package.sh
-node --check skills/harness-engineering-bootstrap/assets/codex/harness-check.mjs
-node --check skills/harness-engineering-bootstrap/assets/codex/harness-generated.mjs
+bash skills/lumine-harness/scripts/check-skill-package.sh
+node --test skills/lumine-harness/assets/harness/tests/*.test.mjs
 ```
 
 ## Repository Layout
 
 ```text
-skills/harness-engineering-bootstrap/       # Canonical Agent Skill package
-plugins/harness-engineering-bootstrap/      # Codex plugin wrapper for marketplace installs
+skills/lumine-harness/       # Canonical Agent Skill package
+plugins/lumine-harness/      # Codex plugin wrapper for marketplace installs
 .agents/plugins/marketplace.json            # Codex repo marketplace catalog
+scripts/sync-plugin-wrapper.sh               # Regenerate the wrapper from the canonical Skill
+scripts/check-repo-sync.sh                   # Prove canonical and wrapper contents match
 ```
 
 ## License

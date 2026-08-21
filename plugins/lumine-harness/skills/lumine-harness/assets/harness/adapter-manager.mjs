@@ -1,0 +1,284 @@
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { findHarnessRoot, isStartedAtHarnessRoot } from "./core/root-resolver.mjs";
+import { readCurrentSessionPointer, recordWorkStatus, WORK_STATUSES } from "./core/work-status.mjs";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const PRODUCTS = ["codex", "qoder", "trae", "kimi", "cursor", "opencode", "zcode", "deepseek-harness"];
+const KIMI_BEGIN = "# BEGIN lumine-harness adapter (managed)";
+const KIMI_END = "# END lumine-harness adapter (managed)";
+const LEGACY_KIMI_BEGIN = "# BEGIN harness-engineering adapter (managed)";
+const LEGACY_KIMI_END = "# END harness-engineering adapter (managed)";
+
+function capabilities(root) {
+  return JSON.parse(readFileSync(path.join(root, ".harness", "adapter-capabilities.json"), "utf8"));
+}
+
+function entry(root, product) {
+  return {
+    codex: path.join(root, ".codex", "hooks.json"),
+    qoder: path.join(root, ".qoder", "settings.json"),
+    trae: path.join(root, ".trae", "hooks.json"),
+    kimi: path.join(root, ".harness", "adapters", "kimi", "hooks", "dispatch.mjs"),
+    cursor: path.join(root, ".cursor", "hooks.json"),
+    opencode: path.join(root, ".opencode", "plugins", "harness.mjs"),
+    zcode: path.join(root, ".harness", "adapters", "zcode", "marketplace", "marketplace.json"),
+    "deepseek-harness": path.join(root, ".harness", "adapters", "deepseek-harness", "bundle", "package.json")
+  }[product];
+}
+
+function forbidden(root) {
+  return [".qoder/skills", ".trae/skills", ".kimi-code/skills", ".qoder/rules", ".trae/rules", ".cursor/rules", ".zcode/skills", ".zcode/rules", ".dsh/skills"]
+    .filter((item) => existsSync(path.join(root, item)));
+}
+
+export function listAdapters(root = findHarnessRoot(process.cwd())) {
+  if (!root) throw new Error("Harness root not found.");
+  const manifest = capabilities(root);
+  return PRODUCTS.map((product) => ({ product, ...manifest.products[product] }));
+}
+
+export function hasManagedKimiBlock(configFile) {
+  if (!existsSync(configFile)) return false;
+  const source = readFileSync(configFile, "utf8");
+  return source.includes(KIMI_BEGIN) || source.includes(LEGACY_KIMI_BEGIN);
+}
+
+export function doctorAdapter(product, options = {}) {
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  const root = findHarnessRoot(cwd);
+  if (!PRODUCTS.includes(product)) return { product, status: "error", messages: [`Unknown product: ${product}`] };
+  if (!root) return { product, status: "error", messages: ["Open the workspace containing .harness/root.json."] };
+  const messages = [];
+  let status = "ok";
+  if (!isStartedAtHarnessRoot(root, cwd)) {
+    status = "error";
+    messages.push(`Open the parent Harness root ${root}; current start directory is ${cwd}.`);
+  }
+  if (!existsSync(entry(root, product))) {
+    status = status === "error" ? status : "not_installed";
+    messages.push("Repository adapter entry was not selected during Adopt.");
+  }
+  const copies = forbidden(root);
+  if (copies.length) {
+    status = "error";
+    messages.push(`Forbidden product-specific sources: ${copies.join(", ")}`);
+  }
+  if (product === "qoder" && status !== "not_installed") {
+    messages.push("Qoder uses UserPromptSubmit because project SessionStart is not currently exposed; shared Skills use actual-read gating.");
+  }
+  if (product === "trae" && status === "ok") {
+    status = "needs_manual_app_step";
+    messages.push("Enable project AGENTS.md, shared .agents/skills, and project Hooks in TRAE settings.");
+  }
+  if (product === "kimi") {
+    const home = options.kimiHome ?? process.env.KIMI_CODE_HOME ?? path.join(os.homedir(), ".kimi-code");
+    if (!hasManagedKimiBlock(path.join(home, "config.toml"))) {
+      status = status === "error" ? status : "needs_manual_app_step";
+      messages.push("With separate approval, run ./.harness/cli adapter install kimi and reload Kimi Code.");
+    }
+    messages.push("Kimi Hooks are fail-open and are not the only high-risk safety barrier.");
+  }
+  if (product === "cursor" && status === "ok") {
+    status = "needs_manual_app_step";
+    messages.push("Open the parent workspace in Cursor and confirm Workspace Trust.");
+  }
+  if (product === "opencode" && status !== "not_installed" && status !== "error") {
+    status = "partial";
+    messages.push("stopGate is unsupported; session.idle is audit-only.");
+  }
+  if (product === "zcode" && status !== "not_installed" && status !== "error") {
+    const evidence = path.join(root, ".harness", "runtime", "zcode", "latest-hook.json");
+    if (!existsSync(evidence)) {
+      status = "needs_manual_app_step";
+      messages.push("Add .harness/adapters/zcode/marketplace in ZCode Settings -> Plugins, install lumine-harness-adapter, enable it, and start a new session.");
+      messages.push("ZCode project-level hooks are ignored; runtime Hook evidence is required before compatibility is verified.");
+    } else {
+      messages.push("ZCode runtime Hook evidence exists; inspect it with adapter verify before relying on the Stop Gate.");
+    }
+    messages.push("Shared .agents/skills are enforced through phase routing and actual read auditing; they are not copied into ZCode's native Skill directory.");
+  }
+  if (product === "deepseek-harness" && status !== "not_installed" && status !== "error") {
+    const evidence = path.join(root, ".harness", "runtime", "deepseek-harness", "latest-hook.json");
+    if (!existsSync(evidence)) {
+      status = "needs_manual_app_step";
+      messages.push("Install the local DSH profile bundle explicitly, then run DeepSeek Harness from the parent Harness root.");
+    } else {
+      status = "partial";
+      messages.push("DeepSeek Harness Hook evidence exists, but the official bridge still has partial SessionStart and Stop semantics.");
+    }
+    messages.push("Verified contract: @deepseek-ai/dsh 0.1.0-rc.7 with @deepseek-ai/dsh-hooks-codex 0.1.0-rc.7.");
+    messages.push("The native DSH instruction and Skill loaders read root AGENTS.md and project .agents/skills when started from the Harness root.");
+  }
+  if (!messages.length) messages.push("Repository adapter contract is present; product runtime verification is still required.");
+  return { product, status, root, capability: capabilities(root).products[product], messages };
+}
+
+export function verifyAdapter(product, options = {}) {
+  const result = doctorAdapter(product, options);
+  return { ...result, verification: result.status === "ok" ? "repository_verified_runtime_pending" : "followup_required" };
+}
+
+function tomlString(value) {
+  return `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+function managedBlock(dispatcher) {
+  const command = `node "${String(dispatcher).replace(/"/g, '\\"')}"`;
+  return [
+    KIMI_BEGIN,
+    "[[hooks]]",
+    'event = "SessionStart"',
+    'matcher = "startup|resume"',
+    `command = ${tomlString(command)}`,
+    "timeout = 30",
+    "",
+    "[[hooks]]",
+    'event = "Stop"',
+    `command = ${tomlString(command)}`,
+    "timeout = 120",
+    KIMI_END
+  ].join("\n");
+}
+
+function stripBlock(source) {
+  let result = source;
+  for (const [begin, endMarker] of [[KIMI_BEGIN, KIMI_END], [LEGACY_KIMI_BEGIN, LEGACY_KIMI_END]]) {
+    const start = result.indexOf(begin);
+    const end = result.indexOf(endMarker);
+    if ((start === -1) !== (end === -1)) throw new Error("Kimi config contains an incomplete Harness managed block.");
+    if (start === -1) continue;
+    if (result.indexOf(begin, start + begin.length) !== -1) throw new Error("Kimi config contains duplicate Harness managed blocks.");
+    result = `${result.slice(0, start)}${result.slice(end + endMarker.length)}`;
+  }
+  return result.replace(/\n{3,}/g, "\n\n").trimEnd();
+}
+
+function validateCandidate(file, options = {}) {
+  if (options.validate) return options.validate(file);
+  const command = options.kimiCommand ?? "kimi";
+  const result = spawnSync(command, ["doctor", "config", file], { encoding: "utf8" });
+  if (result.error?.code === "ENOENT") {
+    const source = readFileSync(file, "utf8");
+    return source.includes(KIMI_BEGIN) === source.includes(KIMI_END);
+  }
+  return result.status === 0;
+}
+
+function backup(file) {
+  if (!existsSync(file)) return null;
+  const target = `${file}.harness-backup-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+  copyFileSync(file, target);
+  return target;
+}
+
+export function installKimiAdapter(options = {}) {
+  const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
+  if (!root) throw new Error("Harness root not found.");
+  const home = options.kimiHome ?? process.env.KIMI_CODE_HOME ?? path.join(os.homedir(), ".kimi-code");
+  const config = path.join(home, "config.toml");
+  const dispatcherDir = path.join(home, "lumine-harness-adapter");
+  const dispatcher = path.join(dispatcherDir, "dispatch.mjs");
+  mkdirSync(home, { recursive: true });
+  const source = existsSync(config) ? readFileSync(config, "utf8") : "";
+  const clean = stripBlock(source);
+  const next = `${clean.trimEnd()}${clean.trim() ? "\n\n" : ""}${managedBlock(dispatcher)}\n`;
+  const candidate = path.join(home, `.config.toml.harness-${process.pid}.tmp`);
+  writeFileSync(candidate, next, "utf8");
+  if (!validateCandidate(candidate, options)) {
+    rmSync(candidate, { force: true });
+    throw new Error("Kimi config validation failed; existing config was not modified.");
+  }
+  const backupFile = source ? backup(config) : null;
+  mkdirSync(dispatcherDir, { recursive: true });
+  writeFileSync(dispatcher, readFileSync(path.join(HERE, "adapters", "kimi", "installed-dispatcher.mjs"), "utf8"), "utf8");
+  writeFileSync(config, next, "utf8");
+  rmSync(candidate, { force: true });
+  return { product: "kimi", status: "installed", configFile: config, dispatcher, backup: backupFile };
+}
+
+export function uninstallKimiAdapter(options = {}) {
+  const home = options.kimiHome ?? process.env.KIMI_CODE_HOME ?? path.join(os.homedir(), ".kimi-code");
+  const config = path.join(home, "config.toml");
+  if (!hasManagedKimiBlock(config)) return { product: "kimi", status: "not_installed" };
+  const next = `${stripBlock(readFileSync(config, "utf8")).trimEnd()}\n`;
+  const candidate = path.join(home, `.config.toml.harness-${process.pid}.tmp`);
+  writeFileSync(candidate, next, "utf8");
+  if (!validateCandidate(candidate, options)) {
+    rmSync(candidate, { force: true });
+    throw new Error("Kimi config validation failed; existing config was not modified.");
+  }
+  const backupFile = backup(config);
+  writeFileSync(config, next, "utf8");
+  rmSync(candidate, { force: true });
+  rmSync(path.join(home, "lumine-harness-adapter"), { recursive: true, force: true });
+  return { product: "kimi", status: "uninstalled", configFile: config, backup: backupFile };
+}
+
+export function setCliWorkStatus(status, options = {}) {
+  if (!WORK_STATUSES.has(status)) throw new Error(`Invalid WORK_STATUS: ${status}`);
+  const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
+  if (!root) throw new Error("Harness root not found.");
+  const product = options.product ?? process.env.HARNESS_PRODUCT ?? "kimi";
+  const pointer = readCurrentSessionPointer(root, product);
+  const sessionId = options.sessionId ?? process.env.HARNESS_SESSION_ID ?? pointer?.sessionId;
+  if (!sessionId) throw new Error(`No active ${product} Harness session.`);
+  return recordWorkStatus(root, { product, sessionId, cwd: options.cwd ?? process.cwd() }, status);
+}
+
+function prepareManualAdapter(product, options = {}) {
+  const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
+  if (!root) throw new Error("Harness root not found.");
+  if (product === "zcode") {
+    return {
+      product,
+      status: "needs_manual_app_step",
+      path: path.join(root, ".harness", "adapters", "zcode", "marketplace"),
+      message: "Add this directory as a local marketplace in ZCode, install lumine-harness-adapter, enable it, then start a new session."
+    };
+  }
+  if (product === "deepseek-harness") {
+    const bundle = path.join(root, ".harness", "adapters", "deepseek-harness", "bundle");
+    return {
+      product,
+      status: "needs_manual_app_step",
+      path: bundle,
+      message: `After separately authorizing the user-profile change, run: dsh plugin --profile <profile> add ${bundle}`
+    };
+  }
+  throw new Error(`No manual installer contract for ${product}.`);
+}
+
+export function runAdapterCommand(argv, options = {}) {
+  const [action, target = "all"] = argv;
+  const targets = target === "all" ? PRODUCTS : [target];
+  if (action === "list") return { results: listAdapters(options.root) };
+  if (action === "doctor") return { results: targets.map((item) => doctorAdapter(item, options)) };
+  if (action === "verify") return { results: targets.map((item) => verifyAdapter(item, options)) };
+  if (action === "install" && target === "kimi") return { results: [installKimiAdapter(options)] };
+  if (action === "uninstall" && target === "kimi") return { results: [uninstallKimiAdapter(options)] };
+  if (action === "install" && ["zcode", "deepseek-harness"].includes(target)) return { results: [prepareManualAdapter(target, options)] };
+  if (action === "uninstall" && ["zcode", "deepseek-harness"].includes(target)) {
+    return {
+      results: [{
+        product: target,
+        status: "needs_manual_app_step",
+        message: target === "zcode"
+          ? "Uninstall lumine-harness-adapter from ZCode Settings -> Plugins."
+          : "Run dsh plugin --profile <profile> remove @lumine/dsh-harness-adapter for each profile where it was installed."
+      }]
+    };
+  }
+  if (action === "install" || action === "uninstall") throw new Error(`${target} is repository-managed and has no user-level installer.`);
+  throw new Error("Usage: adapter <list|doctor|verify|install|uninstall> <product|all>");
+}
+
+export function formatAdapterResult(result) {
+  return result.results.map((item) => {
+    const messages = [...(item.messages ?? []), ...(item.message ? [item.message] : []), ...(item.path ? [`Path: ${item.path}`] : [])];
+    return `${item.product}: ${item.status ?? item.stopGate ?? "ok"}${messages.length ? `\n${messages.map((message) => `  - ${message}`).join("\n")}` : ""}`;
+  }).join("\n");
+}

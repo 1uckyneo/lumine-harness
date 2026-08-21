@@ -1,0 +1,34 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { buildSessionStartContext } from "../../.harness/core/session-context.mjs";
+import { findHarnessRoot } from "../../.harness/core/root-resolver.mjs";
+
+export const HarnessPlugin = async ({ directory }) => {
+  const root = findHarnessRoot(directory);
+  if (!root) return {};
+  const context = buildSessionStartContext({ root, cwd: directory });
+  const audit = async (event, payload = {}) => {
+    const dir = path.join(root, ".harness", "runtime", "opencode");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, "latest-audit.json"),
+      `${JSON.stringify({ event, at: new Date().toISOString(), ...payload }, null, 2)}\n`,
+      "utf8"
+    );
+  };
+  return {
+    "experimental.chat.system.transform": async (_input, output) => {
+      if (!output.system.includes(context)) output.system.push(context);
+    },
+    "experimental.session.compacting": async (_input, output) => {
+      output.context.push(context);
+    },
+    "tool.execute.before": async (input) => audit("tool.execute.before", { tool: input.tool }),
+    "tool.execute.after": async (input) => audit("tool.execute.after", { tool: input.tool }),
+    event: async ({ event }) => {
+      if (event.type === "session.idle") {
+        await audit("session.idle", { stopGate: "unsupported", action: "audit_only" });
+      }
+    }
+  };
+};

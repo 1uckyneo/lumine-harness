@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "authority": "implementation_context",
+    "reviewStatus": "generated_unreviewed",
+    "sourceRefs": {
+      "design": "DESIGN.md",
+      "prototype": "",
+      "componentMap": "",
+      "screenshots": [],
+      "sourceDraft": "",
+      "productSpec": ""
+    },
+    "assumptions": [],
+    "openQuestions": [],
+    "flexibility": {
+      "mustPreserve": [],
+      "adjustable": []
+    },
+    "deviationPolicy": "Use this file as implementation context. If it conflicts with approved DESIGN.md, prototype HTML, or screenshots, defer to those approved sources. Reasonable implementation deviations are allowed when recorded in the active plan or handoff.",
+    "riskNotes": []
+  },
+  "pageId": "",
+  "title": "",
+  "route": "",
+  "sections": [],
+  "fields": [],
+  "actions": [],
+  "states": [],
+  "permissions": [],
+  "dataDependencies": [],
+  "copy": [],
+  "acceptanceRefs": []
+}

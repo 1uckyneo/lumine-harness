@@ -1,14 +1,14 @@
 {
-  "name": "harness-engineering-bootstrap",
+  "name": "lumine-harness",
   "interface": {
-    "displayName": "Harness Engineering Bootstrap"
+    "displayName": "Lumine Harness"
   },
   "plugins": [
     {
-      "name": "harness-engineering-bootstrap",
+      "name": "lumine-harness",
       "source": {
         "source": "local",
-        "path": "./plugins/harness-engineering-bootstrap"
+        "path": "./plugins/lumine-harness"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -18,4 +18,3 @@
     }
   ]
 }
-

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+case "${1:-}" in
+  check)
+    shift
+    exec node "$ROOT/check.mjs" "$@"
+    ;;
+  generated)
+    shift
+    exec node "$ROOT/generated.mjs" "$@"
+    ;;
+  adapter)
+    exec node "$ROOT/adapter-cli.mjs" adapter "${@:2}"
+    ;;
+  work-status)
+    exec node "$ROOT/adapter-cli.mjs" work-status "${@:2}"
+    ;;
+  *)
+    {
+      echo "Usage:"
+      echo "  ./.harness/cli check <docs|draft|design|plan|architecture|taste|stale-docs|adapters|all> [slug]"
+      echo "  ./.harness/cli generated refresh <workspace-index|subrepo-doc-index|api-map|db-schema|plus-ui-routes|plus-ui-components|all>"
+      echo "  ./.harness/cli adapter <list|doctor|verify> <product|all>"
+      echo "  ./.harness/cli adapter <install|uninstall> <kimi|zcode|deepseek-harness>"
+      echo "  ./.harness/cli work-status <status> [--product <product>]"
+    } >&2
+    exit 2
+    ;;
+esac

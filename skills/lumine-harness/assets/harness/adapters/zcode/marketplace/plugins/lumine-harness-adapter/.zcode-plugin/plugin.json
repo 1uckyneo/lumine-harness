@@ -1,0 +1,8 @@
+{
+  "name": "lumine-harness-adapter",
+  "version": "0.1.0",
+  "description": "Connect ZCode lifecycle Hooks to a workspace Lumine Harness Core",
+  "author": "Lumine",
+  "license": "MIT",
+  "keywords": ["harness", "agent", "hooks"]
+}

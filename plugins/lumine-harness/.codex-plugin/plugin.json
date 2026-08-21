@@ -1,0 +1,37 @@
+{
+  "name": "lumine-harness",
+  "version": "0.2.0",
+  "description": "Adopt existing codebases into Lumine Harness with shared Skills, engineering records, checks, and thin Agent adapters.",
+  "author": {
+    "name": "Lumine"
+  },
+  "homepage": "https://github.com/1uckyneo/harness-engineering-bootstrap",
+  "repository": "https://github.com/1uckyneo/harness-engineering-bootstrap",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "agent-skills",
+    "harness",
+    "engineering-workflow",
+    "agents-md",
+    "multi-agent"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Lumine Harness",
+    "shortDescription": "Adopt repositories into Lumine Harness",
+    "longDescription": "Use Lumine Harness to build a project-level engineering record system, shared phase Skills, checks, lifecycle Core, and thin adapters for multiple Agent hosts.",
+    "developerName": "Lumine",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Use lumine-harness to adopt this repository.",
+      "Migrate this project to shared lumine-harness-* Skills and the multi-Agent Adapter Core."
+    ],
+    "websiteURL": "https://github.com/1uckyneo/harness-engineering-bootstrap",
+    "privacyPolicyURL": "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement",
+    "termsOfServiceURL": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+    "brandColor": "#C45B35",
+    "screenshots": []
+  }
+}

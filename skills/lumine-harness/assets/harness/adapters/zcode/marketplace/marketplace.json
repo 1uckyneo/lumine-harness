@@ -1,0 +1,16 @@
+{
+  "name": "lumine-harness-local",
+  "description": "Lumine Harness lifecycle Adapter for ZCode workspaces",
+  "pluginRoot": "plugins",
+  "plugins": [
+    {
+      "name": "lumine-harness-adapter",
+      "source": "./lumine-harness-adapter",
+      "description": "Routes ZCode lifecycle Hooks into the current workspace's shared Lumine Harness Core",
+      "version": "0.1.0",
+      "category": "developer-tools",
+      "tags": ["harness", "agent", "hooks"],
+      "strict": true
+    }
+  ]
+}

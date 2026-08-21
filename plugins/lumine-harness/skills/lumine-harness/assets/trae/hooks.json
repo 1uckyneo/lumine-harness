@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "hooks": {
+    "SessionStart": [{ "hooks": [{ "type": "command", "command": "node .harness/adapters/trae/hooks/session-start.mjs", "timeout": 30 }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "node .harness/adapters/trae/hooks/stop.mjs", "timeout": 120 }], "loop_limit": 1 }]
+  }
+}
