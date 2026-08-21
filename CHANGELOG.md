@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Move the repository identity and public installation links to `1uckyneo/lumine-harness`.
+- Document the host-neutral canonical Skill, generated Codex Plugin wrapper, repository Marketplace catalog, and eight Agent Adapter boundaries.
 - Rename the reusable package to `lumine-harness` and all generated project phase Skills to `lumine-harness-*`.
 - Make `skills/lumine-harness` the single canonical source; the Codex Plugin wrapper is generated and checked for drift.
 - Add explicit ZCode and DeepSeek Harness Adapter contracts alongside Codex, Qoder, Trae, Kimi Code, Cursor, and OpenCode.

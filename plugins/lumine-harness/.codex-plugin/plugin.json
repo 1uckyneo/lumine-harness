@@ -5,8 +5,8 @@
   "author": {
     "name": "Lumine"
   },
-  "homepage": "https://github.com/1uckyneo/harness-engineering-bootstrap",
-  "repository": "https://github.com/1uckyneo/harness-engineering-bootstrap",
+  "homepage": "https://github.com/1uckyneo/lumine-harness",
+  "repository": "https://github.com/1uckyneo/lumine-harness",
   "license": "MIT",
   "keywords": [
     "codex",
@@ -28,7 +28,7 @@
       "Use lumine-harness to adopt this repository.",
       "Migrate this project to shared lumine-harness-* Skills and the multi-Agent Adapter Core."
     ],
-    "websiteURL": "https://github.com/1uckyneo/harness-engineering-bootstrap",
+    "websiteURL": "https://github.com/1uckyneo/lumine-harness",
     "privacyPolicyURL": "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement",
     "termsOfServiceURL": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
     "brandColor": "#C45B35",

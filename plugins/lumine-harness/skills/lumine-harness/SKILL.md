@@ -5,7 +5,7 @@ description: 当需要使用 Lumine Harness 把陌生 workspace、单仓、前�
 
 # Lumine Harness
 
-Lumine Harness 是一套面向 Agent 的项目级工程工作流，用于将单仓或多仓 workspace 建设为可恢复、可约束、可验证的研发环境；其中，品牌词 Lumine 的中文名为“卢米安”。默认语义是 `adopt / migrate`，不是保守增量补丁。
+Lumine Harness 是一套面向 Agent 的项目级工程工作流，用于将单仓或多仓 workspace 建设为可恢复、可约束、可验证的研发环境。Lumine 中文写作“卢米安”。默认语义是 `adopt / migrate`，不是保守增量补丁。
 
 本 skill 必须自包含：不要读取或依赖任何特定 workspace 的文件来决定模板内容。
 
