@@ -1,109 +1,136 @@
 # Lumine Harness
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[English](README.md) | 简体中文
 
 [![skills.sh](https://skills.sh/b/1uckyneo/lumine-harness)](https://skills.sh/1uckyneo/lumine-harness)
 
-Lumine Harness 是一套项目级 Agent 工程工作流。它帮助 Agent 在不同会话和长时间任务中，持续读取同一套产品目标、架构边界、执行状态和验证证据。Lumine 中文写作“[卢米安](https://weibo.com/u/3316905545)”。
+> **在智能体优先的世界中，构建可靠的工程环境。**
 
-它既可以改造单个代码仓库，也可以改造由多个关联仓库组成的工程。最终得到的是一套让 Agent 更容易理解、恢复、约束、验证和持续改进的研发环境。
+编程 Agent 已经不再只是辅助修改代码的工具，而是能够承担完整功能、跨仓协作并连续运行数小时的工程参与者。模型能力越强，影响交付质量的关键就越从“会不会写代码”，转向它能否持续理解项目、遵守边界、恢复现场，并用证据说明结果。
 
-## 它适合我的项目吗？
+Agent 产品自带的 Harness 解决“怎么运行”；**Lumine Harness** 是项目级 Harness，解决“在这个项目里做什么、怎样算完成”。一个是运行底座，一个是项目环境，二者互补。
 
-Lumine Harness 适合以下场景：
+它也是 Harness Engineering（驾驭工程技术）的一种实践：把项目目标、工程边界、执行进度和验证证据留在项目中，让 Agent 换了会话也能理解并继续工作。
 
-- 单个代码仓库需要建立完整的 Agent 工作流；
-- 前端、后端、移动端等多个关联仓库需要同步开发；
-- 纯前端、纯后端、全栈或传统项目缺少可持续恢复的工程上下文；
-- 项目已有 `AGENTS.md`、Rules、Skills、Hooks 或文档流程，希望迁移成一套统一规范。
+**会话会结束，但工程上下文必须留下。**
 
-Lumine Harness 不是：
+Lumine 中文写作“[卢米安](https://weibo.com/u/3316905545)”。
 
-- 一个新的编程 Agent；
-- 绑定某个模型或模型厂商的框架；
-- 只适用于 Codex 的一组 Hooks；
-- 项目采用后，每开发一个功能都要重新安装的工具。
+## 什么时候值得使用
 
-安装或直接读取的 `lumine-harness` Skill 负责首次采用或迁移。日常开发由项目内的 `AGENTS.md`、`.agents/skills/lumine-harness-*`、工程记录、Harness Core 和所选 Agent Adapter 共同支撑。
+Lumine Harness 更适合这些场景：
 
-## 三分钟开始使用
+- 把一项完整功能或长时间任务交给 Agent；
+- 希望换会话、换 Agent 后仍能恢复目标、决定和执行进度；
+- 前端、后端、移动端等多个关联仓库需要一起推进；
+- 需要明确保留产品边界、测试结果和交付证据；
+- 已经有零散的 `AGENTS.md`、Rules、Skills、Hooks 或工程文档，希望整理成一套一致的流程。
 
-### 推荐：使用 `skills` CLI
+如果只是临时询问一段代码、修改一个很小且不会影响后续上下文的问题，通常不必先改造整个工程。
 
-准备好 Node.js 18 或更高版本后，在终端中运行。[`skills` CLI](https://github.com/vercel-labs/skills)（来自 Vercel Labs）会读取本仓库，并把 `lumine-harness` 安装到检测到的 Agent 对应目录。
+## 3 步开始
 
-使用官方文档中的 `npx` 方式：
+### 1. 全局安装入口 Skill
+
+准备好 Node.js 18 或更高版本，在终端运行：
 
 ```bash
 npx skills add 1uckyneo/lumine-harness -g
 ```
 
-使用 pnpm 的等价方式：
+这条命令只安装负责首次接入和升级的 `lumine-harness` Skill，不会修改你的目标工程。
 
-```bash
-pnpm dlx skills add 1uckyneo/lumine-harness -g
-```
+### 2. 从正确的工程根目录开启新会话
 
-`-g` 表示全局安装，适合用同一个入口 Skill 改造多个工程。如果只希望在当前项目中使用，可以省略 `-g`。
-
-安装完成后，请开启新的 Agent 会话，让宿主重新发现 Skill。然后从准备采用 Harness 的目标工程根目录开始使用。
-
-`skills` CLI 安装的是负责首次采用或迁移的入口 `lumine-harness` Skill。工程采用完成后，日常开发使用的是生成到目标工程内的 `AGENTS.md`、`.agents/skills/lumine-harness-*`、工程记录、Harness Core 和所选 Adapter。
-
-### 更新 Skill
-
-```bash
-npx skills update lumine-harness -g -y
-
-# 使用 pnpm
-pnpm dlx skills update lumine-harness -g -y
-```
-
-更新后同样建议开启新会话，让 Agent 载入新的 Skill 内容。
-
-## 选择正确的目标工程根目录
-
-目标不一定是一个“Workspace 仓库”。应该选择能够代表完整工程范围的目录：
-
-| 工程形态 | Harness 根目录 |
+| 工程形态 | 应该打开的目录 |
 | --- | --- |
 | 单仓项目 | 代码仓库根目录 |
-| 多个关联仓库 | 能够覆盖全部关联仓库的共同父目录 |
+| 多个关联仓库 | 能覆盖全部关联仓库的共同父目录 |
 
-这个共同父目录本身不要求是 Git 仓库。关键是 Agent 从这里能够访问所有关联仓库。如果只打开其中一个子仓，跨仓上下文、检查和生命周期恢复都会不完整。
+多仓工程的共同父目录不必是 Git 仓库。关键是 Agent 从这里能够访问全部相关源码、规则和运行入口。只打开其中一个子仓，会让跨仓上下文、检查和任务恢复不完整。
 
-安装 Lumine Harness Skill 后，从准备采用 Harness 的工程根目录启动 Agent，并发送：
+### 3. 把下面的话发给 Agent
 
 ```text
-请使用 lumine-harness Skill 检查当前工程。
+请使用 lumine-harness 检查当前工程。
 
-先识别这是单仓项目还是多仓协同项目，确认合适的 Harness 根目录，
-然后给出 Migration Proposal。在我确认前不要修改文件。
+先判断合适的 Harness 根目录，并给出改造方案（Migration Proposal），
+说明准备新增、修改和保留哪些内容。在我确认前不要修改任何文件。
 ```
 
-## 首次改造会发生什么？
+此时 Agent 只会检查现状并给出方案。只有你确认方案后，它才会写入工程。
 
-Lumine Harness 的首次采用分为四个清晰阶段：
+## 接下来会发生什么
 
-1. **Inspect（检查现状）**
-   - 识别仓库拓扑和技术栈。
-   - 检查 Git 状态、现有 Agent 指令、Skills、Hooks 和工程文档。
-2. **Migration Proposal（迁移提案）**
-   - 列出准备创建、替换、保留或备份的内容。
-   - 说明每个所选 Agent Adapter 的能力与限制。
-   - 等待人工确认，确认前不写入。
-3. **Adopt（采用 Harness）**
-   - 建立工程地图、阶段 Skills、Docs 工作流、公共 Harness Core 和所选 Adapter。
-4. **Verify（验证）**
-   - 刷新导航索引。
-   - 执行 Harness Check 和 Adapter Doctor。
-   - 报告仍需人工完成的宿主设置或产品端验证。
+```text
+检查现状 → 给出改造方案 → 你确认后写入 → 检查接入结果
+```
 
-这是一项迁移，而不是静默追加的保守补丁。批准前请先检查 Migration Proposal。
+1. **检查现状（Inspect）**
+   识别单仓或多仓结构、技术栈、Git 状态、已有 Agent 指令、Skills、Hooks 和工程文档。
 
-## 改造后工程会是什么样？
+2. **给出改造方案（Migration Proposal）**
+   列出准备新增、更新和保留的文件，说明适合启用的模块、选中的 Adapter、能力限制和精确写入范围。
 
-### 单仓项目
+3. **确认后接入（Adopt）**
+   建立工程地图、项目阶段 Skills、工作流记录、Harness Core 和选中的 Adapter。设计、浏览器、数据库等模块只在项目确实需要时启用。
+
+4. **检查结果（Verify）**
+   刷新工程导航，运行 Harness Check，并告诉你还有哪些 Agent 产品设置需要人工完成。
+
+如果发现未受 Lumine Harness 管理的现有文件与方案冲突，接入会停止并报告冲突，不会静默覆盖。处理冲突后需要重新生成并确认方案。
+
+## 日常开发怎么使用
+
+### 不需要单独设计
+
+```text
+需求草案 → 人工确认 → 产品规格 → 执行计划 → 人工授权实施
+        → 实现、测试、修复 → 验证记录 → 归档
+```
+
+### 需要设计确认
+
+```text
+需求草案 → 人工确认 → 设计 / 原型 → 人工确认
+        → 产品规格 → 执行计划 → 人工授权实施
+        → 实现、测试、修复 → 验证记录 → 归档
+```
+
+这些名称分别是：
+
+- Draft（需求草案）：保存原始想法、问题和仍未确认的决定；
+- Design（设计）：按需确认交互、视觉方向和原型；
+- Product Spec（产品规格说明）：固定目标、范围、规则和验收标准；
+- Exec Plan（执行计划）：记录实现路径、当前进度和验证安排；
+- Run（实施）：在得到人工授权后实现、测试和修复；
+- Validation（验证记录）：说明实际发生了什么，以及哪些结果已经被证明。
+
+Design 是按需分支，Product Spec 必须在 Exec Plan 之前。Draft、Design、Product Spec / Exec Plan 和 Run 开始前都有人参与确认。Run 获得授权后，Agent 可以自主推进；遇到新的产品决定、凭据或必须由人完成的应用操作时，再把控制权交还给人。
+
+你可以直接对 Agent 说：
+
+```text
+我先写了一份简单需求，请帮我整理成需求草案，并告诉我还缺哪些上下文。
+```
+
+```text
+这份草案可以进入下一步。先判断是否需要设计，不要直接实施。
+```
+
+```text
+请生成 Product Spec 和 Active Exec Plan，先不要实施。
+```
+
+```text
+计划确认，开始实施。按计划完成开发、测试、修复并更新验证记录。
+```
+
+小需求可以缩短文档，但不能让工程地图、当前状态和验证证据失真，否则后续会话无法可靠恢复。
+
+## 接入后，工程会获得什么
+
+典型单仓项目会增加这些工程资产：
 
 ```text
 my-project/
@@ -111,7 +138,6 @@ my-project/
 ├── ARCHITECTURE.md
 ├── docs/
 │   ├── drafts/
-│   ├── design-docs/
 │   ├── product-specs/
 │   ├── exec-plans/
 │   │   ├── active/
@@ -120,229 +146,148 @@ my-project/
 │   └── generated/
 ├── .agents/
 │   └── skills/
-│       └── lumine-harness-*/
 ├── .harness/
 └── src/
 ```
 
-### 多仓协同项目
+多仓工程使用相同的 Harness 资产，只是根目录下还会包含 `frontend/`、`backend/`、`mobile/` 等关联仓库。
 
-```text
-my-project/
-├── AGENTS.md
-├── ARCHITECTURE.md
-├── docs/
-├── .agents/
-│   └── skills/
-│       └── lumine-harness-*/
-├── .harness/
-├── frontend/
-├── backend/
-└── mobile/
-```
+### 人和 Agent 共同使用的工程记录
 
-这里的 `my-project/` 可以只是一个协同目录，不必是 Git 仓库。各个子仓仍然保留自己的源码和 Git 历史。
-
-### 主要工程资产分别做什么？
-
-| 工程资产 | 作用 |
+| 资产 | 回答的问题 |
 | --- | --- |
-| `AGENTS.md` | Agent 的工程入口地图、项目边界、硬规则和阶段路由 |
-| `ARCHITECTURE.md` | 系统结构、模块关系、实现路径和架构不变量 |
-| Draft（需求草案） | 保存原始需求、待回答问题、歧义和仍在收敛的决策 |
-| Product Spec（产品规格） | 固定产品目标、范围、规则和验收标准 |
-| Exec Plan（执行计划） | 记录技术路径、执行状态、下一步和验证方式 |
-| Validation（验证记录） | 保存实际执行了什么、哪些结果已经被证明的证据 |
-| `.agents/skills/lumine-harness-*` | 项目内用于导航、草案、设计、计划、实施、索引刷新和检查的方法 |
-| `.harness` | 公共 Core、CLI、检查、索引生成器、会话状态和产品 Adapter |
-| generated | 根据仓库事实生成的导航；不能替代源码、测试或运行证据 |
+| `AGENTS.md` | Agent 从哪里开始，工程边界和阶段规则是什么？ |
+| `ARCHITECTURE.md` | 系统由什么组成，模块怎样连接？ |
+| Draft | 最初想解决什么，还有什么没有说清？ |
+| Product Spec | 最终应该做成什么，范围和验收标准是什么？ |
+| Exec Plan | 准备怎样实现，现在做到哪里？ |
+| Validation | 实际发生了什么，结果是否已经被证明？ |
 
-安装或直接读取的 `lumine-harness` Skill 用于首次采用。生成到工程内的 `lumine-harness-*` Skills 才负责日常开发阶段。
+### Agent 和工具使用的运行支撑
 
-## 日常开发流程
+- `.agents/skills`：保存当前项目各阶段的工作方法，是项目 Skill 的唯一内容来源；
+- `.harness`：提供 CLI、检查、状态管理和产品 Adapter；
+- generated：根据仓库事实生成导航索引，帮助 Agent 定位源码和工程入口，但不能替代源码、测试或运行证据。
 
-```text
-Draft（需求草案）
-  ↓ 人工确认
-按需 Design（设计与原型）
-  ↓ 人工确认
-Product Spec（产品规格）
-  ↓
-Exec Plan（执行计划）
-  ↓ 人工授权 Run
-实现、测试和修复
-  ↓
-Validation 与归档
-```
+## 几个容易混淆的名字
 
-Design 是按需分支；Product Spec 一定在 Exec Plan 之前。Draft、Design、Spec/Plan 和 Run 开始前都有人参与确认。Run 获得授权后，Agent 可以自主执行；遇到新的产品决策、凭据或必须人工完成的应用操作时，再把控制权交还给人。
-
-### 可以直接发送给 Agent 的话
-
-开始整理需求：
-
-```text
-我先写了一份简单需求，请帮我整理成 draft，并告诉我还缺哪些上下文和决策。
-```
-
-只讨论设计方向：
-
-```text
-我们先讨论页面设计方向，只更新 draft，暂时不要生成正式设计稿。
-```
-
-确认草案可以继续：
-
-```text
-这个 draft 可以进入下一步。
-```
-
-设计确认后建立产品和执行契约：
-
-```text
-设计稿确认。请生成 Product Spec 和 Active Exec Plan，先不要实施。
-```
-
-授权实施：
-
-```text
-计划确认，开始 Run。按计划实施、测试、修复并更新验证记录。
-```
-
-小需求可以使用更短的文档，但不能为了改动小就绕过流程，导致工程地图、当前状态或验证证据在后续会话中失真。
-
-## 人需要重点看什么？
-
-Harness 包含的材料比人每天需要阅读的内容更多。
-
-| 人重点关注 | Agent 和工具深入消费 |
+| 名称 | 作用 |
 | --- | --- |
-| Draft 和未解决的决策 | 完整源码 |
-| 已确认的 Design 和原型 | generated 导航 |
-| Product Spec | 详细计划和阶段指令 |
-| Exec Plan 的决策与进度摘要 | 检查日志和测试输出 |
-| Validation 摘要和最终证据 | Adapter 状态和生命周期数据 |
-| 安全敏感、架构关键或异常代码 | CLI 和 Hook 临时状态 |
+| `lumine-harness` 入口 Skill | 第一次检查、接入或升级一个工程 |
+| 项目内 `lumine-harness-*` Skills | 接入后用于需求、设计、规划、实施和检查的日常方法 |
+| Harness Core | 位于 `.harness`，负责 CLI、检查、状态和公共运行逻辑 |
+| Adapter | 把公共 Harness 能力转换成不同 Agent 产品的生命周期协议 |
+| Codex Plugin | 入口 Skill 的一种可选分发方式，不是另一套 Harness，也不是项目 Adapter |
 
-这不等于取消代码审查。人的注意力会更多放在产品方向、技术边界、证据质量，以及高风险代码的定向审查上，而不是默认平均阅读全部生成文件和每一行源码。
+## 人需要重点看什么
 
-## Agent 宿主支持
+你不需要阅读 Agent 使用的全部文件。人通常重点关注：
 
-所有支持的宿主共用根 `AGENTS.md`、项目 `.agents/skills`、工程记录和 `.harness` Core。产品目录只是生命周期 Adapter，不是工作流副本。
+- Draft 中仍未解决的问题；
+- Design 和原型；
+- Product Spec；
+- Exec Plan 中的决定、进度和风险摘要；
+- Validation 摘要；
+- 安全敏感、架构关键或出现异常的代码。
 
-| 宿主 | 接入方式 | 额外步骤或当前边界 |
-| --- | --- | --- |
-| Codex | 仓库级 Hooks | 支持 SessionStart 与 Stop Gate |
-| Qoder | Prompt、工具和 Stop Hooks | 公共 Skill 通过读取门禁使用，不进入 Qoder 原生 Skill 列表 |
-| Trae | 仓库级 Hooks | 用户需要启用项目 AGENTS、共享 Skills 和 Hooks |
-| Kimi Code | 原生 AGENTS/Skills + 用户级 Hooks | 用户级 Hook 需要显式安装，且为 fail-open |
-| Cursor | 仓库级 Hooks | 需要打开并信任完整的目标工程根目录 |
-| OpenCode | 仓库级 Plugin | 支持上下文和审计；当前没有等价的 Stop Gate |
-| ZCode | Hook-only 本地 Marketplace Plugin | 需要人工安装 Plugin，只有项目 Hooks 不会运行 |
-| DeepSeek Harness | 原生 AGENTS/Skills + profile bundle | developer preview；SessionStart 与 Stop 仍为 partial |
+Agent 和工具会进一步读取完整源码、generated 导航、详细计划、测试输出、检查日志和生命周期状态。采用 Harness 不等于取消代码审查，而是把人的注意力更多放到产品方向、技术边界、证据质量和高风险代码。
 
-采用完成后运行：
+## 在不同 Agent 中使用
+
+Lumine Harness 把公共工程资产统一保存在 `AGENTS.md`、`.agents/skills`、Docs 和 `.harness` 中，不为每个产品复制一套工作流。
+
+Codex、Qoder、Trae、Kimi Code、Cursor、OpenCode、ZCode、CodeBuddy 和 DeepSeek Harness 对项目指令、Skills 和生命周期 Hooks 的支持方式不同。公共文件存在，不等于目标产品已经实际加载并执行。
+
+接入完成后运行：
 
 ```bash
-./.harness/cli adapter doctor all
+./.harness/cli adapter doctor selected
 ```
 
-Doctor 会报告仍需处理的产品设置和安装步骤。磁盘上存在配置文件，不代表宿主已经加载指令、读取 Skill、执行 Hook 或成功续跑任务。
+Doctor 会告诉你已选择的 Adapter 还需要哪些产品设置。各产品的接入方式、能力限制、成熟度和真实运行验证状态见 [Adapter 兼容性说明](docs/adapter-compatibility.zh-CN.md)。
 
-## 常用命令
+## 安全边界
 
-在采用完成后的 Harness 根目录运行：
+- 改造方案获得确认前不写目标工程；
+- 不静默覆盖未受管理的冲突文件；
+- 保留工作树已有修改，不自动提交、推送、stash、reset、切分支或修改远端；
+- 用户级产品配置必须单独授权；
+- generated 不能替代源码、测试、运行验证或人工决定。
+
+## 需要时再看
+
+下面是日常主线之外的命令、排障和安装方式，需要时再展开。
+
+<details>
+<summary><strong>展开参考内容</strong></summary>
+
+### 常用命令
 
 ```bash
 ./.harness/cli check all
 ./.harness/cli generated refresh all
-./.harness/cli adapter list
-./.harness/cli adapter doctor all
-./.harness/cli adapter verify all
+./.harness/cli adapter doctor selected
 ```
 
-Kimi Code 用户级 Hooks、ZCode 本地 Plugin、DeepSeek Harness profile bundle 等能力需要显式安装。应先运行 `adapter doctor`，再按它输出的步骤操作，不要猜测产品目录或配置格式。
+运行 `./.harness/cli` 可以查看 Skill Catalog、Adapter Verify 等高级命令；真实产品验证流程见 Adapter 兼容性说明。
 
-## 常见问题
+### 常见问题
 
-### 安装后看不到全局 Skill
+**安装后看不到入口 Skill**
+运行 `npx skills list -g` 确认安装结果，再开启新会话。不同 Agent 产品的全局发现机制可能不同，必要时使用下面的手动读取方式。
 
-先运行 `npx skills list -g` 或 `pnpm dlx skills list -g`，确认 `lumine-harness` 已经安装到目标 Agent。然后开启新会话，让宿主重新加载 Skill。使用 Codex Skill Installer 安装时，新 Skill 同样会在下一轮对话中可用。
+**Agent 只发现一个子仓**
+从包含全部关联仓库的共同工程根目录重新启动 Agent。
 
-### Agent 只发现了其中一个子仓
+**已有 `AGENTS.md` 或其他 AI 工作流会被覆盖吗？**
+不会静默覆盖。检查阶段会把重叠内容列为冲突；在冲突得到处理并重新确认方案前，接入不会继续。
 
-请从包含全部关联仓库的共同工程根目录重新打开或启动 Agent。Harness 根目录应该覆盖完整工程范围。
+**Hook 文件存在但没有自动运行**
+先运行 `adapter doctor <product>`，再检查产品设置和运行证据。配置文件存在不是运行验证。
 
-### Hook 文件存在，但没有自动运行
+**generated 显示 `Review status: pending`**
+这表示只完成了确定性扫描，还需要回到源码抽样复核并更新 review metadata。
 
-执行 `./.harness/cli adapter doctor <product>` 和 `adapter verify <product>`，再检查产品的人工设置和 Hook 日志。文件存在本身不是运行态验证。
+### 其他安装方式
 
-### generated 仍显示 `Review status: pending`
+使用 pnpm 全局安装：
 
-刷新 generated 只完成确定性扫描。Agent 还需要抽样检查被引用的源码并更新复核元数据；`pending` 不是已完成复核。
+```bash
+pnpm dlx skills add 1uckyneo/lumine-harness -g
+```
 
-### Doctor 提示需要人工步骤
+更新已经全局安装的入口 Skill：
 
-请在对应产品中完成该操作。当仓库自动化无法证明产品侧设置时，Harness 会保留 `needs_manual_app_step`，不会伪装成已经完成。
+```bash
+npx skills update lumine-harness -g -y
+```
 
-## 其他安装方式
+如果希望把入口 Skill 写入当前项目，可以省略 `-g`。这会在当前目录创建 Skill 文件，因此请先确认当前目录就是预期安装位置：
 
-### 手动读取仓库
+```bash
+npx skills add 1uckyneo/lumine-harness
+```
 
-如果当前 Agent 不支持 `skills` CLI，先把仓库克隆到它能够读取的位置：
+当前 Agent 不支持 `skills` CLI 时，可以手动克隆：
 
 ```bash
 git clone https://github.com/1uckyneo/lumine-harness.git
 ```
 
-然后向 Agent 发送：
+然后发送给能够访问克隆目录和目标工程的 Agent：
 
 ```text
 请完整读取 <克隆目录>/skills/lumine-harness/SKILL.md。
-
-检查 <目标工程目录>，识别项目结构并给出 Migration Proposal。
-在我确认提案前不要修改文件。
+检查 <目标工程目录>，先给出改造方案；在我确认前不要修改文件。
 ```
 
-### Codex Skill Installer
+Codex 用户也可以使用 `$skill-installer` 或可选的 Plugin 分发方式。Plugin 与独立安装的入口 Skill 是同一份内容，除非正在切换安装方式，否则不要重复安装。详见 [OpenAI Plugin 文档](https://developers.openai.com/codex/plugins)。
 
-Codex 用户也可以把下面这段话发送给 Codex。它不是终端命令：
-
-```text
-请使用 $skill-installer 安装这个 Skill：
-https://github.com/1uckyneo/lumine-harness/tree/main/skills/lumine-harness
-```
-
-安装后的 Skill 会在下一轮对话中可用。
-
-## 可选扩展：Codex Plugin
-
-大多数用户只需要 `lumine-harness` Skill。如果你使用 Codex，并且更喜欢通过 Plugin 浏览器安装，本仓库也提供了包含同一个 Skill 的可选 Codex Plugin 包装。
-
-在 Codex CLI 内输入：
-
-```text
-/plugin marketplace add 1uckyneo/lumine-harness
-/plugins
-```
-
-在 Plugin 浏览器中安装 **Lumine Harness**，然后开启新会话。除非你正在切换安装方式，否则不要同时安装两种形式。Plugin 不会改变最终生成到目标工程中的 Harness 文件。
-
-更多信息见 [OpenAI Plugin 官方说明](https://developers.openai.com/codex/plugins)。Codex IDE Extension 目前不支持 Plugin。
-
-## 安全与恢复
-
-- Agent 修改目标工程前必须先提交 Migration Proposal。
-- 必须保留工作树中已有且与迁移无关的修改。
-- Lumine Harness 不会自动提交、推送、修改远端、切换分支、stash、reset 或改写历史。
-- Git 工程通过 diff 和历史记录恢复。
-- 非 Git 目标中，被替换的 AI workflow 文件会备份到 `.harness/local/harness-backup/<timestamp>/`。
-- 用户级产品配置需要单独授权，不会在普通 Adopt 中静默修改。
-- generated 索引只是导航，不替代源码检查、测试、运行态验证或人工决策。
+</details>
 
 ## 维护本仓库
 
-如果你准备维护或贡献 Lumine Harness 本身，请阅读仓库根目录的 [`AGENTS.md`](AGENTS.md)。其中定义了唯一规范源码、Plugin wrapper 生成关系、修改路由、产品中立口径和必跑检查。
+如果你准备维护或贡献 Lumine Harness，请阅读根目录 [`AGENTS.md`](AGENTS.md)。
 
 ## License
 

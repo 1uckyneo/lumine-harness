@@ -3,6 +3,7 @@ import { buildSessionStartOutput } from "./lib/session-start-context.mjs";
 import { normalizeHookInput } from "../../../core/hook-io.mjs";
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { initializeSessionState } from "../../../core/work-status.mjs";
+import { appendVerificationEvent } from "../../../core/verification.mjs";
 
 async function readInput() {
   let raw = "";
@@ -15,6 +16,7 @@ try {
   const input = normalizeHookInput("codex", "session_start", raw);
   const root = requireHarnessRoot(input);
   initializeSessionState(root, input);
+  appendVerificationEvent(root, input, { raw });
   stdout.write(JSON.stringify(buildSessionStartOutput({ ...raw, cwd: input.cwd })));
 } catch (error) {
   stderr.write(`session-start hook failed: ${error.message}\n`);

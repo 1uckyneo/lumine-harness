@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "harness-root",
+  "distributionVersion": "0.2.0",
   "instructions": "AGENTS.md",
   "skills": ".agents/skills"
 }

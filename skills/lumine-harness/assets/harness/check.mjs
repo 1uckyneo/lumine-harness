@@ -10,12 +10,17 @@ const REQUIRED_FILES = [
   "ARCHITECTURE.md",
   ".harness/cli",
   ".harness/root.json",
+  ".harness/project.json",
+  ".harness/managed.json",
   ".harness/adapter-capabilities.json",
   ".harness/adapter-manager.mjs",
   ".harness/adapter-cli.mjs",
   ".harness/core/contracts.d.ts",
+  ".harness/core/phase-router.mjs",
   ".harness/core/root-resolver.mjs",
   ".harness/core/session-context.mjs",
+  ".harness/core/skill-catalog.mjs",
+  ".harness/core/verification.mjs",
   ".harness/core/stop-policy.mjs",
   ".harness/core/work-status.mjs",
   ".harness/check.mjs",
@@ -66,9 +71,8 @@ const WORK_STATUS_DOCS = [
   ["needs_manual_app_step", "需要人工操作"],
   ["blocked_external", "外部阻塞"]
 ];
-const ADAPTER_PRODUCTS = ["codex", "qoder", "trae", "kimi", "cursor", "opencode", "zcode", "deepseek-harness"];
+const ADAPTER_PRODUCTS = ["codex", "qoder", "trae", "kimi", "cursor", "opencode", "zcode", "codebuddy", "deepseek-harness"];
 const FORBIDDEN_PRODUCT_SOURCES = [
-  ".qoder/skills",
   ".trae/skills",
   ".kimi-code/skills",
   ".qoder/rules",
@@ -76,7 +80,11 @@ const FORBIDDEN_PRODUCT_SOURCES = [
   ".cursor/rules",
   ".zcode/skills",
   ".zcode/rules",
-  ".dsh/skills"
+  ".codebuddy/rules",
+  ".dsh/skills",
+  ".qoder/skills",
+  ".codebuddy/skills",
+  ".harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/skills"
 ];
 const ADAPTER_ENTRIES = {
   codex: ".codex/hooks.json",
@@ -86,6 +94,7 @@ const ADAPTER_ENTRIES = {
   cursor: ".cursor/hooks.json",
   opencode: ".opencode/plugins/harness.mjs",
   zcode: ".harness/adapters/zcode/marketplace/marketplace.json",
+  codebuddy: ".codebuddy/settings.json",
   "deepseek-harness": ".harness/adapters/deepseek-harness/bundle/package.json"
 };
 
@@ -278,12 +287,12 @@ function tasteCandidateFiles() {
 
 function checkDocs() {
   for (const file of REQUIRED_FILES) {
-    if (!has(file)) fail(`missing required file ${file}`, "Re-run harness bootstrap assets or restore the file from templates.");
+    if (!has(file)) fail(`missing required file ${file}`, "Re-run the Lumine Harness adoption assets or restore the file from templates.");
   }
   checkFlatPlanningPaths();
   const agents = has("AGENTS.md") ? read("AGENTS.md") : "";
   if (!/上下文地图|Context Map/i.test(agents)) fail("AGENTS.md is not a context map", "Rewrite AGENTS.md using the harness AGENTS template.");
-  if (OLD_MARKERS.slice(0, 3).some((marker) => agents.includes(marker))) fail("AGENTS.md still contains old bootstrap workflow language", "Remove old wrapped-block or local-preference workflow text.");
+  if (OLD_MARKERS.slice(0, 3).some((marker) => agents.includes(marker))) fail("AGENTS.md still contains old adoption workflow language", "Remove old wrapped-block or local-preference workflow text.");
   checkAgentsOperationalRules(agents);
   checkAdapters();
   for (const skill of REQUIRED_SKILLS) {
@@ -319,7 +328,7 @@ function checkAdapters() {
   try {
     manifest = JSON.parse(read(".harness/adapter-capabilities.json"));
   } catch {
-    fail("invalid .harness/adapter-capabilities.json", "Restore a valid capability manifest from the bootstrap package.");
+    fail("invalid .harness/adapter-capabilities.json", "Restore a valid capability manifest from the Lumine Harness package.");
     return;
   }
   if (manifest.skillSource !== ".agents/skills" || manifest.instructionSource !== "AGENTS.md") {
@@ -331,8 +340,14 @@ function checkAdapters() {
   if (manifest.products?.opencode?.stopGate !== "unsupported") {
     fail("OpenCode stopGate must remain unsupported", "Do not treat session.idle as a pre-stop continuation gate.");
   }
-  if (manifest.products?.zcode?.install !== "local-marketplace+manual") {
+  if (manifest.schemaVersion !== 2) {
+    fail("capability manifest must use schemaVersion 2", "Declare implementation, setup, skills.mode, runtimeVerification, maturity, and failMode independently.");
+  }
+  if (manifest.products?.zcode?.setup !== "local-marketplace+manual") {
     fail("ZCode must use a local Marketplace Plugin", "Project-level ZCode Hooks are ignored; keep the Hook-only local Marketplace install contract.");
+  }
+  if (manifest.products?.codebuddy?.skills?.mode !== "adapter-routed") {
+    fail("CodeBuddy must use adapter-routed shared Skills", "Keep .agents/skills as the only physical Skill source and route explicit or phase Skills through the Adapter.");
   }
   if (manifest.products?.["deepseek-harness"]?.verifiedBridgeVersion !== "0.1.0-rc.7") {
     fail("DeepSeek Harness bridge version drifted", "Keep host and @deepseek-ai/dsh-hooks-codex on the verified 0.1.0-rc.7 contract until a newer pair is revalidated.");
@@ -348,13 +363,11 @@ function checkAdapters() {
   for (const [product, entry] of Object.entries(ADAPTER_ENTRIES)) {
     if (!has(entry)) continue;
     const source = read(entry);
-    if (product === "qoder" && source.includes('"SessionStart"')) {
-      fail("Qoder project hook config declares SessionStart", "Use UserPromptSubmit until Qoder exposes project SessionStart.");
-    }
     if (product === "opencode" && /session\.idle[\s\S]{0,200}(followup|continue|stopGate:\s*["']supported)/i.test(source)) {
       fail("OpenCode idle event is being used as a Stop Gate", "Keep session.idle audit-only.");
     }
   }
+
 }
 
 function checkFlatPlanningPaths() {

@@ -1,18 +1,28 @@
 import { readHookInput, normalizeHookInput } from "../../../core/hook-io.mjs";
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
-import { toolReadsExpectedSkill } from "../../../core/phase-router.mjs";
-import { readSessionState, writeSessionState } from "../../../core/work-status.mjs";
+import { markExpectedSkillRead, pendingExpectedSkills, requireExpectedSkillRead, toolReadsExpectedSkill } from "../../../core/phase-router.mjs";
+import { sharedSkillLoadedFromTool, sharedSkillReadFromTool } from "../../../core/skill-catalog.mjs";
+import { readSessionState, recordUsedSkill } from "../../../core/work-status.mjs";
+import { appendVerificationEvent } from "../../../core/verification.mjs";
 
 try {
   const raw = await readHookInput();
   const input = normalizeHookInput("qoder", "tool_after", raw);
   const root = requireHarnessRoot(input);
-  const state = readSessionState(root, input.product, input.sessionId);
-  if (state?.expectedSkillPath && toolReadsExpectedSkill(raw, state.expectedSkillPath)) {
-    writeSessionState(root, input.product, input.sessionId, {
-      expectedSkillRead: true,
-      expectedSkillReadAt: new Date().toISOString()
-    });
+  appendVerificationEvent(root, input, { raw });
+  let state = readSessionState(root, input.product, input.sessionId);
+  const loadedSkill = sharedSkillLoadedFromTool(root, raw);
+  if (loadedSkill) state = requireExpectedSkillRead(root, input, state, loadedSkill);
+  const sharedSkill = sharedSkillReadFromTool(root, raw);
+  if (sharedSkill) {
+    recordUsedSkill(root, input, sharedSkill);
+    appendVerificationEvent(root, input, { raw, skill: sharedSkill });
+    state = readSessionState(root, input.product, input.sessionId);
+  }
+  for (const skill of pendingExpectedSkills(state)) {
+    if (toolReadsExpectedSkill(raw, skill.path)) {
+      state = markExpectedSkillRead(root, input, state, skill.path);
+    }
   }
 } catch (error) {
   process.stderr.write(`qoder post-tool hook failed: ${error.message}\n`);

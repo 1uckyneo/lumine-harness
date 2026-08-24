@@ -1,15 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "skillSource": ".agents/skills",
   "instructionSource": "AGENTS.md",
   "products": {
-    "codex": { "instructions": "native", "skills": "shared", "sessionStart": "supported", "stopGate": "supported", "install": "repository" },
-    "qoder": { "instructions": "native", "skills": "read-gated", "sessionStart": "prompt-submit-fallback", "stopGate": "supported", "install": "repository" },
-    "trae": { "instructions": "manual-toggle", "skills": "manual-toggle", "sessionStart": "supported", "stopGate": "supported", "install": "repository+manual" },
-    "kimi": { "instructions": "native", "skills": "shared", "sessionStart": "supported", "stopGate": "supported-fail-open", "install": "user-config" },
-    "cursor": { "instructions": "native", "skills": "shared", "sessionStart": "supported", "stopGate": "supported", "install": "repository+trust" },
-    "opencode": { "instructions": "native", "skills": "shared", "sessionStart": "context-plugin", "stopGate": "unsupported", "install": "repository" },
-    "zcode": { "instructions": "native", "skills": "read-gated", "sessionStart": "plugin", "stopGate": "supported", "install": "local-marketplace+manual" },
-    "deepseek-harness": { "instructions": "native", "skills": "shared", "sessionStart": "supported-partial", "stopGate": "supported-partial", "install": "dsh-profile-bundle+manual", "maturity": "developer-preview", "verifiedHostVersion": "0.1.0-rc.7", "verifiedBridgeVersion": "0.1.0-rc.7" }
+    "codex": { "implementation": "available", "setup": "repository", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "full", "failMode": "closed", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
+    "qoder": { "implementation": "available", "setup": "repository", "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "host-version-dependent", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
+    "trae": { "implementation": "available", "setup": "repository+manual", "skills": { "mode": "native-with-toggle" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
+    "kimi": { "implementation": "available", "setup": "user-config", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "open", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
+    "cursor": { "implementation": "available", "setup": "repository+trust", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
+    "opencode": { "implementation": "available", "setup": "repository", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "open", "sessionStart": "context-plugin", "stopGate": "unsupported", "hostVersion": null, "verifiedAt": null, "evidence": null },
+    "zcode": { "implementation": "available", "setup": "local-marketplace+manual", "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "plugin", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
+    "codebuddy": { "implementation": "available", "setup": "repository+manual-hook-review", "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
+    "deepseek-harness": { "implementation": "available", "setup": "dsh-profile-bundle+manual", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "developer-preview", "failMode": "open", "sessionStart": "partial", "stopGate": "partial", "hostVersion": "0.1.0-rc.7", "verifiedAt": null, "evidence": null, "verifiedBridgeVersion": "0.1.0-rc.7" }
   }
 }

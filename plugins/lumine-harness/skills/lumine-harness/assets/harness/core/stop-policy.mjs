@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { countWorkStatus, extractWorkStatus, readFreshStateStatus, readSessionState, writeSessionState } from "./work-status.mjs";
+import { countWorkStatus, extractWorkStatus, readFreshStateStatus, readSessionState, recordWorkStatus, writeSessionState } from "./work-status.mjs";
 
 const PAUSE_MESSAGES = {
   needs_user_decision: "Pause and ask the user for the decision that changes direction, scope, or trade-offs.",
@@ -18,7 +18,9 @@ function resolveStatus(input, root) {
   const message = input.lastAssistantMessage ?? "";
   if (message) {
     if (countWorkStatus(message) !== 1) return { status: null, reason: "message" };
-    return { status: extractWorkStatus(message), reason: "message" };
+    const status = extractWorkStatus(message);
+    const state = status ? recordWorkStatus(root, input, status) : null;
+    return { status, reason: "message", state };
   }
   const state = readSessionState(root, input.product, input.sessionId);
   return { status: readFreshStateStatus(state), reason: "state", state };
@@ -29,16 +31,20 @@ export function evaluateStopPolicy(input, options = {}) {
   const resolved = resolveStatus(input, root);
   if (!resolved.status) return { action: "block", message: "Record exactly one fresh WORK_STATUS before stopping." };
   const status = resolved.status;
+  const state = resolved.state ?? readSessionState(root, input.product, input.sessionId) ?? {};
+  const workStatusRevision = Number(state.workStatusRevision ?? 0);
   if (status === "continue_autonomously") {
-    const state = resolved.state ?? readSessionState(root, input.product, input.sessionId) ?? {};
-    const usesMessage = Boolean(input.lastAssistantMessage);
-    const used = input.stopHookActive || input.loopCount > 0 || (!usesMessage && Number(state.continuationCount ?? 0) > 0);
-    if (used) return { action: "pause", workStatus: status, message: "Automatic continuation was already used once." };
-    writeSessionState(root, input.product, input.sessionId, { continuationCount: 1 });
-    return { action: "continue", workStatus: status, message: "Continue with the next concrete autonomous step only, then stop with a fresh WORK_STATUS." };
+    const revision = workStatusRevision;
+    const used = input.stopHookActive || input.loopCount > 0 || Number(state.continuationConsumedRevision ?? -1) === revision;
+    if (used) return { action: "pause", workStatus: status, workStatusRevision, message: "Automatic continuation was already used once." };
+    writeSessionState(root, input.product, input.sessionId, {
+      continuationCount: Number(state.continuationCount ?? 0) + 1,
+      continuationConsumedRevision: revision
+    });
+    return { action: "continue", workStatus: status, workStatusRevision, message: "Continue with the next concrete autonomous step only, then stop with a fresh WORK_STATUS." };
   }
-  if (status !== "done") return { action: "pause", workStatus: status, message: PAUSE_MESSAGES[status] };
+  if (status !== "done") return { action: "pause", workStatus: status, workStatusRevision, message: PAUSE_MESSAGES[status] };
   const check = (options.runCheck ?? defaultRunCheck)(root);
-  if (!check.ok) return { action: "block", workStatus: status, message: check.output || "Harness checks failed." };
-  return { action: "allow", workStatus: status };
+  if (!check.ok) return { action: "block", workStatus: status, workStatusRevision, message: check.output || "Harness checks failed." };
+  return { action: "allow", workStatus: status, workStatusRevision };
 }

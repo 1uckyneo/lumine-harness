@@ -41,7 +41,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Read|ReadFile|View|OpenFile|read_file",
+        "matcher": "Read|ReadFile|View|OpenFile|read_file|Skill",
         "hooks": [
           {
             "type": "process",

@@ -15,6 +15,7 @@
 - `scripts/sync-plugin-wrapper.sh`：从规范 Skill 重新生成 Plugin wrapper 中的 Skill。
 - `scripts/check-repo-sync.sh`：检查规范 Skill、Plugin wrapper、名称口径和公开说明没有漂移。
 - `README.md`、`README.zh-CN.md`：面向使用者的英文和简体中文说明，关键能力、命令和限制必须保持一致。
+- `docs/adapter-compatibility.md`、`docs/adapter-compatibility.zh-CN.md`：Adapter 协议、静态就绪、运行证据、成熟度和失败模式的详细说明。
 - `SECURITY.md`：安全问题报告和目标工程迁移安全边界。
 
 ## 唯一真源与生成关系
@@ -41,7 +42,7 @@ bash scripts/check-repo-sync.sh
 
 - 修改规范 Skill 下的公共 Core、Adapter、Capability Manifest 和相应测试。
 - 产品名称只用于真实协议、产品目录、兼容性说明和验证证据。
-- 更新 README 中对应的公开能力边界。
+- 同步更新中英文 Adapter 兼容性文档；README 只保留普通用户需要的能力摘要和入口链接。
 - 配置文件存在不等于产品端已经执行；没有真实 Hook、Skill 读取或续跑证据时，不得宣称完整兼容。
 
 ### Plugin 分发
@@ -66,7 +67,7 @@ bash scripts/check-repo-sync.sh
 - 模型负责语义理解、判断和内容生成；Agent 负责组装上下文、选择 Skill、调用工具并推进阶段；Adapter 和宿主负责生命周期与协议转换。
 - 产品名称可以出现在 Adapter、官方路径、依赖包名、兼容性说明和真实验证记录中。
 - 生成到目标工程的根 `AGENTS.md` 是 Agent 入口地图，`ARCHITECTURE.md` 是架构地图。
-- 生成到目标工程的 `.agents/skills` 是唯一公共 Skill 真源；不要生成产品级 Rules 或 Skill 副本。
+- 生成到目标工程的 `.agents/skills` 是唯一公共 Skill 内容真源；不要生成产品级 Rules、Skill 正文副本或产品级 Skill 投影。无法原生发现该目录的宿主由 Adapter 按需路由并要求实际读取规范文件。
 - generated 只辅助导航，不能替代源码、测试、运行态验证或 Validation 证据。
 
 ## 首次采用安全边界

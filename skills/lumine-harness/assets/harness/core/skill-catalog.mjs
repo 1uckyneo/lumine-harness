@@ -1,0 +1,120 @@
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, readdirSync, realpathSync } from "node:fs";
+import path from "node:path";
+
+function walkSkillFiles(dir, out = []) {
+  if (!existsSync(dir)) return out;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const target = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkSkillFiles(target, out);
+    else if (entry.isFile() && entry.name === "SKILL.md") out.push(target);
+  }
+  return out;
+}
+
+function cleanScalar(value = "") {
+  const text = String(value).trim();
+  if (!text) return "";
+  if (text.startsWith('"') && text.endsWith('"')) {
+    try { return JSON.parse(text); } catch {}
+  }
+  if (text.startsWith("'") && text.endsWith("'")) return text.slice(1, -1).replaceAll("''", "'");
+  return text;
+}
+
+function frontmatterField(source, field) {
+  const yaml = source.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const lines = yaml.split(/\r?\n/);
+  for (let index = 0; index < lines.length; index += 1) {
+    const match = lines[index].match(new RegExp(`^${field}:\\s*(.*)$`));
+    if (!match) continue;
+    const scalar = match[1].trim();
+    if (!["|", "|-", ">", ">-"].includes(scalar)) return cleanScalar(scalar);
+    const values = [];
+    for (let cursor = index + 1; cursor < lines.length; cursor += 1) {
+      if (!/^\s+/.test(lines[cursor])) break;
+      values.push(lines[cursor].trim());
+    }
+    return scalar.startsWith(">") ? values.join(" ").trim() : values.join("\n").trim();
+  }
+  return "";
+}
+
+function sha256(source) {
+  return createHash("sha256").update(source).digest("hex");
+}
+
+export function discoverSharedSkills(root) {
+  const base = path.join(root, ".agents", "skills");
+  const skills = walkSkillFiles(base).map((file) => {
+    const source = readFileSync(file, "utf8");
+    const relativeSource = path.relative(root, file).replaceAll(path.sep, "/");
+    const fallbackName = path.basename(path.dirname(file));
+    const name = frontmatterField(source, "name") || fallbackName;
+    const description = frontmatterField(source, "description");
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) throw new Error(`Shared Skill has an invalid name: ${relativeSource} (${name})`);
+    if (!description) throw new Error(`Shared Skill is missing frontmatter description: ${relativeSource}`);
+    return { name, description, file, relativeSource, hash: sha256(source) };
+  }).sort((left, right) => left.name.localeCompare(right.name));
+  const duplicates = skills.filter((skill, index) => skills.findIndex((candidate) => candidate.name === skill.name) !== index);
+  if (duplicates.length) throw new Error(`Duplicate shared Skill names: ${[...new Set(duplicates.map((item) => item.name))].join(", ")}`);
+  return skills;
+}
+
+export function getSharedSkill(root, name) {
+  const normalized = String(name ?? "").replace(/^\$/, "").toLowerCase();
+  return discoverSharedSkills(root).find((skill) => skill.name === normalized) ?? null;
+}
+
+function scoreSkill(skill, terms) {
+  const name = skill.name.toLowerCase();
+  const description = skill.description.toLowerCase();
+  return terms.reduce((score, term) => score + (name === term ? 100 : name.includes(term) ? 20 : description.includes(term) ? 4 : 0), 0);
+}
+
+export function searchSharedSkills(root, query = "", options = {}) {
+  const limit = Math.max(1, Math.min(Number(options.limit ?? 3), 20));
+  const terms = String(query).toLowerCase().match(/[a-z0-9-]+|[\u3400-\u9fff]{2,}/g) ?? [];
+  if (!terms.length) return discoverSharedSkills(root).slice(0, limit);
+  return discoverSharedSkills(root)
+    .map((skill) => ({ skill, score: scoreSkill(skill, terms) }))
+    .filter((item) => item.score > 0)
+    .sort((left, right) => right.score - left.score || left.skill.name.localeCompare(right.skill.name))
+    .slice(0, limit)
+    .map((item) => item.skill);
+}
+
+export function buildSharedSkillCatalog(root, options = {}) {
+  const skills = options.query ? searchSharedSkills(root, options.query, options) : discoverSharedSkills(root).slice(0, Number(options.limit ?? 3));
+  if (!skills.length) return "No matching project Skills were discovered under .agents/skills.";
+  return [
+    "Relevant project Skills (canonical content is only under .agents/skills):",
+    ...skills.map((skill) => `- ${skill.name}: ${skill.description} [${skill.relativeSource}]`),
+    "Read the canonical SKILL.md completely before using a Skill."
+  ].join("\n");
+}
+
+export function sharedSkillReadFromTool(root, raw = {}) {
+  const tool = String(raw.tool_name ?? raw.toolName ?? raw.name ?? "");
+  if (!/read|open|view/i.test(tool)) return null;
+  const input = raw.tool_input ?? raw.toolInput ?? raw.input ?? {};
+  const candidate = input.file_path ?? input.filePath ?? input.path ?? input.target ?? "";
+  if (!candidate) return null;
+  const cwd = raw.cwd ?? raw.working_directory ?? raw.workingDirectory ?? root;
+  const resolved = path.resolve(String(cwd), String(candidate));
+  if (!existsSync(resolved)) return null;
+  const canonicalCandidate = realpathSync.native(resolved);
+  return discoverSharedSkills(root).find((skill) => realpathSync.native(skill.file) === canonicalCandidate) ?? null;
+}
+
+export function sharedSkillLoadedFromTool(root, raw = {}) {
+  const tool = String(raw.tool_name ?? raw.toolName ?? raw.name ?? "");
+  if (!/^skill$/i.test(tool)) return null;
+  const input = raw.tool_input ?? raw.toolInput ?? raw.input ?? {};
+  const explicit = input.skill ?? input.skill_name ?? input.skillName ?? input.name ?? "";
+  if (explicit) return getSharedSkill(root, explicit);
+  const response = raw.tool_response ?? raw.toolResponse ?? raw.output ?? "";
+  const text = typeof response === "string" ? response : JSON.stringify(response);
+  return discoverSharedSkills(root).slice().sort((left, right) => right.name.length - left.name.length)
+    .find((skill) => new RegExp(`(?:^|[^a-z0-9-])${skill.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9-])`, "i").test(text)) ?? null;
+}

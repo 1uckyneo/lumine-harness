@@ -1,83 +1,104 @@
 # Harness Contract
 
-目标仓库采用后的核心目录：
+## 最小核心
+
+目标工程采用后的最小核心是：
 
 ```text
 AGENTS.md
 ARCHITECTURE.md
 docs/
   drafts/
-  design-docs/
-    index.md
-    core-beliefs.md
-    design-gate.md
   product-specs/
   exec-plans/
     active/
     completed/
-    tech-debt-tracker.md
   validation/
   generated/
-  references/
-  templates/
-  FRONTEND.md
   workflow-artifacts.md
 .agents/skills/lumine-harness-*/
 .harness/
   root.json
+  project.json
+  managed.json
   adapter-capabilities.json
   cli
   core/
-  adapter-manager.mjs
   check.mjs
   generated.mjs
   tests/
   adapters/
-.codex/hooks.json
-.qoder/settings.json        # when selected
-.trae/hooks.json            # when selected
-.cursor/hooks.json          # when selected
-.opencode/plugins/harness.mjs # when selected; partial compatibility
-.harness/adapters/zcode/marketplace/ # when selected; install manually in ZCode
-.harness/adapters/deepseek-harness/bundle/ # when selected; install into a DSH profile
 ```
+
+`project.json` 保存项目拓扑、启用模块、selected adapters 和 generated targets。`managed.json` 保存规范版本、受管文件和哈希，用于安全升级；它不能把项目自己维护的 AGENTS、ARCHITECTURE、阶段 Skill 或业务 Docs 当作可盲目覆盖的生成物。
+
+## 可选模块
+
+Inspect 和 Migration Proposal 必须按项目事实选择模块，不能给所有目标生成固定全家桶：
+
+- `design`：`docs/design-docs/` 和 Design Gate。
+- `frontend`：`docs/FRONTEND.md` 与 UI 文案、页面 taste 检查。
+- `browser`：浏览器自动化参考和浏览器 Validation 约定。
+- `database`：数据库、migration、schema generated targets 与证据约定。
+- `mobile`：移动端实现面、平台验证和相关导航。
+- `workers`：parallel worker task packet 和协调规则；只有宿主或工作方式支持时启用。
+
+未启用模块的文件不应生成，对应 Check 和 generated target 返回 `not applicable`。
 
 ## Workflow
 
 ```text
-draft 多轮优化
--> 可选设计方向讨论
--> draft 确认
--> 需要设计确认时生成/修改/确认设计稿
--> product spec
--> active exec plan
--> run
--> validation closeout 写回 active plan
--> completed
+Draft 多轮收敛
+→ 人工确认
+→ 按需 Design / Prototype
+→ 人工确认
+→ Product Spec
+→ Exec Plan
+→ 人工授权 Run
+→ 实现、测试、修复
+→ Validation closeout
+→ completed
 ```
 
 用户侧提示词保持自然语言：
 
-- `这个 draft 需要优化。你看我还需要交代什么上下文？还有什么决策点需要确认？`
-- `我补充一下：…… 你继续帮我更新 draft，并告诉我还缺什么。`
-- `我们先讨论页面设计方向。先只更新 draft，不生成设计稿。`
-- `这个 draft 可以进入下一步。`
-- `基于这个 draft 生成设计稿，先不要生成 spec/plan。`
-- `设计稿确认，可以基于 draft 和设计生成 product spec 和 active exec plan，先不要实施。`
-- `按这个 active exec plan 开始实施。`
+- `这个 Draft 需要优化。你看我还需要交代什么上下文？`
+- `这个 Draft 可以进入下一步；先判断是否需要设计，不要直接实施。`
+- `请生成 Product Spec 和 Active Exec Plan，先不要实施。`
+- `计划确认，开始 Run。`
 
 ## Design Gate
 
+Design 只在模块启用且任务需要设计确认时使用：
+
 - 内部 `ui_impact`：`L0 | L1 | L2`。
 - 内部 `prototype_mode`：`html | image | hybrid`。
-- 用户不需要说这些字段。
-- 需要设计确认的页面必须在 draft 确认后、spec/plan 前生成正式设计产物。
-- 进入实现必须有 approved 页面级 `DESIGN.md`、`prototypes[]`、`handoff/*.md` 和 `handoff/*.design.json`；单页面也是数组里只有一个页面项。
-- 每个 `prototypes[]` 页面项必须包含 `id`、`title`、`app_route`、`prototype`、`component_map`、`handoff`、`design_data` 和 `screenshots`。
-- `handoff/*.md` 和 `handoff/*.design.json` 是模型生成的实现上下文，不是用户批准源；冲突时以 `DESIGN.md`、HTML 原型和截图为准。
-- `handoff/*.design.json` 必须包含 `meta.authority: implementation_context`、reviewStatus、sourceRefs 和 deviationPolicy；业务字段可按页面需要扩展或留空。
-- `visual-directions/` 只用于 `image` / `hybrid` 的视觉方向探索，不是旧 harness 兼容目录。
-- `image` 只能探索视觉方向；进入实现必须转成 `html` 或 `hybrid` 的 `prototypes[]` handoff。
+- 用户不需要输入内部字段。
+- 正式设计产物必须位于 Draft 确认之后、Product Spec / Exec Plan 之前。
+- 进入实现需要 approved `DESIGN.md`、`prototypes[]` 和相应 handoff；图片探索不能直接成为实现批准源。
+
+## Shared Instructions And Skills
+
+- 根 `AGENTS.md` 是宿主中立的工程入口，不包含产品兼容矩阵。
+- `.agents/skills` 是唯一 Skill 内容真源。
+- 不生成产品 Rules、Skill 正文副本或产品级 Skill 投影。
+- 无法原生发现 `.agents/skills` 的宿主由 Adapter 按需路由真实 `SKILL.md`；显式 Skill 和 Harness 阶段为确定性路由，普通自然语言发现为 `best-effort`。
+- Draft、Design、Product Spec / Exec Plan、Run、Generated、Check 和 Navigate 开始前必须实际读取对应 Skill。
+- `.harness/root.json` 决定 Harness 根；不能使用最近的 Git 根代替。
+
+## Adapter Capability
+
+产品协议不写入目标 `AGENTS.md`。Capability Manifest 分别记录：
+
+- implementation；
+- setup；
+- skills mode；
+- runtime verification；
+- maturity；
+- fail mode；
+- host version、verified date 和 evidence。
+
+`doctor` 只判断静态配置和人工步骤，`verify` 必须验证当前运行证据。没有真实宿主证据时保持 `runtime-pending`；OpenCode 等缺少完整 Stop Gate 的宿主保持 `partial`；DeepSeek Harness 等不稳定协议保持 `developer-preview`。
 
 ## Status
 
@@ -90,26 +111,8 @@ draft 多轮优化
 - `WORK_STATUS: needs_manual_app_step`
 - `WORK_STATUS: blocked_external`
 
-## Shared Instructions And Skills
-
-- 根 `AGENTS.md` 是唯一公共工程指令入口。
-- `.agents/skills` 是唯一 Skill 真源。
-- 项目 Harness 阶段 Skill 固定使用 `lumine-harness-*` 前缀。
-- 不生成产品 Rules，也不生成 `.qoder/skills`、`.trae/skills`、`.kimi-code/skills` 等副本。
-- Draft、Design、Product Spec / Exec Plan、Run、Generated、Check、Navigate 开始前必须实际读取对应公共 `SKILL.md`。
-- `.harness/root.json` 决定 Harness 根；最近的 Git 根不能替代它。
-
-## Adapter Capability
-
-- Codex：SessionStart 与 Stop Gate。
-- Qoder：`UserPromptSubmit` 上下文回退、Skill 实际读取门禁、Stop Gate；公共 Skill 不进入其原生列表。
-- Trae：SessionStart 与 Stop Gate；AGENTS、共享 Skills 和 Hooks 开关需要人工启用。
-- Kimi Code：根 AGENTS / `.agents/skills` + 用户级 Hook 安装器；Hooks fail-open，不是唯一安全门。
-- Cursor：SessionStart、`afterAgentResponse`、Stop follow-up；需要 Workspace Trust。
-- OpenCode：上下文、工具、压缩和 idle 审计；当前 `stopGate: unsupported`，不得用 `session.idle` 伪造。
-- ZCode：Hook-only 本地 Marketplace Plugin 提供 SessionStart、阶段读取门禁与 Stop；项目级 Hook 当前不执行，`.agents/skills` 不进入其原生 Skill 列表。
-- DeepSeek Harness：原生 AGENTS/Skills + 官方 Codex Hook bridge；宿主/bridge 锁定 `0.1.0-rc.7`，SessionStart 与 Stop 为 partial，整体为 developer-preview。
+状态只表达任务事实。宿主需要的命令由 Adapter 动态注入，不写入目标 `AGENTS.md`。
 
 ## Validation
 
-设计确认截图保留在 `docs/design-docs/<slug>/screenshots/`。实施后的运行证据统一放入 `docs/validation/<slug>/<YYYY-MM-DD>/`，包括浏览器截图、DOM snapshot、console/network log、SQL 日志和接口返回 JSON。active exec plan 写验证摘要、命令、结果、未覆盖风险和证据链接，不承载大量证据文件。
+运行证据写入 `docs/validation/<slug>/<YYYY-MM-DD>/`。Active Exec Plan 保存验证摘要、命令、结果、未覆盖风险和证据链接，不承载大量证据文件。generated 只辅助导航，不能替代源码、测试、运行态或用户确认。

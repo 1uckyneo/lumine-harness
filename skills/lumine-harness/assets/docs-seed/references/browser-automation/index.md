@@ -1,5 +1,7 @@
 # Browser Automation
 
+本文件属于可选 Browser 模块；只有目标工程需要浏览器验证时生成。
+
 浏览器验证优先顺序：
 
 1. Chrome DevTools MCP / live Chrome：适合真实登录态、console/network/DOM/screenshot；live session 必须 preflight。

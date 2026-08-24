@@ -1,5 +1,7 @@
 # Design Docs
 
+本目录属于可选 Design 模块；只有 Migration Proposal 已启用 Design 时生成。
+
 `docs/design-docs/` 用于需要设计确认的页面设计信念、HTML 原型、图像生成视觉方向探索和 design gate。
 
 正式设计产物只能在 draft 确认后、product spec / active exec plan 之前生成。

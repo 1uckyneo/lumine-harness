@@ -1,110 +1,135 @@
 # Lumine Harness
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+English | [简体中文](README.zh-CN.md)
 
 [![skills.sh](https://skills.sh/b/1uckyneo/lumine-harness)](https://skills.sh/1uckyneo/lumine-harness)
 
-Lumine Harness is a project-level Agent engineering workflow. It helps an Agent keep reading the same product goals, architecture boundaries, execution state, and validation evidence across sessions and long-running tasks.
+> **Build a reliable engineering environment for an agent-first world.**
 
-It can adopt a single repository or a project composed of several related repositories. The result is an engineering environment that is easier for an Agent to understand, recover, constrain, verify, and improve.
+Coding Agents are no longer just tools for assisting with code changes. They can own complete features, work across repositories, and run for hours. As models become more capable, delivery quality depends less on whether they can write code and more on whether they can keep understanding the project, respect its boundaries, recover execution state, and support results with evidence.
 
-## Is This For My Project?
+The harness built into an Agent product answers “how does the Agent run?” **Lumine Harness** is a project-level Harness that answers “what should it do in this project, and what counts as done?” One is the runtime foundation; the other is the project environment. They complement each other.
 
-Lumine Harness is a good fit when:
+It is also an implementation of Harness Engineering: keeping project goals, engineering boundaries, execution progress, and validation evidence inside the project so an Agent can understand and continue the work after a session changes.
 
-- a single repository needs a complete Agent workflow;
-- frontend, backend, mobile, or other related repositories must be developed together;
-- a frontend-only, backend-only, full-stack, or traditional project lacks persistent engineering context;
-- an existing `AGENTS.md`, Rules, Skills, Hooks, or docs workflow should be migrated to one coherent system.
+**Sessions end. Engineering context must remain.**
 
-Lumine Harness is not:
+## When it is useful
 
-- a new coding Agent;
-- a framework tied to one model or model provider;
-- only a collection of Codex Hooks;
-- something that must be reinstalled for every feature after a project has adopted it.
+Lumine Harness is a good fit when you want to:
 
-The installed or directly referenced `lumine-harness` Skill performs the initial adoption. Normal development then uses the project-local `AGENTS.md`, `.agents/skills/lumine-harness-*`, engineering records, Harness Core, and selected Agent Adapters.
+- delegate a complete feature or long-running task to an Agent;
+- recover goals, decisions, and progress after changing sessions or Agents;
+- coordinate related frontend, backend, mobile, or other repositories;
+- preserve product boundaries, test results, and delivery evidence;
+- consolidate scattered `AGENTS.md`, Rules, Skills, Hooks, or engineering documents into one workflow.
 
-## Start In Three Minutes
+If you only need a temporary answer or a tiny isolated code change that will not affect future project context, adopting a full Harness is usually unnecessary.
 
-### Recommended: use the `skills` CLI
+## Start in 3 steps
 
-With Node.js 18 or newer installed, run one of these commands in a terminal. The [`skills` CLI](https://github.com/vercel-labs/skills) from Vercel Labs reads this repository and installs `lumine-harness` for the detected Agent.
+### 1. Install the entry Skill globally
 
-Use the official `npx` form:
+With Node.js 18 or newer, run:
 
 ```bash
 npx skills add 1uckyneo/lumine-harness -g
 ```
 
-Or use the equivalent pnpm form:
+This installs the `lumine-harness` Skill used for initial adoption and upgrades. It does not modify the target project.
 
-```bash
-pnpm dlx skills add 1uckyneo/lumine-harness -g
-```
+### 2. Start a new session from the correct project root
 
-`-g` installs the Skill globally, which is convenient when adopting several projects. Omit `-g` to install it only in the current project.
-
-After installation, start a new Agent session so the host can discover the Skill, then work from the root of the project that will adopt Harness.
-
-The CLI installs the top-level `lumine-harness` Skill used for initial adoption or migration. Once adoption is complete, everyday development uses the target project's generated `AGENTS.md`, `.agents/skills/lumine-harness-*`, engineering records, Harness Core, and selected Adapters.
-
-### Update the Skill
-
-```bash
-npx skills update lumine-harness -g -y
-
-# With pnpm
-pnpm dlx skills update lumine-harness -g -y
-```
-
-Start a new session after updating so the Agent loads the refreshed Skill files.
-
-## Choose The Correct Project Root
-
-The target is not necessarily a “workspace repository.” Choose the directory that represents the complete engineering scope:
-
-| Project shape | Harness root |
+| Project shape | Directory to open |
 | --- | --- |
 | Single repository | The repository root |
-| Several related repositories | Their common parent directory |
+| Related repositories | Their common parent directory |
 
-The common parent directory does not have to be a Git repository. What matters is that the Agent can access every related repository from that scope. Opening only one child repository makes cross-repository context, checks, and lifecycle recovery incomplete.
+The common parent does not have to be a Git repository. What matters is that the Agent can access every related codebase, rule, and runtime entry point. Opening only one child repository leaves cross-repository context, checks, and recovery incomplete.
 
-After installing the Lumine Harness Skill, start the Agent from the intended project root and send:
+### 3. Send this message to the Agent
 
 ```text
 Use the lumine-harness Skill to inspect this project.
 
-First determine whether this is a single-repository or multi-repository project,
-confirm the correct Harness root, and present a Migration Proposal.
-Do not modify files until I approve it.
+First identify the correct Harness root and present a Migration Proposal
+that lists what you plan to add, change, and preserve.
+Do not modify any files until I approve it.
 ```
 
-## What Happens During Adoption?
+At this point the Agent only inspects the project and proposes a migration. It writes files only after you approve the proposal.
 
-Lumine Harness follows four visible stages:
+## What happens next
+
+```text
+Inspect → propose a migration → write after approval → verify the adoption
+```
 
 1. **Inspect**
-   - Detect the repository topology and technology stack.
-   - Audit Git state, existing Agent instructions, Skills, Hooks, and engineering docs.
+   Detect repository topology, technology signals, Git state, existing Agent instructions, Skills, Hooks, and engineering documents.
+
 2. **Migration Proposal**
-   - List what will be created, replaced, preserved, or backed up.
-   - Explain the capability and limitation of each selected Agent Adapter.
-   - Wait for human approval before writing.
-3. **Adopt**
-   - Create the engineering maps, phase Skills, docs workflow, shared Harness Core, and selected Adapters.
+   List files to add, update, or preserve; optional modules; selected Adapters; known limitations; and the exact write set.
+
+3. **Adopt after approval**
+   Create engineering maps, project phase Skills, workflow records, Harness Core, and selected Adapters. Design, browser, database, and other modules are enabled only when the project needs them.
+
 4. **Verify**
-   - Refresh navigation indexes.
-   - Run Harness checks and Adapter Doctor.
-   - Report host settings or product-side verification that still require a human.
+   Refresh engineering navigation, run Harness Check, and report Agent-product settings that still require a person.
 
-Adoption is a migration, not a silent conservative patch. Review the proposal before approving it.
+If an unmanaged existing file conflicts with the proposal, adoption stops and reports the conflict instead of overwriting it silently. Resolve the conflict, then generate and approve a new proposal.
 
-## What Will The Project Look Like?
+## Everyday development
 
-### Single-repository project
+### Without a separate design step
+
+```text
+Draft → human confirmation → Product Spec → Exec Plan → authorize Run
+      → implementation, tests, fixes → Validation → archive
+```
+
+### With design confirmation
+
+```text
+Draft → human confirmation → Design / Prototype → human confirmation
+      → Product Spec → Exec Plan → authorize Run
+      → implementation, tests, fixes → Validation → archive
+```
+
+The terms mean:
+
+- **Draft**: original needs, open questions, and decisions still being refined;
+- **Design**: optional interaction, visual direction, and prototype confirmation;
+- **Product Spec**: product goals, scope, rules, and acceptance criteria;
+- **Exec Plan**: implementation path, current progress, and validation strategy;
+- **Run**: implementation, testing, and fixes after human authorization;
+- **Validation**: evidence of what happened and which results have been proven.
+
+Design is optional, and Product Spec must come before Exec Plan. A person confirms Draft, Design, Product Spec / Exec Plan, and Run authorization. After Run is authorized, the Agent may proceed autonomously until it needs a new product decision, credentials, or a manual application step.
+
+Example prompts:
+
+```text
+I wrote a short requirement. Turn it into a Draft and tell me what context is missing.
+```
+
+```text
+This Draft can move forward. Decide whether it needs design first; do not implement yet.
+```
+
+```text
+Create the Product Spec and Active Exec Plan, but do not implement yet.
+```
+
+```text
+The plan is approved. Start Run, implement, test, fix failures, and update Validation.
+```
+
+Small changes may use shorter records, but they must not make the engineering map, current state, or validation evidence unreliable for future sessions.
+
+## What adoption adds to the project
+
+A typical single-repository project gains these engineering assets:
 
 ```text
 my-project/
@@ -112,7 +137,6 @@ my-project/
 ├── ARCHITECTURE.md
 ├── docs/
 │   ├── drafts/
-│   ├── design-docs/
 │   ├── product-specs/
 │   ├── exec-plans/
 │   │   ├── active/
@@ -121,229 +145,149 @@ my-project/
 │   └── generated/
 ├── .agents/
 │   └── skills/
-│       └── lumine-harness-*/
 ├── .harness/
 └── src/
 ```
 
-### Multi-repository project
+A multi-repository project uses the same Harness assets and also contains related repositories such as `frontend/`, `backend/`, or `mobile/` beneath the common root.
 
-```text
-my-project/
-├── AGENTS.md
-├── ARCHITECTURE.md
-├── docs/
-├── .agents/
-│   └── skills/
-│       └── lumine-harness-*/
-├── .harness/
-├── frontend/
-├── backend/
-└── mobile/
-```
+### Engineering records shared by people and Agents
 
-`my-project/` can be a coordination directory rather than a Git repository. The child repositories keep their own source code and Git history.
-
-### What the main assets mean
-
-| Asset | Purpose |
+| Asset | Question it answers |
 | --- | --- |
-| `AGENTS.md` | The Agent entry map, project boundaries, hard rules, and phase routing |
-| `ARCHITECTURE.md` | System structure, module relationships, implementation paths, and architecture invariants |
-| Draft | Original needs, open questions, ambiguity, and decisions still being refined |
-| Product Spec | Product goals, scope, rules, and acceptance criteria |
-| Exec Plan | Technical path, execution state, next steps, and validation strategy |
-| Validation | Evidence of what actually ran and what has been proven |
-| `.agents/skills/lumine-harness-*` | Project-local methods for navigate, draft, design, plan, run, generated refresh, and checks |
-| `.harness` | Shared Core, CLI, checks, generated indexer, session state, and product Adapters |
-| generated | Navigation derived from repository facts; it does not replace source, tests, or runtime evidence |
+| `AGENTS.md` | Where should the Agent start, and what are the project boundaries and phase rules? |
+| `ARCHITECTURE.md` | What composes the system, and how do modules connect? |
+| Draft | What was requested, and what remains unclear? |
+| Product Spec | What should be built, within which scope and acceptance criteria? |
+| Exec Plan | How will it be implemented, and where is execution now? |
+| Validation | What happened, and which results have been proven? |
 
-The installed or directly referenced `lumine-harness` Skill is used for initial adoption. The generated `lumine-harness-*` Skills belong to the adopted project and drive everyday development.
+### Runtime support used by the Agent and tools
 
-## Everyday Development Workflow
+- `.agents/skills` stores project methods for each phase and is the only content source for project Skills;
+- `.harness` provides the CLI, checks, state management, and product Adapters;
+- generated navigation points the Agent toward relevant source and engineering entry points, but does not replace source, tests, or runtime evidence.
 
-```text
-Draft
-  ↓ human confirmation
-Optional Design and prototypes
-  ↓ human confirmation
-Product Spec
-  ↓
-Exec Plan
-  ↓ human authorizes Run
-Implementation, tests, and fixes
-  ↓
-Validation and archive
-```
+## Names that are easy to confuse
 
-Design is an optional branch. Product Spec always comes before Exec Plan. A human participates before Draft, Design, Spec/Plan, and Run begin. After Run is authorized, the Agent can work autonomously, but new product decisions, credentials, and manual application steps return to the human.
-
-### Example messages
-
-Start and refine a requirement:
-
-```text
-I wrote a short requirement. Turn it into a draft and tell me what context or decisions are still missing.
-```
-
-Discuss design without creating formal artifacts yet:
-
-```text
-Let us discuss the page direction first. Update only the draft and do not create a formal design yet.
-```
-
-Move past the draft:
-
-```text
-This draft is ready for the next stage.
-```
-
-After approving the design, create the product and execution contracts:
-
-```text
-The design is approved. Create the Product Spec and Active Exec Plan, but do not implement yet.
-```
-
-Authorize implementation:
-
-```text
-The plan is approved. Start Run, implement it, test it, fix failures, and update the validation records.
-```
-
-Small changes can use shorter artifacts, but they should not bypass the workflow in a way that makes the project map, current state, or evidence unreliable for future sessions.
-
-## What Should Humans Read?
-
-The Harness contains more material than a human needs to read every day.
-
-| Humans should focus on | Agents and tools consume in depth |
+| Name | Role |
 | --- | --- |
-| Draft and unresolved decisions | Complete source code |
-| Approved Design and prototypes | generated navigation |
-| Product Spec | Detailed plans and phase instructions |
-| Exec Plan decisions and progress summary | Check logs and test output |
-| Validation summary and final evidence | Adapter state and lifecycle data |
-| Security-sensitive, architecture-critical, or anomalous code | CLI and Hook temporary state |
+| `lumine-harness` entry Skill | Inspect, adopt, or upgrade a project |
+| Project `lumine-harness-*` Skills | Run the adopted project's daily draft, design, plan, implementation, and check phases |
+| Harness Core | Lives in `.harness` and provides the CLI, checks, state, and shared runtime logic |
+| Adapter | Translates shared Harness behavior into an Agent product's lifecycle protocol |
+| Codex Plugin | An optional distribution wrapper for the entry Skill, not another Harness or project Adapter |
 
-This does not remove code review. It moves human attention toward product direction, technical boundaries, evidence quality, and targeted review of high-risk code instead of assuming every generated file and every source line must receive equal attention.
+## What people should read
 
-## Agent Host Support
+You do not need to read every file the Agent uses. People usually focus on:
 
-All supported hosts share the root `AGENTS.md`, project `.agents/skills`, engineering records, and `.harness` Core. Product-specific files are thin lifecycle Adapters, not copies of the workflow.
+- unresolved decisions in the Draft;
+- approved Design and prototypes;
+- Product Spec;
+- decision, progress, and risk summaries in the Exec Plan;
+- Validation summaries;
+- security-sensitive, architecture-critical, or anomalous code.
 
-| Host | How it integrates | Extra step or current boundary |
-| --- | --- | --- |
-| Codex | Repository Hooks | SessionStart and Stop Gate are supported |
-| Qoder | Prompt, tool, and Stop Hooks | Shared Skills are read-gated and do not appear in Qoder’s native Skill list |
-| Trae | Repository Hooks | The user must enable project AGENTS, shared Skills, and Hooks |
-| Kimi Code | Native AGENTS/Skills plus user Hooks | User-level Hooks require explicit installation and are fail-open |
-| Cursor | Repository Hooks | Open and trust the complete project root |
-| OpenCode | Repository Plugin | Context and audit are supported; an equivalent Stop Gate is currently unavailable |
-| ZCode | Hook-only local Marketplace Plugin | Manual Plugin installation is required; project Hooks alone do not run |
-| DeepSeek Harness | Native AGENTS/Skills plus profile bundle | Developer preview; SessionStart and Stop remain partial |
+The Agent and tools consume complete source, generated navigation, detailed plans, test output, check logs, and lifecycle state. Harness does not remove code review; it moves more human attention toward product direction, technical boundaries, evidence quality, and high-risk code.
+
+## Using different Agent products
+
+Lumine Harness keeps shared engineering assets in `AGENTS.md`, `.agents/skills`, Docs, and `.harness` instead of copying the workflow for every product.
+
+Codex, Qoder, Trae, Kimi Code, Cursor, OpenCode, ZCode, CodeBuddy, and DeepSeek Harness differ in how they load project instructions, Skills, and lifecycle Hooks. Shared files existing on disk does not prove that a product loaded and executed them.
 
 After adoption, run:
 
 ```bash
-./.harness/cli adapter doctor all
+./.harness/cli adapter doctor selected
 ```
 
-Doctor reports the product-specific settings and installation steps that still need attention. A config file existing on disk is not proof that a host actually loaded the instructions, read a Skill, executed a Hook, or resumed a task.
+Doctor reports product-side settings still required by the selected Adapters. See [Adapter Compatibility](docs/adapter-compatibility.md) for integration modes, limitations, maturity, and real-host verification state.
 
-## Common Commands
+## Safety boundaries
 
-Run these from the adopted project’s Harness root:
+- The Migration Proposal must be approved before the target project is modified.
+- Unmanaged conflicting files are never overwritten silently.
+- Existing worktree changes are preserved; Lumine Harness does not automatically commit, push, stash, reset, switch branches, or change remotes.
+- User-level product configuration requires separate authorization.
+- generated navigation cannot replace source, tests, runtime verification, or human decisions.
+
+## Reference
+
+The commands, troubleshooting notes, and alternate installation methods below are available when you need them.
+
+<details>
+<summary><strong>Open the reference section</strong></summary>
+
+### Common commands
 
 ```bash
 ./.harness/cli check all
 ./.harness/cli generated refresh all
-./.harness/cli adapter list
-./.harness/cli adapter doctor all
-./.harness/cli adapter verify all
+./.harness/cli adapter doctor selected
 ```
 
-Some products require an explicit install command, such as Kimi Code user Hooks, the ZCode local Plugin, or the DeepSeek Harness profile bundle. Run `adapter doctor` first and follow the instructions it produces instead of guessing product directories.
+Run `./.harness/cli` to see the Skill Catalog, Adapter Verify, and other advanced commands. The real-host verification procedure lives in Adapter Compatibility.
 
-## Troubleshooting
+### Troubleshooting
 
-### The global Skill is not visible
+**The entry Skill is not visible after installation**
+Run `npx skills list -g`, then start a new session. Global discovery differs by Agent product; use the manual method below when necessary.
 
-Run `npx skills list -g` or `pnpm dlx skills list -g` first and confirm that `lumine-harness` is installed for the intended Agent. Then start a new session so the host reloads its Skills. A Skill installed with Codex Skill Installer also becomes available on the next turn.
+**The Agent sees only one child repository**
+Restart it from the common project root that contains every related repository.
 
-### The Agent found only one child repository
+**Will an existing `AGENTS.md` or AI workflow be overwritten?**
+No. Inspection reports overlapping unmanaged files as conflicts. Adoption does not continue until the conflict is resolved and a new proposal is approved.
 
-Reopen or restart the Agent from the common project root that contains every related repository. The Harness root should represent the complete engineering scope.
+**A Hook file exists but does not run**
+Run `adapter doctor <product>`, then inspect product settings and runtime evidence. Configuration presence is not runtime verification.
 
-### Hook files exist, but nothing happens
+**generated says `Review status: pending`**
+Only deterministic scanning is complete. The Agent still needs to sample the referenced source and update review metadata.
 
-Run `./.harness/cli adapter doctor <product>` and `adapter verify <product>`. Check the host’s manual settings and Hook logs. File presence alone is not runtime verification.
+### Other installation methods
 
-### generated still says `Review status: pending`
+Install globally with pnpm:
 
-Refreshing generated files performs the deterministic scan. The Agent must then sample the referenced source and update the review metadata; `pending` is not a completed review.
+```bash
+pnpm dlx skills add 1uckyneo/lumine-harness -g
+```
 
-### Doctor reports a manual step
+Update the globally installed entry Skill:
 
-Complete that step in the target product. Harness checks intentionally preserve `needs_manual_app_step` when repository automation cannot prove a product-side setting.
+```bash
+npx skills update lumine-harness -g -y
+```
 
-## Other Installation Options
+Omit `-g` to write the entry Skill into the current project. This creates Skill files in the current directory, so first confirm that it is the intended installation target:
 
-### Read the repository manually
+```bash
+npx skills add 1uckyneo/lumine-harness
+```
 
-If the current Agent cannot use the `skills` CLI, clone the repository somewhere it can read:
+If the current Agent does not support the `skills` CLI, clone the repository manually:
 
 ```bash
 git clone https://github.com/1uckyneo/lumine-harness.git
 ```
 
-Then send the Agent:
+Then send this to an Agent that can access both the clone and the target project:
 
 ```text
-Read <clone-path>/skills/lumine-harness/SKILL.md completely.
-
-Inspect <target-project-path>, identify its project structure, and present a Migration Proposal.
-Do not modify files until I confirm the proposal.
+Read <clone-directory>/skills/lumine-harness/SKILL.md in full.
+Inspect <target-project-directory> and present a Migration Proposal first.
+Do not modify files until I approve it.
 ```
 
-### Codex Skill Installer
+Codex users may also use `$skill-installer` or the optional Plugin distribution. The Plugin and the separately installed entry Skill contain the same Skill; do not install both unless you are switching methods. See the [OpenAI Plugin documentation](https://developers.openai.com/codex/plugins).
 
-Codex users can also send the following message to Codex. It is not a terminal command:
+</details>
 
-```text
-Use $skill-installer to install this Skill:
-https://github.com/1uckyneo/lumine-harness/tree/main/skills/lumine-harness
-```
+## Maintaining this repository
 
-The Skill becomes available on the next turn.
-
-## Optional Extension: Codex Plugin
-
-Most users only need the `lumine-harness` Skill. If you use Codex and prefer installing it through the Plugin browser, this repository also provides an optional Codex Plugin package containing the same Skill.
-
-Inside Codex CLI, enter:
-
-```text
-/plugin marketplace add 1uckyneo/lumine-harness
-/plugins
-```
-
-Install **Lumine Harness** from the Plugin browser, then start a new session. Do not install both forms unless you are intentionally switching installation methods. The Plugin does not change the Harness files generated in a target project.
-
-See the [OpenAI Plugin documentation](https://developers.openai.com/codex/plugins). Codex IDE Extension does not currently support Plugins.
-
-## Safety And Recovery
-
-- The Agent must present a Migration Proposal before modifying a target project.
-- Existing unrelated working-tree changes must be preserved.
-- Lumine Harness does not automatically commit, push, change remotes, switch branches, stash, reset, or rewrite history.
-- Git projects rely on diff and history for recovery.
-- For non-Git targets, replaced AI workflow files are backed up under `.harness/local/harness-backup/<timestamp>/`.
-- User-level product configuration requires separate approval and is not silently changed during normal adoption.
-- generated indexes are navigation aids, not substitutes for source inspection, tests, runtime verification, or human decisions.
-
-## Maintaining This Repository
-
-If you want to maintain or contribute to Lumine Harness itself, read the repository root [`AGENTS.md`](AGENTS.md). It defines the canonical source, generated Plugin wrapper, edit routing, product-neutrality rules, and required checks.
+If you want to maintain or contribute to Lumine Harness, read the root [`AGENTS.md`](AGENTS.md).
 
 ## License
 

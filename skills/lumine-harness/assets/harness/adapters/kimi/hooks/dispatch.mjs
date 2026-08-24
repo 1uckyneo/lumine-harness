@@ -3,6 +3,7 @@ import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { buildSessionStartContext } from "../../../core/session-context.mjs";
 import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
 import { initializeSessionState } from "../../../core/work-status.mjs";
+import { appendVerificationEvent } from "../../../core/verification.mjs";
 
 export async function handleKimiHook(raw = {}) {
   const event = raw.hook_event_name === "SessionStart" ? "session_start" : "stop";
@@ -10,9 +11,11 @@ export async function handleKimiHook(raw = {}) {
   const root = requireHarnessRoot(input);
   if (event === "session_start") {
     initializeSessionState(root, input);
+    appendVerificationEvent(root, input, { raw });
     return { exitCode: 0, stdout: buildSessionStartContext({ ...input, root }) };
   }
   const decision = evaluateStopPolicy(input, { root });
+  appendVerificationEvent(root, input, { raw, decision });
   if (decision.action === "continue" || decision.action === "block") {
     return { exitCode: 2, stderr: decision.message };
   }

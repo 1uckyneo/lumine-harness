@@ -20,7 +20,9 @@ required_files=(
   "assets/harness/core/contracts.d.ts"
   "assets/harness/core/root-resolver.mjs"
   "assets/harness/core/session-context.mjs"
+  "assets/harness/core/skill-catalog.mjs"
   "assets/harness/core/stop-policy.mjs"
+  "assets/harness/core/verification.mjs"
   "assets/harness/core/work-status.mjs"
   "assets/harness/check.mjs"
   "assets/harness/generated.mjs"
@@ -29,11 +31,13 @@ required_files=(
   "assets/trae/hooks.json"
   "assets/cursor/hooks.json"
   "assets/opencode/plugins/harness.mjs"
+  "assets/codebuddy/settings.json"
   "assets/harness/adapters/zcode/hooks/dispatch.mjs"
   "assets/harness/adapters/zcode/marketplace/marketplace.json"
   "assets/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/.zcode-plugin/plugin.json"
   "assets/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/hooks.json"
   "assets/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.mjs"
+  "assets/harness/adapters/codebuddy/hooks/dispatch.mjs"
   "assets/harness/adapters/deepseek-harness/hooks.json"
   "assets/harness/adapters/deepseek-harness/hooks/dispatch.mjs"
   "assets/harness/adapters/deepseek-harness/bundle/package.json"
@@ -56,6 +60,8 @@ required_files=(
   "assets/harness/tests/session-start.test.mjs"
   "assets/harness/tests/stop-gate.test.mjs"
   "assets/harness/tests/multi-agent-adapters.test.mjs"
+  "assets/harness/tests/adoption-manager.test.mjs"
+  "assets/harness/tests/architecture-contracts.test.mjs"
   "assets/docs-templates/draft.md"
   "assets/docs-templates/DESIGN.md"
   "assets/docs-templates/component-map.md"
@@ -81,7 +87,8 @@ required_files=(
   "assets/skills/lumine-harness-run/SKILL.md"
   "assets/skills/lumine-harness-check/SKILL.md"
   "scripts/inspect-target.sh"
-  "scripts/apply-harness-bootstrap.sh"
+  "scripts/apply-lumine-harness.sh"
+  "scripts/harness-manager.mjs"
 )
 
 missing=0
@@ -141,36 +148,58 @@ if [ -d "$skill_root/assets/codex/agents" ] || [ -d "$skill_root/assets/codex/ho
   exit 1
 fi
 
-for forbidden in assets/qoder/skills assets/trae/skills assets/kimi-code/skills assets/qoder/rules assets/trae/rules assets/cursor/rules assets/zcode/skills assets/zcode/rules assets/dsh/skills; do
+for forbidden in assets/qoder/skills assets/trae/skills assets/kimi-code/skills assets/qoder/rules assets/trae/rules assets/cursor/rules assets/zcode/skills assets/zcode/rules assets/codebuddy/skills assets/codebuddy/rules assets/dsh/skills assets/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/skills; do
   if [ -e "$skill_root/$forbidden" ]; then
     echo "Found forbidden product-specific Rule or Skill source: $forbidden" >&2
     exit 1
   fi
 done
 
-if ! grep -q '"stopGate": "unsupported"' "$skill_root/assets/harness/adapter-capabilities.json"; then
-  echo "OpenCode capability must declare stopGate unsupported" >&2
+if ! grep -q 'read_file|Skill' "$skill_root/assets/qoder/settings.json"; then
+  echo "Qoder PostToolUse must observe native Skill selection and canonical file reads" >&2
   exit 1
 fi
 
-if grep -q '"SessionStart"' "$skill_root/assets/qoder/settings.json"; then
-  echo "Qoder IDE project hooks do not currently expose SessionStart; use UserPromptSubmit fallback" >&2
+if ! grep -q 'read_file|Skill' "$skill_root/assets/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/hooks.json"; then
+  echo "ZCode PostToolUse must observe native Skill selection and canonical file reads" >&2
   exit 1
 fi
 
-if ! grep -q '"install": "local-marketplace+manual"' "$skill_root/assets/harness/adapter-capabilities.json"; then
-  echo "ZCode capability must declare local Marketplace installation" >&2
+node -e '
+const manifest = require(process.argv[1]);
+const required = ["codex", "qoder", "trae", "kimi", "cursor", "opencode", "zcode", "codebuddy", "deepseek-harness"];
+if (manifest.schemaVersion !== 2 || manifest.skillSource !== ".agents/skills" || manifest.instructionSource !== "AGENTS.md") process.exit(1);
+if (required.some((product) => !manifest.products?.[product])) process.exit(1);
+for (const product of ["qoder", "zcode", "codebuddy"]) {
+  if (manifest.products[product].skills?.mode !== "adapter-routed" || manifest.products[product].skills?.implicitDiscovery !== "best-effort") process.exit(1);
+}
+if (manifest.products.opencode.stopGate !== "unsupported") process.exit(1);
+if (manifest.products.zcode.setup !== "local-marketplace+manual") process.exit(1);
+if (manifest.products["deepseek-harness"].verifiedBridgeVersion !== "0.1.0-rc.7") process.exit(1);
+if (required.some((product) => manifest.products[product].runtimeVerification !== "runtime-pending")) process.exit(1);
+' "$skill_root/assets/harness/adapter-capabilities.json" || {
+  echo "Adapter capability manifest does not satisfy the schema v2 contract" >&2
   exit 1
-fi
+}
 
-if ! grep -q '"verifiedBridgeVersion": "0.1.0-rc.7"' "$skill_root/assets/harness/adapter-capabilities.json"; then
-  echo "DeepSeek Harness capability must pin the verified bridge version" >&2
+for event in SessionStart UserPromptSubmit PreToolUse PostToolUse Stop; do
+  if ! grep -q "\"$event\"" "$skill_root/assets/codebuddy/settings.json"; then
+    echo "CodeBuddy settings are missing $event" >&2
+    exit 1
+  fi
+done
+
+if grep -R -n -E 'skill-projections|sync-skills|generated-native-projection|native-skill-projection' "$skill_root/SKILL.md" "$skill_root/references" "$skill_root/assets" "$skill_root/scripts" \
+  --exclude-dir=.git \
+  --exclude-dir=tests \
+  --exclude='check-skill-package.sh'; then
+  echo "Found retired product Skill projection behavior" >&2
   exit 1
 fi
 
 if grep -R -n -E '(^|[/`])harness-(navigate|draft|generated|design|plan|run|check)([/`]|$)' "$skill_root" \
   --exclude-dir=.git \
-  --exclude='apply-harness-bootstrap.sh' \
+  --exclude='apply-lumine-harness.sh' \
   --exclude='check-skill-package.sh'; then
   echo "Found an unprefixed project Harness Skill; generated Skills must use lumine-harness-*" >&2
   exit 1

@@ -1,12 +1,14 @@
 # Migration Policy
 
-新 bootstrap 的默认目标是采用这套 harness。已有冲突 AI workflow 可以被迁移掉，不再与新 harness 并行触发。
+Lumine Harness 的采用与升级都必须先检查、再提案、最后按批准范围写入。已有冲突 AI workflow 可以迁移，但不能以“目标有 Git”为理由覆盖尚未提交或不可恢复的内容。
 
 ## 写入前
 
-- 先审计 `git status --short`。
-- 有 git：依靠 git diff 回看被替换内容。
-- 覆盖前把旧 `.agents/skills/harness-*` 移入 `.harness/local/harness-backup/<timestamp>/`，避免旧名继续触发；无 git 时还要备份被替换的 `AGENTS.md`、旧 `harness`、`.harness/`、各产品 Adapter 配置、冲突 hooks 和冲突 agent 文件。
+- 先审计 tracked、staged、untracked、嵌套 Git 和 worktree 状态。
+- Migration Proposal 列出精确 write set、冲突、备份方案和唯一 Proposal ID；没有经用户确认的 ID 不得写入。
+- 与现有工作树修改重叠时默认暂停，不自动合并、stash、reset 或覆盖。
+- Git 无法恢复的未跟踪文件和非 Git 目标中被替换的内容，先备份到 `.harness/local/harness-backup/<timestamp>/`。
+- Adopt 过程中发现提案外冲突时停止并重新提案。
 
 ## AGENTS.md
 
@@ -24,17 +26,18 @@
 - 非冲突的项目业务 skills 可以保留，并在 AGENTS 地图中索引。
 - `.harness/` 承载 root marker、公共 Core、CLI、checks、generated、tests 和全部产品薄 Adapter 脚本。
 - `.codex/` 只保留 `hooks.json`；不创建 `.codex/agents/`、`.codex/hooks/` 或 `.codex/tests/` 作为 harness 必备资产。
-- `AGENTS.md` 和 `.agents/skills` 是唯一公共真源；禁止产品 Rules 和产品级 Skill 副本。
-- 根据用户明确选择生成 `.codex/hooks.json`、`.qoder/settings.json`、`.trae/hooks.json`、`.cursor/hooks.json` 或 `.opencode/plugins/harness.mjs`；ZCode 与 DeepSeek Harness 的分发资产位于 `.harness/adapters/`，仅在被选择时报告人工安装步骤。
+- `AGENTS.md` 和 `.agents/skills` 是唯一公共内容真源；禁止产品 Rules、Skill 正文副本和产品级 Skill 投影。不能原生发现 `.agents/skills` 的宿主由 Adapter 按需路由真实文件。
+- 根据用户明确选择生成 `.codex/hooks.json`、`.qoder/settings.json`、`.trae/hooks.json`、`.cursor/hooks.json`、`.opencode/plugins/harness.mjs` 或 `.codebuddy/settings.json`；ZCode 与 DeepSeek Harness 的分发资产位于 `.harness/adapters/`，仅在被选择时报告人工安装步骤。
 - Kimi Code 的 `~/.kimi-code/config.toml` 是用户环境配置，普通 Adopt 只报告安装命令，必须另行授权后才执行。
 
 ## Product Surfaces
 
 - `CLAUDE.md`、`.claude/skills`、`.claude/docs` 默认作为索引目标，不改写。
-- Qoder 当前没有项目级 SessionStart，用 `UserPromptSubmit` 注入上下文；不要写一个不会触发的 SessionStart。
+- Qoder Hook 能力按具体产品形态和版本复核，不能长期硬编码“没有 SessionStart”；没有真实事件证据时保持 runtime pending。
 - Trae 的 AGENTS / `.agents/skills` / Hooks 开关与 Cursor Workspace Trust 由 Doctor 报告为人工步骤。
 - OpenCode 当前只交付部分兼容；`session.idle` 只能用于结束后审计。
 - ZCode 项目级 Hook 当前不执行，不能生成 `.zcode/config.json` 冒充已安装；必须让用户在 ZCode 中安装本地 Marketplace Plugin。
+- CodeBuddy 公共 Skill 使用 Adapter 路由，不生成 `.codebuddy/skills`。产品端仍需通过 `/hooks` 审核仓库配置；若 `CODEBUDDY.md` 或 `.codebuddy/CODEBUDDY.md` 存在但没有导入根 `AGENTS.md`，Doctor 必须报错而不是假定回退生效。
 - DeepSeek Harness 使用原生 AGENTS/Skills 和官方 Codex Hook bridge；安装 profile bundle 属于用户环境操作，必须单独确认，并锁定经过验证的宿主/bridge 版本组合。
 
 ## Fail Closed

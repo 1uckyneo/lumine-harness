@@ -1,5 +1,6 @@
 import path from "node:path";
 import { writeSessionState } from "./work-status.mjs";
+import { discoverSharedSkills } from "./skill-catalog.mjs";
 
 export const HARNESS_PHASES = [
   { id: "generated", skill: "lumine-harness-generated", pattern: /\bgenerated\b|生成导航|刷新索引/i },
@@ -20,11 +21,71 @@ export function expectedSkillPath(root, skill) {
 
 export function recordPromptRoute(root, input, prompt) {
   const phase = routeHarnessPhase(prompt);
+  const sharedSkills = discoverSharedSkills(root);
+  const explicitNames = [...String(prompt).matchAll(/\$([a-z0-9]+(?:-[a-z0-9]+)*)/gi)]
+    .map((match) => match[1].toLowerCase())
+    .filter((name) => sharedSkills.some((skill) => skill.name === name));
+  const expectedSkills = [];
+  if (phase) {
+    expectedSkills.push({
+      name: phase.skill,
+      path: expectedSkillPath(root, phase.skill),
+      reason: `harness-phase:${phase.id}`,
+      read: false
+    });
+  }
+  for (const name of explicitNames) {
+    if (expectedSkills.some((skill) => skill.name === name)) continue;
+    const sharedSkill = sharedSkills.find((skill) => skill.name === name);
+    expectedSkills.push({
+      name,
+      path: sharedSkill.file,
+      reason: "explicit-user-request",
+      read: false
+    });
+  }
   return writeSessionState(root, input.product, input.sessionId, {
     expectedPhase: phase?.id ?? null,
-    expectedSkill: phase?.skill ?? null,
-    expectedSkillPath: phase ? expectedSkillPath(root, phase.skill) : null,
-    expectedSkillRead: false
+    expectedSkill: expectedSkills[0]?.name ?? null,
+    expectedSkillPath: expectedSkills[0]?.path ?? null,
+    expectedSkillRead: expectedSkills.length === 0,
+    expectedSkills
+  });
+}
+
+export function pendingExpectedSkills(state = {}) {
+  if (Array.isArray(state.expectedSkills)) return state.expectedSkills.filter((skill) => !skill.read);
+  if (state.expectedSkill && !state.expectedSkillRead) {
+    return [{ name: state.expectedSkill, path: state.expectedSkillPath, reason: state.expectedPhase, read: false }];
+  }
+  return [];
+}
+
+export function markExpectedSkillRead(root, input, state, file) {
+  const target = path.resolve(file);
+  const expectedSkills = Array.isArray(state?.expectedSkills)
+    ? state.expectedSkills.map((skill) => path.resolve(skill.path) === target ? { ...skill, read: true, readAt: new Date().toISOString() } : skill)
+    : [];
+  const allRead = expectedSkills.length ? expectedSkills.every((skill) => skill.read) : path.resolve(state?.expectedSkillPath ?? "") === target;
+  return writeSessionState(root, input.product, input.sessionId, {
+    expectedSkills,
+    expectedSkillRead: allRead,
+    expectedSkillReadAt: allRead ? new Date().toISOString() : state?.expectedSkillReadAt ?? null
+  });
+}
+
+export function requireExpectedSkillRead(root, input, state, skill, reason = "adapter-routed") {
+  const target = path.resolve(skill.file);
+  const expectedSkills = Array.isArray(state?.expectedSkills) ? [...state.expectedSkills] : [];
+  const index = expectedSkills.findIndex((item) => path.resolve(item.path) === target);
+  const required = { name: skill.name, path: skill.file, reason, read: false };
+  if (index === -1) expectedSkills.push(required);
+  else expectedSkills[index] = { ...expectedSkills[index], ...required, readAt: null };
+  return writeSessionState(root, input.product, input.sessionId, {
+    expectedSkill: expectedSkills[0]?.name ?? skill.name,
+    expectedSkillPath: expectedSkills[0]?.path ?? skill.file,
+    expectedSkillRead: false,
+    expectedSkills
   });
 }
 
@@ -53,7 +114,7 @@ export function toolLoadsExpectedSkill(raw, expectedSkill) {
 }
 
 export function isMutatingTool(raw = {}) {
-  return /^(write|edit|multiedit|bash|shell|terminal|exec|applypatch|apply_patch|write_to_file|search_replace|run_in_terminal|str_replace_editor|run_code)$/i.test(
+  return /^(write|edit|multiedit|notebookedit|bash|shell|terminal|exec|applypatch|apply_patch|write_to_file|search_replace|run_in_terminal|str_replace_editor|run_code)$/i.test(
     extractToolName(raw).replace(/\s+/g, "")
   );
 }

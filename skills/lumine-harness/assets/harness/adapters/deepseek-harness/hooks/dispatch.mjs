@@ -1,22 +1,21 @@
-import { mkdirSync, writeFileSync } from "node:fs";
-import path from "node:path";
 import { normalizeHookInput } from "../../../core/hook-io.mjs";
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { buildSessionStartContext } from "../../../core/session-context.mjs";
 import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
 import {
-  expectedSkillPath,
   isMutatingTool,
+  markExpectedSkillRead,
+  pendingExpectedSkills,
   recordPromptRoute,
-  routeHarnessPhase,
   toolLoadsExpectedSkill,
   toolReadsExpectedSkill
 } from "../../../core/phase-router.mjs";
 import {
   initializeSessionState,
-  readSessionState,
-  writeSessionState
+  readSessionState
 } from "../../../core/work-status.mjs";
+import { appendVerificationEvent } from "../../../core/verification.mjs";
+import { getSharedSkill } from "../../../core/skill-catalog.mjs";
 
 function eventFor(raw) {
   return {
@@ -26,22 +25,6 @@ function eventFor(raw) {
     PostToolUse: "tool_after",
     Stop: "stop"
   }[raw.hook_event_name];
-}
-
-function recordEvidence(root, input, raw) {
-  const dir = path.join(root, ".harness", "runtime", "deepseek-harness");
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(
-    path.join(dir, "latest-hook.json"),
-    `${JSON.stringify({
-      product: "deepseek-harness",
-      event: raw.hook_event_name,
-      sessionId: input.sessionId,
-      cwd: input.cwd,
-      at: new Date().toISOString()
-    }, null, 2)}\n`,
-    "utf8"
-  );
 }
 
 function ensureSession(root, input) {
@@ -57,7 +40,7 @@ export async function handleDeepSeekHarnessHook(raw = {}) {
   const root = requireHarnessRoot(input);
   if (event === "session_start") initializeSessionState(root, input);
   else ensureSession(root, input);
-  recordEvidence(root, input, raw);
+  appendVerificationEvent(root, input, { raw });
 
   if (event === "session_start") {
     return { exitCode: 0, stdout: buildSessionStartContext({ ...input, root }) };
@@ -65,46 +48,45 @@ export async function handleDeepSeekHarnessHook(raw = {}) {
 
   if (event === "prompt_submit") {
     const prompt = raw.prompt ?? "";
-    recordPromptRoute(root, input, prompt);
-    const phase = routeHarnessPhase(prompt);
-    const phaseContext = phase
-      ? `\n- This prompt entered the ${phase.id} phase. Load the native shared Skill ${phase.skill} from ${expectedSkillPath(root, phase.skill)} before mutating the workspace.`
+    const state = recordPromptRoute(root, input, prompt);
+    const expected = pendingExpectedSkills(state);
+    const phaseContext = expected.length
+      ? `\n- Before mutating the workspace, load these native shared Skills:\n${expected.map((skill) => `  - ${skill.name} from ${skill.path}`).join("\n")}`
       : "";
     return {
       exitCode: 0,
       stdout: JSON.stringify({
         hookSpecificOutput: {
           hookEventName: "UserPromptSubmit",
-          additionalContext: `${buildSessionStartContext({ ...input, root })}${phaseContext}`
+          additionalContext: `${buildSessionStartContext({ ...input, root, prompt })}${phaseContext}`
         }
       })
     };
   }
 
   if (event === "tool_after") {
-    const state = readSessionState(root, input.product, input.sessionId);
-    if (
-      state?.expectedSkill &&
-      (toolLoadsExpectedSkill(raw, state.expectedSkill) || toolReadsExpectedSkill(raw, state.expectedSkillPath))
-    ) {
-      writeSessionState(root, input.product, input.sessionId, {
-        expectedSkillRead: true,
-        expectedSkillReadAt: new Date().toISOString()
-      });
+    let state = readSessionState(root, input.product, input.sessionId);
+    for (const skill of pendingExpectedSkills(state)) {
+      if (toolLoadsExpectedSkill(raw, skill.name) || toolReadsExpectedSkill(raw, skill.path)) {
+        state = markExpectedSkillRead(root, input, state, skill.path);
+        const sharedSkill = getSharedSkill(root, skill.name);
+        if (sharedSkill) appendVerificationEvent(root, input, { raw, skill: sharedSkill });
+      }
     }
     return { exitCode: 0 };
   }
 
   if (event === "tool_before") {
     const state = readSessionState(root, input.product, input.sessionId);
-    if (isMutatingTool(raw) && state?.expectedSkill && !state.expectedSkillRead) {
+    const pending = pendingExpectedSkills(state);
+    if (isMutatingTool(raw) && pending.length) {
       return {
         exitCode: 0,
         stdout: JSON.stringify({
           hookSpecificOutput: {
             hookEventName: "PreToolUse",
             permissionDecision: "deny",
-            permissionDecisionReason: `Load ${state.expectedSkill} before executing the ${state.expectedPhase} phase.`
+            permissionDecisionReason: `Load the required shared Skills before mutation: ${pending.map((skill) => skill.name).join(", ")}.`
           }
         })
       };
@@ -113,6 +95,7 @@ export async function handleDeepSeekHarnessHook(raw = {}) {
   }
 
   const decision = evaluateStopPolicy(input, { root });
+  appendVerificationEvent(root, input, { raw, decision });
   if (decision.action === "continue" || decision.action === "block") {
     return {
       exitCode: 0,

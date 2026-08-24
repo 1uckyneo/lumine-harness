@@ -1,15 +1,16 @@
 # Target Topology
 
-拓扑识别同时记录 Agent 产品配置面：`.codex/hooks.json`、`.qoder/settings.json`、`.trae/hooks.json`、`~/.kimi-code/config.toml` 的存在信号、`.cursor/hooks.json`、`.opencode/plugins/`、ZCode Plugin 运行证据与 DeepSeek Harness profile/bundle 信号。这些信号只用于迁移提案，不表示对应产品已经读取或执行。
+拓扑识别同时记录 Agent 产品配置面：`.codex/hooks.json`、`.qoder/settings.json`、`.trae/hooks.json`、`~/.kimi-code/config.toml` 的存在信号、`.cursor/hooks.json`、`.opencode/plugins/`、`.codebuddy/settings.json` 与 CodeBuddy memory、ZCode Plugin 运行证据、DeepSeek Harness profile/bundle 信号。这些信号只用于迁移提案，不表示对应产品已经读取或执行。
 
-Bootstrap 只把 topology 当内部识别结果，不要求用户手写进 draft/spec/plan。
+首次采用工具只把 topology 当内部识别结果，不要求用户手写进 draft/spec/plan。
 
 ## Profiles
 
 - `workspace-with-child-repos`：根目录主要协调多个子仓或应用；存在直接子目录 `.git`、多个 package/app 根、或根级只承载 docs/config/harness。
 - `single-fullstack`：单个业务仓同时包含后端和前端/移动端。
-- `backend-only`：只有服务端、SQL、API、worker、CLI 或库。
+- `backend-only`：只有服务端、SQL、API 或后端 worker。
 - `frontend-only`：只有 Web、移动端、组件库或前端应用。
+- `library-or-cli`：Node.js 等通用库或命令行工具，不应仅因存在 `package.json` 就启用前端、设计和浏览器模块。
 - `unknown-traditional`：没有清晰技术栈或入口，但仍需要 harness 文档和检查骨架。
 
 ## Signals

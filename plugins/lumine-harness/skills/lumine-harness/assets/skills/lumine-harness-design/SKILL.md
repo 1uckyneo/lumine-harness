@@ -7,7 +7,7 @@ description: 为需要设计确认的页面事项生成、修改和确认页面�
 
 ## 使用流程
 
-1. 读取 `AGENTS.md`、`docs/FRONTEND.md`、`docs/design-docs/core-beliefs.md`、`docs/design-docs/index.md`。
+1. 读取 `AGENTS.md`；再读取项目已经启用并实际存在的 `docs/FRONTEND.md`、`docs/design-docs/core-beliefs.md` 和 `docs/design-docs/index.md`。缺少可选设计模块时先返回明确的采用或人工步骤，不能假定所有项目都有这些文件。
 2. 读取已确认 draft。
 3. 只在 draft 已确认且需要设计确认时创建或更新 `docs/design-docs/<slug>/`。
 4. 默认 `prototype_mode: html`；风格不明确或客户高审美时使用 `hybrid`；只探索视觉时可临时 `image`。

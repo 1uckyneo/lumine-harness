@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { doctorAdapter, installKimiAdapter, setCliWorkStatus, uninstallKimiAdapter } from "../adapter-manager.mjs";
+import { doctorAdapter, formatSkillResult, installKimiAdapter, setCliWorkStatus, uninstallKimiAdapter } from "../adapter-manager.mjs";
 import { findHarnessRoot } from "../core/root-resolver.mjs";
 import { evaluateStopPolicy } from "../core/stop-policy.mjs";
 import { initializeSessionState, recordWorkStatus } from "../core/work-status.mjs";
@@ -29,6 +29,13 @@ function tempHarness() {
 
 function runHook(relative, payload) {
   return spawnSync("node", [sourcePath(relative)], { cwd: payload.cwd ?? ROOT, input: JSON.stringify(payload), encoding: "utf8" });
+}
+
+function writeSharedSkill(root, name, description, body = "Follow the canonical workflow.") {
+  const file = path.join(root, ".agents", "skills", name, "SKILL.md");
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, `---\nname: ${name}\ndescription: ${description}\n---\n\n# ${name}\n\n${body}\n`, "utf8");
+  return file;
 }
 
 test("root lookup crosses nested Git boundaries", () => {
@@ -62,9 +69,7 @@ test("public Stop Policy preserves all six states and limits continuation", () =
 
 test("Qoder blocks mutation until the routed public Skill was read", () => {
   const root = tempHarness();
-  const skill = path.join(root, ".agents", "skills", "lumine-harness-run", "SKILL.md");
-  mkdirSync(path.dirname(skill), { recursive: true });
-  writeFileSync(skill, "# lumine-harness-run\n", "utf8");
+  const skill = writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
   const common = { session_id: "qoder-route", cwd: root };
   try {
     const prompt = runHook(".harness/adapters/qoder/hooks/prompt-submit.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "授权 lumine-harness-run 进入实施" });
@@ -78,11 +83,42 @@ test("Qoder blocks mutation until the routed public Skill was read", () => {
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
+test("CodeBuddy gates Harness and explicitly requested shared Skills through canonical reads", () => {
+  const root = tempHarness();
+  const runSkill = writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
+  const securitySkill = writeSharedSkill(root, "security-audit", "Audit authentication and authorization");
+  const common = { session_id: "codebuddy-route", cwd: root };
+  try {
+    const start = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
+    assert.equal(start.status, 0, start.stderr);
+    assert.match(start.stdout, /\.\/\.harness\/cli skills search/);
+    const prompt = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", {
+      ...common,
+      hook_event_name: "UserPromptSubmit",
+      prompt: "使用 $security-audit 并授权 lumine-harness-run 进入实施"
+    });
+    assert.match(prompt.stdout, /lumine-harness-run\/SKILL\.md/);
+    assert.match(prompt.stdout, /security-audit\/SKILL\.md/);
+
+    const firstBlock = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    assert.match(firstBlock.stdout, /permissionDecision":"deny/);
+    runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { file_path: runSkill } });
+    const secondBlock = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    assert.match(secondBlock.stdout, /security-audit/);
+    runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { file_path: securitySkill } });
+    const allowed = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    assert.equal(allowed.stdout, "");
+
+    setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "codebuddy", sessionId: common.session_id });
+    const stop = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: false });
+    assert.match(stop.stdout, /"continue":false/);
+    assert.equal(existsSync(path.join(root, ".harness", "runtime", "verification", "codebuddy--codebuddy-route", "events.jsonl")), true);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
 test("ZCode Hook-only Plugin routes the shared Skill and records runtime evidence", () => {
   const root = tempHarness();
-  const skill = path.join(root, ".agents", "skills", "lumine-harness-run", "SKILL.md");
-  mkdirSync(path.dirname(skill), { recursive: true });
-  writeFileSync(skill, "# lumine-harness-run\n", "utf8");
+  const skill = writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
   const common = { session_id: "zcode-route", cwd: root };
   try {
     const start = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
@@ -95,15 +131,13 @@ test("ZCode Hook-only Plugin routes the shared Skill and records runtime evidenc
     runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { file_path: skill } });
     const allowed = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
-    assert.equal(existsSync(path.join(root, ".harness", "runtime", "zcode", "latest-hook.json")), true);
+    assert.equal(existsSync(path.join(root, ".harness", "runtime", "verification", "zcode--zcode-route", "events.jsonl")), true);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
 test("DeepSeek Harness bridge verifies native Skill evidence before mutation", () => {
   const root = tempHarness();
-  const skill = path.join(root, ".agents", "skills", "lumine-harness-run", "SKILL.md");
-  mkdirSync(path.dirname(skill), { recursive: true });
-  writeFileSync(skill, "---\nname: lumine-harness-run\n---\n", "utf8");
+  writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
   const common = { session_id: "dsh-route", cwd: root };
   try {
     runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
@@ -114,7 +148,7 @@ test("DeepSeek Harness bridge verifies native Skill evidence before mutation", (
     runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "skill", tool_response: "Loaded skill metadata: name: lumine-harness-run" });
     const allowed = runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
-    setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "deepseek-harness" });
+    setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "deepseek-harness", sessionId: common.session_id });
     const stop = runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", last_assistant_message: null, stop_hook_active: false });
     assert.match(stop.stdout, /decision":"block/);
   } finally { rmSync(root, { recursive: true, force: true }); }
@@ -156,20 +190,43 @@ test("Kimi validation failure leaves configuration and dispatcher untouched", ()
   }
 });
 
-test("repository keeps one public Skill source and capability boundaries remain explicit", () => {
-  for (const relative of [".qoder/skills", ".trae/skills", ".kimi-code/skills", ".qoder/rules", ".trae/rules", ".cursor/rules", ".zcode/skills", ".zcode/rules", ".dsh/skills"]) {
+test("repository keeps one canonical Skill source and capability boundaries remain explicit", () => {
+  for (const relative of [
+    ".qoder/skills",
+    ".codebuddy/skills",
+    ".harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/skills",
+    ".trae/skills",
+    ".kimi-code/skills",
+    ".qoder/rules",
+    ".trae/rules",
+    ".cursor/rules",
+    ".zcode/skills",
+    ".zcode/rules",
+    ".codebuddy/rules",
+    ".dsh/skills"
+  ]) {
     assert.equal(existsSync(sourcePath(relative)), false, relative);
   }
   const manifest = JSON.parse(readFileSync(sourcePath(".harness/adapter-capabilities.json"), "utf8"));
   assert.equal(manifest.skillSource, ".agents/skills");
   assert.equal(manifest.products.opencode.stopGate, "unsupported");
-  assert.equal(manifest.products.zcode.install, "local-marketplace+manual");
+  assert.equal(manifest.products.zcode.setup, "local-marketplace+manual");
+  assert.equal(manifest.products.zcode.skills.mode, "adapter-routed");
+  assert.equal(manifest.products.codebuddy.skills.mode, "adapter-routed");
+  assert.equal(manifest.products.codebuddy.skills.implicitDiscovery, "best-effort");
+  assert.equal(manifest.products.opencode.runtimeVerification, "runtime-pending");
   assert.equal(manifest.products["deepseek-harness"].verifiedBridgeVersion, "0.1.0-rc.7");
   if (existsSync(sourcePath(".opencode/plugins/harness.mjs"))) {
     const plugin = readFileSync(sourcePath(".opencode/plugins/harness.mjs"), "utf8");
     assert.match(plugin, /audit_only/);
     assert.doesNotMatch(plugin, /followup_message/);
   }
+});
+
+test("skills inspect CLI formats a single Skill descriptor", () => {
+  const output = JSON.parse(formatSkillResult({ name: "lumine-harness-run", file: "/private/path/SKILL.md" }));
+  assert.equal(output.name, "lumine-harness-run");
+  assert.equal("file" in output, false);
 });
 
 test("Doctor keeps product-side setup and partial semantics visible", { skip: SOURCE_ASSET_MODE }, () => {

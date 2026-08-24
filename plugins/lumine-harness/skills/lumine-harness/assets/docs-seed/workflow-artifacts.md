@@ -14,7 +14,7 @@
 
 ## Design Gate
 
-需要设计确认的页面产物只能在 draft 确认后生成，并且必须早于 product spec / active exec plan。
+本节只在项目启用 Design 模块时生成。需要设计确认的页面产物只能在 draft 确认后生成，并且必须早于 product spec / active exec plan。
 
 - `docs/design-docs/<slug>/DESIGN.md`：设计说明、prototype mode、`prototypes[]` 原型索引、截图清单和 gate 状态。
 - `prototypes/*.html`：页面设计稿预览和视觉确认材料；单页面也是 `prototypes[]` 中只有一个页面项。

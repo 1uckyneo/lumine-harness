@@ -2,7 +2,7 @@
   "hooks": {
     "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node .harness/adapters/qoder/hooks/prompt-submit.mjs", "timeout": 30 }] }],
     "PreToolUse": [{ "matcher": "Write|Edit|SearchReplace|Bash|RunCommand|write_to_file|search_replace|run_in_terminal", "hooks": [{ "type": "command", "command": "node .harness/adapters/qoder/hooks/tool-before.mjs", "timeout": 10 }] }],
-    "PostToolUse": [{ "matcher": "Read|ReadFile|View|OpenFile|read_file", "hooks": [{ "type": "command", "command": "node .harness/adapters/qoder/hooks/tool-after.mjs", "timeout": 10 }] }],
+    "PostToolUse": [{ "matcher": "Read|ReadFile|View|OpenFile|read_file|Skill", "hooks": [{ "type": "command", "command": "node .harness/adapters/qoder/hooks/tool-after.mjs", "timeout": 10 }] }],
     "Stop": [{ "hooks": [{ "type": "command", "command": "node .harness/adapters/qoder/hooks/stop.mjs", "timeout": 120 }] }]
   }
 }

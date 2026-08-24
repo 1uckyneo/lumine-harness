@@ -28,7 +28,7 @@ Agent 只更新当前 draft 文件，不生成 `DESIGN.md`、HTML、图片、pro
 这个 draft 可以进入下一步。
 ```
 
-当前模型根据 draft 和工程上下文判断下一步：不需要设计确认的事项进入 spec/plan；需要先看页面效果的事项进入 `lumine-harness-design`，由 Agent 按阶段约定执行。
+当前模型根据 draft、工程上下文和已启用模块判断下一步：不需要设计确认的事项进入 spec/plan；需要先看页面效果且 Design 模块已启用的事项进入 `lumine-harness-design`。需要设计但模块尚未启用时，先返回明确的采用或人工步骤。
 
 ## 设计稿生成与修改
 

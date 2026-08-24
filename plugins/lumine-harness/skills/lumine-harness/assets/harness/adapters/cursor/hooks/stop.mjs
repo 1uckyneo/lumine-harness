@@ -3,6 +3,7 @@ import { readHookInput, writeHookOutput, normalizeHookInput } from "../../../cor
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
 import { readSessionState } from "../../../core/work-status.mjs";
+import { appendVerificationEvent } from "../../../core/verification.mjs";
 
 function transcriptFallback(file) {
   if (!file || !existsSync(file)) return "";
@@ -25,6 +26,7 @@ try {
   const state = readSessionState(root, input.product, input.sessionId);
   input.lastAssistantMessage = state?.lastAssistantMessage || transcriptFallback(raw.transcript_path) || input.lastAssistantMessage;
   const decision = evaluateStopPolicy(input, { root });
+  appendVerificationEvent(root, input, { raw, decision });
   if (decision.action === "continue" || decision.action === "block") {
     writeHookOutput({ followup_message: decision.message });
   }

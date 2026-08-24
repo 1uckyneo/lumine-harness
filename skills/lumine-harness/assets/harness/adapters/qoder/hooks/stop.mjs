@@ -1,12 +1,14 @@
 import { readHookInput, writeHookOutput, normalizeHookInput } from "../../../core/hook-io.mjs";
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
+import { appendVerificationEvent } from "../../../core/verification.mjs";
 
 try {
   const raw = await readHookInput();
   const input = normalizeHookInput("qoder", "stop", raw);
   const root = requireHarnessRoot(input);
   const decision = evaluateStopPolicy(input, { root });
+  appendVerificationEvent(root, input, { raw, decision });
   if (decision.action === "continue" || decision.action === "block") {
     writeHookOutput({ decision: "block", reason: decision.message });
   }
