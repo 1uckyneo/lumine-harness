@@ -76,7 +76,7 @@ git clone https://gitee.com/thrulife2gether/lumine-harness.git
 ```text
 请使用 lumine-harness 检查当前工程。
 
-先判断合适的 Harness 根目录，并给出改造方案（Migration Proposal），
+先判断合适的 Harness 根目录，并给出改造方案，
 说明准备新增、修改和保留哪些内容。在我确认前不要修改任何文件。
 ```
 
@@ -104,6 +104,29 @@ git clone https://gitee.com/thrulife2gether/lumine-harness.git
 
 ## 日常开发怎么使用
 
+### 先创建一份 Draft
+
+一项需要进入 Harness 流程的新需求，先写进 `docs/drafts/<slug>.md`。Draft 是可以反复修改的需求草案，不是正式规格；哪怕最开始只有几行，也应先留下想解决的问题、预期结果、已知边界和还没想清楚的地方。
+
+`<slug>` 是这项需求后续一直使用的简短名称。建议使用稳定、易读的英文短名，多个单词用连字符连接，例如 `notification-preferences`。后续工件沿用同一个 slug：
+
+```text
+docs/drafts/notification-preferences.md
+docs/design-docs/notification-preferences/          # 需要设计时才有
+docs/product-specs/notification-preferences.md
+docs/exec-plans/active/notification-preferences.md
+docs/validation/notification-preferences/<日期>/
+```
+
+你可以自己创建 Draft 文件并写入原始想法，也可以只把需求告诉 Agent：
+
+```text
+我想做“通知偏好设置”：
+<在这里直接写下需求、背景和想法>
+
+先整理成 Draft，再告诉我还缺哪些上下文。
+```
+
 ### 不需要单独设计
 
 ```text
@@ -119,29 +142,22 @@ git clone https://gitee.com/thrulife2gether/lumine-harness.git
         → 实现、测试、修复 → 验证记录 → 归档
 ```
 
-这些名称分别是：
+这条需求流程中的主要工件是：
 
 - Draft（需求草案）：保存原始想法、问题和仍未确认的决定；
 - Design（设计）：按需确认交互、视觉方向和原型；
 - Product Spec（产品规格说明）：固定目标、范围、规则和验收标准；
 - Exec Plan（执行计划）：记录实现路径、当前进度和验证安排；
-- Run（实施）：在得到人工授权后实现、测试和修复；
 - Validation（验证记录）：说明实际发生了什么，以及哪些结果已经被证明。
 
-Design 是按需分支，Product Spec 必须在 Exec Plan 之前。Draft、Design、Product Spec / Exec Plan 和 Run 开始前都有人参与确认。Run 获得授权后，Agent 可以自主推进；遇到新的产品决定、凭据或必须由人完成的应用操作时，再把控制权交还给人。
-
-你可以直接对 Agent 说：
-
-```text
-我先写了一份简单需求，请帮我整理成需求草案，并告诉我还缺哪些上下文。
-```
+确认 Draft 后，可以继续对 Agent 说：
 
 ```text
 这份草案可以进入下一步。先判断是否需要设计，不要直接实施。
 ```
 
 ```text
-请生成 Product Spec 和 Active Exec Plan，先不要实施。
+生成 Product Spec 和 Exec Plan，先不要实施。
 ```
 
 ```text

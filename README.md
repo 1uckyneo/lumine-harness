@@ -104,10 +104,33 @@ If an unmanaged existing file conflicts with the proposal, adoption stops and re
 
 ## Everyday development
 
+### Start with a Draft
+
+A requirement that enters the Harness workflow starts in `docs/drafts/<slug>.md`. The Draft is a working requirement document, not the final specification. Even a few initial lines should preserve the problem, expected outcome, known boundaries, and open questions so they can be refined over multiple conversations.
+
+`<slug>` is the short, stable name reused by every later artifact. Prefer a readable lowercase English name with hyphens, such as `notification-preferences`:
+
+```text
+docs/drafts/notification-preferences.md
+docs/design-docs/notification-preferences/          # only when design is needed
+docs/product-specs/notification-preferences.md
+docs/exec-plans/active/notification-preferences.md
+docs/validation/notification-preferences/<date>/
+```
+
+You may create the Draft file and write the initial ideas yourself, or ask the Agent to do it:
+
+```text
+I want to add notification preferences:
+<describe the requirement, background, and initial ideas here>
+
+Start by turning this into a Draft, then tell me what context is missing.
+```
+
 ### Without a separate design step
 
 ```text
-Draft → human confirmation → Product Spec → Exec Plan → authorize Run
+Draft → human confirmation → Product Spec → Exec Plan → authorize implementation
       → implementation, tests, fixes → Validation → archive
 ```
 
@@ -115,37 +138,30 @@ Draft → human confirmation → Product Spec → Exec Plan → authorize Run
 
 ```text
 Draft → human confirmation → Design / Prototype → human confirmation
-      → Product Spec → Exec Plan → authorize Run
+      → Product Spec → Exec Plan → authorize implementation
       → implementation, tests, fixes → Validation → archive
 ```
 
-The terms mean:
+The main artifacts in this requirement workflow are:
 
 - **Draft**: original needs, open questions, and decisions still being refined;
 - **Design**: optional interaction, visual direction, and prototype confirmation;
 - **Product Spec**: product goals, scope, rules, and acceptance criteria;
 - **Exec Plan**: implementation path, current progress, and validation strategy;
-- **Run**: implementation, testing, and fixes after human authorization;
 - **Validation**: evidence of what happened and which results have been proven.
 
-Design is optional, and Product Spec must come before Exec Plan. A person confirms Draft, Design, Product Spec / Exec Plan, and Run authorization. After Run is authorized, the Agent may proceed autonomously until it needs a new product decision, credentials, or a manual application step.
-
-Example prompts:
-
-```text
-I wrote a short requirement. Turn it into a Draft and tell me what context is missing.
-```
+After confirming the Draft, continue with prompts such as:
 
 ```text
 This Draft can move forward. Decide whether it needs design first; do not implement yet.
 ```
 
 ```text
-Create the Product Spec and Active Exec Plan, but do not implement yet.
+Create the Product Spec and Exec Plan, but do not implement yet.
 ```
 
 ```text
-The plan is approved. Start Run, implement, test, fix failures, and update Validation.
+The plan is approved. Start implementation, test, fix failures, and update Validation.
 ```
 
 Small changes may use shorter records, but they must not make the engineering map, current state, or validation evidence unreliable for future sessions.
