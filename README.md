@@ -38,13 +38,28 @@ Install from GitHub / skills.sh:
 npx skills add 1uckyneo/lumine-harness -g
 ```
 
-Use the Gitee mirror when GitHub access is limited:
+Install from Gitee / skills.sh:
 
 ```bash
 npx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
 ```
 
 Both commands install the same `lumine-harness` Skill for initial adoption and upgrades. Installing it does not immediately modify the target project.
+
+If the `skills` CLI is unavailable, clone from GitHub or Gitee instead (choose one):
+
+```bash
+git clone https://github.com/1uckyneo/lumine-harness.git
+git clone https://gitee.com/thrulife2gether/lumine-harness.git
+```
+
+After a manual clone, use this message in step 3 so the Agent reads the entry Skill first:
+
+```text
+Read <clone-directory>/skills/lumine-harness/SKILL.md in full.
+Inspect <target-project-directory> and present a Migration Proposal first.
+Do not modify files until I approve it.
+```
 
 ### 2. Start a new session from the correct project root
 
@@ -274,22 +289,6 @@ Omit `-g` to write the entry Skill into the current project. This creates Skill 
 
 ```bash
 npx skills add 1uckyneo/lumine-harness
-```
-
-If the current Agent does not support the `skills` CLI, clone the repository manually:
-
-```bash
-git clone https://github.com/1uckyneo/lumine-harness.git
-# Or use the Gitee mirror when GitHub access is limited
-git clone https://gitee.com/thrulife2gether/lumine-harness.git
-```
-
-Then send this to an Agent that can access both the clone and the target project:
-
-```text
-Read <clone-directory>/skills/lumine-harness/SKILL.md in full.
-Inspect <target-project-directory> and present a Migration Proposal first.
-Do not modify files until I approve it.
 ```
 
 Codex users may also use `$skill-installer` or the optional Plugin distribution. The Plugin and the separately installed entry Skill contain the same Skill; do not install both unless you are switching methods. See the [OpenAI Plugin documentation](https://developers.openai.com/codex/plugins).

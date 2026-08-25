@@ -40,13 +40,27 @@ Lumine Harness 更适合这些场景：
 npx skills add 1uckyneo/lumine-harness -g
 ```
 
-中国大陆用户可以使用 Gitee 镜像：
+通过 Gitee / skills.sh 安装：
 
 ```bash
 npx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
 ```
 
 两条命令安装的是同一个 `lumine-harness` Skill。它只负责首次接入和升级，不会立即修改你的目标工程。
+
+如果当前环境不能使用 `skills` CLI，也可以从 GitHub 或 Gitee 手动克隆（任选其一）：
+
+```bash
+git clone https://github.com/1uckyneo/lumine-harness.git
+git clone https://gitee.com/thrulife2gether/lumine-harness.git
+```
+
+手动克隆后，在第 3 步让 Agent 先读取入口 Skill：
+
+```text
+请完整读取 <克隆目录>/skills/lumine-harness/SKILL.md。
+检查 <目标工程目录>，先给出改造方案；在我确认前不要修改文件。
+```
 
 ### 2. 从正确的工程根目录开启新会话
 
@@ -275,21 +289,6 @@ npx skills update lumine-harness -g -y
 
 ```bash
 npx skills add 1uckyneo/lumine-harness
-```
-
-当前 Agent 不支持 `skills` CLI 时，可以手动克隆：
-
-```bash
-git clone https://github.com/1uckyneo/lumine-harness.git
-# 中国大陆用户也可以使用 Gitee 镜像
-git clone https://gitee.com/thrulife2gether/lumine-harness.git
-```
-
-然后发送给能够访问克隆目录和目标工程的 Agent：
-
-```text
-请完整读取 <克隆目录>/skills/lumine-harness/SKILL.md。
-检查 <目标工程目录>，先给出改造方案；在我确认前不要修改文件。
 ```
 
 Codex 用户也可以使用 `$skill-installer` 或可选的 Plugin 分发方式。Plugin 与独立安装的入口 Skill 是同一份内容，除非正在切换安装方式，否则不要重复安装。详见 [OpenAI Plugin 文档](https://developers.openai.com/codex/plugins)。
