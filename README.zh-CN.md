@@ -32,13 +32,21 @@ Lumine Harness 更适合这些场景：
 
 ### 1. 全局安装入口 Skill
 
-准备好 Node.js 18 或更高版本，在终端运行：
+准备好 Node.js 18 或更高版本，根据网络环境选择一个来源。
+
+通过 GitHub / skills.sh 安装：
 
 ```bash
 npx skills add 1uckyneo/lumine-harness -g
 ```
 
-这条命令只安装负责首次接入和升级的 `lumine-harness` Skill，不会修改你的目标工程。
+中国大陆用户可以使用 Gitee 镜像：
+
+```bash
+npx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
+```
+
+两条命令安装的是同一个 `lumine-harness` Skill。它只负责首次接入和升级，不会立即修改你的目标工程。
 
 ### 2. 从正确的工程根目录开启新会话
 
@@ -254,6 +262,7 @@ Doctor 会告诉你已选择的 Adapter 还需要哪些产品设置。各产品�
 
 ```bash
 pnpm dlx skills add 1uckyneo/lumine-harness -g
+pnpm dlx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
 ```
 
 更新已经全局安装的入口 Skill：
@@ -272,6 +281,8 @@ npx skills add 1uckyneo/lumine-harness
 
 ```bash
 git clone https://github.com/1uckyneo/lumine-harness.git
+# 中国大陆用户也可以使用 Gitee 镜像
+git clone https://gitee.com/thrulife2gether/lumine-harness.git
 ```
 
 然后发送给能够访问克隆目录和目标工程的 Agent：

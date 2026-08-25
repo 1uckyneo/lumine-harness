@@ -30,13 +30,21 @@ If you only need a temporary answer or a tiny isolated code change that will not
 
 ### 1. Install the entry Skill globally
 
-With Node.js 18 or newer, run:
+With Node.js 18 or newer, choose a source that is accessible from your network.
+
+Install from GitHub / skills.sh:
 
 ```bash
 npx skills add 1uckyneo/lumine-harness -g
 ```
 
-This installs the `lumine-harness` Skill used for initial adoption and upgrades. It does not modify the target project.
+Use the Gitee mirror when GitHub access is limited:
+
+```bash
+npx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
+```
+
+Both commands install the same `lumine-harness` Skill for initial adoption and upgrades. Installing it does not immediately modify the target project.
 
 ### 2. Start a new session from the correct project root
 
@@ -253,6 +261,7 @@ Install globally with pnpm:
 
 ```bash
 pnpm dlx skills add 1uckyneo/lumine-harness -g
+pnpm dlx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
 ```
 
 Update the globally installed entry Skill:
@@ -271,6 +280,8 @@ If the current Agent does not support the `skills` CLI, clone the repository man
 
 ```bash
 git clone https://github.com/1uckyneo/lumine-harness.git
+# Or use the Gitee mirror when GitHub access is limited
+git clone https://gitee.com/thrulife2gether/lumine-harness.git
 ```
 
 Then send this to an Agent that can access both the clone and the target project:

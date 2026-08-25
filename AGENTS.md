@@ -102,4 +102,7 @@ node --test skills/lumine-harness/assets/harness/tests/*.test.mjs
 
 - 保留工作树中不属于当前任务的修改，不使用破坏性命令清理它们。
 - 只有用户明确要求时才提交或推送。
+- GitHub `origin` 是 skills.sh 收录和国际用户安装使用的规范发布源；Gitee `gitee` 是面向中国大陆用户的同步镜像。
+- 对外发布时必须将同一 `main` 提交和需要发布的 tags 推送到 GitHub 与 Gitee，并核对两边远端 HEAD 一致。
+- 中英文 README 的主安装步骤必须直接展示 GitHub 与 Gitee 两个来源，不得把 Gitee 命令只放在折叠参考区。
 - 收尾时报告修改范围、执行的检查、未验证的产品端步骤和仍需人工完成的事项。
