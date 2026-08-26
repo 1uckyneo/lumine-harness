@@ -153,6 +153,16 @@ function managedState(root) {
   return existsSync(file) ? readJson(file) : { files: {} };
 }
 
+function isProjectOwnedPath(target, project = {}) {
+  if (["AGENTS.md", "ARCHITECTURE.md"].includes(target)) return true;
+  if (target.startsWith(".agents/skills/") || target.startsWith("docs/")) return true;
+  const extensions = project.extensions ?? {};
+  const extensionPaths = [extensions.projectChecks, extensions.generatedImplementation]
+    .filter((value) => typeof value === "string" && value.trim())
+    .map((value) => slash(path.normalize(value)));
+  return extensionPaths.includes(target);
+}
+
 function targetFingerprint(root, inspect, paths) {
   const state = paths.map((rel) => {
     const file = path.join(root, rel);
@@ -169,14 +179,21 @@ export function createProposal(targetRoot, options = {}) {
   const modules = selectedModules(inspect, options.modules ?? "auto");
   const sources = sourceMap(inspect, selectedAdapters, modules);
   const previous = managedState(inspect.targetRoot);
-  const projectAssets = new Set(["AGENTS.md", "ARCHITECTURE.md"]);
+  const currentProjectFile = path.join(inspect.targetRoot, ".harness", "project.json");
+  const currentProject = existsSync(currentProjectFile) ? readJson(currentProjectFile) : {};
   const writeSet = [];
   for (const [target, source] of sources) {
     const targetFile = path.join(inspect.targetRoot, target);
     const existing = existsSync(targetFile);
     const previousHash = previous.files?.[target]?.hash;
     const currentHash = existing && statSync(targetFile).isFile() ? fileHash(targetFile) : null;
-    let action = !existing ? "create" : previousHash && currentHash === previousHash ? "update-managed" : projectAssets.has(target) ? "preserve-project" : "conflict";
+    let action = !existing
+      ? "create"
+      : previousHash && currentHash === previousHash
+        ? "update-managed"
+        : isProjectOwnedPath(target, currentProject)
+          ? "preserve-project"
+          : "conflict";
     if (existing && currentHash === fileHash(source)) action = "unchanged";
     writeSet.push({ path: target, action, sourceHash: fileHash(source), currentHash });
   }
@@ -204,9 +221,10 @@ export function createProposal(targetRoot, options = {}) {
   const projectPreviousHash = previous.files?.[".harness/project.json"]?.hash;
   writeSet.push({
     path: ".harness/project.json",
-    action: !projectCurrentHash ? "generate-config" : projectPreviousHash === projectCurrentHash ? "update-config" : "conflict",
+    action: !projectCurrentHash ? "generate-config" : "update-config",
     currentHash: projectCurrentHash,
-    previousHash: projectPreviousHash ?? null
+    previousHash: projectPreviousHash ?? null,
+    projectModified: Boolean(projectPreviousHash && projectPreviousHash !== projectCurrentHash)
   });
   writeSet.push({ path: ".harness/managed.json", action: existsSync(path.join(inspect.targetRoot, ".harness", "managed.json")) ? "update-manifest" : "generate-manifest" });
   const trackedPaths = writeSet.map((item) => item.path).sort();
@@ -311,18 +329,28 @@ export function applyProposal(proposalFile) {
     else throw new Error(`No source for planned file: ${item.path}`);
     files[item.path] = { hash: fileHash(target), source: "lumine-harness" };
   }
+  const projectFile = path.join(root, ".harness", "project.json");
+  const existingProject = existsSync(projectFile) ? readJson(projectFile) : {};
   const project = {
-    schemaVersion: 1,
+    ...existingProject,
+    schemaVersion: Math.max(Number(existingProject.schemaVersion ?? 1), 1),
     topology: proposal.inspect.topology,
     childRepositories: proposal.inspect.childRepositories,
     modules: proposal.modules,
     selectedAdapters: proposal.selectedAdapters,
-    generatedTargets: ["workspace-index", "repo-doc-index"],
-    extensions: {}
+    generatedTargets: Array.isArray(existingProject.generatedTargets)
+      ? existingProject.generatedTargets
+      : ["workspace-index", "repo-doc-index"],
+    autonomy: {
+      maxContinuationChain: 20,
+      noProgressThreshold: 2,
+      ...(existingProject.autonomy ?? {})
+    },
+    extensions: existingProject.extensions ?? {}
   };
   mkdirSync(path.join(root, ".harness"), { recursive: true });
-  writeFileSync(path.join(root, ".harness", "project.json"), `${JSON.stringify(project, null, 2)}\n`, "utf8");
-  files[".harness/project.json"] = { hash: fileHash(path.join(root, ".harness", "project.json")), source: "project-config" };
+  writeFileSync(projectFile, `${JSON.stringify(project, null, 2)}\n`, "utf8");
+  files[".harness/project.json"] = { hash: fileHash(projectFile), source: "project-config" };
   const revision = git(SKILL_ROOT, ["rev-parse", "HEAD"]) || null;
   const sourceDirty = Boolean(git(SKILL_ROOT, ["status", "--porcelain=v1", "-uall"]));
   const installedVersion = readJson(path.join(SKILL_ROOT, "assets", "harness", "root.json")).distributionVersion ?? "unversioned";

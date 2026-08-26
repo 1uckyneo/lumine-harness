@@ -1,126 +1,155 @@
-# Adapter Compatibility
+# What Works in Each Agent
 
-This page documents the protocol boundary between Lumine Harness and Agent products. Product behavior changes by version, so repository readiness, real-host execution, capability maturity, and failure behavior are separate claims.
+Lumine Harness lets multiple Agent products share one `AGENTS.md`, one `.agents/skills` directory, the same engineering documents, and the same Harness Core. Products still differ in how they load those assets, execute Hooks, and start another turn automatically.
 
-## Four independent dimensions
+Keep one boundary in mind: **creating the integration files does not prove that the current Agent has used them.** The result depends on the product, its version, and behavior observed in a real session.
 
-### Static readiness
+## Five questions to answer first
 
-- `not-selected`: the project did not select this Adapter;
-- `needs-setup`: the repository entry exists, but product settings, installation, or authorization are still required;
-- `repository-ready`: repository configuration and manual setup are ready.
+### Can my Agent use Lumine Harness?
 
-`adapter doctor` checks only this layer. Configuration presence does not prove product execution.
+The canonical package provides integrations for Codex, Qoder, Trae, Kimi Code, Cursor, OpenCode, ZCode, CodeBuddy, and DeepSeek Harness. Some products read shared project assets directly, some need an Adapter to route to the real files, and some require one-time installation or settings.
 
-### Runtime evidence
+“An integration is available” describes repository implementation. It is not a claim that every version of the product has passed a real-session check.
 
-- `runtime-pending`: the named product and version have not completed a real event challenge;
-- `host-verified`: product, version, date, and complete event evidence have been recorded.
+### What can be automatic?
 
-Repository unit tests cannot promote `runtime-pending` to `host-verified`.
+Separate two capabilities:
 
-### Capability maturity
+- **Core workflow** means the Agent can read project instructions, Skills, and workflow documents and move through Draft, optional Design, Product Spec, Exec Plan, implementation, and Validation.
+- **Automatic continuation** means the host can start another turn when the Agent is about to stop but a clear and safe next step remains.
 
-- `full`: the Adapter design covers the intended lifecycle capabilities;
-- `partial`: the product lacks some lifecycle capability, so some gates are degraded;
-- `developer-preview`: the protocol or dependency is unstable and is not a production compatibility promise.
+A product can support the core workflow without supporting automatic continuation. In that case Lumine Harness still preserves task state, but a person starts the next turn.
 
-### Failure mode
+### Is any setup still required?
 
-- `fail-closed`: a gate failure blocks or pauses execution;
-- `fail-open`: Hook errors or timeouts may let the product continue, so the Hook cannot be the only control for high-risk actions.
+Adoption creates the required project files first. A person is involved only when an integration needs user-level configuration, an in-product toggle, a local Plugin, or a profile extension. The connection check reports the exact next step.
 
-## Shared engineering assets
+### How do I know it actually works?
 
-Lumine Harness keeps shared assets in:
+Open a new session in the Agent you intend to use, start it from the Harness project root, and send:
 
-- root `AGENTS.md`;
-- real Skills under `.agents/skills`;
-- Draft, Product Spec, Exec Plan, Validation, and generated navigation;
-- `.harness` Core, CLI, checks, and runtime state.
-
-This means the repository maintains one shared source of truth. It does not prove that every Agent product loaded it successfully. Actual reads and lifecycle execution require evidence from the corresponding product.
-
-Adapters translate context injection, tool events, lifecycle events, and product protocols. A target project's `AGENTS.md` does not contain a product compatibility matrix or require the model to identify its host.
-
-## Skill integration modes
-
-- `native`: the product directly discovers project `.agents/skills`;
-- `native-with-toggle`: native discovery exists, but the user must enable related settings;
-- `adapter-routed`: the Adapter locates the real `SKILL.md` from an explicit Skill name or Harness phase and checks that it was read before the first mutation;
-- `unsupported`: there is no reliable discovery or read path.
-
-`adapter-routed` is not equivalent to native semantic discovery. Explicit `$skill-name` and Harness phases are deterministic; implicit discovery from general natural language remains `best-effort`.
-
-## Current capability summary
-
-| Product | Skill mode | Required setup | Runtime evidence | Maturity | Failure mode |
-| --- | --- | --- | --- | --- | --- |
-| Codex | native | repository configuration | runtime-pending | full | fail-closed |
-| Qoder | adapter-routed | repository configuration; Hooks vary by product surface and version | runtime-pending | partial | fail-closed |
-| Trae | native-with-toggle | repository configuration + manual project instructions, shared Skills, and Hooks settings | runtime-pending | partial | fail-closed |
-| Kimi Code | native | user-level configuration with separate authorization | runtime-pending | partial | fail-open |
-| Cursor | native | repository configuration + Workspace Trust | runtime-pending | partial | fail-closed |
-| OpenCode | native | repository Plugin | runtime-pending | partial; no complete Stop Gate | fail-open |
-| ZCode | adapter-routed | local Marketplace Plugin + manual installation | runtime-pending | partial | fail-closed |
-| CodeBuddy | adapter-routed | repository configuration + manual Hook review | runtime-pending | partial | fail-closed |
-| DeepSeek Harness | native | profile bundle + manual setup | runtime-pending | developer-preview | fail-open |
-
-This table describes the current canonical implementation, not completed end-to-end verification for every product. Capability Manifest and Validation evidence must record product version, verification date, event sequence, and known gaps.
-
-## Doctor and real-host verification
-
-Check the Adapters selected by the current project:
-
-```bash
-./.harness/cli adapter doctor selected
+```text
+Check whether the current Agent is connected to Lumine Harness correctly.
 ```
 
-Doctor checks only static configuration and manual steps. To claim `host-verified`, issue a one-time verification for one named product:
+The check summarizes existing evidence and lists project instructions, shared Skills, lifecycle Hooks, automatic continuation, and session isolation separately. It does not run a complete host certification automatically. Capabilities that an ordinary check cannot observe remain “not verified” or “not directly observable” instead of treating configuration presence as runtime evidence.
 
-```bash
-./.harness/cli adapter verify <product> --begin --host-version <version>
-```
+### What still requires a person?
 
-The real product session must then write current events. Ordinary `adapter verify <product>` matches the one-time challenge, product version, and complete event stream. Configuration files, old logs, or hand-written JSONL cannot become real-host evidence.
+- installing a user-level Hook, local Plugin, or profile extension for the first time;
+- enabling project instructions, shared Skills, or Hooks in product settings;
+- starting another turn when the product cannot do so automatically;
+- supplying credentials, completing external-app actions, making product decisions, and authorizing high-risk work;
+- checking capabilities the host does not expose programmatically.
 
-## What a real product must prove
+## Results you may see
 
-1. root `AGENTS.md` entered context;
-2. SessionStart or an equivalent entry event executed;
-3. an explicit Skill resolved to `.agents/skills/<name>/SKILL.md`;
-4. when a phase requires the Skill, the first mutation is blocked or reliably paused before it is read;
-5. mutation is allowed after the read;
-6. all six `WORK_STATUS` values are handled correctly;
-7. one `continue_autonomously` revision resumes at most once;
-8. two parallel sessions do not share state;
-9. event evidence proves the sequence without recording credentials, raw prompts, or customer data.
+The connection check returns a plain conclusion and the next action:
 
-## Product notes
+- **Ready to use**: the current session's basic connection was observed; advanced capabilities remain qualified by their individual evidence rows.
+- **One-time setup required**: project files are ready, but installation, authorization, or a product setting remains.
+- **Core workflow available; some automation is manual**: project context and Skills work, but the product limits features such as automatic continuation.
+- **Real-session verification not completed**: repository implementation exists, but the current product version lacks sufficient runtime evidence.
+- **Connection problem found**: observed behavior differs from the integration contract; the result names the affected capability and a repair step.
+
+## Current product summary
+
+“Available” below means Lumine Harness contains the corresponding implementation. It does not mean the product installed on the current machine has passed verification.
+
+| Agent | Core workflow | Automatic continuation | One-time setup | Current verification |
+| --- | --- | --- | --- | --- |
+| Codex | Available | Available | Usually none | Run the connection check in the current version |
+| Qoder | Explicit Skills and Harness phases can be routed | Varies by IDE, CLI, and version | Follow the connection check | Record the concrete product surface and version |
+| Trae | Available | Available | Enable project instructions, shared Skills, and project Hooks | Check after enabling settings |
+| Kimi Code | Available | Available | Authorize user-level Hook installation | Check after installation |
+| Cursor | Available | Available | Trust the project only if Cursor marks it restricted | Run the connection check in the current version |
+| OpenCode | Available | Manual continuation required | Uses a project Plugin and cannot intercept before a turn ends | Core workflow can be checked; automatic continuation is unavailable |
+| ZCode | Explicit Skills and Harness phases can be routed | Available, with a host limit of 3 consecutive continuations | Install a local Marketplace Plugin | Check after installation |
+| CodeBuddy | Explicit Skills and Harness phases can be routed | Available | Review Hook changes in `/hooks` | Check after review |
+| DeepSeek Harness | Preview support | Limited | Install a profile extension | Developer preview |
+
+## First-use notes by product
+
+### Codex
+
+- **Available behavior**: the integration uses root `AGENTS.md`, shared `.agents/skills`, and project lifecycle configuration.
+- **First-time setup**: normally none beyond starting a new session from the correct Harness root.
+- **Still manual**: credentials, external-app actions, high-risk authorization, and product decisions.
+- **How to check**: run the connection check and require real results for project instructions, a Skill, and lifecycle events.
+- **If it fails**: confirm the session started at the Harness root, then inspect the repository Codex Hook configuration.
 
 ### Qoder
 
-Hook events may differ across Qoder IDE, CLI, and other product surfaces and versions. Adoption must record the concrete surface and version rather than treating Qoder as one permanent protocol.
+- **Available behavior**: explicit Skill names and Harness phases can be routed to shared `.agents/skills`.
+- **First-time setup**: record whether you use Qoder IDE, CLI, or another surface because events may differ by surface and version.
+- **Still manual**: implicit discovery of every project Skill from general language is best effort; use an explicit Skill or phase for critical work.
+- **How to check**: verify in the actual product that the intended `SKILL.md` was read before the first mutation.
+- **If it fails**: retry with an explicit Skill name, then inspect the events exposed by that product version.
+
+### Trae
+
+- **Available behavior**: the integration reuses root `AGENTS.md`, shared `.agents/skills`, and project Hooks.
+- **First-time setup**: enable project instructions, shared Skills, and project Hooks in Trae.
+- **Still manual**: repository files cannot confirm these product settings for you.
+- **How to check**: restart the session after enabling settings, then run the connection check.
+- **If it fails**: confirm Trae opened the complete Harness root rather than one child repository.
 
 ### Kimi Code
 
-Project Skills use `.agents/skills`; user-level Hook installation requires separate authorization. Hook errors and timeouts are fail-open, so Hooks cannot be the only control for high-risk actions.
+- **Available behavior**: project instructions and shared Skills remain in the project; lifecycle events use user-level Hooks.
+- **First-time setup**: separately authorize installation of the Kimi Code user-level Hooks, then reload Kimi Code.
+- **Still manual**: Hook errors or timeouts may allow execution to continue, so high-risk work cannot depend on Hooks alone.
+- **How to check**: start a new session after installation and run the connection check.
+- **If it fails**: inspect the managed Hooks in the user configuration and confirm the session started at the Harness root.
+
+### Cursor
+
+- **Available behavior**: the integration uses root project instructions, shared Skills, and Cursor project Hooks.
+- **First-time setup**: normally none. If Cursor marks the project restricted, follow its prompt to trust the project.
+- **Still manual**: project Hooks may not execute while the project is restricted.
+- **How to check**: run the connection check in the current Cursor version.
+- **If it fails**: check the project's restricted state, then confirm the Hook loaded from the complete Harness root.
 
 ### OpenCode
 
-Project Skills can use `.agents/skills`. There is no equivalent complete Stop Gate, so post-completion events support audit but cannot pretend to provide pre-stop blocking and automatic continuation.
+- **Available behavior**: project instructions, shared Skills, context supplementation, and runtime audit can be integrated.
+- **First-time setup**: adoption generates a project Plugin that must run on a supported OpenCode version.
+- **Still manual**: there is no complete pre-stop gate, so a person starts the next turn when work should continue.
+- **How to check**: inspect project context, Skills, and audit events; the result should explicitly show that automatic continuation is unavailable.
+- **If it fails**: compare the OpenCode version with the supported project Plugin range.
 
-### ZCode and CodeBuddy
+### ZCode
 
-They do not store complete Skill copies. Their Adapters locate shared Skills on demand. Keep them `runtime-pending` until real Hook and Skill-read evidence exists.
+- **Available behavior**: the Adapter routes explicit Skills and Harness phases to shared `.agents/skills`.
+- **First-time setup**: add the local Marketplace in ZCode, install and enable the Lumine Harness Adapter Plugin, then start a new session.
+- **Still manual**: ZCode does not execute project-level Hook files directly, and the host allows at most 3 consecutive automatic continuations.
+- **How to check**: after installing the Plugin, verify both Hook execution and Skill reads in a real session.
+- **If it fails**: check whether the Plugin is enabled; do not use project Hook file presence as proof.
+
+### CodeBuddy
+
+- **Available behavior**: the Adapter routes explicit Skills and Harness phases to shared `.agents/skills`.
+- **First-time setup**: after project Hook configuration is added or changed, review it in CodeBuddy's `/hooks` view.
+- **Still manual**: implicit discovery of every Skill from general language is best effort; critical work should use explicit entry points.
+- **How to check**: start a new session after reviewing Hooks, then run the connection check.
+- **If it fails**: confirm that CodeBuddy project memory references root `AGENTS.md` and that Hook changes were reviewed.
 
 ### DeepSeek Harness
 
-The profile bundle and lifecycle bridge remain a developer preview. Locked dependency versions and repository tests do not replace SessionStart, status, and Stop validation in a real DSH session.
+- **Available behavior**: the current integration uses a local profile extension for project instructions, shared Skills, and part of the lifecycle.
+- **First-time setup**: separately authorize profile installation and start DeepSeek Harness from the Harness root.
+- **Still manual**: the bridge remains incomplete and must not be the only gate for high-risk actions.
+- **How to check**: record the concrete version and run the connection check.
+- **If it fails**: verify host and extension versions and treat the integration as preview rather than claiming full compatibility.
 
-## Maintenance rules
+## If the connection check cannot identify the Agent
 
-- When a product protocol changes, update Capability Manifest, tests, this page, and Validation evidence;
-- do not promote `runtime-pending` to `host-verified` without real evidence;
-- do not copy product compatibility details into a target project's `AGENTS.md`;
-- product directories contain only the smallest protocol entry points, never shared workflow or Skill bodies.
+Lumine Harness does not ask the model to guess which product hosts it. The current product comes from real Adapter session state. If it cannot be identified:
+
+1. run the check inside the Agent you intend to use;
+2. start a new session from the directory containing `.harness/root.json`;
+3. finish that product's one-time setup;
+4. run the connection check again.
+
+For internal capability states, diagnostic commands, and runtime evidence, read [Advanced Adapter Verification](adapter-verification.md).

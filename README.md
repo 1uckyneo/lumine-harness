@@ -85,7 +85,7 @@ At this point the Agent only inspects the project and proposes a migration. It w
 ## What happens next
 
 ```text
-Inspect → propose a migration → write after approval → verify the adoption
+Inspect → propose a migration → write after approval → check the adoption
 ```
 
 1. **Inspect**
@@ -97,7 +97,7 @@ Inspect → propose a migration → write after approval → verify the adoption
 3. **Adopt after approval**
    Create engineering maps, project phase Skills, workflow records, Harness Core, and selected Adapters. Design, browser, database, and other modules are enabled only when the project needs them.
 
-4. **Verify**
+4. **Check the adoption**
    Refresh engineering navigation, run Harness Check, and report Agent-product settings that still require a person.
 
 If an unmanaged existing file conflicts with the proposal, adoption stops and reports the conflict instead of overwriting it silently. Resolve the conflict, then generate and approve a new proposal.
@@ -234,15 +234,15 @@ The Agent and tools consume complete source, generated navigation, detailed plan
 
 Lumine Harness keeps shared engineering assets in `AGENTS.md`, `.agents/skills`, Docs, and `.harness` instead of copying the workflow for every product.
 
-Codex, Qoder, Trae, Kimi Code, Cursor, OpenCode, ZCode, CodeBuddy, and DeepSeek Harness differ in how they load project instructions, Skills, and lifecycle Hooks. Shared files existing on disk does not prove that a product loaded and executed them.
+Agent products differ in how they load project instructions and Skills and how they execute lifecycle Hooks. Creating the integration files does not prove that the current Agent has actually used them.
 
-After adoption, run:
+After adoption, the Agent checks which product settings are still missing. You can repeat that check at any time by saying:
 
-```bash
-./.harness/cli adapter doctor selected
+```text
+Check whether the current Agent is connected to Lumine Harness correctly.
 ```
 
-Doctor reports product-side settings still required by the selected Adapters. See [Adapter Compatibility](docs/adapter-compatibility.md) for integration modes, limitations, maturity, and real-host verification state.
+The check summarizes the evidence already available: what is prepared in the repository, what was observed in a real session, what still needs setup, and what still needs verification. It does not turn an unobserved capability into a compatibility claim merely because the check was requested. See [What works in each Agent](docs/adapter-compatibility.md) for product-specific details.
 
 ## Safety boundaries
 
@@ -264,10 +264,9 @@ The commands, troubleshooting notes, and alternate installation methods below ar
 ```bash
 ./.harness/cli check all
 ./.harness/cli generated refresh all
-./.harness/cli adapter doctor selected
 ```
 
-Run `./.harness/cli` to see the Skill Catalog, Adapter Verify, and other advanced commands. The real-host verification procedure lives in Adapter Compatibility.
+An ordinary connection check, configuration diagnosis, and real-host verification answer different questions. See [What works in each Agent](docs/adapter-compatibility.md) for troubleshooting. Maintainers who need to record runtime evidence should use [Advanced Adapter Verification](docs/adapter-verification.md).
 
 ### Troubleshooting
 
@@ -281,7 +280,7 @@ Restart it from the common project root that contains every related repository.
 No. Inspection reports overlapping unmanaged files as conflicts. Adoption does not continue until the conflict is resolved and a new proposal is approved.
 
 **A Hook file exists but does not run**
-Run `adapter doctor <product>`, then inspect product settings and runtime evidence. Configuration presence is not runtime verification.
+Ask the Agent to check whether it is connected to Lumine Harness correctly. If the result is still inconclusive, follow the one-time setup for that product in the compatibility guide. A configuration file existing on disk does not prove that its Hook executed.
 
 **generated says `Review status: pending`**
 Only deterministic scanning is complete. The Agent still needs to sample the referenced source and update review metadata.

@@ -44,21 +44,41 @@ function sha256(source) {
   return createHash("sha256").update(source).digest("hex");
 }
 
-export function discoverSharedSkills(root) {
+export function inspectSharedSkillCatalog(root) {
   const base = path.join(root, ".agents", "skills");
-  const skills = walkSkillFiles(base).map((file) => {
-    const source = readFileSync(file, "utf8");
+  const candidates = [];
+  const diagnostics = [];
+  for (const file of walkSkillFiles(base).sort()) {
     const relativeSource = path.relative(root, file).replaceAll(path.sep, "/");
-    const fallbackName = path.basename(path.dirname(file));
-    const name = frontmatterField(source, "name") || fallbackName;
-    const description = frontmatterField(source, "description");
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) throw new Error(`Shared Skill has an invalid name: ${relativeSource} (${name})`);
-    if (!description) throw new Error(`Shared Skill is missing frontmatter description: ${relativeSource}`);
-    return { name, description, file, relativeSource, hash: sha256(source) };
-  }).sort((left, right) => left.name.localeCompare(right.name));
-  const duplicates = skills.filter((skill, index) => skills.findIndex((candidate) => candidate.name === skill.name) !== index);
-  if (duplicates.length) throw new Error(`Duplicate shared Skill names: ${[...new Set(duplicates.map((item) => item.name))].join(", ")}`);
-  return skills;
+    try {
+      const source = readFileSync(file, "utf8");
+      const fallbackName = path.basename(path.dirname(file));
+      const name = frontmatterField(source, "name") || fallbackName;
+      const description = frontmatterField(source, "description");
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) throw new Error(`invalid name: ${name}`);
+      if (!description) throw new Error("missing frontmatter description");
+      candidates.push({ name, description, file, relativeSource, hash: sha256(source) });
+    } catch (error) {
+      diagnostics.push({ file: relativeSource, code: "invalid-skill", message: error.message });
+    }
+  }
+  const counts = new Map();
+  for (const skill of candidates) counts.set(skill.name, Number(counts.get(skill.name) ?? 0) + 1);
+  const duplicateNames = [...counts].filter(([, count]) => count > 1).map(([name]) => name);
+  for (const name of duplicateNames) {
+    diagnostics.push({
+      file: candidates.filter((skill) => skill.name === name).map((skill) => skill.relativeSource).join(", "),
+      code: "duplicate-skill-name",
+      message: `duplicate shared Skill name: ${name}`
+    });
+  }
+  const skills = candidates.filter((skill) => !duplicateNames.includes(skill.name))
+    .sort((left, right) => left.name.localeCompare(right.name));
+  return { skills, diagnostics };
+}
+
+export function discoverSharedSkills(root) {
+  return inspectSharedSkillCatalog(root).skills;
 }
 
 export function getSharedSkill(root, name) {

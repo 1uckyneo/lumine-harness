@@ -16,6 +16,7 @@ const REQUIRED_FILES = [
   ".harness/adapter-manager.mjs",
   ".harness/adapter-cli.mjs",
   ".harness/core/contracts.d.ts",
+  ".harness/core/continuation-delivery.mjs",
   ".harness/core/phase-router.mjs",
   ".harness/core/root-resolver.mjs",
   ".harness/core/session-context.mjs",
@@ -72,6 +73,9 @@ const WORK_STATUS_DOCS = [
   ["blocked_external", "外部阻塞"]
 ];
 const ADAPTER_PRODUCTS = ["codex", "qoder", "trae", "kimi", "cursor", "opencode", "zcode", "codebuddy", "deepseek-harness"];
+const ADAPTER_CAPABILITIES = ["project_instructions", "session_context", "skill_discovery", "skill_read", "pre_mutation_gate", "stop_gate", "automatic_continuation", "work_status_matrix", "session_isolation"];
+const CAPABILITY_RESULTS = new Set(["passed", "needs_setup", "not_tested", "not_observable", "not_applicable", "failed"]);
+const EVIDENCE_LEVELS = new Set(["official_declared", "repository_checked", "runtime_observed", "behavior_verified"]);
 const FORBIDDEN_PRODUCT_SOURCES = [
   ".trae/skills",
   ".kimi-code/skills",
@@ -337,11 +341,27 @@ function checkAdapters() {
   for (const product of ADAPTER_PRODUCTS) {
     if (!manifest.products?.[product]) fail(`capability manifest missing ${product}`, "Declare every supported, partial, or unsupported product explicitly.");
   }
-  if (manifest.products?.opencode?.stopGate !== "unsupported") {
-    fail("OpenCode stopGate must remain unsupported", "Do not treat session.idle as a pre-stop continuation gate.");
+  if (manifest.schemaVersion !== 3) {
+    fail("capability manifest must use schemaVersion 3", "Declare setup, Skill mode, continuation transport, and evidence per capability.");
   }
-  if (manifest.schemaVersion !== 2) {
-    fail("capability manifest must use schemaVersion 2", "Declare implementation, setup, skills.mode, runtimeVerification, maturity, and failMode independently.");
+  for (const product of ADAPTER_PRODUCTS) {
+    const item = manifest.products?.[product];
+    if (!item) continue;
+    for (const field of ["implementation", "setup", "skills", "continuation", "capabilities", "maturity", "failMode"]) {
+      if (!(field in item)) fail(`${product} capability manifest missing ${field}`, "Keep the schema v3 capability contract complete.");
+    }
+    for (const capability of ADAPTER_CAPABILITIES) {
+      const result = item.capabilities?.[capability];
+      if (!result || !CAPABILITY_RESULTS.has(result.result) || !EVIDENCE_LEVELS.has(result.evidenceLevel)) {
+        fail(`${product} has invalid ${capability} capability evidence`, "Use a supported result and evidenceLevel for every capability.");
+      }
+    }
+    for (const legacy of ["runtimeVerification", "hostVersion", "verifiedAt", "evidence", "stopGate", "sessionStart"]) {
+      if (legacy in item) fail(`${product} still contains legacy field ${legacy}`, "Record runtime evidence per capability instead of one overall compatibility claim.");
+    }
+  }
+  if (manifest.products?.opencode?.capabilities?.stop_gate?.result !== "not_applicable" || manifest.products?.opencode?.continuation?.delivery !== "manual_required") {
+    fail("OpenCode must remain manual at the continuation boundary", "Do not treat session.idle as a pre-stop continuation gate.");
   }
   if (manifest.products?.zcode?.setup !== "local-marketplace+manual") {
     fail("ZCode must use a local Marketplace Plugin", "Project-level ZCode Hooks are ignored; keep the Hook-only local Marketplace install contract.");
@@ -349,7 +369,10 @@ function checkAdapters() {
   if (manifest.products?.codebuddy?.skills?.mode !== "adapter-routed") {
     fail("CodeBuddy must use adapter-routed shared Skills", "Keep .agents/skills as the only physical Skill source and route explicit or phase Skills through the Adapter.");
   }
-  if (manifest.products?.["deepseek-harness"]?.verifiedBridgeVersion !== "0.1.0-rc.7") {
+  if (manifest.products?.zcode?.continuation?.maxConsecutive !== 3) {
+    fail("ZCode continuation limit drifted", "Keep the host-specific consecutive continuation limit at 3.");
+  }
+  if (manifest.products?.["deepseek-harness"]?.repositoryTestedBridgeVersion !== "0.1.0-rc.7") {
     fail("DeepSeek Harness bridge version drifted", "Keep host and @deepseek-ai/dsh-hooks-codex on the verified 0.1.0-rc.7 contract until a newer pair is revalidated.");
   }
 

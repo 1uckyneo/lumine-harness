@@ -88,17 +88,12 @@ Design 只在模块启用且任务需要设计确认时使用：
 
 ## Adapter Capability
 
-产品协议不写入目标 `AGENTS.md`。Capability Manifest 分别记录：
+产品协议不写入目标 `AGENTS.md`。Capability Manifest 对项目指令、会话上下文、Skill 发现与读取、写前门禁、停止门禁、自动续跑、状态矩阵和会话隔离分别记录结果与证据等级。
 
-- implementation；
-- setup；
-- skills mode；
-- runtime verification；
-- maturity；
-- fail mode；
-- host version、verified date 和 evidence。
+- 结果：`passed | needs_setup | not_tested | not_observable | not_applicable | failed`。
+- 证据等级：`official_declared | repository_checked | runtime_observed | behavior_verified`。
 
-`doctor` 只判断静态配置和人工步骤，`verify` 必须验证当前运行证据。没有真实宿主证据时保持 `runtime-pending`；OpenCode 等缺少完整 Stop Gate 的宿主保持 `partial`；DeepSeek Harness 等不稳定协议保持 `developer-preview`。
+`doctor` 只判断静态配置、安装和人工步骤；`verify` 观察真实会话事件，但自动事件聚合最高只能得到 `runtime_observed`。`behavior_verified` 必须来自维护者对真实产品、版本和探针结果的复核。OpenCode 缺少完整 Stop Gate 时只把自动续跑标为不可用，不把整个产品显示为不兼容；DeepSeek Harness 等不稳定协议继续清楚标记为试用支持。
 
 ## Status
 
@@ -112,6 +107,8 @@ Design 只在模块启用且任务需要设计确认时使用：
 - `WORK_STATUS: blocked_external`
 
 状态只表达任务事实。宿主需要的命令由 Adapter 动态注入，不写入目标 `AGENTS.md`。
+
+`continue_autonomously` 与宿主传输分离：每个新的状态发射可以请求一次续跑，同一助手响应或 Hook 重试不能重复请求。新用户输入重置连续自治链；默认上限为 20，连续两轮可观测无进展时暂停，宿主更低限制优先。
 
 ## Validation
 

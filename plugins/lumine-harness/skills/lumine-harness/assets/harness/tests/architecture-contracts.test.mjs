@@ -69,13 +69,21 @@ test("product adapters never contain physical Skill projections", () => {
 
 test("capability manifest separates implementation, setup, runtime evidence, and maturity", () => {
   const manifest = JSON.parse(readFileSync(path.join(HARNESS_DIR, "adapter-capabilities.json"), "utf8"));
-  assert.equal(manifest.schemaVersion, 2);
+  assert.equal(manifest.schemaVersion, 3);
   assert.equal(manifest.skillSource, ".agents/skills");
   for (const [product, capability] of Object.entries(manifest.products)) {
-    for (const field of ["implementation", "setup", "runtimeVerification", "maturity", "failMode", "hostVersion", "verifiedAt", "evidence"]) {
+    for (const field of ["implementation", "setup", "skills", "capabilities", "continuation", "maturity", "failMode"]) {
       assert.equal(Object.hasOwn(capability, field), true, `${product}.${field}`);
     }
+    for (const removed of ["runtimeVerification", "hostVerified", "hostVersion", "verifiedAt", "evidence"]) {
+      assert.equal(Object.hasOwn(capability, removed), false, `${product}.${removed}`);
+    }
     assert.match(capability.skills?.mode ?? "", /^(?:native|native-with-toggle|adapter-routed)$/);
+    assert.match(capability.continuation?.delivery ?? "", /^(?:automatic|manual_required|unsupported)$/);
+    for (const result of Object.values(capability.capabilities ?? {})) {
+      assert.match(result.result, /^(?:passed|needs_setup|not_tested|not_observable|not_applicable|failed)$/);
+      assert.match(result.evidenceLevel, /^(?:official_declared|repository_checked|runtime_observed|behavior_verified)$/);
+    }
   }
   for (const product of ["qoder", "zcode", "codebuddy"]) {
     assert.equal(manifest.products[product].skills.mode, "adapter-routed");
@@ -141,7 +149,9 @@ test("parallel sessions keep independent state and continuation is consumed per 
     recordWorkStatus(root, beta, "needs_user_decision");
     assert.equal(first.workStatusRevision, 1);
     assert.equal(evaluateStopPolicy(alpha, { root }).action, "continue");
-    assert.equal(evaluateStopPolicy(alpha, { root }).action, "pause");
+    const repeated = evaluateStopPolicy(alpha, { root });
+    assert.equal(repeated.action, "continue");
+    assert.equal(repeated.shouldDeliver, false);
     assert.equal(evaluateStopPolicy(beta, { root }).action, "pause");
     assert.equal(readSessionState(root, beta.product, beta.sessionId).continuationConsumedRevision, null);
 
@@ -170,7 +180,7 @@ test("work-status CLI never guesses the active host", async () => {
   }
 });
 
-test("runtime verification requires an issued challenge, one fresh complete event stream, and a canonical Skill read", async () => {
+test("runtime probes are opt-in, redact local identity, and report evidence per capability", async () => {
   const { appendVerificationEvent, beginVerificationRun, verifyRuntimeEvidence } = await import("../core/verification.mjs");
   const root = tempHarness();
   const skill = {
@@ -180,59 +190,82 @@ test("runtime verification requires an issued challenge, one fresh complete even
   };
   try {
     const incomplete = { product: "codebuddy", sessionId: "incomplete", cwd: root };
-    appendVerificationEvent(root, { ...incomplete, event: "session_start" }, { raw: { verification_run_id: "incomplete" } });
-    assert.equal(verifyRuntimeEvidence(root, "codebuddy", { verificationRunId: "incomplete" }).status, "failed");
-    assert.equal(verifyRuntimeEvidence(root, "codebuddy").status, "runtime_pending");
-
-    beginVerificationRun(root, "codebuddy", { verificationRunId: "issued-incomplete", hostVersion: "test-host-1" });
-    appendVerificationEvent(root, { ...incomplete, event: "session_start" }, { raw: { verification_run_id: "issued-incomplete" } });
-    assert.equal(verifyRuntimeEvidence(root, "codebuddy", { verificationRunId: "issued-incomplete" }).status, "failed");
-
-    const mixedRun = "mixed-sessions";
-    appendVerificationEvent(root, { product: "codebuddy", sessionId: "one", cwd: root, event: "session_start" }, { raw: { verification_run_id: mixedRun } });
-    appendVerificationEvent(root, { product: "codebuddy", sessionId: "two", cwd: root, event: "stop" }, { raw: { verification_run_id: mixedRun } });
-    assert.equal(verifyRuntimeEvidence(root, "codebuddy", { verificationRunId: mixedRun }).status, "failed");
+    assert.equal(appendVerificationEvent(root, { ...incomplete, event: "session_start" }), null);
+    assert.equal(existsSync(path.join(root, ".harness", "runtime", "probes")), false);
+    assert.equal(verifyRuntimeEvidence(root, "codebuddy").status, "not_tested");
 
     beginVerificationRun(root, "codebuddy", { verificationRunId: "verified", hostVersion: "test-host-1" });
     const verified = { product: "codebuddy", sessionId: "verified", cwd: root };
-    for (const event of ["session_start", "prompt_submit", "tool_before"]) {
-      appendVerificationEvent(root, { ...verified, event }, { raw: { verification_run_id: "verified" } });
-    }
-    appendVerificationEvent(root, { ...verified, event: "tool_after" }, { raw: { verification_run_id: "verified" }, skill });
+    appendVerificationEvent(root, { ...verified, event: "session_start" }, { observations: ["project_instructions"] });
+    appendVerificationEvent(root, { ...verified, event: "prompt_submit" });
+    appendVerificationEvent(root, { ...verified, event: "tool_before" }, { observations: ["pre_mutation_gate"] });
+    appendVerificationEvent(root, { ...verified, event: "tool_after" }, { skill });
     appendVerificationEvent(root, { ...verified, event: "stop" }, {
-      raw: { verification_run_id: "verified" },
-      decision: { action: "allow", workStatus: "done", workStatusRevision: 1 }
+      decision: { action: "continue", disposition: "request_continuation", workStatus: "continue_autonomously", workStatusRevision: 1, continuationRequestId: "request-1", shouldDeliver: true }
     });
+    appendVerificationEvent(root, { ...verified, event: "assistant_response" });
     const result = verifyRuntimeEvidence(root, "codebuddy", { verificationRunId: "verified" });
-    assert.equal(result.status, "host_verified");
-    assert.equal(result.sessionId, "verified");
+    assert.equal(result.status, "runtime_observed");
     assert.equal(result.hostVersion, "test-host-1");
-    const stopEvent = readFileSync(path.join(root, ".harness", "runtime", "verification", "verified", "events.jsonl"), "utf8")
-      .trim().split(/\r?\n/).map((line) => JSON.parse(line)).find((event) => event.event === "stop");
+    assert.equal(result.hostVersionSource, "user_reported");
+    assert.equal(result.capabilities.project_instructions.result, "passed");
+    assert.equal(result.capabilities.skill_read.evidenceLevel, "runtime_observed");
+    assert.equal(result.capabilities.automatic_continuation.result, "passed");
+    assert.equal(result.capabilities.work_status_matrix.result, "not_tested");
+    assert.equal(JSON.stringify(result).includes("host_verified"), false);
+    assert.equal(JSON.stringify(result).includes("behavior_verified"), false);
+    const eventsFile = path.join(root, ".harness", "runtime", "probes", "verified", "events.jsonl");
+    const eventsSource = readFileSync(eventsFile, "utf8");
+    assert.equal(eventsSource.includes(path.resolve(root)), false);
+    const events = eventsSource.trim().split(/\r?\n/).map((line) => JSON.parse(line));
+    assert.ok(events.every((event) => !("sessionId" in event)));
+    const stopEvent = events.find((event) => event.event === "stop");
     assert.equal(stopEvent.decision.workStatusRevision, 1);
+    assert.match(stopEvent.sessionIdHash, /^[a-f0-9]{64}$/);
+    assert.equal(stopEvent.cwd, ".");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
 });
 
-test("runtime verification rejects expired, wrong-product, and outside-root evidence", async () => {
+test("runtime verification rejects evidence outside the Harness root", async () => {
   const { appendVerificationEvent, beginVerificationRun, verifyRuntimeEvidence } = await import("../core/verification.mjs");
   const root = tempHarness();
   const outside = mkdtempSync(path.join(os.tmpdir(), "lumine-evidence-outside-"));
   try {
-    beginVerificationRun(root, "codebuddy", { verificationRunId: "expired", hostVersion: "test-host-1", maxAgeMs: -1 });
-    appendVerificationEvent(root, { product: "codebuddy", sessionId: "expired", cwd: root, event: "session_start" }, { raw: { verification_run_id: "expired" } });
-    assert.equal(verifyRuntimeEvidence(root, "codebuddy", { verificationRunId: "expired" }).status, "failed");
-
-    beginVerificationRun(root, "zcode", { verificationRunId: "wrong-product", hostVersion: "test-host-1" });
-    appendVerificationEvent(root, { product: "codebuddy", sessionId: "wrong-product", cwd: root, event: "session_start" }, { raw: { verification_run_id: "wrong-product" } });
-    assert.equal(verifyRuntimeEvidence(root, "codebuddy", { verificationRunId: "wrong-product" }).status, "failed");
-
     beginVerificationRun(root, "codebuddy", { verificationRunId: "outside-root", hostVersion: "test-host-1" });
-    appendVerificationEvent(root, { product: "codebuddy", sessionId: "outside-root", cwd: outside, event: "session_start" }, { raw: { verification_run_id: "outside-root" } });
+    appendVerificationEvent(root, { product: "codebuddy", sessionId: "outside-root", cwd: outside, event: "session_start" });
     assert.equal(verifyRuntimeEvidence(root, "codebuddy", { verificationRunId: "outside-root" }).status, "failed");
   } finally {
     rmSync(root, { recursive: true, force: true });
     rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("runtime verification can observe two isolated session streams in one explicit probe", async () => {
+  const { appendVerificationEvent, beginVerificationRun, verifyRuntimeEvidence } = await import("../core/verification.mjs");
+  const root = tempHarness();
+  try {
+    beginVerificationRun(root, "codebuddy", { verificationRunId: "two-sessions", hostVersion: "test-host" });
+    for (const [sessionId, requestId] of [["session-a", "request-a"], ["session-b", "request-b"]]) {
+      const input = { product: "codebuddy", sessionId, cwd: root };
+      appendVerificationEvent(root, { ...input, event: "session_start" });
+      appendVerificationEvent(root, { ...input, event: "stop" }, {
+        decision: {
+          action: "continue",
+          disposition: "request_continuation",
+          workStatus: "continue_autonomously",
+          workStatusRevision: 1,
+          continuationRequestId: requestId,
+          shouldDeliver: true
+        }
+      });
+    }
+    const result = verifyRuntimeEvidence(root, "codebuddy", { verificationRunId: "two-sessions" });
+    assert.equal(result.status, "runtime_observed");
+    assert.equal(result.capabilities.session_isolation.result, "passed");
+    assert.equal(result.capabilities.session_isolation.evidenceLevel, "runtime_observed");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 });

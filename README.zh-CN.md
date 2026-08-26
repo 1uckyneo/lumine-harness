@@ -97,7 +97,7 @@ git clone https://gitee.com/thrulife2gether/lumine-harness.git
 3. **确认后接入（Adopt）**
    建立工程地图、项目阶段 Skills、工作流记录、Harness Core 和选中的 Adapter。设计、浏览器、数据库等模块只在项目确实需要时启用。
 
-4. **检查结果（Verify）**
+4. **检查接入结果**
    刷新工程导航，运行 Harness Check，并告诉你还有哪些 Agent 产品设置需要人工完成。
 
 如果发现未受 Lumine Harness 管理的现有文件与方案冲突，接入会停止并报告冲突，不会静默覆盖。处理冲突后需要重新生成并确认方案。
@@ -234,15 +234,15 @@ Agent 和工具会进一步读取完整源码、generated 导航、详细计划�
 
 Lumine Harness 把公共工程资产统一保存在 `AGENTS.md`、`.agents/skills`、Docs 和 `.harness` 中，不为每个产品复制一套工作流。
 
-Codex、Qoder、Trae、Kimi Code、Cursor、OpenCode、ZCode、CodeBuddy 和 DeepSeek Harness 对项目指令、Skills 和生命周期 Hooks 的支持方式不同。公共文件存在，不等于目标产品已经实际加载并执行。
+不同 Agent 读取项目指令、Skills 和执行生命周期 Hook 的方式不同。接入文件已经生成，不代表当前 Agent 已经真正使用了它们。
 
-接入完成后运行：
+接入完成后，Agent 会检查当前产品还缺少哪些设置。你也可以随时对它说：
 
-```bash
-./.harness/cli adapter doctor selected
+```text
+检查当前 Agent 与 Lumine Harness 是否正常连接。
 ```
 
-Doctor 会告诉你已选择的 Adapter 还需要哪些产品设置。各产品的接入方式、能力限制、成熟度和真实运行验证状态见 [Adapter 兼容性说明](docs/adapter-compatibility.zh-CN.md)。
+检查会汇总当前已经取得的证据，分别说明哪些能力在仓库侧已经准备好、哪些在真实会话中已经观察到、哪些仍需设置或进一步验证，并给出下一步。它不会因为一句检查指令就把尚未观察到的能力写成“已经兼容”。各 Agent 的具体差异见 [不同 Agent 能用到什么程度](docs/adapter-compatibility.zh-CN.md)。
 
 ## 安全边界
 
@@ -264,10 +264,9 @@ Doctor 会告诉你已选择的 Adapter 还需要哪些产品设置。各产品�
 ```bash
 ./.harness/cli check all
 ./.harness/cli generated refresh all
-./.harness/cli adapter doctor selected
 ```
 
-运行 `./.harness/cli` 可以查看 Skill Catalog、Adapter Verify 等高级命令；真实产品验证流程见 Adapter 兼容性说明。
+Adapter 的普通检查、配置诊断和真实产品验证不是一回事。需要排查时，请查看 [不同 Agent 能用到什么程度](docs/adapter-compatibility.zh-CN.md)；维护者需要记录真实运行证据时，再阅读 [Adapter 高级验证](docs/adapter-verification.zh-CN.md)。
 
 ### 常见问题
 
@@ -281,7 +280,7 @@ Doctor 会告诉你已选择的 Adapter 还需要哪些产品设置。各产品�
 不会静默覆盖。检查阶段会把重叠内容列为冲突；在冲突得到处理并重新确认方案前，接入不会继续。
 
 **Hook 文件存在但没有自动运行**
-先运行 `adapter doctor <product>`，再检查产品设置和运行证据。配置文件存在不是运行验证。
+对 Agent 说“检查当前 Agent 与 Lumine Harness 是否正常连接”。如果仍不能确认，再按照兼容性说明检查对应产品的一次性设置。配置文件存在，不代表 Hook 已经实际运行。
 
 **generated 显示 `Review status: pending`**
 这表示只完成了确定性扫描，还需要回到源码抽样复核并更新 review metadata。

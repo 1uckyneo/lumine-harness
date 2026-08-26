@@ -34,7 +34,7 @@ Lumine Harness 的采用与升级都必须先检查、再提案、最后按批�
 
 - `CLAUDE.md`、`.claude/skills`、`.claude/docs` 默认作为索引目标，不改写。
 - Qoder Hook 能力按具体产品形态和版本复核，不能长期硬编码“没有 SessionStart”；没有真实事件证据时保持 runtime pending。
-- Trae 的 AGENTS / `.agents/skills` / Hooks 开关与 Cursor Workspace Trust 由 Doctor 报告为人工步骤。
+- Trae 的项目指令、共享 Skills 与 Hooks 设置由 Doctor 报告；Cursor 只有在产品将项目标为受限、导致项目 Hook 不执行时，才提示用户信任当前项目。
 - OpenCode 当前只交付部分兼容；`session.idle` 只能用于结束后审计。
 - ZCode 项目级 Hook 当前不执行，不能生成 `.zcode/config.json` 冒充已安装；必须让用户在 ZCode 中安装本地 Marketplace Plugin。
 - CodeBuddy 公共 Skill 使用 Adapter 路由，不生成 `.codebuddy/skills`。产品端仍需通过 `/hooks` 审核仓库配置；若 `CODEBUDDY.md` 或 `.codebuddy/CODEBUDDY.md` 存在但没有导入根 `AGENTS.md`，Doctor 必须报错而不是假定回退生效。

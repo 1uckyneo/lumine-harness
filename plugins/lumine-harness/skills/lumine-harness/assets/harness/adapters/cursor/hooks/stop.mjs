@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { readHookInput, writeHookOutput, normalizeHookInput } from "../../../core/hook-io.mjs";
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
+import { continuationDeliveryFor } from "../../../core/continuation-delivery.mjs";
 import { readSessionState } from "../../../core/work-status.mjs";
 import { appendVerificationEvent } from "../../../core/verification.mjs";
 
@@ -27,7 +28,10 @@ try {
   input.lastAssistantMessage = state?.lastAssistantMessage || transcriptFallback(raw.transcript_path) || input.lastAssistantMessage;
   const decision = evaluateStopPolicy(input, { root });
   appendVerificationEvent(root, input, { raw, decision });
-  if (decision.action === "continue" || decision.action === "block") {
+  const delivery = continuationDeliveryFor(input.product, decision);
+  if (decision.disposition === "reject_completion" && delivery === "automatic") {
+    writeHookOutput({ followup_message: decision.message });
+  } else if (decision.disposition === "request_continuation" && decision.shouldDeliver === true && delivery === "automatic") {
     writeHookOutput({ followup_message: decision.message });
   }
 } catch (error) {

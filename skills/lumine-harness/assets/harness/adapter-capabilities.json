@@ -1,16 +1,179 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "skillSource": ".agents/skills",
   "instructionSource": "AGENTS.md",
   "products": {
-    "codex": { "implementation": "available", "setup": "repository", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "full", "failMode": "closed", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
-    "qoder": { "implementation": "available", "setup": "repository", "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "host-version-dependent", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
-    "trae": { "implementation": "available", "setup": "repository+manual", "skills": { "mode": "native-with-toggle" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
-    "kimi": { "implementation": "available", "setup": "user-config", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "open", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
-    "cursor": { "implementation": "available", "setup": "repository+trust", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
-    "opencode": { "implementation": "available", "setup": "repository", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "open", "sessionStart": "context-plugin", "stopGate": "unsupported", "hostVersion": null, "verifiedAt": null, "evidence": null },
-    "zcode": { "implementation": "available", "setup": "local-marketplace+manual", "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "plugin", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
-    "codebuddy": { "implementation": "available", "setup": "repository+manual-hook-review", "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" }, "runtimeVerification": "runtime-pending", "maturity": "partial", "failMode": "closed", "sessionStart": "supported", "stopGate": "supported", "hostVersion": null, "verifiedAt": null, "evidence": null },
-    "deepseek-harness": { "implementation": "available", "setup": "dsh-profile-bundle+manual", "skills": { "mode": "native" }, "runtimeVerification": "runtime-pending", "maturity": "developer-preview", "failMode": "open", "sessionStart": "partial", "stopGate": "partial", "hostVersion": "0.1.0-rc.7", "verifiedAt": null, "evidence": null, "verifiedBridgeVersion": "0.1.0-rc.7" }
+    "codex": {
+      "implementation": "available",
+      "setup": "repository",
+      "skills": { "mode": "native" },
+      "maturity": "full",
+      "failMode": "closed",
+      "continuation": { "delivery": "automatic", "maxConsecutive": 20 },
+      "capabilities": {
+        "project_instructions": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "session_context": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_discovery": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "skill_read": { "result": "not_observable", "evidenceLevel": "official_declared" },
+        "pre_mutation_gate": { "result": "not_applicable", "evidenceLevel": "repository_checked" },
+        "stop_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "automatic_continuation": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "work_status_matrix": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "session_isolation": { "result": "passed", "evidenceLevel": "repository_checked" }
+      }
+    },
+    "qoder": {
+      "implementation": "available",
+      "setup": "repository",
+      "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" },
+      "maturity": "partial",
+      "failMode": "closed",
+      "continuation": { "delivery": "automatic", "maxConsecutive": 20 },
+      "capabilities": {
+        "project_instructions": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "session_context": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_discovery": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_read": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "pre_mutation_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "stop_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "automatic_continuation": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "work_status_matrix": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "session_isolation": { "result": "passed", "evidenceLevel": "repository_checked" }
+      }
+    },
+    "trae": {
+      "implementation": "available",
+      "setup": "repository+manual",
+      "skills": { "mode": "native-with-toggle" },
+      "maturity": "partial",
+      "failMode": "closed",
+      "continuation": { "delivery": "automatic", "maxConsecutive": 20 },
+      "capabilities": {
+        "project_instructions": { "result": "needs_setup", "evidenceLevel": "official_declared" },
+        "session_context": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_discovery": { "result": "needs_setup", "evidenceLevel": "official_declared" },
+        "skill_read": { "result": "not_observable", "evidenceLevel": "official_declared" },
+        "pre_mutation_gate": { "result": "not_applicable", "evidenceLevel": "repository_checked" },
+        "stop_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "automatic_continuation": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "work_status_matrix": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "session_isolation": { "result": "passed", "evidenceLevel": "repository_checked" }
+      }
+    },
+    "kimi": {
+      "implementation": "available",
+      "setup": "user-config",
+      "skills": { "mode": "native" },
+      "maturity": "partial",
+      "failMode": "open",
+      "continuation": { "delivery": "automatic", "maxConsecutive": 20 },
+      "capabilities": {
+        "project_instructions": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "session_context": { "result": "needs_setup", "evidenceLevel": "repository_checked" },
+        "skill_discovery": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "skill_read": { "result": "not_observable", "evidenceLevel": "official_declared" },
+        "pre_mutation_gate": { "result": "not_applicable", "evidenceLevel": "repository_checked" },
+        "stop_gate": { "result": "needs_setup", "evidenceLevel": "repository_checked" },
+        "automatic_continuation": { "result": "needs_setup", "evidenceLevel": "repository_checked" },
+        "work_status_matrix": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "session_isolation": { "result": "passed", "evidenceLevel": "repository_checked" }
+      }
+    },
+    "cursor": {
+      "implementation": "available",
+      "setup": "repository",
+      "skills": { "mode": "native" },
+      "maturity": "partial",
+      "failMode": "open",
+      "continuation": { "delivery": "automatic", "maxConsecutive": 20 },
+      "capabilities": {
+        "project_instructions": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "session_context": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_discovery": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "skill_read": { "result": "not_observable", "evidenceLevel": "official_declared" },
+        "pre_mutation_gate": { "result": "not_applicable", "evidenceLevel": "repository_checked" },
+        "stop_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "automatic_continuation": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "work_status_matrix": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "session_isolation": { "result": "passed", "evidenceLevel": "repository_checked" }
+      }
+    },
+    "opencode": {
+      "implementation": "available",
+      "setup": "repository",
+      "skills": { "mode": "native" },
+      "maturity": "partial",
+      "failMode": "open",
+      "continuation": { "delivery": "manual_required", "maxConsecutive": 0 },
+      "capabilities": {
+        "project_instructions": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "session_context": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_discovery": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "skill_read": { "result": "not_observable", "evidenceLevel": "official_declared" },
+        "pre_mutation_gate": { "result": "not_applicable", "evidenceLevel": "repository_checked" },
+        "stop_gate": { "result": "not_applicable", "evidenceLevel": "repository_checked" },
+        "automatic_continuation": { "result": "not_applicable", "evidenceLevel": "repository_checked" },
+        "work_status_matrix": { "result": "not_observable", "evidenceLevel": "repository_checked" },
+        "session_isolation": { "result": "not_observable", "evidenceLevel": "repository_checked" }
+      }
+    },
+    "zcode": {
+      "implementation": "available",
+      "setup": "local-marketplace+manual",
+      "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" },
+      "maturity": "partial",
+      "failMode": "closed",
+      "continuation": { "delivery": "automatic", "maxConsecutive": 3 },
+      "capabilities": {
+        "project_instructions": { "result": "needs_setup", "evidenceLevel": "repository_checked" },
+        "session_context": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_discovery": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_read": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "pre_mutation_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "stop_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "automatic_continuation": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "work_status_matrix": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "session_isolation": { "result": "passed", "evidenceLevel": "repository_checked" }
+      }
+    },
+    "codebuddy": {
+      "implementation": "available",
+      "setup": "repository+manual-hook-review",
+      "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" },
+      "maturity": "partial",
+      "failMode": "closed",
+      "continuation": { "delivery": "automatic", "maxConsecutive": 20 },
+      "capabilities": {
+        "project_instructions": { "result": "needs_setup", "evidenceLevel": "repository_checked" },
+        "session_context": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_discovery": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "skill_read": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "pre_mutation_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "stop_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "automatic_continuation": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "work_status_matrix": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "session_isolation": { "result": "passed", "evidenceLevel": "repository_checked" }
+      }
+    },
+    "deepseek-harness": {
+      "implementation": "available",
+      "setup": "dsh-profile-bundle+manual",
+      "skills": { "mode": "native" },
+      "maturity": "developer-preview",
+      "failMode": "open",
+      "continuation": { "delivery": "automatic", "maxConsecutive": 20 },
+      "capabilities": {
+        "project_instructions": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "session_context": { "result": "needs_setup", "evidenceLevel": "repository_checked" },
+        "skill_discovery": { "result": "not_tested", "evidenceLevel": "official_declared" },
+        "skill_read": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "pre_mutation_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "stop_gate": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "automatic_continuation": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "work_status_matrix": { "result": "passed", "evidenceLevel": "repository_checked" },
+        "session_isolation": { "result": "passed", "evidenceLevel": "repository_checked" }
+      },
+      "repositoryTestedBridgeVersion": "0.1.0-rc.7"
+    }
   }
 }

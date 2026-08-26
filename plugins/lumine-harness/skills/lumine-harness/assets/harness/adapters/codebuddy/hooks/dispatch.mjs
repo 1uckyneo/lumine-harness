@@ -2,6 +2,7 @@ import { normalizeHookInput } from "../../../core/hook-io.mjs";
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { buildSessionStartContext } from "../../../core/session-context.mjs";
 import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
+import { continuationDeliveryFor } from "../../../core/continuation-delivery.mjs";
 import {
   isMutatingTool,
   markExpectedSkillRead,
@@ -11,7 +12,7 @@ import {
   toolReadsExpectedSkill
 } from "../../../core/phase-router.mjs";
 import { sharedSkillLoadedFromTool, sharedSkillReadFromTool } from "../../../core/skill-catalog.mjs";
-import { initializeSessionState, readSessionState, recordUsedSkill } from "../../../core/work-status.mjs";
+import { initializeSessionState, observeHarnessEvent, readSessionState, recordUsedSkill } from "../../../core/work-status.mjs";
 import { appendVerificationEvent } from "../../../core/verification.mjs";
 
 function eventFor(raw) {
@@ -44,6 +45,12 @@ export async function handleCodeBuddyHook(raw = {}) {
   const root = requireHarnessRoot(input);
   if (event === "session_start") initializeSessionState(root, input);
   else ensureSession(root, input);
+  if (event !== "stop") {
+    observeHarnessEvent(root, input, {
+      eventId: input.eventId,
+      userInitiated: event === "prompt_submit" && input.userInitiated
+    });
+  }
   appendVerificationEvent(root, input, { raw });
 
   if (event === "session_start") {
@@ -65,7 +72,12 @@ export async function handleCodeBuddyHook(raw = {}) {
   if (event === "tool_after") {
     let state = readSessionState(root, input.product, input.sessionId);
     const loadedSkill = sharedSkillLoadedFromTool(root, raw);
-    if (loadedSkill) state = requireExpectedSkillRead(root, input, state, loadedSkill);
+    if (loadedSkill) {
+      state = requireExpectedSkillRead(root, input, state, loadedSkill);
+      recordUsedSkill(root, input, loadedSkill);
+      appendVerificationEvent(root, input, { raw, skill: loadedSkill });
+      state = markExpectedSkillRead(root, input, state, loadedSkill.file);
+    }
     const sharedSkill = sharedSkillReadFromTool(root, raw);
     if (sharedSkill) {
       recordUsedSkill(root, input, sharedSkill);
@@ -82,6 +94,7 @@ export async function handleCodeBuddyHook(raw = {}) {
     const state = readSessionState(root, input.product, input.sessionId);
     const pending = pendingExpectedSkills(state);
     if (isMutatingTool(raw) && pending.length) {
+      appendVerificationEvent(root, input, { raw, observations: ["pre_mutation_gate"] });
       return {
         exitCode: 0,
         stdout: JSON.stringify({
@@ -98,7 +111,11 @@ export async function handleCodeBuddyHook(raw = {}) {
 
   const decision = evaluateStopPolicy(input, { root });
   appendVerificationEvent(root, input, { raw, decision });
-  if (decision.action === "continue" || decision.action === "block") {
+  const delivery = continuationDeliveryFor(input.product, decision);
+  if (decision.disposition === "reject_completion" && delivery === "automatic") {
+    return { exitCode: 0, stdout: JSON.stringify({ continue: false, reason: decision.message }) };
+  }
+  if (decision.disposition === "request_continuation" && decision.shouldDeliver === true && delivery === "automatic") {
     return { exitCode: 0, stdout: JSON.stringify({ continue: false, reason: decision.message }) };
   }
   return { exitCode: 0 };

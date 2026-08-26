@@ -27,7 +27,11 @@ export const HarnessPlugin = async ({ directory }) => {
     "tool.execute.after": async (input) => audit("tool.execute.after", { tool: input.tool }),
     event: async ({ event }) => {
       if (event.type === "session.idle") {
-        await audit("session.idle", { stopGate: "unsupported", action: "audit_only" });
+        await audit("session.idle", {
+          stopGate: "unsupported",
+          action: "audit_only",
+          continuationDelivery: "manual_required"
+        });
       }
     }
   };

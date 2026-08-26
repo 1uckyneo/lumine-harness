@@ -4,6 +4,10 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { decideStopHookResponse, extractWorkStatus } from "../adapters/codex/hooks/lib/stop-gate.mjs";
+import { continuationDeliveryFor } from "../core/continuation-delivery.mjs";
+import { normalizeHookInput } from "../core/hook-io.mjs";
+import { evaluateStopPolicy } from "../core/stop-policy.mjs";
+import { initializeSessionState, observeHarnessEvent, readSessionState, recordProgressObservation, recordUserTurn, setProgressObservability } from "../core/work-status.mjs";
 
 function tempHarness() {
   const root = mkdtempSync(path.join(os.tmpdir(), "harness-stop-test-"));
@@ -19,9 +23,216 @@ test("explicit WORK_STATUS drives Codex continuation and pause", () => {
     const next = decideStopHookResponse({ cwd: root, session_id: "next", stop_hook_active: false, last_assistant_message: "WORK_STATUS: continue_autonomously" });
     assert.equal(next.decision, "block");
     const pause = decideStopHookResponse({ cwd: root, session_id: "pause", last_assistant_message: "WORK_STATUS: needs_user_decision" });
-    assert.equal(pause.continue, false);
-    assert.match(pause.stopReason, /decision/i);
+    assert.equal(pause, null);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+function stopInput(root, sessionId, emissionId, extra = {}) {
+  return {
+    product: extra.product ?? "codex",
+    event: "stop",
+    sessionId,
+    cwd: root,
+    lastAssistantMessage: "WORK_STATUS: continue_autonomously",
+    statusEmissionId: emissionId,
+    ...extra
+  };
+}
+
+test("one status emission creates one logical continuation request", () => {
+  const root = tempHarness();
+  try {
+    const input = stopInput(root, "same-emission", "response-1", { stopHookActive: true, loopCount: 9 });
+    initializeSessionState(root, input);
+    const first = evaluateStopPolicy(input, { root });
+    const repeated = evaluateStopPolicy(input, { root });
+    assert.equal(first.disposition, "request_continuation");
+    assert.equal(first.shouldDeliver, true);
+    assert.equal(repeated.disposition, "request_continuation");
+    assert.equal(repeated.shouldDeliver, false);
+    assert.equal(repeated.workStatusRevision, first.workStatusRevision);
+    assert.equal(repeated.continuationRequestId, first.continuationRequestId);
+    assert.equal(readSessionState(root, "codex", "same-emission").autonomousChainCount, 1);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("one emission cannot silently change status and a new user turn invalidates old state", async () => {
+  const root = tempHarness();
+  try {
+    const input = stopInput(root, "turn-boundary", "response-1");
+    initializeSessionState(root, input);
+    evaluateStopPolicy(input, { root });
+    const { recordWorkStatus } = await import("../core/work-status.mjs");
+    assert.throws(() => recordWorkStatus(root, input, "done", { emissionId: readSessionState(root, "codex", "turn-boundary").workStatusEmissionId }), /cannot declare multiple states/);
+    recordUserTurn(root, { ...input, event: "prompt_submit", userTurnId: "next-user-turn", lastAssistantMessage: null });
+    const stale = evaluateStopPolicy({ ...input, lastAssistantMessage: null }, { root });
+    assert.equal(stale.disposition, "reject_completion");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("fallback emission identity changes only after continuation delivery", () => {
+  const root = tempHarness();
+  try {
+    const input = stopInput(root, "fallback", null);
+    initializeSessionState(root, input);
+    const first = evaluateStopPolicy(input, { root });
+    assert.equal(evaluateStopPolicy(input, { root }).shouldDeliver, false);
+    observeHarnessEvent(root, { ...input, event: "assistant_response", lastAssistantMessage: null, eventId: "next-turn" });
+    observeHarnessEvent(root, { ...input, event: "tool_after", lastAssistantMessage: null, eventId: "same-host-turn" });
+    assert.equal(readSessionState(root, "codex", "fallback").hostTurnRevision, 1);
+    const next = evaluateStopPolicy(input, { root });
+    assert.equal(next.disposition, "request_continuation");
+    assert.equal(next.shouldDeliver, true);
+    assert.notEqual(next.continuationRequestId, first.continuationRequestId);
+    assert.equal(next.workStatusRevision, first.workStatusRevision + 1);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("changing Hook invocation IDs does not create a new assistant status emission", () => {
+  const root = tempHarness();
+  try {
+    const firstInput = normalizeHookInput("codex", "stop", {
+      cwd: root,
+      session_id: "hook-retry",
+      hook_run_id: "stop-attempt-1",
+      last_assistant_message: "WORK_STATUS: continue_autonomously"
+    });
+    const retriedInput = normalizeHookInput("codex", "stop", {
+      cwd: root,
+      session_id: "hook-retry",
+      hook_run_id: "stop-attempt-2",
+      loop_count: 7,
+      last_assistant_message: "WORK_STATUS: continue_autonomously"
+    });
+    initializeSessionState(root, firstInput);
+    const first = evaluateStopPolicy(firstInput, { root });
+    const retried = evaluateStopPolicy(retriedInput, { root });
+    assert.equal(first.shouldDeliver, true);
+    assert.equal(retried.shouldDeliver, false);
+    assert.equal(retried.workStatusRevision, first.workStatusRevision);
+    assert.equal(retried.continuationRequestId, first.continuationRequestId);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("an explicitly observable new user turn resets the autonomous chain at Stop", () => {
+  const root = tempHarness();
+  try {
+    const base = stopInput(root, "stop-user-turn", "response-1", { userTurnId: "user-turn-1" });
+    initializeSessionState(root, base);
+    assert.equal(evaluateStopPolicy(base, { root }).disposition, "request_continuation");
+    observeHarnessEvent(root, { ...base, event: "assistant_response", eventId: "delivery-1", lastAssistantMessage: null });
+    assert.equal(evaluateStopPolicy({ ...base, statusEmissionId: "response-2" }, { root }).disposition, "request_continuation");
+    assert.equal(readSessionState(root, "codex", "stop-user-turn").autonomousChainCount, 2);
+
+    const afterUserInput = evaluateStopPolicy({ ...base, userTurnId: "user-turn-2", statusEmissionId: "response-3" }, { root });
+    assert.equal(afterUserInput.disposition, "request_continuation");
+    assert.equal(readSessionState(root, "codex", "stop-user-turn").autonomousChainCount, 1);
+
+    const retried = evaluateStopPolicy({ ...base, userTurnId: "user-turn-2", statusEmissionId: "response-3", loopCount: 9 }, { root });
+    assert.equal(retried.shouldDeliver, false);
+    assert.equal(readSessionState(root, "codex", "stop-user-turn").autonomousChainCount, 1);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("prompt submission infers a real user turn only when no automatic continuation is pending", () => {
+  const root = tempHarness();
+  try {
+    const prompt = normalizeHookInput("qoder", "prompt_submit", {
+      cwd: root,
+      session_id: "prompt-inference",
+      hook_run_id: "prompt-1"
+    });
+    assert.equal(prompt.userInitiated, undefined);
+    initializeSessionState(root, prompt);
+    observeHarnessEvent(root, prompt, { eventId: prompt.eventId });
+    assert.equal(readSessionState(root, "qoder", "prompt-inference").userTurnRevision, 1);
+
+    const stop = stopInput(root, "prompt-inference", "response-1", { product: "qoder" });
+    assert.equal(evaluateStopPolicy(stop, { root }).disposition, "request_continuation");
+    const automaticFollowup = normalizeHookInput("qoder", "prompt_submit", {
+      cwd: root,
+      session_id: "prompt-inference",
+      hook_run_id: "prompt-2"
+    });
+    observeHarnessEvent(root, automaticFollowup, { eventId: automaticFollowup.eventId });
+    const afterAutomaticFollowup = readSessionState(root, "qoder", "prompt-inference");
+    assert.equal(afterAutomaticFollowup.userTurnRevision, 1);
+    assert.equal(afterAutomaticFollowup.pendingContinuationRequestId, null);
+
+    const explicitUserPrompt = normalizeHookInput("qoder", "prompt_submit", {
+      cwd: root,
+      session_id: "prompt-inference",
+      hook_run_id: "prompt-3",
+      user_initiated: true
+    });
+    observeHarnessEvent(root, explicitUserPrompt, { eventId: explicitUserPrompt.eventId });
+    assert.equal(readSessionState(root, "qoder", "prompt-inference").userTurnRevision, 2);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("fresh status emissions can continue repeatedly until the configured chain limit", () => {
+  const root = tempHarness();
+  try {
+    const base = stopInput(root, "chain", "response-0");
+    initializeSessionState(root, base);
+    for (let index = 1; index <= 20; index += 1) {
+      const current = { ...base, statusEmissionId: `response-${index}`, stopHookActive: true, loopCount: index };
+      const result = evaluateStopPolicy(current, { root });
+      assert.equal(result.disposition, "request_continuation", `revision ${index}`);
+      observeHarnessEvent(root, { ...current, event: "assistant_response", eventId: `delivery-${index}`, lastAssistantMessage: null });
+    }
+    const limited = evaluateStopPolicy({ ...base, statusEmissionId: "response-21" }, { root });
+    assert.equal(limited.disposition, "pause_for_human");
+    assert.match(limited.message, /limit of 20/);
+
+    recordUserTurn(root, { ...base, event: "prompt_submit", userTurnId: "new-user-turn", lastAssistantMessage: null });
+    const reset = evaluateStopPolicy({ ...base, statusEmissionId: "response-after-user" }, { root });
+    assert.equal(reset.disposition, "request_continuation");
+    assert.equal(readSessionState(root, "codex", "chain").autonomousChainCount, 1);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("ZCode host limit overrides the generic continuation limit", () => {
+  const root = tempHarness();
+  try {
+    const base = stopInput(root, "zcode-chain", "z-0", { product: "zcode" });
+    initializeSessionState(root, base);
+    for (let index = 1; index <= 3; index += 1) {
+      const current = { ...base, statusEmissionId: `z-${index}` };
+      assert.equal(evaluateStopPolicy(current, { root }).disposition, "request_continuation");
+      observeHarnessEvent(root, { ...current, event: "tool_after", eventId: `z-delivery-${index}`, lastAssistantMessage: null });
+    }
+    assert.equal(evaluateStopPolicy({ ...base, statusEmissionId: "z-4" }, { root }).disposition, "pause_for_human");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("two observable no-progress cycles pause while a progress event resets the count", () => {
+  const root = tempHarness();
+  try {
+    const base = stopInput(root, "progress", "p-1", { product: "codebuddy" });
+    initializeSessionState(root, base);
+    setProgressObservability(root, base, true);
+    assert.equal(evaluateStopPolicy(base, { root }).disposition, "request_continuation");
+    observeHarnessEvent(root, { ...base, event: "assistant_response", eventId: "p-delivery-1", lastAssistantMessage: null });
+    assert.equal(evaluateStopPolicy({ ...base, statusEmissionId: "p-2" }, { root }).disposition, "request_continuation");
+    observeHarnessEvent(root, { ...base, event: "assistant_response", eventId: "p-delivery-2", lastAssistantMessage: null });
+    const paused = evaluateStopPolicy({ ...base, statusEmissionId: "p-3" }, { root });
+    assert.equal(paused.disposition, "pause_for_human");
+    assert.match(paused.message, /No observable progress/);
+
+    recordProgressObservation(root, { ...base, event: "tool_after", eventId: "write-complete", lastAssistantMessage: null });
+    const resumed = evaluateStopPolicy({ ...base, statusEmissionId: "p-4" }, { root });
+    assert.equal(resumed.disposition, "request_continuation");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("semantic continuation and host delivery remain separate", () => {
+  const request = { disposition: "request_continuation" };
+  const rejected = { disposition: "reject_completion" };
+  assert.equal(continuationDeliveryFor("cursor", request), "automatic");
+  assert.equal(continuationDeliveryFor("opencode", request), "manual_required");
+  assert.equal(continuationDeliveryFor("opencode", rejected), "unsupported");
+  assert.equal(continuationDeliveryFor("codex", { disposition: "pause_for_human" }), null);
 });

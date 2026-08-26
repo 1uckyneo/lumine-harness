@@ -131,8 +131,9 @@ test("adopt requires the reviewed proposal and writes project and managed manife
     const project = JSON.parse(readFileSync(path.join(root, ".harness", "project.json"), "utf8"));
     const managed = JSON.parse(readFileSync(path.join(root, ".harness", "managed.json"), "utf8"));
     assert.deepEqual(project.selectedAdapters, []);
+    assert.deepEqual(project.autonomy, { maxContinuationChain: 20, noProgressThreshold: 2 });
     assert.equal(managed.proposalId, proposal.proposalId);
-    assert.equal(managed.installedVersion, "0.2.0");
+    assert.equal(managed.installedVersion, "0.3.0");
     assert.match(managed.sourceSnapshotHash, /^[a-f0-9]{64}$/);
     assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /\/Users\/|file:\/\/\/Users\//);
     for (const relative of [".codex", ".qoder", ".trae", ".cursor", ".opencode", ".codebuddy"]) {
@@ -176,6 +177,54 @@ test("upgrade removes only unchanged managed Adapter files and backs them up", (
     assert.equal(existsSync(path.join(root, ".codex", "hooks.json")), false);
     assert.ok(result.backupDir);
     assert.equal(existsSync(path.join(result.backupDir, ".codex", "hooks.json")), true);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+    if (adoptFile) rmSync(adoptFile, { force: true });
+    if (upgradeFile) rmSync(upgradeFile, { force: true });
+  }
+});
+
+test("upgrade preserves modified project assets and project config while updating managed Core", () => {
+  const root = tempTarget();
+  let adoptFile;
+  let upgradeFile;
+  try {
+    const adopt = createProposal(root, { adapters: "codex", modules: "workflow" });
+    adoptFile = saveProposal(root, adopt, "adopt-preserve-config.json");
+    applyProposal(adoptFile);
+    const projectFile = path.join(root, ".harness", "project.json");
+    const project = JSON.parse(readFileSync(projectFile, "utf8"));
+    project.generatedTargets = ["workspace-index", "custom-api-map"];
+    project.extensions = {
+      readOnlyChildRepositories: ["backend"],
+      startupSkill: ".agents/skills/start/SKILL.md",
+      projectChecks: ".harness/check.mjs",
+      generatedImplementation: ".harness/generated.mjs"
+    };
+    project.autonomy = { maxContinuationChain: 12 };
+    writeFileSync(projectFile, `${JSON.stringify(project, null, 2)}\n`, "utf8");
+    const projectSkill = path.join(root, ".agents", "skills", "lumine-harness-run", "SKILL.md");
+    const workflowDoc = path.join(root, "docs", "workflow-artifacts.md");
+    const projectCheck = path.join(root, ".harness", "check.mjs");
+    writeFileSync(projectSkill, `${readFileSync(projectSkill, "utf8")}\nPROJECT-SKILL-CUSTOMIZATION\n`, "utf8");
+    writeFileSync(workflowDoc, `${readFileSync(workflowDoc, "utf8")}\nPROJECT-DOC-CUSTOMIZATION\n`, "utf8");
+    writeFileSync(projectCheck, `${readFileSync(projectCheck, "utf8")}\n// PROJECT-CHECK-CUSTOMIZATION\n`, "utf8");
+
+    const upgrade = createProposal(root, { mode: "upgrade", adapters: "codex", modules: "workflow" });
+    assert.equal(upgrade.writeSet.find((item) => item.path === ".harness/project.json").action, "update-config");
+    assert.equal(upgrade.writeSet.find((item) => item.path === ".agents/skills/lumine-harness-run/SKILL.md").action, "preserve-project");
+    assert.equal(upgrade.writeSet.find((item) => item.path === "docs/workflow-artifacts.md").action, "preserve-project");
+    assert.equal(upgrade.writeSet.find((item) => item.path === ".harness/check.mjs").action, "preserve-project");
+    assert.equal(upgrade.writeSet.some((item) => item.action === "conflict"), false);
+    upgradeFile = saveProposal(root, upgrade, "upgrade-preserve-config.json");
+    applyProposal(upgradeFile);
+    const upgraded = JSON.parse(readFileSync(projectFile, "utf8"));
+    assert.deepEqual(upgraded.generatedTargets, ["workspace-index", "custom-api-map"]);
+    assert.deepEqual(upgraded.extensions, project.extensions);
+    assert.deepEqual(upgraded.autonomy, { maxContinuationChain: 12, noProgressThreshold: 2 });
+    assert.match(readFileSync(projectSkill, "utf8"), /PROJECT-SKILL-CUSTOMIZATION/);
+    assert.match(readFileSync(workflowDoc, "utf8"), /PROJECT-DOC-CUSTOMIZATION/);
+    assert.match(readFileSync(projectCheck, "utf8"), /PROJECT-CHECK-CUSTOMIZATION/);
   } finally {
     rmSync(root, { recursive: true, force: true });
     if (adoptFile) rmSync(adoptFile, { force: true });

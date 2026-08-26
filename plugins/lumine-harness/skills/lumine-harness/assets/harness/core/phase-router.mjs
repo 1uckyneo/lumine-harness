@@ -1,3 +1,4 @@
+import { existsSync, realpathSync } from "node:fs";
 import path from "node:path";
 import { writeSessionState } from "./work-status.mjs";
 import { discoverSharedSkills } from "./skill-catalog.mjs";
@@ -103,7 +104,11 @@ export function toolReadsExpectedSkill(raw, expectedPath) {
   const input = extractToolInput(raw);
   const candidate = input.file_path ?? input.filePath ?? input.path ?? input.target ?? "";
   if (!candidate) return false;
-  return path.resolve(String(candidate)) === path.resolve(expectedPath);
+  const cwd = raw.cwd ?? raw.working_directory ?? raw.workingDirectory ?? process.cwd();
+  const resolvedCandidate = path.resolve(String(cwd), String(candidate));
+  const resolvedExpected = path.resolve(expectedPath);
+  if (!existsSync(resolvedCandidate) || !existsSync(resolvedExpected)) return false;
+  return realpathSync.native(resolvedCandidate) === realpathSync.native(resolvedExpected);
 }
 
 export function toolLoadsExpectedSkill(raw, expectedSkill) {

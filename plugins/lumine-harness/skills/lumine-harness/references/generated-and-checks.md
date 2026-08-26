@@ -47,10 +47,10 @@ Profile 不支持的 target 不应失败：
 - `AGENTS.md` 保持宿主中立，不含产品兼容矩阵、产品条件命令或绝对本机路径。
 - 如果启用 Worker Coordination，项目文档说明 task packet、owned write set、验收和回写边界；未启用时标记 not applicable。
 - `AGENTS.md` 给每个 `WORK_STATUS` 状态码提供项目可理解的解释；具体宿主命令由 Adapter 动态提供。
-- `.harness/root.json`、能力清单和所选产品 Adapter 入口存在且一致。
+- `.harness/root.json`、逐能力证据清单和所选产品 Adapter 入口存在且一致；不能用整体 `host_verified` 掩盖未验证能力。
 - 仓库内不存在产品 Rules、产品级 Skill 目录、Skill 正文副本或 Skill 投影；`.agents/skills` 是唯一 Skill 内容真源。
 - 七个项目 Harness 阶段 Skill 全部使用 `lumine-harness-*` 前缀，不重新生成旧的无前缀 `harness-*`。
-- Qoder 按具体宿主形态和版本选择可用事件；CodeBuddy 使用仓库 Hooks 并保留 `/hooks` 人工审核；OpenCode `stopGate` 固定为 `unsupported`，idle 处理只做审计。
+- Qoder 按具体宿主形态和版本选择可用事件；CodeBuddy 使用仓库 Hooks，并在配置发生变化后保留 `/hooks` 人工审核；OpenCode 的自动续跑保持 `not_applicable`，idle 处理只做审计。
 - ZCode 使用 Hook-only 本地 Marketplace Plugin，不能把项目级 Hook 文件当成已生效。
 - DeepSeek Harness 的宿主与官方 Codex Hook bridge 锁定同一已验证版本；SessionStart、Stop 继续标记为 partial，直到产品端复验通过。
 - draft/design/plan gate。

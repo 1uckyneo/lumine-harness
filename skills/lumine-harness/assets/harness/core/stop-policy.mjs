@@ -1,6 +1,8 @@
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { countWorkStatus, extractWorkStatus, readFreshStateStatus, readSessionState, recordWorkStatus, writeSessionState } from "./work-status.mjs";
+import { countWorkStatus, deriveStatusEmissionId, extractWorkStatus, readFreshStateStatus, readSessionState, recordUserTurn, recordWorkStatus, writeSessionState } from "./work-status.mjs";
 
 const PAUSE_MESSAGES = {
   needs_user_decision: "Pause and ask the user for the decision that changes direction, scope, or trade-offs.",
@@ -8,6 +10,49 @@ const PAUSE_MESSAGES = {
   needs_manual_app_step: "Pause because a manual action in an external application is required.",
   blocked_external: "Pause because an external dependency is unavailable and no safe autonomous workaround remains."
 };
+
+export const DEFAULT_AUTONOMY_POLICY = Object.freeze({
+  maxContinuationChain: 20,
+  noProgressThreshold: 2
+});
+
+const HOST_CONTINUATION_LIMITS = Object.freeze({ zcode: 3 });
+
+function positiveInteger(value, fallback) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+export function resolveAutonomyPolicy(root, product, override = {}) {
+  let configured = {};
+  const file = path.join(root, ".harness", "project.json");
+  if (existsSync(file)) {
+    try { configured = JSON.parse(readFileSync(file, "utf8")).autonomy ?? {}; } catch {}
+  }
+  const requestedMax = positiveInteger(override.maxContinuationChain ?? configured.maxContinuationChain, DEFAULT_AUTONOMY_POLICY.maxContinuationChain);
+  const hostMax = HOST_CONTINUATION_LIMITS[product] ?? Number.POSITIVE_INFINITY;
+  return {
+    maxContinuationChain: Math.min(requestedMax, hostMax),
+    noProgressThreshold: positiveInteger(override.noProgressThreshold ?? configured.noProgressThreshold, DEFAULT_AUTONOMY_POLICY.noProgressThreshold)
+  };
+}
+
+function legacyAction(disposition) {
+  return {
+    finish: "allow",
+    request_continuation: "continue",
+    pause_for_human: "pause",
+    reject_completion: "block"
+  }[disposition];
+}
+
+function decision(disposition, fields = {}) {
+  return { disposition, action: legacyAction(disposition), ...fields };
+}
+
+function continuationRequestId(input, revision) {
+  return createHash("sha256").update(`${input.product}\0${input.sessionId}\0${revision}`).digest("hex");
+}
 
 function defaultRunCheck(root) {
   const result = spawnSync(process.execPath, [path.join(root, ".harness", "check.mjs"), "all"], { cwd: root, encoding: "utf8" });
@@ -19,7 +64,9 @@ function resolveStatus(input, root) {
   if (message) {
     if (countWorkStatus(message) !== 1) return { status: null, reason: "message" };
     const status = extractWorkStatus(message);
-    const state = status ? recordWorkStatus(root, input, status) : null;
+    const current = readSessionState(root, input.product, input.sessionId) ?? {};
+    const emissionId = deriveStatusEmissionId(input, current);
+    const state = status ? recordWorkStatus(root, input, status, { emissionId }) : null;
     return { status, reason: "message", state };
   }
   const state = readSessionState(root, input.product, input.sessionId);
@@ -28,23 +75,78 @@ function resolveStatus(input, root) {
 
 export function evaluateStopPolicy(input, options = {}) {
   const root = options.root;
+  // Some hosts expose a stable user-turn identifier only on their Stop event.
+  // Reset the autonomous chain only when that explicit identifier changes;
+  // Hook retries and loop counters are transport metadata, not user input.
+  if (input.userTurnId) recordUserTurn(root, input, { userTurnId: input.userTurnId });
   const resolved = resolveStatus(input, root);
-  if (!resolved.status) return { action: "block", message: "Record exactly one fresh WORK_STATUS before stopping." };
+  if (!resolved.status) return decision("reject_completion", { message: "Record exactly one fresh WORK_STATUS before stopping." });
   const status = resolved.status;
   const state = resolved.state ?? readSessionState(root, input.product, input.sessionId) ?? {};
   const workStatusRevision = Number(state.workStatusRevision ?? 0);
   if (status === "continue_autonomously") {
     const revision = workStatusRevision;
-    const used = input.stopHookActive || input.loopCount > 0 || Number(state.continuationConsumedRevision ?? -1) === revision;
-    if (used) return { action: "pause", workStatus: status, workStatusRevision, message: "Automatic continuation was already used once." };
+    if (Number(state.lastEvaluatedContinuationRevision ?? -1) === revision) {
+      const disposition = state.lastContinuationDisposition ?? "pause_for_human";
+      return decision(disposition, {
+        workStatus: status,
+        workStatusRevision,
+        continuationRequestId: state.lastContinuationRequestId ?? state.pendingContinuationRequestId ?? undefined,
+        shouldDeliver: false,
+        message: state.lastContinuationMessage ?? "This continuation status was already evaluated."
+      });
+    }
+
+    const policy = resolveAutonomyPolicy(root, input.product, options.autonomy);
+    const chainCount = Number(state.autonomousChainCount ?? state.continuationCount ?? 0);
+    if (chainCount >= policy.maxContinuationChain) {
+      const message = `Automatic continuation reached the current limit of ${policy.maxContinuationChain}; pause for human review.`;
+      writeSessionState(root, input.product, input.sessionId, {
+        lastEvaluatedContinuationRevision: revision,
+        lastContinuationDisposition: "pause_for_human",
+        lastContinuationMessage: message
+      });
+      return decision("pause_for_human", { workStatus: status, workStatusRevision, shouldDeliver: false, message });
+    }
+
+    const progressRevision = Number(state.progressRevision ?? 0);
+    const hadProgressBaseline = state.lastContinuationProgressRevision !== null && state.lastContinuationProgressRevision !== undefined;
+    const noProgressCount = state.progressObservable && hadProgressBaseline && progressRevision === Number(state.lastContinuationProgressRevision)
+      ? Number(state.noProgressCount ?? 0) + 1
+      : 0;
+    if (state.progressObservable && noProgressCount >= policy.noProgressThreshold) {
+      const message = `No observable progress was recorded across ${policy.noProgressThreshold} continuation cycles; pause for human review.`;
+      writeSessionState(root, input.product, input.sessionId, {
+        noProgressCount,
+        lastContinuationProgressRevision: progressRevision,
+        lastEvaluatedContinuationRevision: revision,
+        lastContinuationDisposition: "pause_for_human",
+        lastContinuationMessage: message
+      });
+      return decision("pause_for_human", { workStatus: status, workStatusRevision, shouldDeliver: false, message });
+    }
+
+    const requestId = continuationRequestId(input, revision);
+    const message = "Continue with the next concrete autonomous step, then report a fresh WORK_STATUS.";
     writeSessionState(root, input.product, input.sessionId, {
-      continuationCount: Number(state.continuationCount ?? 0) + 1,
-      continuationConsumedRevision: revision
+      autonomousChainCount: chainCount + 1,
+      continuationCount: chainCount + 1,
+      continuationConsumedRevision: revision,
+      pendingContinuationRequestId: requestId,
+      pendingContinuationRevision: revision,
+      continuationRequestedAt: new Date().toISOString(),
+      lastContinuationRequestId: requestId,
+      lastContinuationRequestRevision: revision,
+      lastContinuationProgressRevision: progressRevision,
+      noProgressCount,
+      lastEvaluatedContinuationRevision: revision,
+      lastContinuationDisposition: "request_continuation",
+      lastContinuationMessage: message
     });
-    return { action: "continue", workStatus: status, workStatusRevision, message: "Continue with the next concrete autonomous step only, then stop with a fresh WORK_STATUS." };
+    return decision("request_continuation", { workStatus: status, workStatusRevision, continuationRequestId: requestId, shouldDeliver: true, message });
   }
-  if (status !== "done") return { action: "pause", workStatus: status, workStatusRevision, message: PAUSE_MESSAGES[status] };
+  if (status !== "done") return decision("pause_for_human", { workStatus: status, workStatusRevision, message: PAUSE_MESSAGES[status] });
   const check = (options.runCheck ?? defaultRunCheck)(root);
-  if (!check.ok) return { action: "block", workStatus: status, workStatusRevision, message: check.output || "Harness checks failed." };
-  return { action: "allow", workStatus: status, workStatusRevision };
+  if (!check.ok) return decision("reject_completion", { workStatus: status, workStatusRevision, message: check.output || "Harness checks failed." });
+  return decision("finish", { workStatus: status, workStatusRevision });
 }

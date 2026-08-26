@@ -6,8 +6,10 @@ import os from "node:os";
 import path from "node:path";
 import { doctorAdapter, formatSkillResult, installKimiAdapter, setCliWorkStatus, uninstallKimiAdapter } from "../adapter-manager.mjs";
 import { findHarnessRoot } from "../core/root-resolver.mjs";
+import { inspectSharedSkillCatalog } from "../core/skill-catalog.mjs";
 import { evaluateStopPolicy } from "../core/stop-policy.mjs";
-import { initializeSessionState, recordWorkStatus } from "../core/work-status.mjs";
+import { initializeSessionState, observeHarnessEvent, recordWorkStatus } from "../core/work-status.mjs";
+import { beginVerificationRun } from "../core/verification.mjs";
 
 const HARNESS_DIR = path.resolve(new URL("..", import.meta.url).pathname);
 const SOURCE_ASSET_MODE = path.basename(path.dirname(HARNESS_DIR)) === "assets";
@@ -46,7 +48,7 @@ test("root lookup crosses nested Git boundaries", () => {
   finally { rmSync(root, { recursive: true, force: true }); }
 });
 
-test("public Stop Policy preserves all six states and limits continuation", () => {
+test("public Stop Policy preserves all six states and deduplicates one status revision", () => {
   const root = tempHarness();
   try {
     for (const status of ["needs_user_decision", "needs_credentials", "needs_manual_app_step", "blocked_external"]) {
@@ -62,24 +64,79 @@ test("public Stop Policy preserves all six states and limits continuation", () =
     const next = { product: "kimi", sessionId: "next", cwd: root };
     initializeSessionState(root, next);
     recordWorkStatus(root, next, "continue_autonomously");
-    assert.equal(evaluateStopPolicy(next, { root }).action, "continue");
-    assert.equal(evaluateStopPolicy(next, { root }).action, "pause");
+    const first = evaluateStopPolicy(next, { root });
+    assert.equal(first.disposition, "request_continuation");
+    assert.equal(first.shouldDeliver, true);
+    const duplicate = evaluateStopPolicy(next, { root });
+    assert.equal(duplicate.disposition, "request_continuation");
+    assert.equal(duplicate.shouldDeliver, false);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("ZCode applies its three-cycle host limit without limiting later user-authorized chains", () => {
+  const root = tempHarness();
+  const input = { product: "zcode", sessionId: "zcode-limit", cwd: root, event: "stop" };
+  try {
+    initializeSessionState(root, input);
+    for (let index = 1; index <= 3; index += 1) {
+      recordWorkStatus(root, input, "continue_autonomously", { emissionId: `status-${index}` });
+      const decision = evaluateStopPolicy(input, { root });
+      assert.equal(decision.disposition, "request_continuation");
+      assert.equal(decision.shouldDeliver, true);
+      observeHarnessEvent(root, { ...input, event: "tool_before", eventId: `delivery-${index}` });
+    }
+    recordWorkStatus(root, input, "continue_autonomously", { emissionId: "status-4" });
+    assert.equal(evaluateStopPolicy(input, { root }).disposition, "pause_for_human");
+
+    observeHarnessEvent(root, { ...input, event: "prompt_submit", eventId: "new-user-turn" }, { userInitiated: true });
+    recordWorkStatus(root, input, "continue_autonomously", { emissionId: "status-after-user" });
+    assert.equal(evaluateStopPolicy(input, { root }).disposition, "request_continuation");
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
 test("Qoder blocks mutation until the routed public Skill was read", () => {
   const root = tempHarness();
   const skill = writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
+  const securitySkill = writeSharedSkill(root, "security-audit", "Audit authentication and authorization");
   const common = { session_id: "qoder-route", cwd: root };
   try {
-    const prompt = runHook(".harness/adapters/qoder/hooks/prompt-submit.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "授权 lumine-harness-run 进入实施" });
+    const prompt = runHook(".harness/adapters/qoder/hooks/prompt-submit.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "使用 $security-audit 并授权 lumine-harness-run 进入实施" });
     assert.equal(prompt.status, 0, prompt.stderr);
     assert.match(prompt.stdout, /lumine-harness-run\/SKILL\.md/);
+    assert.match(prompt.stdout, /security-audit\/SKILL\.md/);
     const blocked = runHook(".harness/adapters/qoder/hooks/tool-before.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.match(blocked.stdout, /permissionDecision":"deny/);
-    runHook(".harness/adapters/qoder/hooks/tool-after.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { file_path: skill } });
+    runHook(".harness/adapters/qoder/hooks/tool-after.mjs", {
+      ...common,
+      hook_event_name: "PostToolUse",
+      tool_name: "Read",
+      tool_input: { file_path: path.relative(root, skill) }
+    });
+    const stillBlocked = runHook(".harness/adapters/qoder/hooks/tool-before.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    assert.match(stillBlocked.stdout, /security-audit/);
+    runHook(".harness/adapters/qoder/hooks/tool-after.mjs", {
+      ...common,
+      hook_event_name: "PostToolUse",
+      tool_name: "Read",
+      tool_input: { file_path: path.relative(root, securitySkill) }
+    });
     const allowed = runHook(".harness/adapters/qoder/hooks/tool-before.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("one malformed shared Skill does not hide valid Skills", () => {
+  const root = tempHarness();
+  writeSharedSkill(root, "security-audit", "Audit authentication and authorization");
+  const malformed = path.join(root, ".agents", "skills", "broken-skill", "SKILL.md");
+  mkdirSync(path.dirname(malformed), { recursive: true });
+  writeFileSync(malformed, "---\nname: Broken Skill\n---\n\nMissing a valid name and description.\n", "utf8");
+  try {
+    const catalog = inspectSharedSkillCatalog(root);
+    assert.deepEqual(catalog.skills.map((skill) => skill.name), ["security-audit"]);
+    assert.equal(catalog.diagnostics.length, 1);
+    assert.equal(catalog.diagnostics[0].code, "invalid-skill");
+    assert.match(catalog.diagnostics[0].file, /broken-skill\/SKILL\.md/);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
@@ -89,6 +146,7 @@ test("CodeBuddy gates Harness and explicitly requested shared Skills through can
   const securitySkill = writeSharedSkill(root, "security-audit", "Audit authentication and authorization");
   const common = { session_id: "codebuddy-route", cwd: root };
   try {
+    const probe = beginVerificationRun(root, "codebuddy", { hostVersion: "test-host" });
     const start = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
     assert.equal(start.status, 0, start.stderr);
     assert.match(start.stdout, /\.\/\.harness\/cli skills search/);
@@ -112,26 +170,49 @@ test("CodeBuddy gates Harness and explicitly requested shared Skills through can
     setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "codebuddy", sessionId: common.session_id });
     const stop = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: false });
     assert.match(stop.stdout, /"continue":false/);
-    assert.equal(existsSync(path.join(root, ".harness", "runtime", "verification", "codebuddy--codebuddy-route", "events.jsonl")), true);
+    const duplicateStop = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: true });
+    assert.equal(duplicateStop.stdout, "");
+    setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "codebuddy", sessionId: common.session_id });
+    const nextRevision = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: true });
+    assert.match(nextRevision.stdout, /"continue":false/);
+    const evidence = path.join(root, ".harness", "runtime", "probes", probe.verificationRunId, "events.jsonl");
+    assert.equal(existsSync(evidence), true);
+    assert.doesNotMatch(readFileSync(evidence, "utf8"), /使用 \$security-audit/);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
 test("ZCode Hook-only Plugin routes the shared Skill and records runtime evidence", () => {
   const root = tempHarness();
   const skill = writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
+  const securitySkill = writeSharedSkill(root, "security-audit", "Audit authentication and authorization");
   const common = { session_id: "zcode-route", cwd: root };
   try {
+    const probe = beginVerificationRun(root, "zcode", { hostVersion: "test-host" });
     const start = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
     assert.equal(start.status, 0, start.stderr);
     assert.match(start.stdout, /Workspace harness context/);
-    const prompt = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "授权 lumine-harness-run 进入实施" });
+    const prompt = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "使用 $security-audit 并授权 lumine-harness-run 进入实施" });
     assert.match(prompt.stdout, /lumine-harness-run\/SKILL\.md/);
+    assert.match(prompt.stdout, /security-audit\/SKILL\.md/);
     const blocked = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.match(blocked.stdout, /permissionDecision":"deny/);
-    runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { file_path: skill } });
+    runHook(".harness/adapters/zcode/hooks/dispatch.mjs", {
+      ...common,
+      hook_event_name: "PostToolUse",
+      tool_name: "Read",
+      tool_input: { file_path: path.relative(root, skill) }
+    });
+    const stillBlocked = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    assert.match(stillBlocked.stdout, /security-audit/);
+    runHook(".harness/adapters/zcode/hooks/dispatch.mjs", {
+      ...common,
+      hook_event_name: "PostToolUse",
+      tool_name: "Read",
+      tool_input: { file_path: path.relative(root, securitySkill) }
+    });
     const allowed = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
-    assert.equal(existsSync(path.join(root, ".harness", "runtime", "verification", "zcode--zcode-route", "events.jsonl")), true);
+    assert.equal(existsSync(path.join(root, ".harness", "runtime", "probes", probe.verificationRunId, "events.jsonl")), true);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
@@ -151,6 +232,20 @@ test("DeepSeek Harness bridge verifies native Skill evidence before mutation", (
     setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "deepseek-harness", sessionId: common.session_id });
     const stop = runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", last_assistant_message: null, stop_hook_active: false });
     assert.match(stop.stdout, /decision":"block/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("Cursor emits one followup_message per continuation status revision", () => {
+  const root = tempHarness();
+  const common = { session_id: "cursor-continuation", cwd: root };
+  try {
+    const start = runHook(".harness/adapters/cursor/hooks/session-start.mjs", common);
+    assert.equal(start.status, 0, start.stderr);
+    setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "cursor", sessionId: common.session_id });
+    const first = runHook(".harness/adapters/cursor/hooks/stop.mjs", { ...common, status: "completed" });
+    assert.match(first.stdout, /followup_message/);
+    const duplicate = runHook(".harness/adapters/cursor/hooks/stop.mjs", { ...common, status: "completed", loop_count: 1 });
+    assert.equal(duplicate.stdout, "");
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
@@ -208,17 +303,52 @@ test("repository keeps one canonical Skill source and capability boundaries rema
     assert.equal(existsSync(sourcePath(relative)), false, relative);
   }
   const manifest = JSON.parse(readFileSync(sourcePath(".harness/adapter-capabilities.json"), "utf8"));
+  const capabilityNames = [
+    "project_instructions",
+    "session_context",
+    "skill_discovery",
+    "skill_read",
+    "pre_mutation_gate",
+    "stop_gate",
+    "automatic_continuation",
+    "work_status_matrix",
+    "session_isolation"
+  ];
+  const results = new Set(["passed", "needs_setup", "not_tested", "not_observable", "not_applicable", "failed"]);
+  const evidenceLevels = new Set(["official_declared", "repository_checked", "runtime_observed", "behavior_verified"]);
+  assert.equal(manifest.schemaVersion, 3);
   assert.equal(manifest.skillSource, ".agents/skills");
-  assert.equal(manifest.products.opencode.stopGate, "unsupported");
+  for (const product of Object.values(manifest.products)) {
+    assert.deepEqual(Object.keys(product.capabilities).sort(), capabilityNames.slice().sort());
+    for (const capability of Object.values(product.capabilities)) {
+      assert.equal(results.has(capability.result), true);
+      assert.equal(evidenceLevels.has(capability.evidenceLevel), true);
+    }
+    for (const legacyField of ["runtimeVerification", "hostVersion", "verifiedAt", "evidence", "stopGate", "sessionStart"]) {
+      assert.equal(legacyField in product, false, legacyField);
+    }
+  }
+  assert.equal(manifest.products.opencode.capabilities.stop_gate.result, "not_applicable");
+  assert.equal(manifest.products.opencode.capabilities.automatic_continuation.result, "not_applicable");
+  assert.equal(manifest.products.opencode.continuation.delivery, "manual_required");
+  assert.equal(manifest.products.opencode.continuation.maxConsecutive, 0);
   assert.equal(manifest.products.zcode.setup, "local-marketplace+manual");
   assert.equal(manifest.products.zcode.skills.mode, "adapter-routed");
+  assert.equal(manifest.products.zcode.continuation.maxConsecutive, 3);
   assert.equal(manifest.products.codebuddy.skills.mode, "adapter-routed");
   assert.equal(manifest.products.codebuddy.skills.implicitDiscovery, "best-effort");
-  assert.equal(manifest.products.opencode.runtimeVerification, "runtime-pending");
-  assert.equal(manifest.products["deepseek-harness"].verifiedBridgeVersion, "0.1.0-rc.7");
+  assert.equal(manifest.products.cursor.failMode, "open");
+  assert.equal(manifest.products.cursor.continuation.maxConsecutive, 20);
+  assert.equal(manifest.products.trae.continuation.maxConsecutive, 20);
+  assert.equal(manifest.products["deepseek-harness"].repositoryTestedBridgeVersion, "0.1.0-rc.7");
+  assert.equal("verifiedBridgeVersion" in manifest.products["deepseek-harness"], false);
+  assert.doesNotMatch(readFileSync(sourcePath(".harness/adapters/deepseek-harness/bundle/cordis.patch.yml"), "utf8"), /deepseek-v4|^\s*model:/m);
+  assert.equal(JSON.parse(readFileSync(sourcePath(".cursor/hooks.json"), "utf8")).hooks.stop[0].loop_limit, 20);
+  assert.equal(JSON.parse(readFileSync(sourcePath(".trae/hooks.json"), "utf8")).hooks.Stop[0].loop_limit, 20);
   if (existsSync(sourcePath(".opencode/plugins/harness.mjs"))) {
     const plugin = readFileSync(sourcePath(".opencode/plugins/harness.mjs"), "utf8");
     assert.match(plugin, /audit_only/);
+    assert.match(plugin, /manual_required/);
     assert.doesNotMatch(plugin, /followup_message/);
   }
 });

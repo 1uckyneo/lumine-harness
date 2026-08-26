@@ -46,6 +46,7 @@
   - Generated：`.agents/skills/lumine-harness-generated/SKILL.md`
   - Check：`.agents/skills/lumine-harness-check/SKILL.md`
 - 从包含 `.harness/root.json` 的 Harness 根启动；多仓工程不能只打开其中一个子仓。
+- 用户要求检查当前 Agent 与 Lumine Harness 的连接时，运行 `./.harness/cli adapter status current`，汇总当前已有的逐能力证据和下一步；无法识别当前宿主时如实报告，不让模型猜测产品身份，也不把尚未观察到的能力写成已兼容。
 
 ## 工作流与人工确认门
 

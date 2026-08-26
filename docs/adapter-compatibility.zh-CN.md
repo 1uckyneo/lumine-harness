@@ -1,126 +1,155 @@
-# Adapter 兼容性说明
+# 不同 Agent 能用到什么程度
 
-本页记录 Lumine Harness 与不同 Agent 产品之间的协议边界。产品能力会随版本变化，因此必须分别判断：仓库是否准备好、产品是否真实执行、当前能力成熟到什么程度，以及失败时是否会放行。
+Lumine Harness 可以让多个 Agent 共用同一套 `AGENTS.md`、`.agents/skills`、工程文档和 Harness Core。不同产品读取这些内容、执行 Hook 和自动继续任务的方式并不相同。
 
-## 四个判断维度
+先记住一个边界：**接入文件已经生成，不代表当前 Agent 已经真正使用了它们。** 是否生效，要以当前产品、当前版本和真实会话中的检查结果为准。
 
-### 静态就绪状态
+## 先回答五个问题
 
-- `not-selected`：项目没有选择这个 Adapter；
-- `needs-setup`：仓库入口存在，但还需要产品设置、安装或授权；
-- `repository-ready`：仓库侧配置和人工步骤已经就绪。
+### 我使用的 Agent 能接入吗？
 
-`adapter doctor` 只检查这一层。配置文件存在，不代表产品实际读取或执行。
+当前规范为 Codex、Qoder、Trae、Kimi Code、Cursor、OpenCode、ZCode、CodeBuddy 和 DeepSeek Harness 提供了适配方案。部分产品可以直接读取公共工程资产，部分产品需要适配层（Adapter）帮它定位文件，还有一些产品需要完成一次安装或设置。
 
-### 运行证据
+“提供了适配方案”只表示仓库侧已有实现，不代表每个产品版本都经过了真实会话验证。
 
-- `runtime-pending`：还没有完成指定产品与版本的真实事件验证；
-- `host-verified`：已经保存产品、版本、日期和完整事件链证据。
+### 接入后哪些能力可以自动完成？
 
-仓库单元测试不能把 `runtime-pending` 自动升级为 `host-verified`。
+先区分两件事：
 
-### 能力成熟度
+- **基本流程**：Agent 能读取项目规则、Skills 和工作流文档，并按 Draft、Design、Product Spec、Exec Plan、实施和验证阶段推进任务。
+- **自动续跑**：Agent 本轮准备结束，但任务仍有明确、安全的下一步时，宿主能否自动发起下一轮。
 
-- `full`：目标生命周期能力在 Adapter 设计中完整；
-- `partial`：产品缺少某些生命周期能力，部分门禁会降级；
-- `developer-preview`：协议或依赖仍不稳定，不作为正式兼容承诺。
+基本流程可用，不等于一定支持自动续跑。无法自动续跑时，Lumine Harness 仍可保存任务状态，只是需要人手动让 Agent 继续。
 
-### 失败模式
+### 我还需要做什么设置？
 
-- `fail-closed`：门禁失败时阻止或暂停继续执行；
-- `fail-open`：Hook 错误或超时时产品仍可能继续运行，不能作为高风险操作的唯一安全门。
+接入流程会先生成项目内需要的文件。只有涉及用户级配置、产品内开关、本地 Plugin 或 profile 扩展时，才需要人完成一次设置。具体操作会出现在连接检查的“下一步”中。
 
-## 公共工程资产
+### 怎样确认它真的生效了？
 
-Lumine Harness 把公共资产统一保存在：
+在准备使用的 Agent 中，从 Harness 工程根目录开启一个新会话，然后发送：
 
-- 根 `AGENTS.md`；
-- `.agents/skills` 中的真实 Skill；
-- Draft、Product Spec、Exec Plan、Validation 和 generated；
-- `.harness` Core、CLI、检查和运行状态。
-
-这表示仓库只维护一份公共真源，不代表每个 Agent 产品都已经成功加载。实际读取和生命周期执行必须由对应产品的运行证据证明。
-
-Adapter 只负责上下文注入、工具事件、生命周期和产品协议转换。目标工程的 `AGENTS.md` 不包含产品兼容矩阵，也不要求模型判断自己运行在哪个产品中。
-
-## Skill 接入方式
-
-- `native`：产品可以直接发现项目 `.agents/skills`；
-- `native-with-toggle`：产品具备原生发现能力，但需要用户开启相关设置；
-- `adapter-routed`：Adapter 根据显式 Skill 名称或 Harness 阶段定位真实 `SKILL.md`，并检查它是否在首次修改前被读取；
-- `unsupported`：当前没有可靠的发现或读取链路。
-
-`adapter-routed` 不等于原生语义发现。显式 `$skill-name` 和 Harness 阶段可以确定性路由；普通自然语言的隐式发现仍是 `best-effort`。
-
-## 当前能力摘要
-
-| 产品 | Skill 方式 | 需要的设置 | 运行证据 | 成熟度 | 失败模式 |
-| --- | --- | --- | --- | --- | --- |
-| Codex | native | 仓库配置 | runtime-pending | full | fail-closed |
-| Qoder | adapter-routed | 仓库配置，具体 Hook 随产品形态和版本变化 | runtime-pending | partial | fail-closed |
-| Trae | native-with-toggle | 仓库配置 + 人工开启项目指令、共享 Skills 和 Hooks | runtime-pending | partial | fail-closed |
-| Kimi Code | native | 用户级配置，需要单独授权 | runtime-pending | partial | fail-open |
-| Cursor | native | 仓库配置 + Workspace Trust | runtime-pending | partial | fail-closed |
-| OpenCode | native | 仓库 Plugin | runtime-pending | partial，无完整 Stop Gate | fail-open |
-| ZCode | adapter-routed | 本地 Marketplace Plugin + 人工安装 | runtime-pending | partial | fail-closed |
-| CodeBuddy | adapter-routed | 仓库配置 + 人工复核 Hooks | runtime-pending | partial | fail-closed |
-| DeepSeek Harness | native | profile bundle + 人工设置 | runtime-pending | developer-preview | fail-open |
-
-这张表描述当前规范实现，不代表所有产品已经完成端到端验证。Capability Manifest 和 Validation 证据必须记录产品版本、验证日期、事件序列和已知缺口。
-
-## Doctor 与真实产品验证
-
-先检查当前项目选择的 Adapter：
-
-```bash
-./.harness/cli adapter doctor selected
+```text
+检查当前 Agent 与 Lumine Harness 是否正常连接。
 ```
 
-Doctor 只判断静态配置与人工步骤。要声明 `host-verified`，还需要为一个具体产品签发一次性验证：
+检查会汇总当前已有证据，并分别列出项目指令、公共 Skills、生命周期 Hook、自动续跑和会话隔离。它不会自动完成一整套宿主认证；一次普通检查观察不到的能力会明确写成“尚未验证”或“当前宿主无法直接观察”，不会用配置文件代替运行证据。
 
-```bash
-./.harness/cli adapter verify <product> --begin --host-version <version>
-```
+### 哪些事情仍需要人完成？
 
-随后必须由该真实产品会话写入当前事件。普通 `adapter verify <product>` 会核对一次性 challenge、产品版本和完整事件链；配置文件、旧日志或手工编写的 JSONL 不能成为真实产品验证证据。
+- 首次安装用户级 Hook、本地 Plugin 或 profile 扩展；
+- 在产品设置中开启项目指令、共享 Skills 或 Hooks；
+- 产品不支持自动续跑时，手动发起下一轮；
+- 凭据、外部应用操作、产品决策和高风险授权；
+- 对无法由宿主暴露的能力做现场确认。
 
-## 真实产品必须证明什么
+## 你会看到什么结果
 
-1. 根 `AGENTS.md` 已进入上下文；
-2. SessionStart 或等价入口真实触发；
-3. 显式 Skill 定位到 `.agents/skills/<name>/SKILL.md`；
-4. 阶段要求读取 Skill 时，未读取前的首次修改会被阻断或可靠暂停；
-5. 读取后允许继续；
-6. 六种 `WORK_STATUS` 得到正确处理；
-7. `continue_autonomously` 对同一 revision 只续跑一次；
-8. 两个并行会话不会互相污染状态；
-9. 事件日志能够证明上述过程，且不记录凭据、原始 Prompt 或客户数据。
+连接检查只给出清楚的结论和下一步：
 
-## 产品说明
+- **可以正常使用**：当前会话的基本连接已经观察到；高级能力仍按下方逐项证据判断。
+- **需要完成一次设置**：项目文件已准备好，但还需要安装、授权或开启一个产品设置。
+- **基本流程可用，部分自动化需要手动完成**：项目上下文和 Skills 可以使用，但自动续跑等能力受产品限制。
+- **尚未完成真实验证**：仓库侧实现已经存在，但当前产品版本还没有足够的运行证据。
+- **发现连接异常，需要修复**：实际行为与预期不一致；结果会同时给出受影响能力和修复建议。
+
+## 当前产品摘要
+
+下表中的“已提供”表示 Lumine Harness 已有对应实现，不表示当前机器上的产品已经验证通过。
+
+| Agent | 基本流程 | 自动续跑 | 是否需要一次设置 | 当前验证情况 |
+| --- | --- | --- | --- | --- |
+| Codex | 已提供 | 已提供 | 通常不需要额外设置 | 需在当前版本中运行连接检查 |
+| Qoder | 明确 Skill 与 Harness 阶段可路由 | 随 IDE、CLI 和版本变化 | 按连接检查提示处理 | 需记录具体产品形态和版本 |
+| Trae | 已提供 | 已提供 | 需要开启项目指令、共享 Skills 和项目 Hooks | 完成设置后运行连接检查 |
+| Kimi Code | 已提供 | 已提供 | 需要单独授权安装用户级 Hook | 完成安装后运行连接检查 |
+| Cursor | 已提供 | 已提供 | 只有项目处于受限状态时才需要确认信任 | 需在当前版本中运行连接检查 |
+| OpenCode | 已提供 | 需要手动继续 | 使用项目 Plugin，任务结束前不能自动拦截 | 基本流程可检查，自动续跑当前不可用 |
+| ZCode | 明确 Skill 与 Harness 阶段可路由 | 可用，但宿主最多连续 3 次 | 需要安装本地 Marketplace Plugin | 完成安装后运行连接检查 |
+| CodeBuddy | 明确 Skill 与 Harness 阶段可路由 | 已提供 | Hook 配置变化后需要在 `/hooks` 中确认 | 完成确认后运行连接检查 |
+| DeepSeek Harness | 试用支持 | 有限支持 | 需要安装 profile 扩展 | 仍处于开发预览阶段 |
+
+## 各产品第一次怎么用
+
+### Codex
+
+- **能直接使用什么**：适配方案使用根 `AGENTS.md`、公共 `.agents/skills` 和项目级生命周期配置。
+- **第一次需要做什么**：通常只需从正确的 Harness 工程根目录开启新会话。
+- **仍需手动什么**：凭据、外部应用操作、高风险授权和产品决策仍由人处理。
+- **怎样确认**：发送连接检查语句，确认项目指令、Skill 和生命周期事件均有真实结果。
+- **没有通过怎么办**：先确认会话从 Harness 根目录启动，再检查仓库内的 Codex Hook 配置。
 
 ### Qoder
 
-Qoder 的 Hook 事件可能随 IDE、CLI 等产品形态和版本变化。采用时必须记录具体形态和版本，不能把 Qoder 当成一个永远不变的协议。
+- **能直接使用什么**：明确写出的 Skill 名称和 Harness 阶段可以由 Adapter 定位到公共 `.agents/skills`。
+- **第一次需要做什么**：记录正在使用的是 Qoder IDE、CLI 还是其他形态；不同形态和版本可能暴露不同事件。
+- **仍需手动什么**：普通自然语言能否自动发现所有项目 Skill 只能尽力支持，关键阶段应使用明确的 Skill 或阶段入口。
+- **怎样确认**：在实际产品中运行连接检查，并确认首次修改前确实读取了目标 `SKILL.md`。
+- **没有通过怎么办**：先使用明确的 Skill 名称重试，再根据结果检查当前版本支持的 Hook 事件。
+
+### Trae
+
+- **能直接使用什么**：适配方案复用根 `AGENTS.md`、公共 `.agents/skills` 和项目 Hooks。
+- **第一次需要做什么**：在 Trae 中开启项目指令、共享 Skills 和项目 Hooks。
+- **仍需手动什么**：这些开关无法由仓库文件替你确认。
+- **怎样确认**：开启设置并重启会话后运行连接检查。
+- **没有通过怎么办**：确认打开的是完整 Harness 工程根目录，而不是其中一个子仓。
 
 ### Kimi Code
 
-公共 Skill 使用项目 `.agents/skills`；用户级 Hooks 必须单独授权安装。Hook 失败或超时时产品会继续运行，因此不能把 Hook 作为高风险操作的唯一安全门。
+- **能直接使用什么**：项目规则和公共 Skills 保留在工程中，生命周期通过用户级 Hook 接入。
+- **第一次需要做什么**：单独授权安装 Kimi Code 用户级 Hook，然后重新加载 Kimi Code。
+- **仍需手动什么**：Hook 发生错误或超时时，产品可能继续运行，因此高风险操作不能只依赖 Hook。
+- **怎样确认**：安装后开启新会话并运行连接检查。
+- **没有通过怎么办**：检查用户配置中的受管 Hook 是否存在，并确认会话从 Harness 根目录启动。
+
+### Cursor
+
+- **能直接使用什么**：适配方案使用根项目指令、公共 Skills 和 Cursor 项目 Hooks。
+- **第一次需要做什么**：通常没有额外步骤；只有 Cursor 将项目显示为受限时，才需要按产品提示信任该项目。
+- **仍需手动什么**：产品受限时，项目 Hook 可能不会执行。
+- **怎样确认**：在当前 Cursor 版本中运行连接检查。
+- **没有通过怎么办**：先看项目是否处于受限状态，再检查 Hook 是否从完整 Harness 根目录加载。
 
 ### OpenCode
 
-公共 Skill 可以使用 `.agents/skills`。当前没有等价的完整 Stop Gate；结束后事件只能用于审计，不能伪装成停止前阻断和自动续跑。
+- **能直接使用什么**：项目规则、公共 Skills、上下文补充和运行审计可以接入。
+- **第一次需要做什么**：采用流程会生成项目 Plugin；需在当前支持的 OpenCode 版本中使用。
+- **仍需手动什么**：当前没有完整的结束前门禁，任务需要继续时由人手动发起下一轮。
+- **怎样确认**：检查项目上下文、Skills 和审计事件；连接结果应明确显示自动续跑不可用。
+- **没有通过怎么办**：先核对 OpenCode 版本与项目 Plugin 的支持范围。
 
-### ZCode 与 CodeBuddy
+### ZCode
 
-它们不保存完整 Skill 副本。Adapter 只在需要时定位公共 Skill；没有真实 Hook 日志和 Skill 读取证据前保持 `runtime-pending`。
+- **能直接使用什么**：Adapter 可以把明确 Skill 和 Harness 阶段路由到公共 `.agents/skills`。
+- **第一次需要做什么**：在 ZCode 中加入本地 Marketplace，安装并启用 Lumine Harness Adapter Plugin，然后开启新会话。
+- **仍需手动什么**：项目级 Hook 文件不会被 ZCode 直接执行；自动续跑最多连续 3 次。
+- **怎样确认**：安装 Plugin 后运行连接检查，确认 Hook 与 Skill 读取都留下真实结果。
+- **没有通过怎么办**：优先检查 Plugin 是否启用，不要用项目内 Hook 文件是否存在来判断。
+
+### CodeBuddy
+
+- **能直接使用什么**：Adapter 可以把明确 Skill 和 Harness 阶段路由到公共 `.agents/skills`。
+- **第一次需要做什么**：项目 Hook 配置新增或变化后，在 CodeBuddy 的 `/hooks` 中检查并确认。
+- **仍需手动什么**：普通自然语言发现所有 Skill 只能尽力支持，关键阶段应使用明确入口。
+- **怎样确认**：确认 Hook 后开启新会话并运行连接检查。
+- **没有通过怎么办**：检查 CodeBuddy 项目记忆是否正确引用根 `AGENTS.md`，以及 Hook 变化是否已经确认。
 
 ### DeepSeek Harness
 
-Profile bundle 和生命周期桥接仍属于开发预览。锁定依赖版本并通过仓库测试，仍不能替代真实 DSH 会话中的 SessionStart、状态和 Stop 验证。
+- **能直接使用什么**：当前方案通过本地 profile 扩展连接项目指令、公共 Skills 和部分生命周期事件。
+- **第一次需要做什么**：单独授权安装 profile 扩展，并从 Harness 根目录启动 DeepSeek Harness。
+- **仍需手动什么**：当前桥接能力仍不完整，不应把它作为高风险操作的唯一门禁。
+- **怎样确认**：记录具体版本并运行连接检查。
+- **没有通过怎么办**：先核对宿主与扩展版本，再按试用能力处理，不要宣称完整兼容。
 
-## 维护规则
+## 如果连接检查没有识别出当前 Agent
 
-- 产品协议变化时更新 Capability Manifest、测试、本页和验证证据；
-- 没有真实证据时不得把 `runtime-pending` 改成 `host-verified`；
-- 不把产品兼容说明复制到目标工程的 `AGENTS.md`；
-- 产品目录只保存协议需要的最小入口，不保存公共工作流和 Skill 正文。
+Lumine Harness 不要求模型猜测自己运行在哪个产品中。当前产品应由真实 Adapter 会话状态识别。无法识别时：
+
+1. 确认你正在准备使用的 Agent 中执行检查；
+2. 从包含 `.harness/root.json` 的工程根目录开启新会话；
+3. 完成该产品的一次性设置；
+4. 再次发送连接检查语句。
+
+需要查看内部能力、诊断命令和运行证据时，请阅读 [Adapter 高级验证](adapter-verification.zh-CN.md)。

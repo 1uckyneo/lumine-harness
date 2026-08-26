@@ -18,6 +18,7 @@ required_files=(
   "assets/harness/adapter-manager.mjs"
   "assets/harness/adapter-cli.mjs"
   "assets/harness/core/contracts.d.ts"
+  "assets/harness/core/continuation-delivery.mjs"
   "assets/harness/core/root-resolver.mjs"
   "assets/harness/core/session-context.mjs"
   "assets/harness/core/skill-catalog.mjs"
@@ -168,17 +169,29 @@ fi
 node -e '
 const manifest = require(process.argv[1]);
 const required = ["codex", "qoder", "trae", "kimi", "cursor", "opencode", "zcode", "codebuddy", "deepseek-harness"];
-if (manifest.schemaVersion !== 2 || manifest.skillSource !== ".agents/skills" || manifest.instructionSource !== "AGENTS.md") process.exit(1);
+const capabilityNames = ["project_instructions", "session_context", "skill_discovery", "skill_read", "pre_mutation_gate", "stop_gate", "automatic_continuation", "work_status_matrix", "session_isolation"];
+const results = new Set(["passed", "needs_setup", "not_tested", "not_observable", "not_applicable", "failed"]);
+const evidenceLevels = new Set(["official_declared", "repository_checked", "runtime_observed", "behavior_verified"]);
+if (manifest.schemaVersion !== 3 || manifest.skillSource !== ".agents/skills" || manifest.instructionSource !== "AGENTS.md") process.exit(1);
 if (required.some((product) => !manifest.products?.[product])) process.exit(1);
 for (const product of ["qoder", "zcode", "codebuddy"]) {
   if (manifest.products[product].skills?.mode !== "adapter-routed" || manifest.products[product].skills?.implicitDiscovery !== "best-effort") process.exit(1);
 }
-if (manifest.products.opencode.stopGate !== "unsupported") process.exit(1);
+for (const product of required) {
+  const item = manifest.products[product];
+  for (const field of ["implementation", "setup", "skills", "continuation", "capabilities", "maturity", "failMode"]) if (!(field in item)) process.exit(1);
+  for (const capability of capabilityNames) {
+    const value = item.capabilities?.[capability];
+    if (!value || !results.has(value.result) || !evidenceLevels.has(value.evidenceLevel)) process.exit(1);
+  }
+  for (const legacy of ["runtimeVerification", "hostVersion", "verifiedAt", "evidence", "stopGate", "sessionStart"]) if (legacy in item) process.exit(1);
+}
+if (manifest.products.opencode.capabilities?.stop_gate?.result !== "not_applicable" || manifest.products.opencode.continuation?.delivery !== "manual_required") process.exit(1);
 if (manifest.products.zcode.setup !== "local-marketplace+manual") process.exit(1);
-if (manifest.products["deepseek-harness"].verifiedBridgeVersion !== "0.1.0-rc.7") process.exit(1);
-if (required.some((product) => manifest.products[product].runtimeVerification !== "runtime-pending")) process.exit(1);
+if (manifest.products.zcode.continuation?.maxConsecutive !== 3) process.exit(1);
+if (manifest.products["deepseek-harness"].repositoryTestedBridgeVersion !== "0.1.0-rc.7") process.exit(1);
 ' "$skill_root/assets/harness/adapter-capabilities.json" || {
-  echo "Adapter capability manifest does not satisfy the schema v2 contract" >&2
+  echo "Adapter capability manifest does not satisfy the schema v3 contract" >&2
   exit 1
 }
 

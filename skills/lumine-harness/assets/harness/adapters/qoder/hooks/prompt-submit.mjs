@@ -1,7 +1,7 @@
 import { readHookInput, writeHookOutput, normalizeHookInput } from "../../../core/hook-io.mjs";
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { buildSessionStartContext } from "../../../core/session-context.mjs";
-import { initializeSessionState, readSessionState } from "../../../core/work-status.mjs";
+import { initializeSessionState, observeHarnessEvent, readSessionState } from "../../../core/work-status.mjs";
 import { recordPromptRoute, pendingExpectedSkills } from "../../../core/phase-router.mjs";
 import { appendVerificationEvent } from "../../../core/verification.mjs";
 
@@ -10,6 +10,7 @@ try {
   const input = normalizeHookInput("qoder", "prompt_submit", raw);
   const root = requireHarnessRoot(input);
   if (!readSessionState(root, input.product, input.sessionId)) initializeSessionState(root, input);
+  observeHarnessEvent(root, input, { userInitiated: input.userInitiated, eventId: input.eventId });
   appendVerificationEvent(root, input, { raw });
   const prompt = raw.prompt ?? "";
   const state = recordPromptRoute(root, input, prompt);

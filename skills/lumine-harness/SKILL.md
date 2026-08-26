@@ -69,7 +69,7 @@ node scripts/harness-manager.mjs proposal <target-root> --adapters <product-list
 - 补齐核心 docs contract、templates、generated docs、`.harness` Core / CLI / checks / generated refresh 和公共阶段 Skills；Design、Frontend、Browser、Database、Mobile 和 Worker Coordination 按批准的模块清单生成。
 - 始终只生成根 `AGENTS.md` 与 `.agents/skills` 作为公共内容真源；不生成产品 Rules、Skill 正文副本或产品级 Skill 投影。不能原生发现 `.agents/skills` 的宿主由 Adapter 按需路由真实文件，并在首次修改前验证规范文件已经读取。
 - 生成的七个项目 Harness 阶段 Skill 必须命名为 `lumine-harness-navigate`、`lumine-harness-draft`、`lumine-harness-generated`、`lumine-harness-design`、`lumine-harness-plan`、`lumine-harness-run`、`lumine-harness-check`；禁止生成旧的无前缀 `harness-*` 名称。
-- 根据用户批准的产品列表生成薄 Adapter：Codex、Qoder、Trae、Cursor、CodeBuddy 使用仓库配置；OpenCode 使用明确降级的本地 Plugin；Kimi Code 只生成公共分发能力，不在普通 Adopt 中修改用户级配置；ZCode 交付 Hook-only 本地 Marketplace；DeepSeek Harness 交付锁定已验证版本的 profile bundle。
+- 根据用户批准的产品列表生成薄 Adapter：Codex、Qoder、Trae、Cursor、CodeBuddy 使用仓库配置；OpenCode 使用明确降级的本地 Plugin；Kimi Code 只生成公共分发能力，不在普通 Adopt 中修改用户级配置；ZCode 交付 Hook-only 本地 Marketplace；DeepSeek Harness 交付锁定仓库测试版本的开发预览 profile bundle，不能据此宣称真实宿主已验证。
 - 无论是否存在 Git，都不能覆盖与当前工作树修改重叠的文件。不可通过 Git 恢复的被替换文件必须先备份到 `.harness/local/harness-backup/<timestamp>/`。
 - Adopt 只允许写已确认 Proposal 的精确 write set；发现新冲突时立即停止并重新提案。
 
@@ -98,7 +98,7 @@ node scripts/harness-manager.mjs upgrade --apply --proposal <proposal.json>
 - 运行 `./.harness/cli check all`。
 - profile 不适用的检查必须返回 not applicable，而不是失败。
 - 如果有 Node tests，运行生成的 `.harness/tests/*.test.mjs`。
-- 运行 `./.harness/cli adapter doctor <product|all>`；Trae 开关、Cursor Workspace Trust、Kimi 用户配置、ZCode Plugin、CodeBuddy `/hooks` 审核、DeepSeek Harness profile bundle 和产品端真实 Hook 必须保留为人工验证，除非已在对应产品内取得运行证据。
+- 运行 `./.harness/cli adapter status selected` 汇总普通用户需要知道的接入状态；`adapter doctor` 只检查仓库配置、安装和缺失设置，`adapter verify` 只供真实宿主证据验证。Trae 产品设置、Kimi 用户配置、ZCode Plugin、CodeBuddy `/hooks` 审核、DeepSeek Harness profile bundle，以及 Cursor 处于受限状态时的项目授权，都必须明确报告，不能由配置文件存在推断为已生效。
 - 收尾报告 topology、改动、未改动、not applicable 项、剩余人工决策点。
 
 ## 关键口径
@@ -120,6 +120,7 @@ node scripts/harness-manager.mjs upgrade --apply --proposal <proposal.json>
 - ZCode 项目级 Hook 当前不会执行，必须通过 `.harness/adapters/zcode/marketplace` 安装 Hook-only Plugin；Adapter 路由公共 Skill，完整规则只从项目 `.agents/skills` 读取并审计。
 - CodeBuddy 使用 `.codebuddy/settings.json` 对接生命周期；公共 Skill 由 Adapter 路由，不生成 `.codebuddy/skills`。若存在 `CODEBUDDY.md` 或 `.codebuddy/CODEBUDDY.md`，必须用正确相对路径显式导入根 `AGENTS.md`，并在新会话中通过 `/hooks` 审核配置。没有真实 Hook 日志前保持 `needs_manual_app_step`。
 - DeepSeek Harness 原生读取根 `AGENTS.md` 与项目 `.agents/skills`；第一版通过官方 `@deepseek-ai/dsh-hooks-codex` 连接生命周期，锁定宿主/bridge `0.1.0-rc.7`，并明确保留 SessionStart、Stop 的 partial 与 developer-preview 边界。
+- `continue_autonomously` 只表达任务仍有明确、安全且不需要新授权的下一步；`followup_message`、阻止 Stop 或宿主退出码只是发起下一轮的产品协议。同一状态发射必须幂等，后续完成新工作后可以再次声明；默认连续自治上限和停滞阈值由 `.harness/project.json` 配置。
 
 ## 输出要求
 

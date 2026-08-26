@@ -2,7 +2,8 @@ import { normalizeHookInput } from "../../../core/hook-io.mjs";
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { buildSessionStartContext } from "../../../core/session-context.mjs";
 import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
-import { initializeSessionState } from "../../../core/work-status.mjs";
+import { continuationDeliveryFor } from "../../../core/continuation-delivery.mjs";
+import { initializeSessionState, observeHarnessEvent } from "../../../core/work-status.mjs";
 import { appendVerificationEvent } from "../../../core/verification.mjs";
 
 export async function handleKimiHook(raw = {}) {
@@ -11,12 +12,17 @@ export async function handleKimiHook(raw = {}) {
   const root = requireHarnessRoot(input);
   if (event === "session_start") {
     initializeSessionState(root, input);
+    observeHarnessEvent(root, input, { eventId: input.eventId });
     appendVerificationEvent(root, input, { raw });
     return { exitCode: 0, stdout: buildSessionStartContext({ ...input, root }) };
   }
   const decision = evaluateStopPolicy(input, { root });
   appendVerificationEvent(root, input, { raw, decision });
-  if (decision.action === "continue" || decision.action === "block") {
+  const delivery = continuationDeliveryFor(input.product, decision);
+  if (decision.disposition === "reject_completion" && delivery === "automatic") {
+    return { exitCode: 2, stderr: decision.message };
+  }
+  if (decision.disposition === "request_continuation" && decision.shouldDeliver === true && delivery === "automatic") {
     return { exitCode: 2, stderr: decision.message };
   }
   return { exitCode: 0 };

@@ -2,6 +2,7 @@ import { normalizeHookInput } from "../../../core/hook-io.mjs";
 import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { buildSessionStartContext } from "../../../core/session-context.mjs";
 import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
+import { continuationDeliveryFor } from "../../../core/continuation-delivery.mjs";
 import {
   isMutatingTool,
   markExpectedSkillRead,
@@ -12,6 +13,8 @@ import {
 } from "../../../core/phase-router.mjs";
 import {
   initializeSessionState,
+  observeHarnessEvent,
+  recordUsedSkill,
   readSessionState
 } from "../../../core/work-status.mjs";
 import { appendVerificationEvent } from "../../../core/verification.mjs";
@@ -40,6 +43,12 @@ export async function handleDeepSeekHarnessHook(raw = {}) {
   const root = requireHarnessRoot(input);
   if (event === "session_start") initializeSessionState(root, input);
   else ensureSession(root, input);
+  if (event !== "stop") {
+    observeHarnessEvent(root, input, {
+      eventId: input.eventId,
+      userInitiated: event === "prompt_submit" && input.userInitiated
+    });
+  }
   appendVerificationEvent(root, input, { raw });
 
   if (event === "session_start") {
@@ -70,7 +79,10 @@ export async function handleDeepSeekHarnessHook(raw = {}) {
       if (toolLoadsExpectedSkill(raw, skill.name) || toolReadsExpectedSkill(raw, skill.path)) {
         state = markExpectedSkillRead(root, input, state, skill.path);
         const sharedSkill = getSharedSkill(root, skill.name);
-        if (sharedSkill) appendVerificationEvent(root, input, { raw, skill: sharedSkill });
+        if (sharedSkill) {
+          recordUsedSkill(root, input, sharedSkill);
+          appendVerificationEvent(root, input, { raw, skill: sharedSkill });
+        }
       }
     }
     return { exitCode: 0 };
@@ -80,6 +92,7 @@ export async function handleDeepSeekHarnessHook(raw = {}) {
     const state = readSessionState(root, input.product, input.sessionId);
     const pending = pendingExpectedSkills(state);
     if (isMutatingTool(raw) && pending.length) {
+      appendVerificationEvent(root, input, { raw, observations: ["pre_mutation_gate"] });
       return {
         exitCode: 0,
         stdout: JSON.stringify({
@@ -96,7 +109,14 @@ export async function handleDeepSeekHarnessHook(raw = {}) {
 
   const decision = evaluateStopPolicy(input, { root });
   appendVerificationEvent(root, input, { raw, decision });
-  if (decision.action === "continue" || decision.action === "block") {
+  const delivery = continuationDeliveryFor(input.product, decision);
+  if (decision.disposition === "reject_completion" && delivery === "automatic") {
+    return {
+      exitCode: 0,
+      stdout: JSON.stringify({ decision: "block", reason: decision.message })
+    };
+  }
+  if (decision.disposition === "request_continuation" && decision.shouldDeliver === true && delivery === "automatic") {
     return {
       exitCode: 0,
       stdout: JSON.stringify({ decision: "block", reason: decision.message })
