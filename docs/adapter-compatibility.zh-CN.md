@@ -1,155 +1,78 @@
-# 不同 Agent 能用到什么程度
+# 在不同 Agent 中使用 Lumine Harness
 
-Lumine Harness 可以让多个 Agent 共用同一套 `AGENTS.md`、`.agents/skills`、工程文档和 Harness Core。不同产品读取这些内容、执行 Hook 和自动继续任务的方式并不相同。
+本文适用于已经完成 Lumine Harness 项目接入的工程。Harness 根目录是包含 `.harness/root.json` 和 `.harness/cli` 的工程目录；如果还没有这些文件，请先返回[中文 README](../README.zh-CN.md)完成接入。
 
-先记住一个边界：**接入文件已经生成，不代表当前 Agent 已经真正使用了它们。** 是否生效，要以当前产品、当前版本和真实会话中的检查结果为准。
+下面列出的是各产品的接入方式和 Lumine Harness 仓库已经提供的 Adapter，不代表你本机的当前会话已经验证通过。
 
-## 先回答五个问题
+## 找到你使用的 Agent
 
-### 我使用的 Agent 能接入吗？
+| Agent | 接入后的使用方式 | 第一次要做什么 | 使用时的主要差异 |
+| --- | --- | --- | --- |
+| Codex | 项目接入后直接使用 | 从 Harness 根目录开启新会话 | 原生发现 `.agents/skills`；项目 Hook 负责会话入口、结束检查和继续处理 |
+| Cursor | 项目接入后直接使用 | 从 Harness 根目录开启新会话；只有 Cursor 明确提示工程受限时才按提示信任工程 | 原生发现 `.agents/skills`；未完成任务通过新一轮消息继续 |
+| Trae | 完成一次设置后使用 | 在“设置 > 规则 > 导入设置”启用 `AGENTS.md`，在“设置 > 技能与命令 > 导入设置”启用 `.agents` 技能目录，并在“设置 > Hooks”启用项目 Hook，然后开启新会话 | 设置完成后原生发现 `.agents/skills` |
+| Kimi Code | 安装一次后使用 | 运行 `./.harness/cli adapter install kimi`，重新加载 Kimi Code，再从 Harness 根目录开启新会话 | 原生发现 `.agents/skills`；Hook 失败时默认放行，高风险操作仍需独立确认 |
+| Qoder | 项目接入后直接使用 | 从 Harness 根目录开启新会话；关键阶段明确说出 Skill 名称会更稳定 | Skill 不进入 Qoder 原生列表；Adapter 定位真实文件并要求 Agent 读取 |
+| CodeBuddy | 确认项目 Hook 后使用 | 在 CodeBuddy 对话中运行 `/hooks`，审核当前项目的 Hook 变更，再开启新会话 | Skill 不进入 CodeBuddy 原生列表；Adapter 定位真实文件并要求 Agent 读取 |
+| ZCode | 启用本地 Plugin 后使用 | 运行 `./.harness/cli adapter install zcode`，把返回目录加入 ZCode 本地 Marketplace，安装并启用 `lumine-harness-adapter`，再开启新会话 | Skill 不进入 ZCode 原生列表；最多连续自动继续 3 次 |
+| OpenCode | 核心流程可以直接使用 | 从 Harness 根目录开启新会话 | 原生发现 `.agents/skills`；没有对等 Stop Gate，任务需要继续时由人发起下一轮 |
+| DeepSeek Harness | 完成配置后试用 | 运行 `./.harness/cli adapter install deepseek-harness`，授权修改用户 profile，执行命令返回的 `dsh plugin` 安装指令，再开启新会话 | 当前属于开发预览，不应作为高风险操作的唯一门禁 |
 
-当前规范为 Codex、Qoder、Trae、Kimi Code、Cursor、OpenCode、ZCode、CodeBuddy 和 DeepSeek Harness 提供了适配方案。部分产品可以直接读取公共工程资产，部分产品需要适配层（Adapter）帮它定位文件，还有一些产品需要完成一次安装或设置。
+所有项目 Skill 的正文只保存在 `.agents/skills/`。支持该目录的产品会直接发现它；Qoder、CodeBuddy 和 ZCode 的 Adapter 会根据明确的 Skill 名称或 Harness 阶段定位真实文件，要求 Agent 读取，并在宿主提供相应事件时检查是否已经读取。Adapter 不会复制 Skill 正文，也不会代替模型阅读文件。
 
-“提供了适配方案”只表示仓库侧已有实现，不代表每个产品版本都经过了真实会话验证。
+## 最关键的 Hook 差异：结束前能不能先检查
 
-### 接入后哪些能力可以自动完成？
+多数产品都能在新会话开始或提交提示时补充工程上下文。真正影响长任务闭环的是：Agent 准备结束时，宿主是否提供停止前门禁（Stop Gate）。本文把各产品提供的这类结束前能力统称为 Stop Gate；它不一定是产品中的实际事件名称。
 
-先区分两件事：
+这些差异不是把 `.codex` 改成另一个目录名就能解决。不同 Agent 的 Hook 没有统一协议：配置位置、事件名称、触发时机和返回值都可能不同；有的 Hook 可以阻断当前动作并向 Agent 反馈，有的只能在动作结束后收到通知；失败时也可能分别采用默认阻断或默认放行。Lumine Harness 的 Adapter 可以把已有协议转换为统一的 Harness 语义，但不能补出宿主本身没有提供的生命周期能力。
 
-- **基本流程**：Agent 能读取项目规则、Skills 和工作流文档，并按 Draft、Design、Product Spec、Exec Plan、实施和验证阶段推进任务。
-- **自动续跑**：Agent 本轮准备结束，但任务仍有明确、安全的下一步时，宿主能否自动发起下一轮。
+Stop Gate 在本轮真正结束前执行。它可以读取 `WORK_STATUS`、运行 Harness Check，并据此允许结束、要求继续，或把需要决策、凭据和人工操作的事项交还给人。结束后的日志或通知事件不能替代它。
 
-基本流程可用，不等于一定支持自动续跑。无法自动续跑时，Lumine Harness 仍可保存任务状态，只是需要人手动让 Agent 继续。
+| 情况 | Agent | 对使用者的影响 |
+| --- | --- | --- |
+| 有停止前门禁，宿主协议允许 Adapter 请求继续 | Codex、Qoder、Trae、Cursor、CodeBuddy | 未完成的长任务可以先检查，再继续推进 |
+| 有停止前门禁，但存在产品限制 | Kimi Code、ZCode、DeepSeek Harness | Kimi Hook 失败时默认放行；ZCode 最多连续自动继续 3 次；DeepSeek Harness 仍是开发预览 |
+| 没有对等的停止前门禁 | OpenCode | 可以读取工程资产并执行核心流程，但不能在停止前阻止过早结束；任务未完成时需要人发起下一轮 |
 
-### 我还需要做什么设置？
+OpenCode 的 `session.idle` 发生在 Agent 已经进入空闲状态以后。Lumine Harness 的 OpenCode Adapter 只把它用于结束后审计；它不能当作 Stop Gate，也不能可靠地自动重新进入本轮任务。
 
-接入流程会先生成项目内需要的文件。只有涉及用户级配置、产品内开关、本地 Plugin 或 profile 扩展时，才需要人完成一次设置。具体操作会出现在连接检查的“下一步”中。
+## 检查是否已经生效
 
-### 怎样确认它真的生效了？
-
-在准备使用的 Agent 中，从 Harness 工程根目录开启一个新会话，然后发送：
+完成上表中的首次设置后，从 Harness 根目录开启新会话，然后发送：
 
 ```text
-检查当前 Agent 与 Lumine Harness 是否正常连接。
+检查当前 Agent 的 Lumine Harness 是否已经生效。
 ```
 
-检查会汇总当前已有证据，并分别列出项目指令、公共 Skills、生命周期 Hook、自动续跑和会话隔离。它不会自动完成一整套宿主认证；一次普通检查观察不到的能力会明确写成“尚未验证”或“当前宿主无法直接观察”，不会用配置文件代替运行证据。
+检查结果会告诉你：
 
-### 哪些事情仍需要人完成？
+- 现在能不能开始；
+- 还需要完成什么一次性设置；
+- 当前产品有哪些会影响使用的限制；
+- 接下来应该做什么。
 
-- 首次安装用户级 Hook、本地 Plugin 或 profile 扩展；
-- 在产品设置中开启项目指令、共享 Skills 或 Hooks；
-- 产品不支持自动续跑时，手动发起下一轮；
-- 凭据、外部应用操作、产品决策和高风险授权；
-- 对无法由宿主暴露的能力做现场确认。
+这项检查是只读的，不会修改业务代码或项目文档。
 
-## 你会看到什么结果
+如果结果显示“无法识别当前 Agent”：
 
-连接检查只给出清楚的结论和下一步：
+1. 确认当前会话是从 Harness 根目录新开的；
+2. 仍无法识别时，让 Agent 运行 `./.harness/cli adapter check <product>`，把 `<product>` 换成当前产品标识；
+3. 显式产品检查只能确认工程配置和已知限制，不能证明本次会话已经实际触发 Hook。
 
-- **可以正常使用**：当前会话的基本连接已经观察到；高级能力仍按下方逐项证据判断。
-- **需要完成一次设置**：项目文件已准备好，但还需要安装、授权或开启一个产品设置。
-- **基本流程可用，部分自动化需要手动完成**：项目上下文和 Skills 可以使用，但自动续跑等能力受产品限制。
-- **尚未完成真实验证**：仓库侧实现已经存在，但当前产品版本还没有足够的运行证据。
-- **发现连接异常，需要修复**：实际行为与预期不一致；结果会同时给出受影响能力和修复建议。
+显示“可以开始”后，就可以提出第一项真实需求。显示仍有设置未完成时，按结果完成设置，再开启新会话复查。
 
-## 当前产品摘要
+Skill 发现方式和 Hook 能力改变的是自动化方式，不改变 Draft、按需 Design、Product Spec、Exec Plan、Run 和 Validation 的项目流程。
 
-下表中的“已提供”表示 Lumine Harness 已有对应实现，不表示当前机器上的产品已经验证通过。
+普通使用者到这里就足够了。只有维护 Adapter 或排查产品协议时，才需要阅读 [Adapter 调试与发布检查](adapter-verification.zh-CN.md)。
 
-| Agent | 基本流程 | 自动续跑 | 是否需要一次设置 | 当前验证情况 |
-| --- | --- | --- | --- | --- |
-| Codex | 已提供 | 已提供 | 通常不需要额外设置 | 需在当前版本中运行连接检查 |
-| Qoder | 明确 Skill 与 Harness 阶段可路由 | 随 IDE、CLI 和版本变化 | 按连接检查提示处理 | 需记录具体产品形态和版本 |
-| Trae | 已提供 | 已提供 | 需要开启项目指令、共享 Skills 和项目 Hooks | 完成设置后运行连接检查 |
-| Kimi Code | 已提供 | 已提供 | 需要单独授权安装用户级 Hook | 完成安装后运行连接检查 |
-| Cursor | 已提供 | 已提供 | 只有项目处于受限状态时才需要确认信任 | 需在当前版本中运行连接检查 |
-| OpenCode | 已提供 | 需要手动继续 | 使用项目 Plugin，任务结束前不能自动拦截 | 基本流程可检查，自动续跑当前不可用 |
-| ZCode | 明确 Skill 与 Harness 阶段可路由 | 可用，但宿主最多连续 3 次 | 需要安装本地 Marketplace Plugin | 完成安装后运行连接检查 |
-| CodeBuddy | 明确 Skill 与 Harness 阶段可路由 | 已提供 | Hook 配置变化后需要在 `/hooks` 中确认 | 完成确认后运行连接检查 |
-| DeepSeek Harness | 试用支持 | 有限支持 | 需要安装 profile 扩展 | 仍处于开发预览阶段 |
+## 官方能力参考
 
-## 各产品第一次怎么用
-
-### Codex
-
-- **能直接使用什么**：适配方案使用根 `AGENTS.md`、公共 `.agents/skills` 和项目级生命周期配置。
-- **第一次需要做什么**：通常只需从正确的 Harness 工程根目录开启新会话。
-- **仍需手动什么**：凭据、外部应用操作、高风险授权和产品决策仍由人处理。
-- **怎样确认**：发送连接检查语句，确认项目指令、Skill 和生命周期事件均有真实结果。
-- **没有通过怎么办**：先确认会话从 Harness 根目录启动，再检查仓库内的 Codex Hook 配置。
-
-### Qoder
-
-- **能直接使用什么**：明确写出的 Skill 名称和 Harness 阶段可以由 Adapter 定位到公共 `.agents/skills`。
-- **第一次需要做什么**：记录正在使用的是 Qoder IDE、CLI 还是其他形态；不同形态和版本可能暴露不同事件。
-- **仍需手动什么**：普通自然语言能否自动发现所有项目 Skill 只能尽力支持，关键阶段应使用明确的 Skill 或阶段入口。
-- **怎样确认**：在实际产品中运行连接检查，并确认首次修改前确实读取了目标 `SKILL.md`。
-- **没有通过怎么办**：先使用明确的 Skill 名称重试，再根据结果检查当前版本支持的 Hook 事件。
-
-### Trae
-
-- **能直接使用什么**：适配方案复用根 `AGENTS.md`、公共 `.agents/skills` 和项目 Hooks。
-- **第一次需要做什么**：在 Trae 中开启项目指令、共享 Skills 和项目 Hooks。
-- **仍需手动什么**：这些开关无法由仓库文件替你确认。
-- **怎样确认**：开启设置并重启会话后运行连接检查。
-- **没有通过怎么办**：确认打开的是完整 Harness 工程根目录，而不是其中一个子仓。
-
-### Kimi Code
-
-- **能直接使用什么**：项目规则和公共 Skills 保留在工程中，生命周期通过用户级 Hook 接入。
-- **第一次需要做什么**：单独授权安装 Kimi Code 用户级 Hook，然后重新加载 Kimi Code。
-- **仍需手动什么**：Hook 发生错误或超时时，产品可能继续运行，因此高风险操作不能只依赖 Hook。
-- **怎样确认**：安装后开启新会话并运行连接检查。
-- **没有通过怎么办**：检查用户配置中的受管 Hook 是否存在，并确认会话从 Harness 根目录启动。
-
-### Cursor
-
-- **能直接使用什么**：适配方案使用根项目指令、公共 Skills 和 Cursor 项目 Hooks。
-- **第一次需要做什么**：通常没有额外步骤；只有 Cursor 将项目显示为受限时，才需要按产品提示信任该项目。
-- **仍需手动什么**：产品受限时，项目 Hook 可能不会执行。
-- **怎样确认**：在当前 Cursor 版本中运行连接检查。
-- **没有通过怎么办**：先看项目是否处于受限状态，再检查 Hook 是否从完整 Harness 根目录加载。
-
-### OpenCode
-
-- **能直接使用什么**：项目规则、公共 Skills、上下文补充和运行审计可以接入。
-- **第一次需要做什么**：采用流程会生成项目 Plugin；需在当前支持的 OpenCode 版本中使用。
-- **仍需手动什么**：当前没有完整的结束前门禁，任务需要继续时由人手动发起下一轮。
-- **怎样确认**：检查项目上下文、Skills 和审计事件；连接结果应明确显示自动续跑不可用。
-- **没有通过怎么办**：先核对 OpenCode 版本与项目 Plugin 的支持范围。
-
-### ZCode
-
-- **能直接使用什么**：Adapter 可以把明确 Skill 和 Harness 阶段路由到公共 `.agents/skills`。
-- **第一次需要做什么**：在 ZCode 中加入本地 Marketplace，安装并启用 Lumine Harness Adapter Plugin，然后开启新会话。
-- **仍需手动什么**：项目级 Hook 文件不会被 ZCode 直接执行；自动续跑最多连续 3 次。
-- **怎样确认**：安装 Plugin 后运行连接检查，确认 Hook 与 Skill 读取都留下真实结果。
-- **没有通过怎么办**：优先检查 Plugin 是否启用，不要用项目内 Hook 文件是否存在来判断。
-
-### CodeBuddy
-
-- **能直接使用什么**：Adapter 可以把明确 Skill 和 Harness 阶段路由到公共 `.agents/skills`。
-- **第一次需要做什么**：项目 Hook 配置新增或变化后，在 CodeBuddy 的 `/hooks` 中检查并确认。
-- **仍需手动什么**：普通自然语言发现所有 Skill 只能尽力支持，关键阶段应使用明确入口。
-- **怎样确认**：确认 Hook 后开启新会话并运行连接检查。
-- **没有通过怎么办**：检查 CodeBuddy 项目记忆是否正确引用根 `AGENTS.md`，以及 Hook 变化是否已经确认。
-
-### DeepSeek Harness
-
-- **能直接使用什么**：当前方案通过本地 profile 扩展连接项目指令、公共 Skills 和部分生命周期事件。
-- **第一次需要做什么**：单独授权安装 profile 扩展，并从 Harness 根目录启动 DeepSeek Harness。
-- **仍需手动什么**：当前桥接能力仍不完整，不应把它作为高风险操作的唯一门禁。
-- **怎样确认**：记录具体版本并运行连接检查。
-- **没有通过怎么办**：先核对宿主与扩展版本，再按试用能力处理，不要宣称完整兼容。
-
-## 如果连接检查没有识别出当前 Agent
-
-Lumine Harness 不要求模型猜测自己运行在哪个产品中。当前产品应由真实 Adapter 会话状态识别。无法识别时：
-
-1. 确认你正在准备使用的 Agent 中执行检查；
-2. 从包含 `.harness/root.json` 的工程根目录开启新会话；
-3. 完成该产品的一次性设置；
-4. 再次发送连接检查语句。
-
-需要查看内部能力、诊断命令和运行证据时，请阅读 [Adapter 高级验证](adapter-verification.zh-CN.md)。
+- [Codex Skills](https://learn.chatgpt.com/docs/build-skills)
+- [Qoder Skills](https://docs.qoder.com/extensions/skills) 与 [Qoder Hooks](https://docs.qoder.com/extensions/hooks)
+- [Trae Skills](https://docs.trae.cn/ide_skills) 与 [Trae Hooks](https://docs.trae.cn/ide_automate-actions-with-hooks)
+- [Kimi Code Skills](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/skills.html) 与 [Kimi Code Hooks](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/hooks.html)
+- [Cursor Skills](https://cursor.com/docs/skills) 与 [Cursor Hooks](https://cursor.com/docs/hooks)
+- [OpenCode Skills](https://opencode.ai/docs/skills/)、[OpenCode Plugins](https://opencode.ai/docs/plugins/) 与 [停止前事件提案](https://github.com/anomalyco/opencode/issues/16626)
+- [ZCode Skills](https://zcode.z.ai/en/docs/skill) 与 [ZCode Hooks](https://zcode.z.ai/en/docs/hooks)
+- [CodeBuddy Skills](https://www.codebuddy.ai/docs/cli/skills) 与 [CodeBuddy Hooks](https://www.codebuddy.ai/docs/cli/hooks)
+- [DeepSeek Harness Skills](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/skills.md) 与 [Codex Hook bridge](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/hooks/hooks-codex/README.md)

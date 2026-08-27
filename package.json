@@ -1,0 +1,22 @@
+{
+  "name": "lumine-harness-repository",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.13.0",
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
+  },
+  "scripts": {
+    "runtime:typecheck": "tsc --noEmit",
+    "runtime:build": "tsx scripts/build-runtime.ts --write",
+    "runtime:check": "tsx scripts/build-runtime.ts --check",
+    "runtime:test": "node --test skills/lumine-harness/assets/harness/tests/*.test.mjs",
+    "runtime:test:source": "node --import tsx --test skills/lumine-harness/src/harness/tests/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.3.0",
+    "tsdown": "^0.22.14",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}

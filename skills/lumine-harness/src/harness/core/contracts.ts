@@ -1,0 +1,191 @@
+export type HarnessProduct =
+  | "codex"
+  | "qoder"
+  | "trae"
+  | "kimi"
+  | "cursor"
+  | "opencode"
+  | "zcode"
+  | "codebuddy"
+  | "deepseek-harness";
+
+export type HarnessHookEvent =
+  | "session_start"
+  | "prompt_submit"
+  | "tool_before"
+  | "tool_after"
+  | "assistant_response"
+  | "stop";
+
+export interface HarnessSessionInput {
+  product: HarnessProduct;
+  sessionId: string | null;
+  cwd: string;
+  workspaceRoots?: string[];
+  lastAssistantMessage?: string | null;
+  loopCount?: number;
+  stopHookActive?: boolean;
+  sessionMode?: string | null;
+  statusEmissionId?: string | null;
+  userTurnId?: string | null;
+  eventId?: string | null;
+  userInitiated?: boolean;
+  progressObservable?: boolean;
+  progressObserved?: boolean;
+}
+
+export interface HarnessHookInput extends HarnessSessionInput {
+  event: HarnessHookEvent;
+}
+
+export type UnknownRecord = Record<string, unknown>;
+
+export interface NormalizedHarnessHookInput extends HarnessHookInput {
+  raw: UnknownRecord;
+}
+
+export type WorkStatus =
+  | "done"
+  | "continue_autonomously"
+  | "needs_user_decision"
+  | "needs_credentials"
+  | "needs_manual_app_step"
+  | "blocked_external";
+
+export type StopDisposition =
+  | "finish"
+  | "request_continuation"
+  | "pause_for_human"
+  | "reject_completion";
+
+export type ContinuationDelivery = "automatic" | "manual_required" | "unsupported";
+
+export interface HarnessHookDecision {
+  disposition: StopDisposition;
+  /** @deprecated Adapter migration compatibility. Use disposition instead. */
+  action: "allow" | "continue" | "pause" | "block";
+  message?: string;
+  workStatus?: WorkStatus;
+  workStatusRevision?: number;
+  continuationRequestId?: string;
+  shouldDeliver?: boolean;
+}
+
+export interface SharedSkill {
+  name: string;
+  description: string;
+  file: string;
+  relativeSource: string;
+  hash: string;
+}
+
+export interface SkillCatalogDiagnostic {
+  file: string;
+  code: "invalid-skill" | "duplicate-skill-name";
+  message: string;
+}
+
+export interface ExpectedSkill {
+  name: string;
+  path: string;
+  reason: string | null;
+  read: boolean;
+  readAt?: string | null;
+}
+
+export interface UsedSkill {
+  name: string;
+  source: string;
+  readAt: string;
+}
+
+export interface SessionState extends UnknownRecord {
+  product: HarnessProduct;
+  sessionId: string;
+  updatedAt: string;
+  cwd?: string;
+  startedAt?: string;
+  resumedAt?: string;
+  sessionMode?: string | null;
+  lastAssistantMessage?: string | null;
+  userTurnId?: string | null;
+  userTurnRevision?: number;
+  hostTurnRevision?: number;
+  workStatus?: WorkStatus | null;
+  workStatusEmissionId?: string | null;
+  workStatusRevision?: number;
+  workStatusUserTurnRevision?: number;
+  workStatusUpdatedAt?: string | null;
+  lastEvaluatedContinuationRevision?: number | null;
+  lastContinuationDisposition?: StopDisposition | null;
+  lastContinuationMessage?: string | null;
+  autonomousChainCount?: number;
+  continuationCount?: number;
+  continuationConsumedRevision?: number | null;
+  pendingContinuationRequestId?: string | null;
+  pendingContinuationRevision?: number | null;
+  continuationRequestedAt?: string | null;
+  continuationDeliveredAt?: string | null;
+  lastContinuationRequestId?: string | null;
+  lastContinuationRequestRevision?: number | null;
+  lastContinuationDeliveryEventId?: string | null;
+  progressObservable?: boolean;
+  progressRevision?: number;
+  lastProgressEventId?: string | null;
+  lastProgressAt?: string | null;
+  lastContinuationProgressRevision?: number | null;
+  noProgressCount?: number;
+  expectedPhase?: string | null;
+  expectedSkill?: string | null;
+  expectedSkillPath?: string | null;
+  expectedSkillRead?: boolean;
+  expectedSkillReadAt?: string | null;
+  expectedSkills?: ExpectedSkill[];
+  usedSkills?: UsedSkill[];
+}
+
+export type SessionStatePatch = Partial<SessionState> & UnknownRecord;
+
+export type SkillDiscoveryMode = "native" | "native-with-toggle" | "adapter-routed" | "unsupported";
+export type CapabilityEvidenceLevel = "official_declared" | "repository_checked" | "runtime_observed" | "behavior_verified";
+export type CapabilityResult = "passed" | "needs_setup" | "not_tested" | "not_observable" | "not_applicable" | "failed";
+export type AdapterCapabilityName =
+  | "project_instructions"
+  | "session_context"
+  | "skill_discovery"
+  | "skill_read"
+  | "pre_mutation_gate"
+  | "stop_gate"
+  | "automatic_continuation"
+  | "work_status_matrix"
+  | "session_isolation";
+
+export interface AdapterCapabilityResult {
+  result: CapabilityResult;
+  evidenceLevel: CapabilityEvidenceLevel;
+  observedAt?: string | null;
+  evidence?: string | null;
+}
+
+export type AdapterReadiness = "ready" | "setup_required" | "trial_only" | "connection_error";
+
+export interface AdapterSetupAction {
+  id: string;
+  title: string;
+  steps: string[];
+  successSignal: string;
+  reloadRequired: boolean;
+  satisfiedBy?: AdapterCapabilityName[];
+}
+
+export interface HarnessAdapterCapability {
+  implementation: "available" | "unsupported";
+  setup: string;
+  setupActions?: AdapterSetupAction[];
+  limitations?: string[];
+  skills: { mode: SkillDiscoveryMode; implicitDiscovery?: "best-effort" };
+  capabilities: Partial<Record<AdapterCapabilityName, AdapterCapabilityResult>>;
+  continuation?: { delivery: ContinuationDelivery; maxConsecutive?: number | null };
+  maturity: "full" | "partial" | "developer-preview";
+  failMode: "open" | "closed";
+}

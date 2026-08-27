@@ -10,6 +10,8 @@
 ## 仓库地图
 
 - `skills/lumine-harness/`：唯一规范 Agent Skill，包含入口指令、参考资料、模板、公共 Harness Core、项目阶段 Skills 和产品 Adapter。
+- `skills/lumine-harness/src/`：Harness Runtime、Adapter、CLI 和运行测试的 TypeScript 唯一源码。
+- `skills/lumine-harness/assets/harness/**/*.mjs`、`skills/lumine-harness/assets/opencode/plugins/harness.mjs`、`skills/lumine-harness/scripts/harness-manager.mjs`：由 TypeScript 构建生成的可分发运行产物，禁止直接编辑。
 - `plugins/lumine-harness/`：Codex Plugin 分发包装；其中的 `skills/lumine-harness/` 由规范 Skill 同步生成，不是第二套实现。
 - `.agents/plugins/marketplace.json`：仓库级 Codex Marketplace 目录，只声明 Plugin 的发现和安装位置，不承载 Harness 工作流。
 - `scripts/sync-plugin-wrapper.sh`：从规范 Skill 重新生成 Plugin wrapper 中的 Skill。
@@ -21,6 +23,7 @@
 ## 唯一真源与生成关系
 
 - Skill 行为、参考资料、模板、Harness Core、项目阶段 Skills 和 Adapter 只在 `skills/lumine-harness/` 中维护。
+- Runtime、Adapter、CLI 和运行测试必须修改 `skills/lumine-harness/src/` 下的 TypeScript 源码，再运行 `pnpm runtime:build` 生成 `.mjs`；不得直接修补生成产物。
 - 不要直接修改 `plugins/lumine-harness/skills/lumine-harness/` 下的任何文件；同步脚本会覆盖这些改动。
 - 修改规范 Skill 后必须执行：
 
@@ -40,7 +43,7 @@ bash scripts/check-repo-sync.sh
 
 ### Adapter 或宿主能力
 
-- 修改规范 Skill 下的公共 Core、Adapter、Capability Manifest 和相应测试。
+- 修改规范 Skill 下的 TypeScript 公共 Core、Adapter、Capability Manifest 和相应测试，再重新生成 Runtime 产物。
 - 产品名称只用于真实协议、产品目录、兼容性说明和验证证据。
 - 同步更新中英文 Adapter 兼容性文档；README 只保留普通用户需要的能力摘要和入口链接。
 - 配置文件存在不等于产品端已经执行；没有真实 Hook、Skill 读取或续跑证据时，不得宣称完整兼容。
@@ -82,12 +85,17 @@ bash scripts/check-repo-sync.sh
 
 ## 仓库验证
 
+普通使用者运行已生成 Runtime 时保持 Node.js 18 兼容；维护本仓库和重新生成 Runtime 需要 Node.js 22.18+ 或 24.11+，以满足当前 `tsdown` 工具链要求。
+
 修改完成后至少运行：
 
 ```bash
+pnpm runtime:typecheck
+pnpm runtime:build
+pnpm runtime:check
+pnpm runtime:test
 bash skills/lumine-harness/scripts/check-skill-package.sh
 bash scripts/check-repo-sync.sh
-node --test skills/lumine-harness/assets/harness/tests/*.test.mjs
 ```
 
 验证要求：
@@ -96,6 +104,7 @@ node --test skills/lumine-harness/assets/harness/tests/*.test.mjs
 - Plugin wrapper 与规范 Skill 完全一致。
 - 公共资产不存在具体模型绑定或产品固定执行主体。
 - Adapter 能力声明、实现、测试和公开说明一致。
+- TypeScript 是运行逻辑的唯一源码；生成的 `.mjs` 与源码和构建清单无漂移。
 - 不把 `not applicable`、需要人工设置或仅有配置文件的状态写成验证通过。
 
 ## Git 与交付

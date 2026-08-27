@@ -61,6 +61,20 @@ Inspect <target-project-directory> and present a Migration Proposal first.
 Do not modify files until I approve it.
 ```
 
+#### Update later
+
+After installing with the `skills` CLI, use the same command to update the globally installed entry Skill whether you originally chose GitHub or Gitee. The CLI reuses the source recorded during installation:
+
+```bash
+npx skills update lumine-harness -g -y
+```
+
+For a manual clone, update through the remote already configured for that clone:
+
+```bash
+git -C <clone-directory> pull --ff-only
+```
+
 ### 2. Start a new session from the correct project root
 
 | Project shape | Directory to open |
@@ -176,6 +190,7 @@ my-project/
 ├── ARCHITECTURE.md
 ├── docs/
 │   ├── drafts/
+│   ├── design-docs/          # only when design is needed
 │   ├── product-specs/
 │   ├── exec-plans/
 │   │   ├── active/
@@ -197,6 +212,7 @@ A multi-repository project uses the same Harness assets and also contains relate
 | `AGENTS.md` | Where should the Agent start, and what are the project boundaries and phase rules? |
 | `ARCHITECTURE.md` | What composes the system, and how do modules connect? |
 | Draft | What was requested, and what remains unclear? |
+| Design (optional) | What should the experience look like, and which design decisions and prototypes were approved? |
 | Product Spec | What should be built, within which scope and acceptance criteria? |
 | Exec Plan | How will it be implemented, and where is execution now? |
 | Validation | What happened, and which results have been proven? |
@@ -234,15 +250,23 @@ The Agent and tools consume complete source, generated navigation, detailed plan
 
 Lumine Harness keeps shared engineering assets in `AGENTS.md`, `.agents/skills`, Docs, and `.harness` instead of copying the workflow for every product.
 
-Agent products differ in how they load project instructions and Skills and how they execute lifecycle Hooks. Creating the integration files does not prove that the current Agent has actually used them.
+After project adoption, coding agents use the same Draft, Product Spec, Exec Plan, and Validation workflow. Users mainly need to know whether a product requires one-time setup, how it discovers project Skills, and whether a Stop Gate can check the Agent's state before the turn ends.
 
-After adoption, the Agent checks which product settings are still missing. You can repeat that check at any time by saying:
+The compatibility guide reflects published product protocols and the Adapter implementation in this repository. It does not mean that the current session on your machine has already been verified.
+
+After adoption, start a new session in the Agent you actually plan to use and send:
 
 ```text
-Check whether the current Agent is connected to Lumine Harness correctly.
+Check whether Lumine Harness is active in the current Agent.
 ```
 
-The check summarizes the evidence already available: what is prepared in the repository, what was observed in a real session, what still needs setup, and what still needs verification. It does not turn an unobserved capability into a compatibility claim merely because the check was requested. See [What works in each Agent](docs/adapter-compatibility.md) for product-specific details.
+The result tells you directly:
+
+- whether you can start now;
+- whether one setup step is still required;
+- whether a product limitation changes how you use the workflow.
+
+See [Using Lumine Harness with Different Coding Agents](docs/adapter-compatibility.md) for one-time setup, Skill discovery, and Stop Gate differences. Protocol evidence and real-host acceptance are maintainer concerns, not a daily-development prerequisite.
 
 ## Safety boundaries
 
@@ -266,7 +290,7 @@ The commands, troubleshooting notes, and alternate installation methods below ar
 ./.harness/cli generated refresh all
 ```
 
-An ordinary connection check, configuration diagnosis, and real-host verification answer different questions. See [What works in each Agent](docs/adapter-compatibility.md) for troubleshooting. Maintainers who need to record runtime evidence should use [Advanced Adapter Verification](docs/adapter-verification.md).
+For ordinary troubleshooting, see [Using Lumine Harness Across Coding Agents](docs/adapter-compatibility.md). Only Adapter maintainers or host-protocol investigations need [Adapter diagnostics and release checks](docs/adapter-verification.md).
 
 ### Troubleshooting
 
@@ -280,7 +304,7 @@ Restart it from the common project root that contains every related repository.
 No. Inspection reports overlapping unmanaged files as conflicts. Adoption does not continue until the conflict is resolved and a new proposal is approved.
 
 **A Hook file exists but does not run**
-Ask the Agent to check whether it is connected to Lumine Harness correctly. If the result is still inconclusive, follow the one-time setup for that product in the compatibility guide. A configuration file existing on disk does not prove that its Hook executed.
+Ask the Agent to check whether Lumine Harness is active. If the result is still inconclusive, follow the one-time setup for that product in the compatibility guide.
 
 **generated says `Review status: pending`**
 Only deterministic scanning is complete. The Agent still needs to sample the referenced source and update review metadata.
@@ -292,12 +316,6 @@ Install globally with pnpm:
 ```bash
 pnpm dlx skills add 1uckyneo/lumine-harness -g
 pnpm dlx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
-```
-
-Update the globally installed entry Skill:
-
-```bash
-npx skills update lumine-harness -g -y
 ```
 
 Omit `-g` to write the entry Skill into the current project. This creates Skill files in the current directory, so first confirm that it is the intended installation target:

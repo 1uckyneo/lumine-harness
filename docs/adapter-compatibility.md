@@ -1,155 +1,78 @@
-# What Works in Each Agent
+# Using Lumine Harness with Different Coding Agents
 
-Lumine Harness lets multiple Agent products share one `AGENTS.md`, one `.agents/skills` directory, the same engineering documents, and the same Harness Core. Products still differ in how they load those assets, execute Hooks, and start another turn automatically.
+This guide is for projects that have already adopted Lumine Harness. The Harness root is the project directory that contains `.harness/root.json` and `.harness/cli`. If those files do not exist yet, follow the adoption steps in the [README](../README.md) first.
 
-Keep one boundary in mind: **creating the integration files does not prove that the current Agent has used them.** The result depends on the product, its version, and behavior observed in a real session.
+The table describes each product's setup path and the Adapter provided by the Lumine Harness repository. It does not claim that your current local session has already been verified.
 
-## Five questions to answer first
+## Find your coding agent
 
-### Can my Agent use Lumine Harness?
+| Agent | How to use it after adoption | Start here | Main difference |
+| --- | --- | --- | --- |
+| Codex | Use it directly after project adoption | Start a new session from the Harness root | Discovers `.agents/skills` natively; project Hooks provide session entry, completion checks, and continuation |
+| Cursor | Use it directly after project adoption | Start a new session from the Harness root; trust the project only if Cursor explicitly marks it as restricted | Discovers `.agents/skills` natively; unfinished work continues through a new follow-up turn |
+| Trae | Use it after one-time setup | Enable `AGENTS.md` under Settings > Rules > Import Settings, enable the `.agents` Skill directory under Settings > Skills and Commands > Import Settings, and enable project Hooks under Settings > Hooks; then start a new session | Discovers `.agents/skills` natively after setup |
+| Kimi Code | Use it after one-time installation | Run `./.harness/cli adapter install kimi`, reload Kimi Code, and start a new session from the Harness root | Discovers `.agents/skills` natively; Hooks fail open, so high-risk actions still need independent approval |
+| Qoder | Use it directly after project adoption | Start a new session from the Harness root; naming the Skill explicitly is more reliable for critical phases | Skills do not appear in Qoder's native list; the Adapter locates the canonical file and requires the Agent to read it |
+| CodeBuddy | Use it after approving project Hooks | Run `/hooks` in CodeBuddy, review the current project's Hook changes, and start a new session | Skills do not appear in CodeBuddy's native list; the Adapter locates the canonical file and requires the Agent to read it |
+| ZCode | Use it after enabling the local Plugin | Run `./.harness/cli adapter install zcode`, add the returned directory as a local ZCode Marketplace, install and enable `lumine-harness-adapter`, and start a new session | Skills do not appear in ZCode's native list; automatic continuation is limited to three consecutive turns |
+| OpenCode | Use the core workflow directly | Start a new session from the Harness root | Discovers `.agents/skills` natively; there is no equivalent Stop Gate, so a person starts the next turn when more work is needed |
+| DeepSeek Harness | Try it after profile setup | Run `./.harness/cli adapter install deepseek-harness`, authorize the profile change, run the returned `dsh plugin` command, and start a new session | Developer preview; do not use it as the only gate for high-risk actions |
 
-The canonical package provides integrations for Codex, Qoder, Trae, Kimi Code, Cursor, OpenCode, ZCode, CodeBuddy, and DeepSeek Harness. Some products read shared project assets directly, some need an Adapter to route to the real files, and some require one-time installation or settings.
+Every project Skill body lives only under `.agents/skills/`. Products that support this directory discover it directly. For Qoder, CodeBuddy, and ZCode, the Adapter maps an explicit Skill name or Harness phase to the canonical file, requires the Agent to read it, and checks the read event when the host exposes one. The Adapter neither copies Skill bodies nor reads them on the model's behalf.
 
-“An integration is available” describes repository implementation. It is not a claim that every version of the product has passed a real-session check.
+## The most important Hook difference: can the Agent check before stopping?
 
-### What can be automatic?
+Most products can add engineering context when a session starts or a prompt is submitted. What matters most for long-running work is whether the host provides a pre-stop gate before the Agent actually becomes idle. This guide uses Stop Gate as a shared name for this class of pre-stop capability; it is not necessarily the event name used by each product.
 
-Separate two capabilities:
+These differences cannot be solved by renaming `.codex` to another product directory. Coding agents do not share one Hook standard: configuration paths, event names, timing, and return contracts differ. Some Hooks can block an action and return feedback to the Agent; others only receive a notification after the action has finished. Failure behavior may also be fail-closed or fail-open. A Lumine Harness Adapter can translate lifecycle capabilities that a host already exposes, but it cannot create a lifecycle point that the host does not provide.
 
-- **Core workflow** means the Agent can read project instructions, Skills, and workflow documents and move through Draft, optional Design, Product Spec, Exec Plan, implementation, and Validation.
-- **Automatic continuation** means the host can start another turn when the Agent is about to stop but a clear and safe next step remains.
+A Stop Gate can read `WORK_STATUS`, run Harness Check, and then allow the turn to finish, request another turn, or return control for a decision, credentials, or a manual step. A notification or audit event that fires after the turn has ended is not equivalent.
 
-A product can support the core workflow without supporting automatic continuation. In that case Lumine Harness still preserves task state, but a person starts the next turn.
+| Situation | Agent | Effect on the user |
+| --- | --- | --- |
+| Pre-stop gate whose host protocol lets the Adapter request continuation | Codex, Qoder, Trae, Cursor, CodeBuddy | Incomplete long-running work can be checked before the Adapter asks the host to continue |
+| Pre-stop gate with product-specific limits | Kimi Code, ZCode, DeepSeek Harness | Kimi Hooks fail open; ZCode allows at most three consecutive automatic continuations; DeepSeek Harness remains a developer preview |
+| No equivalent pre-stop gate | OpenCode | The core workflow and project assets remain usable, but premature stopping cannot be blocked; a person starts the next turn |
 
-### Is any setup still required?
+OpenCode's `session.idle` event fires after the Agent has already become idle. The Lumine Harness OpenCode Adapter uses it only for post-turn audit; it is not a Stop Gate and cannot reliably re-enter the current task automatically.
 
-Adoption creates the required project files first. A person is involved only when an integration needs user-level configuration, an in-product toggle, a local Plugin, or a profile extension. The connection check reports the exact next step.
+## Check that the setup is active
 
-### How do I know it actually works?
-
-Open a new session in the Agent you intend to use, start it from the Harness project root, and send:
+After completing the setup step above, start a new session from the Harness root and ask:
 
 ```text
-Check whether the current Agent is connected to Lumine Harness correctly.
+Check whether Lumine Harness is active in the current Agent.
 ```
 
-The check summarizes existing evidence and lists project instructions, shared Skills, lifecycle Hooks, automatic continuation, and session isolation separately. It does not run a complete host certification automatically. Capabilities that an ordinary check cannot observe remain “not verified” or “not directly observable” instead of treating configuration presence as runtime evidence.
+The result should tell you:
 
-### What still requires a person?
+- whether you can start now;
+- which one-time setup step remains;
+- which product limitation changes how you work;
+- what to do next.
 
-- installing a user-level Hook, local Plugin, or profile extension for the first time;
-- enabling project instructions, shared Skills, or Hooks in product settings;
-- starting another turn when the product cannot do so automatically;
-- supplying credentials, completing external-app actions, making product decisions, and authorizing high-risk work;
-- checking capabilities the host does not expose programmatically.
+This check is read-only. It does not change business code or project documents.
 
-## Results you may see
+If the result says that it cannot identify the current Agent:
 
-The connection check returns a plain conclusion and the next action:
+1. confirm that this is a new session started from the Harness root;
+2. if identification still fails, ask the Agent to run `./.harness/cli adapter check <product>`, replacing `<product>` with the current product ID;
+3. remember that an explicit product check confirms project configuration and known limitations, not that the current session actually ran its Hooks.
 
-- **Ready to use**: the current session's basic connection was observed; advanced capabilities remain qualified by their individual evidence rows.
-- **One-time setup required**: project files are ready, but installation, authorization, or a product setting remains.
-- **Core workflow available; some automation is manual**: project context and Skills work, but the product limits features such as automatic continuation.
-- **Real-session verification not completed**: repository implementation exists, but the current product version lacks sufficient runtime evidence.
-- **Connection problem found**: observed behavior differs from the integration contract; the result names the affected capability and a repair step.
+When the result says you can start, give the Agent the first real requirement. If setup is still incomplete, follow the returned steps and check again in a new session.
 
-## Current product summary
+Skill discovery and Hook capabilities change the automation path, not the project workflow of Draft, optional Design, Product Spec, Exec Plan, Run, and Validation.
 
-“Available” below means Lumine Harness contains the corresponding implementation. It does not mean the product installed on the current machine has passed verification.
+Most users can stop here. If you maintain an Adapter or need to investigate a product protocol, see [Adapter diagnostics and release checks](adapter-verification.md).
 
-| Agent | Core workflow | Automatic continuation | One-time setup | Current verification |
-| --- | --- | --- | --- | --- |
-| Codex | Available | Available | Usually none | Run the connection check in the current version |
-| Qoder | Explicit Skills and Harness phases can be routed | Varies by IDE, CLI, and version | Follow the connection check | Record the concrete product surface and version |
-| Trae | Available | Available | Enable project instructions, shared Skills, and project Hooks | Check after enabling settings |
-| Kimi Code | Available | Available | Authorize user-level Hook installation | Check after installation |
-| Cursor | Available | Available | Trust the project only if Cursor marks it restricted | Run the connection check in the current version |
-| OpenCode | Available | Manual continuation required | Uses a project Plugin and cannot intercept before a turn ends | Core workflow can be checked; automatic continuation is unavailable |
-| ZCode | Explicit Skills and Harness phases can be routed | Available, with a host limit of 3 consecutive continuations | Install a local Marketplace Plugin | Check after installation |
-| CodeBuddy | Explicit Skills and Harness phases can be routed | Available | Review Hook changes in `/hooks` | Check after review |
-| DeepSeek Harness | Preview support | Limited | Install a profile extension | Developer preview |
+## Official capability references
 
-## First-use notes by product
-
-### Codex
-
-- **Available behavior**: the integration uses root `AGENTS.md`, shared `.agents/skills`, and project lifecycle configuration.
-- **First-time setup**: normally none beyond starting a new session from the correct Harness root.
-- **Still manual**: credentials, external-app actions, high-risk authorization, and product decisions.
-- **How to check**: run the connection check and require real results for project instructions, a Skill, and lifecycle events.
-- **If it fails**: confirm the session started at the Harness root, then inspect the repository Codex Hook configuration.
-
-### Qoder
-
-- **Available behavior**: explicit Skill names and Harness phases can be routed to shared `.agents/skills`.
-- **First-time setup**: record whether you use Qoder IDE, CLI, or another surface because events may differ by surface and version.
-- **Still manual**: implicit discovery of every project Skill from general language is best effort; use an explicit Skill or phase for critical work.
-- **How to check**: verify in the actual product that the intended `SKILL.md` was read before the first mutation.
-- **If it fails**: retry with an explicit Skill name, then inspect the events exposed by that product version.
-
-### Trae
-
-- **Available behavior**: the integration reuses root `AGENTS.md`, shared `.agents/skills`, and project Hooks.
-- **First-time setup**: enable project instructions, shared Skills, and project Hooks in Trae.
-- **Still manual**: repository files cannot confirm these product settings for you.
-- **How to check**: restart the session after enabling settings, then run the connection check.
-- **If it fails**: confirm Trae opened the complete Harness root rather than one child repository.
-
-### Kimi Code
-
-- **Available behavior**: project instructions and shared Skills remain in the project; lifecycle events use user-level Hooks.
-- **First-time setup**: separately authorize installation of the Kimi Code user-level Hooks, then reload Kimi Code.
-- **Still manual**: Hook errors or timeouts may allow execution to continue, so high-risk work cannot depend on Hooks alone.
-- **How to check**: start a new session after installation and run the connection check.
-- **If it fails**: inspect the managed Hooks in the user configuration and confirm the session started at the Harness root.
-
-### Cursor
-
-- **Available behavior**: the integration uses root project instructions, shared Skills, and Cursor project Hooks.
-- **First-time setup**: normally none. If Cursor marks the project restricted, follow its prompt to trust the project.
-- **Still manual**: project Hooks may not execute while the project is restricted.
-- **How to check**: run the connection check in the current Cursor version.
-- **If it fails**: check the project's restricted state, then confirm the Hook loaded from the complete Harness root.
-
-### OpenCode
-
-- **Available behavior**: project instructions, shared Skills, context supplementation, and runtime audit can be integrated.
-- **First-time setup**: adoption generates a project Plugin that must run on a supported OpenCode version.
-- **Still manual**: there is no complete pre-stop gate, so a person starts the next turn when work should continue.
-- **How to check**: inspect project context, Skills, and audit events; the result should explicitly show that automatic continuation is unavailable.
-- **If it fails**: compare the OpenCode version with the supported project Plugin range.
-
-### ZCode
-
-- **Available behavior**: the Adapter routes explicit Skills and Harness phases to shared `.agents/skills`.
-- **First-time setup**: add the local Marketplace in ZCode, install and enable the Lumine Harness Adapter Plugin, then start a new session.
-- **Still manual**: ZCode does not execute project-level Hook files directly, and the host allows at most 3 consecutive automatic continuations.
-- **How to check**: after installing the Plugin, verify both Hook execution and Skill reads in a real session.
-- **If it fails**: check whether the Plugin is enabled; do not use project Hook file presence as proof.
-
-### CodeBuddy
-
-- **Available behavior**: the Adapter routes explicit Skills and Harness phases to shared `.agents/skills`.
-- **First-time setup**: after project Hook configuration is added or changed, review it in CodeBuddy's `/hooks` view.
-- **Still manual**: implicit discovery of every Skill from general language is best effort; critical work should use explicit entry points.
-- **How to check**: start a new session after reviewing Hooks, then run the connection check.
-- **If it fails**: confirm that CodeBuddy project memory references root `AGENTS.md` and that Hook changes were reviewed.
-
-### DeepSeek Harness
-
-- **Available behavior**: the current integration uses a local profile extension for project instructions, shared Skills, and part of the lifecycle.
-- **First-time setup**: separately authorize profile installation and start DeepSeek Harness from the Harness root.
-- **Still manual**: the bridge remains incomplete and must not be the only gate for high-risk actions.
-- **How to check**: record the concrete version and run the connection check.
-- **If it fails**: verify host and extension versions and treat the integration as preview rather than claiming full compatibility.
-
-## If the connection check cannot identify the Agent
-
-Lumine Harness does not ask the model to guess which product hosts it. The current product comes from real Adapter session state. If it cannot be identified:
-
-1. run the check inside the Agent you intend to use;
-2. start a new session from the directory containing `.harness/root.json`;
-3. finish that product's one-time setup;
-4. run the connection check again.
-
-For internal capability states, diagnostic commands, and runtime evidence, read [Advanced Adapter Verification](adapter-verification.md).
+- [Codex Skills](https://learn.chatgpt.com/docs/build-skills)
+- [Qoder Skills](https://docs.qoder.com/extensions/skills) and [Qoder Hooks](https://docs.qoder.com/extensions/hooks)
+- [Trae Skills](https://docs.trae.cn/ide_skills) and [Trae Hooks](https://docs.trae.cn/ide_automate-actions-with-hooks)
+- [Kimi Code Skills](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/skills.html) and [Kimi Code Hooks](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/hooks.html)
+- [Cursor Skills](https://cursor.com/docs/skills) and [Cursor Hooks](https://cursor.com/docs/hooks)
+- [OpenCode Skills](https://opencode.ai/docs/skills/), [OpenCode Plugins](https://opencode.ai/docs/plugins/), and the [pre-stop event proposal](https://github.com/anomalyco/opencode/issues/16626)
+- [ZCode Skills](https://zcode.z.ai/en/docs/skill) and [ZCode Hooks](https://zcode.z.ai/en/docs/hooks)
+- [CodeBuddy Skills](https://www.codebuddy.ai/docs/cli/skills) and [CodeBuddy Hooks](https://www.codebuddy.ai/docs/cli/hooks)
+- [DeepSeek Harness Skills](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/skills.md) and [Codex Hook bridge](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/hooks/hooks-codex/README.md)

@@ -1,11 +1,13 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "skillSource": ".agents/skills",
   "instructionSource": "AGENTS.md",
   "products": {
     "codex": {
       "implementation": "available",
       "setup": "repository",
+      "setupActions": [],
+    "limitations": [],
       "skills": { "mode": "native" },
       "maturity": "full",
       "failMode": "closed",
@@ -25,6 +27,10 @@
     "qoder": {
       "implementation": "available",
       "setup": "repository",
+      "setupActions": [],
+    "limitations": [
+        "Qoder 不会把 .agents/skills 加入原生 Skill 列表；Lumine Harness 的 Adapter 会定位对应 Skill 并要求 Agent 读取真实文件，关键阶段明确 Skill 名称会更稳定。"
+    ],
       "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" },
       "maturity": "partial",
       "failMode": "closed",
@@ -44,6 +50,22 @@
     "trae": {
       "implementation": "available",
       "setup": "repository+manual",
+      "setupActions": [
+        {
+          "id": "enable-trae-project-integration",
+          "title": "启用 Trae 的项目指令、共享 Skills 和项目 Hooks",
+          "steps": [
+            "在 Trae 的项目设置中启用 AGENTS.md 或项目指令。",
+            "启用共享 Skills。",
+            "启用项目 Hooks。",
+            "从 Harness 根目录重新开启会话。"
+          ],
+          "successSignal": "连接检查能识别 Trae 和会话入口，关键阶段能观察到 Agent 读取 .agents/skills 中的目标 SKILL.md。",
+          "reloadRequired": true,
+          "satisfiedBy": ["project_instructions", "session_context", "skill_discovery"]
+        }
+      ],
+    "limitations": [],
       "skills": { "mode": "native-with-toggle" },
       "maturity": "partial",
       "failMode": "closed",
@@ -63,6 +85,23 @@
     "kimi": {
       "implementation": "available",
       "setup": "user-config",
+      "setupActions": [
+        {
+          "id": "install-kimi-user-hooks",
+          "title": "安装 Kimi Code 用户级 Hooks",
+          "steps": [
+            "获得修改 Kimi Code 用户配置的授权。",
+            "从 Harness 根目录运行 ./.harness/cli adapter install kimi。",
+            "重新加载 Kimi Code，并从 Harness 根目录开启新会话。"
+          ],
+          "successSignal": "连接检查能识别 Kimi Code，并观察到会话入口和结束前处理。",
+          "reloadRequired": true,
+          "satisfiedBy": ["session_context", "stop_gate"]
+        }
+      ],
+      "limitations": [
+        "Kimi Code 的 Hook 失败时默认放行，不能作为高风险操作的唯一安全门禁。"
+      ],
       "skills": { "mode": "native" },
       "maturity": "partial",
       "failMode": "open",
@@ -82,6 +121,8 @@
     "cursor": {
       "implementation": "available",
       "setup": "repository",
+      "setupActions": [],
+    "limitations": [],
       "skills": { "mode": "native" },
       "maturity": "partial",
       "failMode": "open",
@@ -101,6 +142,10 @@
     "opencode": {
       "implementation": "available",
       "setup": "repository",
+      "setupActions": [],
+      "limitations": [
+        "OpenCode 当前没有可在 Agent 停止前阻断的对等 Stop Gate；session.idle 只用于结束后审计，任务未完成时需要人发起下一轮。"
+      ],
       "skills": { "mode": "native" },
       "maturity": "partial",
       "failMode": "open",
@@ -120,6 +165,25 @@
     "zcode": {
       "implementation": "available",
       "setup": "local-marketplace+manual",
+      "setupActions": [
+        {
+          "id": "install-zcode-local-plugin",
+          "title": "安装并启用 ZCode 本地 Adapter Plugin",
+          "steps": [
+            "从 Harness 根目录运行 ./.harness/cli adapter install zcode。",
+            "把命令返回的目录加入 ZCode 本地 Marketplace。",
+            "安装并启用 lumine-harness-adapter。",
+            "从 Harness 根目录开启新会话。"
+          ],
+          "successSignal": "连接检查能识别 ZCode 和会话入口，并能观察到 Agent 读取 .agents/skills 中的目标 SKILL.md。",
+          "reloadRequired": true,
+          "satisfiedBy": ["project_instructions", "session_context", "skill_read"]
+        }
+      ],
+    "limitations": [
+        "ZCode 不会把 .agents/skills 加入原生 Skill 列表；Lumine Harness 的 Adapter 会定位对应 Skill 并要求 Agent 读取真实文件。",
+        "ZCode 最多连续自动续跑 3 次，达到限制后需要人重新发起。"
+      ],
       "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" },
       "maturity": "partial",
       "failMode": "closed",
@@ -139,6 +203,23 @@
     "codebuddy": {
       "implementation": "available",
       "setup": "repository+manual-hook-review",
+      "setupActions": [
+        {
+          "id": "approve-codebuddy-project-hooks",
+          "title": "在 CodeBuddy Code 中审核项目 Hook",
+          "steps": [
+            "在 CodeBuddy Code 中运行 /hooks。",
+            "审核并确认当前项目的 Hook 变更。",
+            "从 Harness 根目录开启新会话。"
+          ],
+          "successSignal": "连接检查能识别 CodeBuddy 和会话入口，并能观察到 Agent 读取 .agents/skills 中的目标 SKILL.md。",
+          "reloadRequired": true,
+          "satisfiedBy": ["project_instructions", "session_context", "skill_read"]
+        }
+      ],
+    "limitations": [
+        "CodeBuddy 不会把 .agents/skills 加入原生 Skill 列表；Lumine Harness 的 Adapter 会定位对应 Skill 并要求 Agent 读取真实文件，关键阶段明确 Skill 名称会更稳定。"
+    ],
       "skills": { "mode": "adapter-routed", "implicitDiscovery": "best-effort" },
       "maturity": "partial",
       "failMode": "closed",
@@ -158,6 +239,24 @@
     "deepseek-harness": {
       "implementation": "available",
       "setup": "dsh-profile-bundle+manual",
+      "setupActions": [
+        {
+          "id": "install-deepseek-profile-bundle",
+          "title": "把 Lumine Harness Adapter 安装到 DeepSeek Harness profile",
+          "steps": [
+            "从 Harness 根目录运行 ./.harness/cli adapter install deepseek-harness。",
+            "获得修改用户 profile 的授权。",
+            "按命令返回的 dsh plugin 指令安装到准备使用的 profile。",
+            "从 Harness 根目录开启新会话。"
+          ],
+          "successSignal": "连接检查能识别 DeepSeek Harness，并观察到 profile 中的 Adapter 会话入口。",
+          "reloadRequired": true,
+          "satisfiedBy": ["session_context"]
+        }
+      ],
+      "limitations": [
+        "当前仍是开发预览，不能作为生产、高风险或不可恢复操作的唯一门禁。"
+      ],
       "skills": { "mode": "native" },
       "maturity": "developer-preview",
       "failMode": "open",

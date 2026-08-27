@@ -53,7 +53,7 @@ scripts/inspect-target.sh <target-root>
 - `AGENTS.md` 如何成为上下文地图，`ARCHITECTURE.md` 如何成为架构地图；上下文入口只能留在 `AGENTS.md`。
 - 哪些旧 AI workflow 会被替换，哪些非冲突项目 skills/docs 会被索引保留。
 - 哪些 check 对当前 profile 标记为 not applicable。
-- 用户选择哪些 Agent Adapter；逐项说明完整兼容、需要人工设置或明确降级，不能把“目录存在”写成产品端已验证。
+- 用户选择哪些 Agent Adapter；优先说明基本流程能否使用、是否需要一次设置和真正影响体验的限制，详细协议证据留给高级验证，不能把“目录存在”写成产品端已验证。
 - 精确 write set、不可通过 Git 恢复的备份方案和 Proposal ID；没有经用户确认的 Proposal ID 不得进入 Adopt。
 
 生成可审阅 Proposal 时使用：
@@ -115,7 +115,7 @@ node scripts/harness-manager.mjs upgrade --apply --proposal <proposal.json>
 - `visual-directions/` 只用于 `image` / `hybrid` 的视觉方向探索，不是旧 harness 兼容目录，也不能单独作为实现输入。
 - run closeout 默认刷新并复核 generated，把实施验证证据放入 `docs/validation/<slug>/<YYYY-MM-DD>/`，写回 active plan 的验证摘要和证据路径，运行 checks。
 - 所有用户可见 UI 文案不得出现代码注释式、占位式、开发提示式或未清理备注式文案。
-- Qoder 的 Hook 能力必须按产品形态和版本复核，不能长期硬编码“没有 SessionStart”；公共 Skill 采用 Adapter 路由并接受写前读取门禁。OpenCode 当前没有等价的完整 Stop Gate，必须标记部分兼容。
+- Qoder、CodeBuddy 和 ZCode 不原生扫描 `.agents/skills`，公共 Skill 通过 Adapter 路由并在关键阶段执行写前读取门禁；这属于 Skill 入口差异，不代表整套流程不可用。OpenCode 当前没有等价的完整 Stop Gate，需要继续时由人发起下一轮。
 - Kimi Code 用户级 Hook 安装必须单独取得授权，再运行 `./.harness/cli adapter install kimi`；不使用 Plugin，不静默写 `~/.kimi-code/config.toml`。
 - ZCode 项目级 Hook 当前不会执行，必须通过 `.harness/adapters/zcode/marketplace` 安装 Hook-only Plugin；Adapter 路由公共 Skill，完整规则只从项目 `.agents/skills` 读取并审计。
 - CodeBuddy 使用 `.codebuddy/settings.json` 对接生命周期；公共 Skill 由 Adapter 路由，不生成 `.codebuddy/skills`。若存在 `CODEBUDDY.md` 或 `.codebuddy/CODEBUDDY.md`，必须用正确相对路径显式导入根 `AGENTS.md`，并在新会话中通过 `/hooks` 审核配置。没有真实 Hook 日志前保持 `needs_manual_app_step`。

@@ -62,6 +62,20 @@ git clone https://gitee.com/thrulife2gether/lumine-harness.git
 检查 <目标工程目录>，先给出改造方案；在我确认前不要修改文件。
 ```
 
+#### 后续更新
+
+使用 `skills` CLI 安装后，无论最初选择 GitHub 还是 Gitee，都可以用同一条命令更新已经全局安装的入口 Skill。CLI 会沿用安装时记录的来源：
+
+```bash
+npx skills update lumine-harness -g -y
+```
+
+如果使用的是手动克隆，通过该克隆目录已经配置好的远端更新：
+
+```bash
+git -C <克隆目录> pull --ff-only
+```
+
 ### 2. 从正确的工程根目录开启新会话
 
 | 工程形态 | 应该打开的目录 |
@@ -176,6 +190,7 @@ my-project/
 ├── ARCHITECTURE.md
 ├── docs/
 │   ├── drafts/
+│   ├── design-docs/          # 需要设计时生成
 │   ├── product-specs/
 │   ├── exec-plans/
 │   │   ├── active/
@@ -197,6 +212,7 @@ my-project/
 | `AGENTS.md` | Agent 从哪里开始，工程边界和阶段规则是什么？ |
 | `ARCHITECTURE.md` | 系统由什么组成，模块怎样连接？ |
 | Draft | 最初想解决什么，还有什么没有说清？ |
+| Design（按需） | 页面体验应该是什么样，哪些设计决定和原型已经确认？ |
 | Product Spec | 最终应该做成什么，范围和验收标准是什么？ |
 | Exec Plan | 准备怎样实现，现在做到哪里？ |
 | Validation | 实际发生了什么，结果是否已经被证明？ |
@@ -234,15 +250,23 @@ Agent 和工具会进一步读取完整源码、generated 导航、详细计划�
 
 Lumine Harness 把公共工程资产统一保存在 `AGENTS.md`、`.agents/skills`、Docs 和 `.harness` 中，不为每个产品复制一套工作流。
 
-不同 Agent 读取项目指令、Skills 和执行生命周期 Hook 的方式不同。接入文件已经生成，不代表当前 Agent 已经真正使用了它们。
+完成项目接入后，不同 Agent 使用同一套 Draft、Product Spec、Exec Plan 和 Validation 流程。使用者主要需要确认三件事：当前产品是否需要一次性设置、怎样发现项目 Skill，以及 Agent 结束前有没有 Stop Gate 可以先检查再决定是否继续。
 
-接入完成后，Agent 会检查当前产品还缺少哪些设置。你也可以随时对它说：
+兼容说明依据各产品的公开协议和仓库中的 Adapter 实现整理，不等于你本机的当前会话已经验证通过。
+
+接入完成后，在实际准备使用的 Agent 中开启新会话，然后发送：
 
 ```text
-检查当前 Agent 与 Lumine Harness 是否正常连接。
+检查当前 Agent 的 Lumine Harness 是否已经生效。
 ```
 
-检查会汇总当前已经取得的证据，分别说明哪些能力在仓库侧已经准备好、哪些在真实会话中已经观察到、哪些仍需设置或进一步验证，并给出下一步。它不会因为一句检查指令就把尚未观察到的能力写成“已经兼容”。各 Agent 的具体差异见 [不同 Agent 能用到什么程度](docs/adapter-compatibility.zh-CN.md)。
+检查结果会直接告诉你：
+
+- 现在能不能开始；
+- 是否还有一次性设置需要完成；
+- 当前产品有没有会影响使用的关键限制。
+
+各产品的首次设置、Skill 发现方式和 Stop Gate 差异见 [在不同 Agent 中使用 Lumine Harness](docs/adapter-compatibility.zh-CN.md)。协议证据和真实宿主验收只面向 Adapter 维护者，不是日常使用前置步骤。
 
 ## 安全边界
 
@@ -266,7 +290,7 @@ Lumine Harness 把公共工程资产统一保存在 `AGENTS.md`、`.agents/skill
 ./.harness/cli generated refresh all
 ```
 
-Adapter 的普通检查、配置诊断和真实产品验证不是一回事。需要排查时，请查看 [不同 Agent 能用到什么程度](docs/adapter-compatibility.zh-CN.md)；维护者需要记录真实运行证据时，再阅读 [Adapter 高级验证](docs/adapter-verification.zh-CN.md)。
+普通使用者需要排查时，请查看 [在不同 Agent 中使用 Lumine Harness](docs/adapter-compatibility.zh-CN.md)；只有维护 Adapter 或排查宿主协议时，才需要阅读 [Adapter 调试与发布检查](docs/adapter-verification.zh-CN.md)。
 
 ### 常见问题
 
@@ -280,7 +304,7 @@ Adapter 的普通检查、配置诊断和真实产品验证不是一回事。需
 不会静默覆盖。检查阶段会把重叠内容列为冲突；在冲突得到处理并重新确认方案前，接入不会继续。
 
 **Hook 文件存在但没有自动运行**
-对 Agent 说“检查当前 Agent 与 Lumine Harness 是否正常连接”。如果仍不能确认，再按照兼容性说明检查对应产品的一次性设置。配置文件存在，不代表 Hook 已经实际运行。
+对 Agent 说“检查当前 Agent 的 Lumine Harness 是否已经生效”。如果仍不能确认，再按照兼容性说明完成对应产品的一次性设置。
 
 **generated 显示 `Review status: pending`**
 这表示只完成了确定性扫描，还需要回到源码抽样复核并更新 review metadata。
@@ -292,12 +316,6 @@ Adapter 的普通检查、配置诊断和真实产品验证不是一回事。需
 ```bash
 pnpm dlx skills add 1uckyneo/lumine-harness -g
 pnpm dlx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
-```
-
-更新已经全局安装的入口 Skill：
-
-```bash
-npx skills update lumine-harness -g -y
 ```
 
 如果希望把入口 Skill 写入当前项目，可以省略 `-g`。这会在当前目录创建 Skill 文件，因此请先确认当前目录就是预期安装位置：

@@ -1,0 +1,1081 @@
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { findHarnessRoot, isStartedAtHarnessRoot } from "./core/root-resolver.ts";
+import { discoverSharedSkills, getSharedSkill, inspectSharedSkillCatalog, searchSharedSkills } from "./core/skill-catalog.ts";
+import { listCurrentSessionPointers, readCurrentSessionPointer, recordWorkStatus, WORK_STATUSES } from "./core/work-status.ts";
+import { beginVerificationRun, verifyRuntimeEvidence } from "./core/verification.ts";
+import { resolveHarnessRuntimeRoot } from "./core/runtime-layout.ts";
+import type { RuntimeVerificationResult } from "./core/verification.ts";
+import type {
+  AdapterCapabilityName,
+  AdapterCapabilityResult,
+  AdapterReadiness,
+  AdapterSetupAction,
+  CapabilityEvidenceLevel,
+  HarnessAdapterCapability,
+  HarnessProduct,
+  WorkStatus
+} from "./core/contracts.ts";
+
+const HERE = resolveHarnessRuntimeRoot(import.meta.url);
+const PRODUCTS = ["codex", "qoder", "trae", "kimi", "cursor", "opencode", "zcode", "codebuddy", "deepseek-harness"] as const satisfies readonly HarnessProduct[];
+const KIMI_BEGIN = "# BEGIN lumine-harness adapter (managed)";
+const KIMI_END = "# END lumine-harness adapter (managed)";
+const LEGACY_KIMI_BEGIN = "# BEGIN harness-engineering adapter (managed)";
+const LEGACY_KIMI_END = "# END harness-engineering adapter (managed)";
+
+const READINESS_LABELS: Record<AdapterReadiness, string> = Object.freeze({
+  ready: "可以开始使用",
+  setup_required: "完成一次设置后可用",
+  trial_only: "可以试用",
+  connection_error: "需要排查"
+});
+
+const CAPABILITY_LABELS = Object.freeze({
+  project_instructions: "项目指令",
+  session_context: "会话入口",
+  skill_discovery: "Skill 发现",
+  skill_read: "Skill 读取",
+  pre_mutation_gate: "首次修改前门禁",
+  stop_gate: "结束前门禁",
+  automatic_continuation: "自动续跑",
+  work_status_matrix: "状态转换",
+  session_isolation: "会话隔离"
+});
+
+const EVIDENCE_LEVEL_RANK = Object.freeze({
+  official_declared: 0,
+  repository_checked: 1,
+  runtime_observed: 2,
+  behavior_verified: 3
+});
+
+const RUNTIME_EVIDENCE_LEVELS = new Set(["runtime_observed", "behavior_verified"]);
+
+const CAPABILITY_GROUP_DEFINITIONS = [
+  { id: "project_context", label: "工程上下文", capabilities: ["project_instructions", "session_context"] },
+  { id: "skill_usage", label: "Skill 使用", capabilities: ["skill_discovery", "skill_read", "pre_mutation_gate"] },
+  { id: "workflow_constraints", label: "流程约束", capabilities: ["stop_gate", "work_status_matrix"] },
+  { id: "long_task_reliability", label: "长任务可靠性", capabilities: ["automatic_continuation", "session_isolation"] }
+] as const satisfies ReadonlyArray<{
+  id: CapabilityGroup["id"];
+  label: string;
+  capabilities: readonly AdapterCapabilityName[];
+}>;
+
+type DoctorStatus = "repository_ready" | "partial" | "needs_manual_app_step" | "not_selected" | "not_installed" | "error";
+type RuntimeCapabilities = Partial<Record<AdapterCapabilityName, AdapterCapabilityResult>>;
+type EvidenceSummary = "not_tested" | "repository_checked" | "runtime_observed" | "behavior_verified" | "failed";
+
+interface CapabilityManifest {
+  products: Record<HarnessProduct, HarnessAdapterCapability>;
+}
+
+interface HarnessProjectConfig {
+  selectedAdapters?: string[];
+}
+
+interface AdapterOptions {
+  cwd?: string;
+  root?: string;
+  kimiHome?: string;
+  cursorRestricted?: boolean;
+  env?: NodeJS.ProcessEnv;
+  validate?: (file: string) => boolean;
+  kimiCommand?: string;
+  product?: string;
+  sessionId?: string;
+  currentProduct?: string;
+  now?: number;
+  pointerMaxAgeMs?: number;
+  limit?: number;
+  hostVersion?: string;
+  verificationRunId?: string;
+  maxAgeMs?: number;
+  details?: boolean;
+}
+
+interface SkillCatalogSummary {
+  valid: number;
+  invalid: number;
+  diagnostics: ReturnType<typeof inspectSharedSkillCatalog>["diagnostics"];
+}
+
+interface DoctorResult {
+  product: string;
+  status: DoctorStatus;
+  root?: string;
+  capability?: HarnessAdapterCapability;
+  skillCatalog?: SkillCatalogSummary | null;
+  setupActions?: AdapterSetupAction[];
+  limitations?: string[];
+  messages: string[];
+}
+
+interface CapabilityLine {
+  capability: AdapterCapabilityName;
+  label: string;
+  result: AdapterCapabilityResult["result"];
+  evidenceLevel: AdapterCapabilityResult["evidenceLevel"];
+  description: string;
+}
+
+interface CapabilityGroup {
+  id: "project_context" | "skill_usage" | "workflow_constraints" | "long_task_reliability";
+  label: string;
+  capabilities: CapabilityLine[];
+}
+
+interface ProductStatusResult {
+  product: HarnessProduct;
+  readiness: AdapterReadiness;
+  label: string;
+  setup: { status: DoctorStatus; actions: AdapterSetupAction[]; messages: string[] };
+  limitations: string[];
+  continuation: { delivery: string; maxConsecutive?: number | null };
+  evidence: {
+    summary: EvidenceSummary;
+    confirmed: CapabilityLine[];
+    unconfirmed: CapabilityLine[];
+    runtimeStatus: RuntimeVerificationResult["status"];
+    status: RuntimeVerificationResult["status"];
+    hostVersion: string;
+    hostVersionSource: string;
+    observedAt: string | null;
+    evidence: string | null;
+  };
+  capabilities: RuntimeCapabilities;
+  capabilityGroups: CapabilityGroup[];
+  skillCatalog: SkillCatalogSummary | null;
+  nextSteps: string[];
+}
+
+interface CurrentAdapterIdentification {
+  status: "identified" | "invalid" | "ambiguous" | "unknown";
+  source: "environment" | "runtime_pointer" | "unknown";
+  product: HarnessProduct | null;
+  reason?: string;
+  hasSession?: boolean;
+  pointerConflict?: boolean;
+}
+
+interface AdapterStatusResult {
+  schemaVersion: 2;
+  kind: "adapter_status" | "adapter_check";
+  scope: string;
+  readiness: AdapterReadiness | null;
+  label: string | null;
+  summary: string;
+  source: string;
+  product: HarnessProduct | null;
+  products: ProductStatusResult[];
+  notes?: string[];
+  nextSteps: string[];
+  groups?: Partial<Record<AdapterReadiness, HarnessProduct[]>>;
+  probe?: {
+    product: HarnessProduct;
+    status: RuntimeVerificationResult["status"];
+    verificationRunId?: string;
+    reused: boolean;
+  };
+  details?: boolean;
+  generatedAt: string;
+}
+
+type AdapterCommandItem = {
+  product: string;
+  status?: string;
+  selected?: boolean;
+  implementation?: string;
+  maturity?: string;
+  messages?: string[];
+  message?: string;
+  path?: string;
+  setupActions?: AdapterSetupAction[];
+  limitations?: string[];
+};
+
+interface AdapterCommandResult {
+  kind: string;
+  label?: string | null;
+  summary?: string;
+  scope?: string;
+  products?: ProductStatusResult[];
+  notes?: string[];
+  nextSteps?: string[];
+  readiness?: AdapterReadiness | null;
+  groups?: Partial<Record<AdapterReadiness, HarnessProduct[]>>;
+  details?: boolean;
+  probe?: AdapterStatusResult["probe"];
+  results?: AdapterCommandItem[];
+}
+
+function conciseCapabilityList(lines: CapabilityLine[]): string {
+  if (!lines.length) return "无";
+  return lines.map((line) => `${line.label}（${line.description}）`).join("、");
+}
+
+function capabilityEvidenceSections(item: ProductStatusResult): {
+  repositoryChecked: CapabilityLine[];
+  runtimeObserved: CapabilityLine[];
+  notApplicable: CapabilityLine[];
+  unobserved: CapabilityLine[];
+  failed: CapabilityLine[];
+} {
+  const sections = {
+    repositoryChecked: [] as CapabilityLine[],
+    runtimeObserved: [] as CapabilityLine[],
+    notApplicable: [] as CapabilityLine[],
+    unobserved: [] as CapabilityLine[],
+    failed: [] as CapabilityLine[]
+  };
+  for (const [name, capability] of Object.entries(item.capabilities)) {
+    if (!capability) continue;
+    const line = capabilityLine(name as AdapterCapabilityName, capability);
+    if (capability.result === "not_applicable") {
+      sections.notApplicable.push(line);
+    } else if (capability.result === "failed") {
+      sections.failed.push(line);
+    } else if (RUNTIME_EVIDENCE_LEVELS.has(capability.evidenceLevel)) {
+      sections.runtimeObserved.push(line);
+    } else if (["not_tested", "not_observable"].includes(capability.result)) {
+      sections.unobserved.push(line);
+    } else if (capability.evidenceLevel === "repository_checked") {
+      sections.repositoryChecked.push(line);
+    } else {
+      sections.unobserved.push(line);
+    }
+  }
+  return sections;
+}
+
+function formatProductStatus(item: ProductStatusResult, details = false, subjectLabel = "检查对象"): string {
+  const evidence = capabilityEvidenceSections(item);
+  const lines = [
+    `${subjectLabel}：${item.product}`,
+    `结论：${item.label}`
+  ];
+  if (item.setup.actions.length) {
+    lines.push(`开始前：${item.setup.actions.map((action) => action.title).join("；")}`);
+    for (const action of item.setup.actions) {
+      action.steps.forEach((step, index) => lines.push(`  ${index + 1}. ${step}`));
+      lines.push(`  完成标志：${action.successSignal}`);
+      if (action.reloadRequired) lines.push("  完成后需要重新加载产品或开启新会话。");
+    }
+  } else {
+    lines.push("开始前：无需额外设置");
+  }
+  if (item.limitations.length) lines.push(`主要限制：${item.limitations.join("；")}`);
+  lines.push(`下一步：${item.nextSteps.length ? item.nextSteps.join("；") : "可以开始使用"}`);
+
+  if (details) {
+    lines.push(`仓库中已配置：${conciseCapabilityList(evidence.repositoryChecked)}`);
+    lines.push(`当前会话已确认：${conciseCapabilityList(evidence.runtimeObserved)}`);
+    lines.push(`当前产品不提供：${conciseCapabilityList(evidence.notApplicable)}`);
+    lines.push(`尚待确认：${conciseCapabilityList(evidence.unobserved)}`);
+    if (evidence.failed.length) lines.push(`存在异常：${conciseCapabilityList(evidence.failed)}`);
+    lines.push("能力详情：");
+    for (const group of item.capabilityGroups) {
+      lines.push(`  ${group.label}：`);
+      for (const capability of group.capabilities) {
+        lines.push(`    - ${capability.label}：${capability.description}`);
+      }
+    }
+  }
+  return lines.join("\n");
+}
+
+function isHarnessProduct(value: unknown): value is HarnessProduct {
+  return typeof value === "string" && PRODUCTS.includes(value as HarnessProduct);
+}
+
+function capabilities(root: string): CapabilityManifest {
+  return JSON.parse(readFileSync(path.join(root, ".harness", "adapter-capabilities.json"), "utf8")) as CapabilityManifest;
+}
+
+function projectConfig(root: string): HarnessProjectConfig | null {
+  const file = path.join(root, ".harness", "project.json");
+  if (!existsSync(file)) return null;
+  try { return JSON.parse(readFileSync(file, "utf8")) as HarnessProjectConfig; } catch { return null; }
+}
+
+function selectedAdapters(root: string): HarnessProduct[] {
+  const selected = projectConfig(root)?.selectedAdapters;
+  if (Array.isArray(selected)) return selected.filter(isHarnessProduct);
+  return PRODUCTS.filter((product) => existsSync(entry(root, product)) && !["kimi", "zcode", "deepseek-harness"].includes(product));
+}
+
+function entry(root: string, product: HarnessProduct): string {
+  return {
+    codex: path.join(root, ".codex", "hooks.json"),
+    qoder: path.join(root, ".qoder", "settings.json"),
+    trae: path.join(root, ".trae", "hooks.json"),
+    kimi: path.join(root, ".harness", "adapters", "kimi", "hooks", "dispatch.mjs"),
+    cursor: path.join(root, ".cursor", "hooks.json"),
+    opencode: path.join(root, ".opencode", "plugins", "harness.mjs"),
+    zcode: path.join(root, ".harness", "adapters", "zcode", "marketplace", "marketplace.json"),
+    codebuddy: path.join(root, ".codebuddy", "settings.json"),
+    "deepseek-harness": path.join(root, ".harness", "adapters", "deepseek-harness", "bundle", "package.json")
+  }[product];
+}
+
+function forbidden(root: string): string[] {
+  return [
+    ".qoder/skills",
+    ".codebuddy/skills",
+    ".harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/skills",
+    ".trae/skills",
+    ".kimi-code/skills",
+    ".qoder/rules",
+    ".trae/rules",
+    ".cursor/rules",
+    ".zcode/skills",
+    ".zcode/rules",
+    ".codebuddy/rules",
+    ".dsh/skills"
+  ]
+    .filter((item) => existsSync(path.join(root, item)));
+}
+
+function importsRootAgents(root: string, file: string): boolean {
+  const source = readFileSync(file, "utf8");
+  const rootAgents = path.resolve(root, "AGENTS.md");
+  return [...source.matchAll(/(?:^|\s)@([^\s]+)/gm)]
+    .some((match) => path.resolve(path.dirname(file), match[1]) === rootAgents);
+}
+
+function raiseDoctorStatus(current: DoctorStatus, next: DoctorStatus): DoctorStatus {
+  const rank: Record<DoctorStatus, number> = {
+    repository_ready: 0,
+    partial: 1,
+    needs_manual_app_step: 2,
+    not_selected: 3,
+    not_installed: 3,
+    error: 4
+  };
+  return rank[next] > rank[current] ? next : current;
+}
+
+function isCursorRestricted(options: AdapterOptions = {}): boolean {
+  if (typeof options.cursorRestricted === "boolean") return options.cursorRestricted;
+  const env = options.env ?? process.env;
+  const restricted = String(env.CURSOR_WORKSPACE_RESTRICTED ?? "").trim().toLowerCase();
+  if (["1", "true", "yes", "restricted", "untrusted"].includes(restricted)) return true;
+  const trust = String(env.CURSOR_WORKSPACE_TRUST ?? "").trim().toLowerCase();
+  return ["restricted", "untrusted", "false", "0"].includes(trust);
+}
+
+function inspectRoutedSkillCatalog(root: string, product: HarnessProduct, messages: string[]): SkillCatalogSummary | null {
+  if (!["qoder", "zcode", "codebuddy"].includes(product)) return null;
+  const catalog = inspectSharedSkillCatalog(root);
+  if (catalog.skills.length) {
+    messages.push(`已发现 ${catalog.skills.length} 个可读取的公共 Skill；内容只来自 .agents/skills。`);
+  }
+  if (catalog.diagnostics.length) {
+    messages.push(`已隔离 ${catalog.diagnostics.length} 个无效 Skill，其余有效 Skill 不受影响。`);
+  }
+  return {
+    valid: catalog.skills.length,
+    invalid: catalog.diagnostics.length,
+    diagnostics: catalog.diagnostics
+  };
+}
+
+export function listAdapters(root = findHarnessRoot(process.cwd())): Array<{ product: HarnessProduct; selected: boolean } & HarnessAdapterCapability> {
+  if (!root) throw new Error("Harness root not found.");
+  const manifest = capabilities(root);
+  const selected = new Set(selectedAdapters(root));
+  return PRODUCTS.map((product) => ({ product, selected: selected.has(product), ...manifest.products[product] }));
+}
+
+export function hasManagedKimiBlock(configFile: string): boolean {
+  if (!existsSync(configFile)) return false;
+  const source = readFileSync(configFile, "utf8");
+  return source.includes(KIMI_BEGIN) || source.includes(LEGACY_KIMI_BEGIN);
+}
+
+export function doctorAdapter(product: string, options: AdapterOptions = {}): DoctorResult {
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  const root = findHarnessRoot(cwd);
+  if (!isHarnessProduct(product)) return { product, status: "error", messages: [`未知的 Agent：${product}`] };
+  if (!root) return { product, status: "error", messages: ["请从包含 .harness/root.json 的工程根目录运行检查。"] };
+  const capability = capabilities(root).products[product];
+  if (!selectedAdapters(root).includes(product)) return {
+    product,
+    status: "not_selected",
+    root,
+    capability,
+    setupActions: [],
+    limitations: capability.limitations ?? [],
+    messages: ["当前工程没有选择这个 Adapter。"]
+  };
+  const messages: string[] = [];
+  let status: DoctorStatus = "repository_ready";
+  if (!isStartedAtHarnessRoot(root, cwd)) {
+    status = "error";
+    messages.push(`请从 Harness 根目录启动 Agent：${root}。当前目录是 ${cwd}。`);
+  }
+  if (!existsSync(entry(root, product))) {
+    status = raiseDoctorStatus(status, "not_installed");
+    messages.push("工程中缺少对应的 Adapter 入口，请重新检查采用或升级配置。");
+  }
+  const copies = forbidden(root);
+  if (copies.length) {
+    status = "error";
+    messages.push(`发现不应存在的产品级 Skill 或 Rules 副本：${copies.join(", ")}`);
+  }
+
+  const skillCatalog = inspectRoutedSkillCatalog(root, product, messages);
+  if (skillCatalog && skillCatalog.valid === 0) {
+    status = raiseDoctorStatus(status, "error");
+    messages.push("没有可读取的公共 Skill，请先修复 .agents/skills。");
+  }
+
+  if (product === "qoder" && status !== "not_installed" && status !== "error") {
+    messages.push("Qoder Adapter 会把明确的 Skill 或 Harness 阶段路由到 .agents/skills 中的真实文件，并要求 Agent 读取；自然语言隐式发现仍需在真实会话中确认。");
+  }
+  if (product === "trae" && status === "repository_ready") {
+    status = "needs_manual_app_step";
+    messages.push("请在 Trae 中启用项目 AGENTS.md、共享 Skills 和项目 Hooks，然后重新打开会话。");
+  }
+  if (product === "kimi") {
+    const home = options.kimiHome ?? process.env.KIMI_CODE_HOME ?? path.join(os.homedir(), ".kimi-code");
+    if (!hasManagedKimiBlock(path.join(home, "config.toml"))) {
+      status = raiseDoctorStatus(status, "needs_manual_app_step");
+      messages.push("需要单独授权安装 Kimi Code 用户级 Hook，然后重新打开 Kimi Code。");
+    }
+    messages.push("Kimi Code 的 Hook 失败时默认放行，不能把它作为高风险操作的唯一安全门禁。");
+  }
+  if (product === "cursor" && status === "repository_ready" && isCursorRestricted(options)) {
+    status = "needs_manual_app_step";
+    messages.push("Cursor 当前处于受限状态，需先信任当前工程，项目 Hook 才能运行。");
+  }
+  if (product === "opencode" && status !== "not_installed" && status !== "error") {
+    status = "partial";
+    messages.push("OpenCode 当前没有可在 Agent 停止前阻断的对等 Stop Gate；session.idle 只用于结束后审计，任务未完成时需要由人发起下一轮。");
+  }
+  if (product === "zcode" && status !== "not_installed" && status !== "error") {
+    status = raiseDoctorStatus(status, "needs_manual_app_step");
+    messages.push("请把本工程的 ZCode 本地 Plugin 加入并启用，然后从 Harness 根目录开启新会话。");
+    messages.push("ZCode Adapter 会把明确的 Skill 或 Harness 阶段路由到 .agents/skills 中的真实文件，并要求 Agent 读取；自然语言隐式发现属于尽力支持。");
+  }
+  if (product === "codebuddy" && status !== "not_installed" && status !== "error") {
+    const memoryFiles = [path.join(root, "CODEBUDDY.md"), path.join(root, ".codebuddy", "CODEBUDDY.md")].filter(existsSync);
+    const shadowsAgents = memoryFiles.filter((file) => !importsRootAgents(root, file));
+    if (shadowsAgents.length) {
+      status = "error";
+      messages.push(`以下 CodeBuddy 记忆文件会遮蔽根 AGENTS.md：${shadowsAgents.map((file) => path.relative(root, file)).join(", ")}。请删除它们或正确导入根 AGENTS.md。`);
+    } else {
+      status = raiseDoctorStatus(status, "needs_manual_app_step");
+      messages.push("请在 CodeBuddy Code 的 /hooks 中审核项目 Hook 变更，然后从 Harness 根目录开启新会话。");
+      messages.push("CodeBuddy Adapter 会把明确的 Skill 或 Harness 阶段路由到 .agents/skills 中的真实文件，并要求 Agent 读取；自然语言隐式发现属于尽力支持。");
+    }
+  }
+  if (product === "deepseek-harness" && status !== "not_installed" && status !== "error") {
+    status = raiseDoctorStatus(status, "needs_manual_app_step");
+    messages.push("需要把本工程提供的本地 profile bundle 安装到准备使用的 DeepSeek Harness profile。");
+    messages.push("当前仓库检查覆盖 @deepseek-ai/dsh 0.1.0-rc.7 与 @deepseek-ai/dsh-hooks-codex 0.1.0-rc.7；这不代表真实宿主已经验证通过。");
+  }
+  if (!messages.length) messages.push("工程侧 Adapter 配置已就绪；真实会话证据单独显示，不影响是否可以开始的判断。");
+  const setupActions = status === "needs_manual_app_step"
+    ? [...(capability.setupActions ?? [])]
+    : [];
+  if (status === "needs_manual_app_step" && product === "cursor" && setupActions.length === 0) {
+    setupActions.push({
+      id: "trust-cursor-workspace",
+      title: "允许 Cursor 在当前工程运行项目 Hook",
+      steps: ["按 Cursor 的受限项目提示信任当前工程。", "从 Harness 根目录重新开启会话。"],
+      successSignal: "检查结果能识别 Cursor，并观察到项目 Hook 的会话入口。",
+      reloadRequired: true,
+      satisfiedBy: ["session_context"]
+    });
+  }
+  return { product, status, root, capability, skillCatalog, setupActions, limitations: capability.limitations ?? [], messages };
+}
+
+export function verifyAdapter(product: string, options: AdapterOptions = {}): DoctorResult | (RuntimeVerificationResult & { capability: HarnessAdapterCapability }) {
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  const root = findHarnessRoot(cwd);
+  if (!root) return { product, status: "error", messages: ["没有找到 Harness 根目录。"] };
+  const doctor = doctorAdapter(product, options);
+  if (["error", "not_installed", "not_selected"].includes(doctor.status)) return doctor;
+  if (!isHarnessProduct(product)) return { product, status: "error", messages: [`未知的 Agent：${product}`] };
+  return { ...verifyRuntimeEvidence(root, product, options), capability: capabilities(root).products[product] };
+}
+
+function mergeCapabilities(declared: RuntimeCapabilities = {}, observed: RuntimeCapabilities = {}): RuntimeCapabilities {
+  const names = new Set<AdapterCapabilityName>([
+    ...Object.keys(declared) as AdapterCapabilityName[],
+    ...Object.keys(observed) as AdapterCapabilityName[]
+  ]);
+  return Object.fromEntries([...names].map((name) => {
+    const baseline = declared[name] ?? { result: "not_tested", evidenceLevel: "official_declared" };
+    const runtime = observed[name];
+    if (!runtime) return [name, baseline];
+    const baselineRank = EVIDENCE_LEVEL_RANK[baseline.evidenceLevel as CapabilityEvidenceLevel];
+    const runtimeRank = EVIDENCE_LEVEL_RANK[runtime.evidenceLevel as CapabilityEvidenceLevel];
+    return [name, runtimeRank > baselineRank ? runtime : baseline];
+  }));
+}
+
+function isRuntimePass(capability: AdapterCapabilityResult | undefined): boolean {
+  return capability?.result === "passed" && RUNTIME_EVIDENCE_LEVELS.has(capability.evidenceLevel);
+}
+
+function capabilityDescription(capability: AdapterCapabilityResult): string {
+  if (capability.result === "needs_setup") return "需要先完成设置";
+  if (capability.result === "not_tested") return "当前会话尚未观察";
+  if (capability.result === "not_observable") return "当前宿主没有提供可观察证据";
+  if (capability.result === "not_applicable") return "当前宿主不提供这项能力";
+  if (capability.result === "failed") return "观察结果与预期不一致";
+  if (capability.evidenceLevel === "behavior_verified") return "安全场景中的行为已经验证";
+  if (capability.evidenceLevel === "runtime_observed") return "真实会话中已经观察到";
+  if (capability.evidenceLevel === "repository_checked") return "仓库侧实现已经检查";
+  return "产品协议声明支持，当前安装版本尚未观察";
+}
+
+function capabilityLine(name: AdapterCapabilityName, capability: AdapterCapabilityResult): CapabilityLine {
+  return {
+    capability: name,
+    label: CAPABILITY_LABELS[name],
+    result: capability.result,
+    evidenceLevel: capability.evidenceLevel,
+    description: capabilityDescription(capability)
+  };
+}
+
+function capabilityGroups(capabilities: RuntimeCapabilities): CapabilityGroup[] {
+  return CAPABILITY_GROUP_DEFINITIONS.map((group) => ({
+    id: group.id,
+    label: group.label,
+    capabilities: group.capabilities
+      .filter((name) => capabilities[name])
+      .map((name) => capabilityLine(name, capabilities[name] as AdapterCapabilityResult))
+  }));
+}
+
+function isConfirmedCapability(capability: AdapterCapabilityResult): boolean {
+  if (capability.result === "not_applicable") return capability.evidenceLevel !== "official_declared";
+  return capability.result === "passed" && capability.evidenceLevel !== "official_declared";
+}
+
+function evidenceSummary(runtime: RuntimeVerificationResult, mergedCapabilities: RuntimeCapabilities): EvidenceSummary {
+  if (runtime.status === "failed") return "failed";
+  const ranks: Record<Exclude<EvidenceSummary, "failed">, number> = {
+    not_tested: 0,
+    repository_checked: 1,
+    runtime_observed: 2,
+    behavior_verified: 3
+  };
+  let summary: Exclude<EvidenceSummary, "failed"> = "not_tested";
+  for (const capability of Object.values(mergedCapabilities)) {
+    if (!capability || !isConfirmedCapability(capability)) continue;
+    const candidate = capability.evidenceLevel === "official_declared" ? "not_tested" : capability.evidenceLevel;
+    if (ranks[candidate] > ranks[summary]) summary = candidate;
+  }
+  return summary;
+}
+
+function setupActionSatisfied(action: AdapterSetupAction, runtime: RuntimeVerificationResult): boolean {
+  if (runtime.status !== "runtime_observed" || !action.satisfiedBy?.length) return false;
+  return action.satisfiedBy.every((name) => isRuntimePass(runtime.capabilities?.[name]));
+}
+
+function remainingSetupActions(doctor: DoctorResult, runtime: RuntimeVerificationResult): AdapterSetupAction[] {
+  if (doctor.status !== "needs_manual_app_step") return [];
+  return (doctor.setupActions ?? []).filter((action) => !setupActionSatisfied(action, runtime));
+}
+
+function classifyReadiness(
+  capability: HarnessAdapterCapability,
+  doctor: DoctorResult,
+  setupActions: AdapterSetupAction[]
+): AdapterReadiness {
+  if (["error", "not_installed", "not_selected"].includes(doctor.status)) return "connection_error";
+  if (setupActions.length || (doctor.status === "needs_manual_app_step" && !(doctor.setupActions?.length))) return "setup_required";
+  if (capability.maturity === "developer-preview") return "trial_only";
+  return "ready";
+}
+
+function statusNextSteps(
+  readiness: AdapterReadiness,
+  product: HarnessProduct,
+  setupActions: AdapterSetupAction[]
+): string[] {
+  if (readiness === "connection_error") return [`检查 ${product} 的启动目录和 Adapter 配置后重试。`];
+  if (readiness === "setup_required") {
+    return setupActions.length
+      ? setupActions.map((action) => `${action.title}；完成标志：${action.successSignal}`)
+      : [`完成 ${product} 返回的一次性设置后，重新开启会话。`];
+  }
+  if (readiness === "trial_only") return ["可以在低风险场景试用；不要把当前 Adapter 作为高风险操作的唯一门禁。"];
+  return ["可以开始使用。"];
+}
+
+function productStatus(root: string, product: HarnessProduct, options: AdapterOptions = {}): ProductStatusResult {
+  const capability = capabilities(root).products[product];
+  const doctor = doctorAdapter(product, { ...options, cwd: options.cwd ?? root });
+  const runtime = verifyRuntimeEvidence(root, product, options);
+  const mergedCapabilities = mergeCapabilities(capability.capabilities, runtime.capabilities);
+  const setupActions = remainingSetupActions(doctor, runtime);
+  const readiness = classifyReadiness(capability, doctor, setupActions);
+  const lines = Object.entries(mergedCapabilities).map(([name, value]) => (
+    capabilityLine(name as AdapterCapabilityName, value as AdapterCapabilityResult)
+  ));
+  const summary = evidenceSummary(runtime, mergedCapabilities);
+  return {
+    product,
+    readiness,
+    label: READINESS_LABELS[readiness],
+    setup: {
+      status: doctor.status,
+      actions: setupActions,
+      messages: doctor.messages ?? []
+    },
+    limitations: doctor.limitations ?? capability.limitations ?? [],
+    continuation: capability.continuation ?? { delivery: "unsupported", maxConsecutive: 0 },
+    evidence: {
+      summary,
+      confirmed: lines.filter((line) => isConfirmedCapability(mergedCapabilities[line.capability] as AdapterCapabilityResult)),
+      unconfirmed: lines.filter((line) => !isConfirmedCapability(mergedCapabilities[line.capability] as AdapterCapabilityResult)),
+      runtimeStatus: runtime.status,
+      status: runtime.status,
+      hostVersion: runtime.hostVersion ?? "unknown",
+      hostVersionSource: runtime.hostVersionSource ?? "unknown",
+      observedAt: runtime.verifiedAt ?? null,
+      evidence: runtime.evidence ?? null
+    },
+    capabilities: mergedCapabilities,
+    capabilityGroups: capabilityGroups(mergedCapabilities),
+    skillCatalog: doctor.skillCatalog ?? null,
+    nextSteps: statusNextSteps(readiness, product, setupActions)
+  };
+}
+
+function freshCurrentPointers(root: string, options: AdapterOptions = {}): ReturnType<typeof listCurrentSessionPointers> {
+  const now = Number(options.now ?? Date.now());
+  const maxAgeMs = Number(options.pointerMaxAgeMs ?? 24 * 60 * 60 * 1000);
+  return listCurrentSessionPointers(root).filter((pointer) => {
+    if (!isHarnessProduct(pointer.product)) return false;
+    const updatedAt = Date.parse(pointer.updatedAt);
+    return Number.isFinite(updatedAt) && now - updatedAt <= maxAgeMs;
+  });
+}
+
+function identifyCurrentAdapter(root: string, options: AdapterOptions = {}): CurrentAdapterIdentification {
+  const env = options.env ?? process.env;
+  const explicitProduct = options.currentProduct ?? env.HARNESS_PRODUCT;
+  const explicitSessionId = options.sessionId ?? env.HARNESS_SESSION_ID;
+  if (explicitProduct) {
+    if (!isHarnessProduct(explicitProduct)) {
+      return { status: "invalid", source: "environment", product: null, reason: `HARNESS_PRODUCT 指向未知 Agent：${explicitProduct}` };
+    }
+    const pointer = readCurrentSessionPointer(root, explicitProduct);
+    return {
+      status: "identified",
+      source: "environment",
+      product: explicitProduct,
+      hasSession: Boolean(explicitSessionId || pointer?.sessionId),
+      pointerConflict: Boolean(explicitSessionId && pointer?.sessionId && explicitSessionId !== pointer.sessionId)
+    };
+  }
+
+  let pointers = freshCurrentPointers(root, options);
+  if (explicitSessionId) pointers = pointers.filter((pointer) => pointer.sessionId === explicitSessionId);
+  if (pointers.length === 1) {
+    return { status: "identified", source: "runtime_pointer", product: pointers[0].product, hasSession: true, pointerConflict: false };
+  }
+  if (pointers.length > 1) {
+    return {
+      status: "ambiguous",
+      source: "runtime_pointer",
+      product: null,
+      reason: `发现 ${pointers.length} 个仍然有效的会话指针，无法确定当前 Agent。`
+    };
+  }
+  return {
+    status: "unknown",
+    source: "unknown",
+    product: null,
+    reason: explicitSessionId ? "没有找到与当前会话标识匹配的运行指针。" : "没有找到可用于识别当前 Agent 的运行指针。"
+  };
+}
+
+export function adapterStatus(scope = "current", options: AdapterOptions = {}): AdapterStatusResult {
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  const root = options.root ?? findHarnessRoot(cwd);
+  const generatedAt = new Date(options.now ?? Date.now()).toISOString();
+  if (!root) {
+    return {
+      schemaVersion: 2,
+      kind: "adapter_status",
+      scope,
+      readiness: "connection_error",
+      label: READINESS_LABELS.connection_error,
+      summary: "没有找到 Harness 根目录。",
+      source: "unknown",
+      product: null,
+      products: [],
+      nextSteps: ["从包含 .harness/root.json 的工程根目录重新运行。"],
+      generatedAt
+    };
+  }
+
+  if (scope === "current") {
+    const current = identifyCurrentAdapter(root, options);
+    if (current.status !== "identified") {
+      return {
+        schemaVersion: 2,
+        kind: "adapter_status",
+        scope,
+        readiness: current.status === "invalid" ? "connection_error" : null,
+        label: current.status === "invalid" ? READINESS_LABELS.connection_error : null,
+        summary: current.reason ?? "无法识别当前 Agent。",
+        source: current.source,
+        product: null,
+        products: [],
+        nextSteps: ["请从目标工程根目录的新 Agent 会话中重新检查，或由 Adapter 显式提供 HARNESS_PRODUCT。"],
+        generatedAt
+      };
+    }
+    if (!current.product) throw new Error("Identified Adapter is missing a product.");
+    const status = productStatus(root, current.product, { ...options, cwd });
+    const notes = current.pointerConflict ? ["显式会话标识与旧运行指针不一致；本次以显式环境为准。"] : [];
+    return {
+      schemaVersion: 2,
+      kind: "adapter_status",
+      scope,
+      readiness: status.readiness,
+      label: status.label,
+      summary: `${current.product}：${status.label}`,
+      source: current.source,
+      product: current.product,
+      products: [status],
+      notes,
+      nextSteps: status.nextSteps,
+      details: options.details,
+      generatedAt
+    };
+  }
+
+  if (isHarnessProduct(scope)) {
+    const status = productStatus(root, scope, { ...options, cwd });
+    return {
+      schemaVersion: 2,
+      kind: "adapter_status",
+      scope,
+      readiness: status.readiness,
+      label: status.label,
+      summary: `${scope}：${status.label}`,
+      source: "explicit_product",
+      product: scope,
+      products: [status],
+      nextSteps: status.nextSteps,
+      details: options.details,
+      generatedAt
+    };
+  }
+
+  if (scope !== "selected") throw new Error("Usage: adapter status <current|selected|product> [--details] [--json]");
+  const products = selectedAdapters(root).map((product) => productStatus(root, product, { ...options, cwd }));
+  const groups: Partial<Record<AdapterReadiness, HarnessProduct[]>> = {};
+  for (const product of products) {
+    const items = groups[product.readiness] ?? [];
+    items.push(product.product);
+    groups[product.readiness] = items;
+  }
+  return {
+    schemaVersion: 2,
+    kind: "adapter_status",
+    scope,
+    readiness: null,
+    label: null,
+    summary: products.length ? `已汇总 ${products.length} 个已选择的 Adapter。` : "当前工程没有选择任何 Adapter。",
+    source: "project_config",
+    product: null,
+    products,
+    groups,
+    nextSteps: [],
+    details: options.details,
+    generatedAt
+  };
+}
+
+export function adapterCheck(scope = "current", options: AdapterOptions = {}): AdapterStatusResult {
+  const status = adapterStatus(scope, options);
+  return { ...status, kind: "adapter_check" };
+}
+
+function tomlString(value: unknown): string {
+  return `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+function managedBlock(dispatcher: string): string {
+  const command = `node "${String(dispatcher).replace(/"/g, '\\"')}"`;
+  return [
+    KIMI_BEGIN,
+    "[[hooks]]",
+    'event = "SessionStart"',
+    'matcher = "startup|resume"',
+    `command = ${tomlString(command)}`,
+    "timeout = 30",
+    "",
+    "[[hooks]]",
+    'event = "Stop"',
+    `command = ${tomlString(command)}`,
+    "timeout = 120",
+    KIMI_END
+  ].join("\n");
+}
+
+function stripBlock(source: string): string {
+  let result = source;
+  for (const [begin, endMarker] of [[KIMI_BEGIN, KIMI_END], [LEGACY_KIMI_BEGIN, LEGACY_KIMI_END]]) {
+    const start = result.indexOf(begin);
+    const end = result.indexOf(endMarker);
+    if ((start === -1) !== (end === -1)) throw new Error("Kimi config contains an incomplete Harness managed block.");
+    if (start === -1) continue;
+    if (result.indexOf(begin, start + begin.length) !== -1) throw new Error("Kimi config contains duplicate Harness managed blocks.");
+    result = `${result.slice(0, start)}${result.slice(end + endMarker.length)}`;
+  }
+  return result.replace(/\n{3,}/g, "\n\n").trimEnd();
+}
+
+function validateCandidate(file: string, options: AdapterOptions = {}): boolean {
+  if (options.validate) return options.validate(file);
+  const command = options.kimiCommand ?? "kimi";
+  const result = spawnSync(command, ["doctor", "config", file], { encoding: "utf8" });
+  if ((result.error as NodeJS.ErrnoException | undefined)?.code === "ENOENT") {
+    const source = readFileSync(file, "utf8");
+    return source.includes(KIMI_BEGIN) === source.includes(KIMI_END);
+  }
+  return result.status === 0;
+}
+
+function backup(file: string): string | null {
+  if (!existsSync(file)) return null;
+  const target = `${file}.harness-backup-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+  copyFileSync(file, target);
+  return target;
+}
+
+export function installKimiAdapter(options: AdapterOptions = {}) {
+  const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
+  if (!root) throw new Error("Harness root not found.");
+  const home = options.kimiHome ?? process.env.KIMI_CODE_HOME ?? path.join(os.homedir(), ".kimi-code");
+  const config = path.join(home, "config.toml");
+  const dispatcherDir = path.join(home, "lumine-harness-adapter");
+  const dispatcher = path.join(dispatcherDir, "dispatch.mjs");
+  mkdirSync(home, { recursive: true });
+  const source = existsSync(config) ? readFileSync(config, "utf8") : "";
+  const clean = stripBlock(source);
+  const next = `${clean.trimEnd()}${clean.trim() ? "\n\n" : ""}${managedBlock(dispatcher)}\n`;
+  const candidate = path.join(home, `.config.toml.harness-${process.pid}.tmp`);
+  writeFileSync(candidate, next, "utf8");
+  if (!validateCandidate(candidate, options)) {
+    rmSync(candidate, { force: true });
+    throw new Error("Kimi config validation failed; existing config was not modified.");
+  }
+  const backupFile = source ? backup(config) : null;
+  mkdirSync(dispatcherDir, { recursive: true });
+  writeFileSync(dispatcher, readFileSync(path.join(HERE, "adapters", "kimi", "installed-dispatcher.mjs"), "utf8"), "utf8");
+  writeFileSync(config, next, "utf8");
+  rmSync(candidate, { force: true });
+  return { product: "kimi", status: "installed", configFile: config, dispatcher, backup: backupFile };
+}
+
+export function uninstallKimiAdapter(options: AdapterOptions = {}) {
+  const home = options.kimiHome ?? process.env.KIMI_CODE_HOME ?? path.join(os.homedir(), ".kimi-code");
+  const config = path.join(home, "config.toml");
+  if (!hasManagedKimiBlock(config)) return { product: "kimi", status: "not_installed" };
+  const next = `${stripBlock(readFileSync(config, "utf8")).trimEnd()}\n`;
+  const candidate = path.join(home, `.config.toml.harness-${process.pid}.tmp`);
+  writeFileSync(candidate, next, "utf8");
+  if (!validateCandidate(candidate, options)) {
+    rmSync(candidate, { force: true });
+    throw new Error("Kimi config validation failed; existing config was not modified.");
+  }
+  const backupFile = backup(config);
+  writeFileSync(config, next, "utf8");
+  rmSync(candidate, { force: true });
+  rmSync(path.join(home, "lumine-harness-adapter"), { recursive: true, force: true });
+  return { product: "kimi", status: "uninstalled", configFile: config, backup: backupFile };
+}
+
+export function setCliWorkStatus(status: string, options: AdapterOptions = {}) {
+  if (!WORK_STATUSES.has(status as WorkStatus)) throw new Error(`Invalid WORK_STATUS: ${status}`);
+  const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
+  if (!root) throw new Error("Harness root not found.");
+  const product = options.product ?? process.env.HARNESS_PRODUCT;
+  const sessionId = options.sessionId ?? process.env.HARNESS_SESSION_ID;
+  if (!product || !sessionId) throw new Error("Pass --product and --session-id explicitly; Harness will not guess an active host session.");
+  if (!isHarnessProduct(product)) throw new Error(`Invalid Harness product: ${product}`);
+  return recordWorkStatus(root, { product, sessionId, cwd: options.cwd ?? process.cwd() }, status as WorkStatus);
+}
+
+function prepareManualAdapter(product: HarnessProduct, options: AdapterOptions = {}) {
+  const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
+  if (!root) throw new Error("Harness root not found.");
+  if (product === "zcode") {
+    return {
+      product,
+      status: "needs_manual_app_step",
+      path: path.join(root, ".harness", "adapters", "zcode", "marketplace"),
+      message: "请把该目录作为本地 Marketplace 加入 ZCode，安装并启用 lumine-harness-adapter，然后开启新会话。"
+    };
+  }
+  if (product === "deepseek-harness") {
+    const bundle = path.join(root, ".harness", "adapters", "deepseek-harness", "bundle");
+    return {
+      product,
+      status: "needs_manual_app_step",
+      path: bundle,
+      message: `单独授权修改用户 Profile 后执行：dsh plugin --profile <profile> add ${bundle}`
+    };
+  }
+  throw new Error(`No manual installer contract for ${product}.`);
+}
+
+export function runAdapterCommand(argv: string[], options: AdapterOptions = {}) {
+  const details = options.details ?? argv.includes("--details");
+  const filteredArgv = argv.filter((item) => !["--details", "--json"].includes(item));
+  const [action, target = "selected"] = filteredArgv;
+  const commandOptions = { ...options, details };
+  const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
+  const targets: readonly string[] = target === "all" ? PRODUCTS : target === "selected" ? (root ? selectedAdapters(root) : PRODUCTS) : [target];
+  if (action === "status") return adapterStatus(target, commandOptions);
+  if (action === "check") {
+    if (target === "selected" || target === "all") throw new Error("Usage: adapter check <current|product> [--details] [--json]");
+    return adapterCheck(target, commandOptions);
+  }
+  if (action === "list") return { schemaVersion: 1, kind: "adapter_list", results: listAdapters(root) };
+  if (action === "doctor") return { schemaVersion: 1, kind: "adapter_doctor", target, results: targets.map((item) => doctorAdapter(item, options)) };
+  if (action === "verify" && argv.includes("--begin")) {
+    if (!root) throw new Error("Harness root not found.");
+    if (targets.length !== 1 || !isHarnessProduct(target)) throw new Error("Begin verification for one selected product at a time.");
+    const versionIndex = argv.indexOf("--host-version");
+    const hostVersion = versionIndex >= 0 ? argv[versionIndex + 1] : null;
+    return { schemaVersion: 1, kind: "adapter_verify", target, results: [beginVerificationRun(root, target, { hostVersion: hostVersion ?? undefined })] };
+  }
+  if (action === "verify") return { schemaVersion: 1, kind: "adapter_verify", target, results: targets.map((item) => verifyAdapter(item, options)) };
+  if (action === "install" && target === "kimi") return { schemaVersion: 1, kind: "adapter_install", target, results: [installKimiAdapter(options)] };
+  if (action === "uninstall" && target === "kimi") return { schemaVersion: 1, kind: "adapter_uninstall", target, results: [uninstallKimiAdapter(options)] };
+  if (action === "install" && (target === "zcode" || target === "deepseek-harness")) return { schemaVersion: 1, kind: "adapter_install", target, results: [prepareManualAdapter(target, options)] };
+  if (action === "uninstall" && ["zcode", "deepseek-harness"].includes(target)) {
+    return {
+      schemaVersion: 1,
+      kind: "adapter_uninstall",
+      target,
+      results: [{
+        product: target,
+        status: "needs_manual_app_step",
+        message: target === "zcode"
+          ? "请在 ZCode 的 Settings -> Plugins 中卸载 lumine-harness-adapter。"
+          : "请对每个已安装的 Profile 执行：dsh plugin --profile <profile> remove @lumine/dsh-harness-adapter。"
+      }]
+    };
+  }
+  if (action === "install" || action === "uninstall") throw new Error(`${target} is repository-managed and has no user-level installer.`);
+  throw new Error("Usage: adapter check <current|product> [--details] [--json] | adapter status <current|selected|product> [--details] [--json] | adapter <list|doctor|verify|install|uninstall> <product|selected|all>");
+}
+
+export function runSkillCommand(argv: string[], options: AdapterOptions = {}) {
+  const [action, ...rest] = argv;
+  const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
+  if (!root) throw new Error("Harness root not found.");
+  if (action === "list") return discoverSharedSkills(root);
+  if (action === "search") return searchSharedSkills(root, rest.join(" "), { limit: options.limit ?? 3 });
+  if (action === "inspect") {
+    const skill = getSharedSkill(root, rest[0]);
+    if (!skill) throw new Error(`Unknown shared Skill: ${rest[0]}`);
+    return skill;
+  }
+  throw new Error("Usage: skills <list|search|inspect> [query|name]");
+}
+
+export function formatAdapterResult(result: AdapterCommandResult): string {
+  if (result.kind === "adapter_status" || result.kind === "adapter_check") {
+    if (result.scope === "selected") {
+      const lines = [result.summary ?? "已选择的 Adapter："];
+      const order: AdapterReadiness[] = ["ready", "setup_required", "trial_only", "connection_error"];
+      for (const readiness of order) {
+        const products = result.groups?.[readiness] ?? [];
+        if (!products.length) continue;
+        lines.push(`${READINESS_LABELS[readiness]}：${products.join("、")}`);
+        if (result.details) {
+          for (const product of products) {
+            const item = result.products?.find((candidate) => candidate.product === product);
+            if (item) lines.push(formatProductStatus(item, true, "检查对象").split("\n").map((line) => `  ${line}`).join("\n"));
+          }
+        }
+      }
+      return lines.join("\n");
+    }
+
+    const item = result.products?.[0];
+    if (!item) {
+      const currentScope = result.scope === "current";
+      return [
+        currentScope ? "当前 Agent：无法识别" : `检查对象：${result.scope ?? "无法识别"}`,
+        "结论：暂时无法判断",
+        `下一步：${result.nextSteps?.join("；") ?? "重新运行连接检查"}`
+      ].join("\n");
+    }
+    const subjectLabel = result.scope === "current" ? "当前 Agent" : "检查对象";
+    const lines = [formatProductStatus(item, Boolean(result.details), subjectLabel)];
+    for (const note of result.notes ?? []) lines.push(`说明：${note}`);
+    if (result.probe?.status === "challenge_issued") {
+      lines.push(`安全探针：${result.probe.reused ? "已复用当前探针" : "已创建"}`);
+    }
+    return lines.join("\n");
+  }
+  if (result.kind === "adapter_list") {
+    return [
+      "以下仅表示工程中是否提供并选择了 Adapter，不代表真实 Agent 已验证通过。",
+      ...(result.results ?? []).map((item) => [
+      `${item.product}：${item.selected ? "已选择" : "未选择"}`,
+      `  - 仓库实现：${item.implementation ?? "unknown"}`,
+      `  - 成熟度：${item.maturity ?? "unknown"}`
+      ].join("\n"))
+    ].join("\n");
+  }
+  const labels: Record<string, string> = {
+    repository_ready: "工程配置已就绪",
+    needs_manual_app_step: "需要完成一次设置",
+    partial: "基本流程可用但部分自动化需手动",
+    not_selected: "当前工程未选择",
+    not_installed: "连接异常",
+    error: "连接异常",
+    not_tested: "尚未完成真实验证",
+    runtime_observed: "已观察到真实会话事件",
+    failed: "连接异常",
+    challenge_issued: "已创建真实验证任务",
+    installed: "安装完成",
+    uninstalled: "卸载完成"
+  };
+  return (result.results ?? []).map((item) => {
+    const messages = [...(item.messages ?? []), ...(item.message ? [item.message] : []), ...(item.path ? [`Path: ${item.path}`] : [])];
+    const status = item.status ? (labels[item.status] ?? item.status) : "完成";
+    const lines = [`${item.product}：${status}`];
+    for (const message of messages) lines.push(`  - ${message}`);
+    for (const action of item.setupActions ?? []) {
+      lines.push(`  - 要做：${action.title}`);
+      action.steps.forEach((step, index) => lines.push(`    ${index + 1}. ${step}`));
+      lines.push(`    完成标志：${action.successSignal}`);
+      if (action.reloadRequired) lines.push("    完成后需要重新加载产品或开启新会话。");
+    }
+    for (const limitation of item.limitations ?? []) lines.push(`  - 已知限制：${limitation}`);
+    return lines.join("\n");
+  }).join("\n");
+}
+
+export function formatSkillResult(result: unknown): string {
+  const omitFile = ({ file: _file, ...skill }: Record<string, unknown>): Record<string, unknown> => skill;
+  if (result === null || typeof result !== "object") return JSON.stringify(result, null, 2);
+  const output = Array.isArray(result)
+    ? result.map((item) => item && typeof item === "object" ? omitFile(item as Record<string, unknown>) : item)
+    : omitFile(result as Record<string, unknown>);
+  return JSON.stringify(output, null, 2);
+}
