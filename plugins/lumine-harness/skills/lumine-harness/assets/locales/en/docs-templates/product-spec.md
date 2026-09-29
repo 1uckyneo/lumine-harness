@@ -27,4 +27,8 @@ locale: en
 
 ## Open decisions and design references
 
-<!-- Keep only real unresolved choices. Reference approval scope and evidence; template status cannot establish approval. Link design material when needed. -->
+<!-- Keep real unresolved choices and explain whether design is needed and why. Link applicable design material. After design confirmation, incorporate resulting behavior, scenario, and acceptance changes into this Spec for user confirmation. -->
+
+## Confirmation and next step
+
+<!-- Summarize the scope offered for confirmation, the recommended next step, and actual confirmation evidence. Record real user decisions only. Readiness questions, template status, and early broad implementation intent are not stage confirmation. Follow lumine-plan stage handoff guidance; do not produce the next stage deliverable without confirmation. -->

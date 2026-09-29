@@ -62,7 +62,9 @@ The Agent inspects the target and prepares a Migration Proposal listing writes, 
 
 State your outcome directly rather than invoking each capability manually. Feature work normally follows:
 
-**Product Spec → necessary design → technical Exec Plan → implementation/verification → affected knowledge updates.**
+**Product Spec → (necessary design → Spec update) → Exec Plan → Run. The user confirms each stage handoff; verification during or after Run needs no separate confirmation.**
+
+The Agent uses existing material, repository facts, and applicable Skills to judge the next step, including whether design is needed. “Can we move to the next step?” asks for an assessment; confirmation authorizes the recommended stage. Design work provides suitable material such as HTML prototypes, then updates the Spec after design confirmation and obtains confirmation of the revised requirements. See the [stage handoff guidance](skills/lumine-harness/assets/locales/en/skills/lumine-plan/references/stage-handoff.md) for the detailed rules.
 
 | Everyday Skill | Responsibility |
 | --- | --- |
@@ -78,12 +80,13 @@ Example requests:
 ```text
 Develop a product proposal for this requirement without implementing it yet.
 Compare two technical approaches and update the Plan without changing business code.
-Continue the confirmed approach and verify the actual outcome.
+Can we move to the next step? Check the existing material and assess readiness.
+I confirm this execution plan. Enter Run and verify the actual outcome.
 Diagnose this issue and report causes and evidence without automatically repairing it.
 Explain how login and dynamic routing cooperate, with source references.
 ```
 
-Local repairs may proceed directly when they introduce no product choice, change no agreed behavior contract, and need no independent coordination. Existing authorization survives capability changes; real unresolved choices need user input. A generated Plan, approved field, or passing tool check does not establish authorization or acceptance.
+Work autonomously within a stage without repeating confirmation for the same scope. An early broad request to build a feature cannot approve later concrete deliverables. Local repairs that introduce no product choice, change no agreed behavior contract, and need no independent coordination, as well as explicit rule maintenance and verification-only requests, retain their own scope without the full product workflow. A generated Plan, approved field, or passing tool check does not establish authorization or acceptance.
 
 ## Engineering records for people and Agents
 

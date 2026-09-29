@@ -1,6 +1,6 @@
 ---
 name: lumine-plan
-description: Clarify requirements and create or review product specifications and technical execution plans; use for product discussion, Spec revisions, technical options, or implementation planning without automatically starting implementation.
+description: Clarify requirements, create or review product specifications and execution plans, and assess readiness for the next step; obtain separate stage confirmations for the Spec, necessary design, and Plan without automatically implementing a generated plan.
 ---
 
 # Requirements and solution planning
@@ -12,13 +12,14 @@ Work toward the outcome requested in this turn. Read AGENTS.md, applicable rules
 - For product problems, scenarios, rules, and acceptance, read [Product specification](references/product-spec.md) and maintain the Spec in place.
 - For technical choices, execution order, and recovery, read [Execution plan](references/exec-plan.md) and reference the applicable Spec acceptance items.
 - A Spec-only discussion or revision does not require an Exec Plan. A review request produces findings, evidence, and focused corrections, not implementation.
-- Use lumine-design when unresolved visual or interaction choices need concrete material. Product rules remain in the Spec.
+- When asked about the next step, preparing a handoff, or resuming work, read [Stage readiness and handoff](references/stage-handoff.md). Inspect applicable Skills, actual deliverables, and confirmation evidence, then recommend the next step with reasons.
+- Discuss product direction in the Spec first. Use lumine-design for necessary visual/interaction design, bring confirmed decisions back into the same Spec, then proceed to technical planning. Technical architecture design remains in this Skill.
 
 <!-- LH-PLAN-03 -->
 Feature work normally uses a Spec and Plan. A local repair may go directly to lumine-run when it introduces no new product decision, changes no agreed behavior contract, and needs no independent cross-task coordination. File count does not determine simplicity.
 
 <!-- LH-PLAN-04 -->
-Reuse existing authorization; changing capabilities does not add approval steps. Present concrete choices for unresolved goals, scope, or material tradeoffs. An approved field, a generated document, or a fingerprint is not user authorization. Continue to lumine-run when implementation is already authorized and the approach is ready; conclude with planning results when planning alone was requested.
+Work autonomously within a stage. Every stage transition requires user confirmation of the concrete deliverables already presented and the next step. An earlier broad request to finish a feature cannot skip these confirmations; do not ask again when the same deliverables and stage already have valid confirmation. Asking whether the next step is possible requests an assessment, not approval. Document status, fingerprints, and Agent judgment cannot replace user confirmation. Do not automatically continue into another stage while confirmation is pending.
 
 <!-- LH-PLAN-05 -->
 Review product and technical consistency, testable acceptance, and missing boundaries. Runtime checks validate structure and references, not semantic quality. Lead with conclusions and current decisions, omit irrelevant sections, and link to logs rather than copying them. Follow the project language; readable filenames and stable identities are separate.

@@ -4,7 +4,7 @@
 
 - `.lumine/root.json` 标识项目根；`.lumine/project.json` 管理语言、仓库、能力和知识配置。
 - `.agents/skills/` 只分发 `lumine-plan`、`lumine-run`、`lumine-knowledge`、`lumine-design` 四个日常规范入口。初始化维护入口仍为 `lumine-harness`。
-- `AGENTS.md` 是规则与地图，`ARCHITECTURE.md` 是架构概览。强制规则不能只靠知识检索发现。
+- `AGENTS.md` 是宿主中立的工程规则与地图，`ARCHITECTURE.md` 是架构概览。根规则不承载宿主配置目录导航或社区 Adapter 兼容说明；实际适配配置单独维护。强制规则不能只靠知识检索发现。
 - Spec 默认 `docs/product-specs/`，Plan 默认 `docs/exec-plans/active/`，历史执行计划位于 `completed/`，证据位于 `docs/validation/`。
 - 知识正文默认 `docs/repo-wiki/`，配置只指定一个权威根。`.lumine/wiki-state/` 保存持久维护状态；`.lumine/local/wiki/` 只保存可重建缓存／本机态。
 
@@ -16,7 +16,7 @@ Spec／Plan 使用 `id` 和类型；Wiki 单元按知识接口保存稳定 ID。
 
 ## 工作与证据
 
-规划可以只产出 Spec；完整功能通常使用 Spec＋Plan。技术方案由 Plan 维护，实施后的稳定知识进入 Wiki，未实现目标不覆盖现状。四个 Skill 由意图与授权调度，不要求用户逐项调用，不因阶段切换重审批。只验证模式不修复。
+规划可以只产出 Spec；完整功能通常使用 Spec＋Plan。技术方案由 Plan 维护，实施后的稳定知识进入 Wiki，未实现目标不覆盖现状。Agent 按目标和仓库事实选择四个 Skill，并评估是否需要设计及下一步是否就绪；用户不必逐项调用。产品 Spec、必要设计及 Spec 回写、Exec Plan、Run 的交接按[阶段交接指导](../assets/skills/lumine-plan/references/stage-handoff.md)取得人的明确确认；阶段内自主，已确认的同一范围不重复询问。Run 中或之后的验证无需独立确认，只验证模式不修复。
 
 Runtime 承担可确定的检查，四个能力承担各自语义评审。完成依据对应当前请求、验收子集、内容基线与真实操作，测试、运行、部署和用户接受分别表达。任务记录位于 `.lumine/tasks/`，绑定当前会话和模式；详情参见[检查与证据](runtime-checks.md)。
 

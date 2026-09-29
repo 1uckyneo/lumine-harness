@@ -38,7 +38,7 @@ Read the applicable Skill; a name match or existing directory does not establish
 - lumine-knowledge: discovery, queries, source verification, and Wiki maintenance.
 - lumine-design: visual and interaction choices and design review.
 
-Select capabilities by current intent and authorization, not keywords. Feature work normally follows Spec → necessary design → Plan → implementation/verification → affected knowledge updates. Continue under existing authorization without new phase approvals. A local repair may proceed directly when it introduces no product decision, changes no agreed behavior contract, and needs no independent coordination; retain its goal, boundaries, and evidence.
+Assess the next step using the goal, existing material, and repository facts rather than keywords or requiring the user to dispatch Skills. Product work follows Spec → (necessary design → Spec update) → Exec Plan → Run. Each stage handoff requires explicit human confirmation; work autonomously within a stage and do not repeat confirmation for the same scope. “Can we move to the next step?” requests a readiness assessment, not permission to proceed; an early broad implementation request cannot approve deliverables that do not yet exist. See [Stage handoffs](.agents/skills/lumine-plan/references/stage-handoff.md) for readiness and confirmation scope. Verification during or after Run needs no separate confirmation. Handle bounded repairs, rule maintenance, and verification-only requests within their own scope without forcing the full product workflow.
 
 Checks are Runtime tools, not a fifth Skill. Structural checks do not replace domain-specific semantic review. Use ./.lumine/cli --help for interfaces; task checks and explicit project health checks have different scopes.
 

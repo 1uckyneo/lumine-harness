@@ -170,7 +170,7 @@ function evaluateLockedStopPolicy(input, options) {
 		failure = check.output || "The current task completion evidence is insufficient.";
 	} else if (report?.status === "continue") cause = "continue";
 	const disposition = failure ? "reject_completion" : "request_continuation";
-	const message = failure ? `${failure}\nReassess only the current request. Correct the report or evidence within existing authorization; findings do not authorize a repair, changed acceptance, deployment or broader work. If unable to continue, report blocked with the concrete reason.` : "Continue with the next concrete step within the existing authorization, then report the current work status.";
+	const message = failure ? `${failure}\nReassess only the current request. Correct the report or evidence within existing authorization; findings do not authorize a repair, changed acceptance, deployment or broader work. If unable to continue, report blocked with the concrete reason.` : "Continue with the next concrete step within the currently confirmed stage and authorized scope, then report the current work status. Do not enter a new product-development stage without the user confirmation described in the stage-handoff guidance; if that confirmation is pending, report blocked with the concrete next step.";
 	if (continuationDeliveryFor(input.product, { disposition }) !== "automatic") return persist(decision(disposition, {
 		...common,
 		cause,

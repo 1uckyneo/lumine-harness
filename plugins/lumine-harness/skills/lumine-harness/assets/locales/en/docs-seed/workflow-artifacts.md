@@ -1,6 +1,6 @@
 # How work artifacts fit together
 
-Lumine keeps goals, technical plans, existing knowledge, and actual evidence in distinct authoritative records. Users state outcomes in natural language; Agents continue within authorization without requiring manual stage commands.
+Lumine keeps goals, technical plans, existing knowledge, and actual evidence in distinct authoritative records. Users state outcomes in natural language; Agents assess the current stage, applicable capabilities, and next step. Users confirm stage handoffs without manually dispatching Skills.
 
 | Artifact | Question answered | Maintenance |
 | --- | --- | --- |
@@ -9,7 +9,7 @@ Lumine keeps goals, technical plans, existing knowledge, and actual evidence in 
 | Repo Wiki | How does the system currently work, why, and with what limits? | Cite source and decisions; share one Markdown body and Mermaid text between people and Agents. |
 | Validation | What actually happened, with what outcome and evidentiary scope? | Preserve date, actions, code/environment applicability, and original evidence without rewriting historical conclusions. |
 
-Features usually follow Spec → necessary design → Plan → implementation/verification → affected knowledge updates. Product-only discussion needs no technical Plan. Judge direct repairs by behavior contracts and decision needs, not file count. Existing authorization remains valid; only real unresolved choices need discussion.
+Product work follows Spec → (necessary design → Spec update) → Exec Plan → Run, with explicit human confirmation at each handoff. Omit design and its Spec update when design is unnecessary. The Agent checks the goal, material, repository facts, and applicable Skills before recommending the next step, then works autonomously within the confirmed stage. A Spec-only discussion produces no technical Plan. Verification during or after Run needs no separate confirmation. Bounded repairs, rule maintenance, and verification-only work retain their own scope without the full product workflow. See [Stage handoffs](../.agents/skills/lumine-plan/references/stage-handoff.md) for readiness, confirmation evidence, and recovery; this page owns artifact responsibilities only.
 
 ## Everyday capabilities
 

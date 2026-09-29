@@ -10,7 +10,7 @@ specId: "{{spec_id}}"
 
 ## Current results and next action
 
-<!-- Summarize delivered results, remaining work, next action, and blockers. Maintain a current overview rather than prepending historical batches. -->
+<!-- Summarize delivered results, remaining work, next action, and blockers. Cite the applicable Spec/design confirmation and whether the user has confirmed this Plan for Run; active status is not implementation authorization. Until confirmation, the next step is human review rather than implementation. Maintain a current overview rather than prepending historical batches. -->
 
 ## Goal and acceptance references
 
@@ -26,7 +26,7 @@ specId: "{{spec_id}}"
 
 ## Verification and delivery
 
-<!-- Link actions, outcomes, date, code/environment scope, and evidence by AC ID. Distinguish tests, actual operation, deployment, user acceptance, and unverified items. -->
+<!-- Link actions, outcomes, date, code/environment scope, and evidence by AC ID. Verify during or after Run without another stage confirmation; deployment, publication, and other external actions retain their own authorization boundaries. Distinguish tests, actual operation, deployment, user acceptance, and unverified items. -->
 
 ## Material decisions and history
 

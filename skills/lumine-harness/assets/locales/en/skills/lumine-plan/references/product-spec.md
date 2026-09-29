@@ -14,3 +14,6 @@ Keep one current set of requirements. Move superseded batches and findings to a 
 
 <!-- LH-SPEC-05 -->
 Review whether the proposal solves the stated problem, normal/failure behavior is consistent, exclusions are clear, acceptance is observable, and constraints are compatible. Judge realistic scenarios rather than section count, length, or field validation.
+
+<!-- LH-SPEC-06 -->
+Use [Stage readiness and handoff](stage-handoff.md) to assess readiness, whether design is needed, and the recommended next step. After confirmation of the initial Spec, follow the confirmed design branch. Bring confirmed design decisions back into the same Spec, show what changed, and obtain user confirmation before the Exec Plan. Skipping design still requires confirmation of the Spec and entry into technical planning. A document, status field, or question about next-step readiness is not confirmation.

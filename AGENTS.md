@@ -121,7 +121,7 @@ bash scripts/check-repo-sync.sh
 - 本仓配置与运行入口在 `.lumine/`，中文优先；`.lumine/cli` 运行构建后的 Runtime。
 - 四个日常 Skill 直接读取 `skills/lumine-harness/assets/skills/lumine-*/SKILL.md`，由 root manifest 的 skills 字段定位，不创建另一套可编辑副本。
 - `docs/product-specs/` 维护产品要求，`docs/exec-plans/active/` 维护实施及证据，`docs/repo-wiki/` 维护源码关联的架构和机制。
-- 产品需求直接在 Spec 内迭代，技术方案和进度放 Plan；已有授权内连续推进，仅诊断不自动修复。
+- 产品需求直接在 Spec 内迭代，技术方案和进度放 Plan；本仓同样遵循[阶段交接指导](skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md)：产品 Spec、必要设计及 Spec 回写、Exec Plan、Run 的交接需人的明确确认，阶段内自主，已确认的同一范围不重复询问。Agent 自主判断下一步，询问就绪不等于授权；Run 中或之后的验证不另设确认。明确的局部修复、规则维护和仅诊断按自身范围处理，不强制完整产品流程；仅诊断不自动修复。
 - 知识只维护 Markdown、Mermaid 与持久文本状态；浏览器阅读和绘图不调用模型。按目标自主选择 Wiki、源码或组合，不强制查询；核实缺口、过期或矛盾后，在授权内写回可复用结论，明确只读时只报告。目录按真实能力维护，知识查询不自动开始全量改写。
 - `.lumine/wiki-state/`、`.lumine/tasks/`、`.lumine/project-checks/` 是项目资产；`.lumine/local/` 含本机态与受保护私有材料，不能整体当作随意清理的缓存。
 - 初始化维护、日常 Runtime 与阅读器分别构建，旧格式只由独立迁移模块读取。历史资料不进入默认规范发现。
