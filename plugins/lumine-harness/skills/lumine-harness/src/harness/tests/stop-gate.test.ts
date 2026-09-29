@@ -26,11 +26,11 @@ function requireSessionState(root: string, product: HarnessProduct, sessionId: s
 test("explicit WORK_STATUS drives Codex continuation and pause", () => {
   const root = tempHarness();
   try {
-    assert.equal(extractWorkStatus("WORK_STATUS: continue_autonomously"), "continue_autonomously");
-    const next = decideStopHookResponse({ cwd: root, session_id: "next", stop_hook_active: false, last_assistant_message: "WORK_STATUS: continue_autonomously" });
+    assert.equal(extractWorkStatus("WORK_STATUS: continue"), "continue");
+    const next = decideStopHookResponse({ cwd: root, session_id: "next", stop_hook_active: false, last_assistant_message: "WORK_STATUS: continue" });
     assert.ok(next);
     assert.equal(next.decision, "block");
-    const pause = decideStopHookResponse({ cwd: root, session_id: "pause", last_assistant_message: "WORK_STATUS: needs_user_decision" });
+    const pause = decideStopHookResponse({ cwd: root, session_id: "pause", last_assistant_message: "WORK_STATUS: blocked" });
     assert.equal(pause, null);
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -48,7 +48,7 @@ function stopInput(
     event: "stop",
     sessionId,
     cwd: root,
-    lastAssistantMessage: "WORK_STATUS: continue_autonomously",
+    lastAssistantMessage: "WORK_STATUS: continue",
     statusEmissionId: emissionId,
     ...extra
   };
@@ -78,7 +78,7 @@ test("one emission cannot silently change status and a new user turn invalidates
     initializeSessionState(root, input);
     evaluateStopPolicy(input, { root });
     const { recordWorkStatus } = await import("../core/work-status.ts");
-    assert.throws(() => recordWorkStatus(root, input, "done", { emissionId: requireSessionState(root, "codex", "turn-boundary").workStatusEmissionId }), /cannot declare multiple states/);
+    assert.throws(() => recordWorkStatus(root, input, "done", { emissionId: requireSessionState(root, "codex", "turn-boundary").workStatusEmissionId }), /cannot declare conflicting reports/);
     recordUserTurn(root, { ...input, userTurnId: "next-user-turn", lastAssistantMessage: null });
     const stale = evaluateStopPolicy({ ...input, lastAssistantMessage: null }, { root });
     assert.equal(stale.disposition, "reject_completion");
@@ -112,14 +112,14 @@ test("changing Hook invocation IDs does not create a new assistant status emissi
       cwd: root,
       session_id: "hook-retry",
       hook_run_id: "stop-attempt-1",
-      last_assistant_message: "WORK_STATUS: continue_autonomously"
+      last_assistant_message: "WORK_STATUS: continue"
     });
     const retriedInput = normalizeHookInput("codex", "stop", {
       cwd: root,
       session_id: "hook-retry",
       hook_run_id: "stop-attempt-2",
       loop_count: 7,
-      last_assistant_message: "WORK_STATUS: continue_autonomously"
+      last_assistant_message: "WORK_STATUS: continue"
     });
     initializeSessionState(root, firstInput);
     const first = evaluateStopPolicy(firstInput, { root });

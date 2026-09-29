@@ -116,7 +116,7 @@ export async function handleDeepSeekHarnessHook(raw: UnknownRecord = {}): Promis
   const decision = evaluateStopPolicy(input, { root });
   appendVerificationEvent(root, input, { raw, decision });
   const delivery = continuationDeliveryFor(input.product, decision);
-  if (decision.disposition === "reject_completion" && delivery === "automatic") {
+  if (decision.disposition === "reject_completion" && decision.shouldDeliver === true && delivery === "automatic") {
     return {
       exitCode: 0,
       stdout: JSON.stringify({ decision: "block", reason: decision.message })

@@ -23,3 +23,7 @@ Read only the language-specific references needed for the task. Inspect the actu
 Everyday project work uses the installed `lumine-plan`, `lumine-run`, `lumine-knowledge`, and `lumine-design` Skills. Checks are Runtime tools. This entry owns initialization and maintenance, not another mandatory daily phase.
 
 日常工作使用项目内四个 Skill：`lumine-plan`、`lumine-run`、`lumine-knowledge`、`lumine-design`。检查由 Runtime 提供，本入口只负责初始化与维护。
+
+After first adoption, the current Agent continues with `lumine-knowledge` to understand the project and build a project-specific Wiki covering its major modules, unless the user narrows or defers that work. Tools do not create semantic knowledge. Report installation, knowledge coverage, and content verification separately; preserve progress for resumption.
+
+首次采用后，当前 Agent 接续 `lumine-knowledge`，理解项目、规划适用目录并深入覆盖主要模块；用户可以缩小范围或延后。工具不承担知识理解与撰写。安装、知识覆盖和内容核实分别报告，未完成工作保存恢复位置。

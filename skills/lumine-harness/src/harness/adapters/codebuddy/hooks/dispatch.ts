@@ -123,7 +123,7 @@ export async function handleCodeBuddyHook(raw: UnknownRecord = {}): Promise<Hook
   const decision = evaluateStopPolicy(input, { root });
   appendVerificationEvent(root, input, { raw, decision });
   const delivery = continuationDeliveryFor(input.product, decision);
-  if (decision.disposition === "reject_completion" && delivery === "automatic") {
+  if (decision.disposition === "reject_completion" && decision.shouldDeliver === true && delivery === "automatic") {
     return { exitCode: 0, stdout: JSON.stringify({ continue: false, reason: decision.message }) };
   }
   if (decision.disposition === "request_continuation" && decision.shouldDeliver === true && delivery === "automatic") {

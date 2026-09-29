@@ -20,7 +20,7 @@ Planning may produce a Spec only; complete feature work normally uses Spec and P
 
 Runtime supplies deterministic checks; the four capabilities own their semantic reviews. Completion evidence matches the current request, applicable acceptance subset, content baseline, and actual operations. Distinguish tests, runtime behavior, deployment, and user acceptance. Task records under .lumine/tasks/ bind the current session and mode; see [Checks and evidence](runtime-checks.md).
 
-Preserve done, continue_autonomously, needs_user_decision, needs_credentials, needs_manual_app_step, and blocked_external. Diagnostic done may include failing findings. Only knowledge synchronization explicitly within the current task affects its completion.
+Use done, continue, and blocked as public control states; explain the specific blocker and next action separately. Status grants no authorization, and automatic follow-ups share budgets and deduplication. Diagnostic done may include failing findings. Only knowledge synchronization explicitly within the current task affects its completion.
 
 ## Knowledge presentation
 

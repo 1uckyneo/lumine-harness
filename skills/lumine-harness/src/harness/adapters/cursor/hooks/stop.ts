@@ -29,7 +29,7 @@ try {
   const decision = evaluateStopPolicy(input, { root });
   appendVerificationEvent(root, input, { raw, decision });
   const delivery = continuationDeliveryFor(input.product, decision);
-  if (decision.disposition === "reject_completion" && delivery === "automatic") {
+  if (decision.disposition === "reject_completion" && decision.shouldDeliver === true && delivery === "automatic") {
     writeHookOutput({ followup_message: decision.message });
   } else if (decision.disposition === "request_continuation" && decision.shouldDeliver === true && delivery === "automatic") {
     writeHookOutput({ followup_message: decision.message });

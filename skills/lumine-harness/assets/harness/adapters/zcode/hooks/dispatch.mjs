@@ -6,8 +6,8 @@ import { initializeSessionState, observeHarnessEvent, readSessionState, recordUs
 import { appendVerificationEvent } from "../../../core/verification.mjs";
 import { normalizeHookInput } from "../../../core/hook-io.mjs";
 import { buildSessionStartContext } from "../../../core/session-context.mjs";
-import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
 import { continuationDeliveryFor } from "../../../core/continuation-delivery.mjs";
+import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
 import { isMutatingTool, markExpectedSkillRead, pendingExpectedSkills, recordPromptRoute, requireExpectedSkillRead, toolReadsExpectedSkill } from "../../../core/phase-router.mjs";
 
 //#region skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts
@@ -121,7 +121,7 @@ async function handleZCodeHook(raw = {}) {
 		decision
 	});
 	const delivery = continuationDeliveryFor(input.product, decision);
-	if (decision.disposition === "reject_completion" && delivery === "automatic") {
+	if (decision.disposition === "reject_completion" && decision.shouldDeliver === true && delivery === "automatic") {
 		return {
 			exitCode: 0,
 			stdout: JSON.stringify({

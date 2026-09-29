@@ -32,11 +32,11 @@ function buildSessionStartContext(input = {}) {
 		`- 规范 Skill：${manifest.skills}；使用 ./.lumine/cli skills search <query> 定位。`,
 		"- lumine-plan 负责需求与方案；lumine-run 负责实施、恢复、验证和诊断；lumine-knowledge 负责知识；lumine-design 负责视觉与交互。",
 		"- 根据当前目标按需选择 Skill；读取 Skill 不等于获得实施授权。仅规划可只产出产品方案，已有实施授权不因切换入口而失效。",
-		"- 新目标、范围变化或恢复时运行 ./.lumine/cli wiki query <query>；按需展开正文并核对源码。知识不是新的授权规则。",
+		"- 按当前问题自主决定是否查询 ./.lumine/cli wiki query <query>；需要稳定背景时展开相关知识，矛盾或过期时核对源码。知识不是新的授权规则。",
 		"- 明确的局部修复可直接处理。实施前将目标、范围与证据记录到 task，并绑定当前会话；task bind 不代替授权。",
 		"- 独立检查直接运行 ./.lumine/cli check <target>。仅诊断或验证可以报告失败后完成，不因此自动修复。",
 		"- 验证区分工具结果、真实运行和人工接受；本次实施结束只检查关联任务，不强制全项目健康检查。",
-		"- 收尾或暂停时输出恰好一条 WORK_STATUS。"
+		"- 收尾记录 WorkReport v2：done、continue、blocked；blocked 说明具体原因。可读取结束回答的宿主使用末尾独立行 WORK_STATUS: <status>，受阻原因和下一步写在正文或结构化报告，可选附加 | <原因>；正文例子不参与控制。"
 	] : [
 		"Lumine project context:",
 		`- Project root: ${root}`,
@@ -44,12 +44,13 @@ function buildSessionStartContext(input = {}) {
 		`- Canonical Skills: ${manifest.skills}; discover with ./.lumine/cli skills search <query>.`,
 		"- lumine-plan owns requirements and plans; lumine-run owns implementation, recovery, verification and diagnosis; lumine-knowledge owns knowledge; lumine-design owns visual and interaction design.",
 		"- Select Skills by the current goal. Reading a Skill does not grant implementation permission. Product planning need not create an execution plan; existing implementation authorization survives context transitions.",
-		"- Query ./.lumine/cli wiki query <query> on a new goal, scope change or recovery; expand relevant knowledge and verify source. Knowledge is not an authorization source.",
+		"- Choose whether ./.lumine/cli wiki query <query> helps the current question; expand stable background when useful and verify source for stale or conflicting claims. Knowledge is not an authorization source.",
 		"- Scoped repairs may proceed directly. Record the implementation goal, scope and evidence with task and bind the session; binding does not grant authorization.",
 		"- Independent checks use ./.lumine/cli check <target>. Diagnosis or verification may finish with failures; findings do not authorize repairs.",
 		"- Separate tool results, runtime evidence and human acceptance. Completion checks only the current task, not global project health.",
-		"- Finish or pause with exactly one WORK_STATUS line."
+		"- Record WorkReport v2: done, continue or blocked with a concrete reason. Hosts that read the final answer accept one terminal WORK_STATUS: <status> line; explain a blocker and next step in prose or the structured report (an optional | <reason> suffix is accepted). Examples in the body do not control execution."
 	];
+	lines.push(zh ? "- 在现有授权内将已核实且可复用的稳定知识整理回 Wiki，避免把临时排错过程或未实施方案写成现状；纯查询不自动全量重写。" : "- Within existing authorization, preserve verified reusable knowledge in the Wiki; do not promote temporary debugging or proposed behavior to current implementation. A query does not authorize a full rewrite.");
 	if (manifest.migrationStatus && manifest.migrationStatus !== "complete") lines.push(zh ? "- 迁移尚未完整收口：可以检查、恢复并运行新 Hook 取得证据；真实宿主验证完成前，不宣称完整迁移已完成。" : "- Migration is not fully complete: checks, recovery and new Hook invocations may collect evidence; do not claim completed migration before actual host verification.");
 	if (input.prompt) lines.push(buildSharedSkillCatalog(root, {
 		query: input.prompt,

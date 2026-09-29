@@ -176,43 +176,102 @@ function walkFiles(root, relative = ".", limit = 4e4, omit = () => false) {
 	visit(relative);
 	return found.sort();
 }
-function snapshotSources(root, sources, scopes) {
-	const config = wikiConfig(root), fingerprints = {}, files = {}, scopeFingerprints = {}, missing = [];
+/** The optional cache belongs to one scan/prepare operation, never to a process-wide index. */
+function snapshotSources(root, sources, scopes, cache = new Map()) {
+	const config = wikiConfig(root), prefix = `${path.resolve(root)}\0`;
+	const fingerprints = {}, files = {}, scopeFingerprints = {}, missing = [];
+	const includes = (parent, child) => parent === "." || child === parent || child.startsWith(`${parent}/`);
+	const digest = (repoId, relative, file) => {
+		const identity = `${repoId}:${relative}`, key = `${prefix}file:${identity}`;
+		const saved = cache.get(key)?.fingerprints[identity];
+		if (typeof saved === "string") return saved;
+		const value = hash(readFileSync(file));
+		cache.set(key, {
+			fingerprints: { [identity]: value },
+			files: {},
+			scopeFingerprints: {},
+			missing: []
+		});
+		return value;
+	};
+	const captureScope = (scope) => {
+		const identity = `${scope.repoId}:${scope.path}`;
+		let relative;
+		try {
+			relative = relativePath(scope.path);
+		} catch {
+			return {
+				fingerprints: {},
+				files: {},
+				scopeFingerprints: { [identity]: "missing" },
+				missing: [identity]
+			};
+		}
+		const scopePrefix = `${prefix}scope:${scope.repoId}:`, cacheKey = `${scopePrefix}${relative}`;
+		const saved = cache.get(cacheKey);
+		if (saved) return saved;
+		const result = {
+			fingerprints: {},
+			files: {},
+			scopeFingerprints: {},
+			missing: []
+		};
+		try {
+			const repoRoot = repositoryRoot(root, config, scope.repoId);
+			sourcePath(root, config, scope.repoId, relative);
+			const available = [...cache].flatMap(([key, snapshot]) => key.startsWith(scopePrefix) && !snapshot.missing.length ? [{
+				relative: key.slice(scopePrefix.length),
+				snapshot
+			}] : []);
+			const ancestor = available.find((entry) => includes(entry.relative, relative));
+			const entries = {};
+			if (ancestor) {
+				for (const [file, fingerprint] of Object.entries(ancestor.snapshot.files)) {
+					const local = file.slice(scope.repoId.length + 1);
+					if (includes(relative, local)) entries[local] = fingerprint;
+				}
+			} else {
+				const descendants = available.filter((entry) => includes(relative, entry.relative)).sort((a, b) => a.relative.length - b.relative.length).filter((entry, index, all) => !all.slice(0, index).some((parent) => includes(parent.relative, entry.relative)));
+				for (const entry of descendants) for (const [file, fingerprint] of Object.entries(entry.snapshot.files)) entries[file.slice(scope.repoId.length + 1)] = fingerprint;
+				const omit = (file) => descendants.some((entry) => includes(entry.relative, file)) || belongsToNestedRepository(root, config, scope.repoId, file) || config.repositories.find((entry) => entry.id === scope.repoId)?.path === "." && (file === config.root || file.startsWith(`${config.root}/`));
+				for (const file of walkFiles(repoRoot, relative, 4e4, omit)) {
+					let absolute;
+					try {
+						absolute = sourcePath(root, config, scope.repoId, file);
+					} catch {
+						continue;
+					}
+					const info = statSync(absolute);
+					entries[file] = info.size > 2e6 ? `large:${info.size}:${info.mtimeMs}` : digest(scope.repoId, file, absolute);
+				}
+			}
+			if (Object.keys(entries).length > 4e4) throw new Error("SOURCE_SCAN_LIMIT_EXCEEDED");
+			const ordered = Object.fromEntries(Object.keys(entries).sort().map((file) => [file, entries[file]]));
+			result.files = Object.fromEntries(Object.entries(ordered).map(([file, fingerprint]) => [`${scope.repoId}:${file}`, fingerprint]));
+			result.scopeFingerprints[`${scope.repoId}:${relative}`] = hash(JSON.stringify(ordered));
+		} catch (error) {
+			if (error instanceof Error && error.message === "SOURCE_SCAN_LIMIT_EXCEEDED") throw error;
+			result.scopeFingerprints[`${scope.repoId}:${relative}`] = "missing";
+			result.missing.push(`${scope.repoId}:${relative}`);
+		}
+		cache.set(cacheKey, result);
+		return result;
+	};
+	const allScopes = [...new Map(scopes.map((scope) => [`${scope.repoId}:${scope.path}`, scope])).values()];
+	for (const scope of [...allScopes].sort((a, b) => a.path.split("/").length - b.path.split("/").length || a.path.length - b.path.length)) captureScope(scope);
+	for (const scope of allScopes) {
+		const snapshot = captureScope(scope), key = `${scope.repoId}:${scope.path}`;
+		scopeFingerprints[key] = Object.values(snapshot.scopeFingerprints)[0];
+		Object.assign(files, snapshot.files);
+		if (snapshot.missing.length) missing.push(key);
+	}
 	for (const source of sources) {
 		const key = `${source.repoId}:${source.path}`;
 		try {
 			const file = sourcePath(root, config, source.repoId, source.path);
-			fingerprints[key] = hash(readFileSync(file));
+			fingerprints[key] = digest(source.repoId, relativePath(source.path), file);
 		} catch {
 			fingerprints[key] = null;
-			missing.push(key);
-		}
-	}
-	const allScopes = new Map(scopes.map((scope) => [`${scope.repoId}:${scope.path}`, scope]));
-	for (const [key, scope] of allScopes) {
-		try {
-			const repoRoot = repositoryRoot(root, config, scope.repoId);
-			const relative = relativePath(scope.path);
-			sourcePath(root, config, scope.repoId, relative);
-			const entries = {};
-			for (const file of walkFiles(repoRoot, relative, 4e4, (file) => belongsToNestedRepository(root, config, scope.repoId, file) || config.repositories.find((entry) => entry.id === scope.repoId)?.path === "." && (file === config.root || file.startsWith(`${config.root}/`)))) {
-				try {
-					sourcePath(root, config, scope.repoId, file);
-				} catch {
-					continue;
-				}
-				const info = statSync(path.join(repoRoot, file));
-				if (info.size > 2e6) {
-					entries[file] = `large:${info.size}:${info.mtimeMs}`;
-					continue;
-				}
-				entries[file] = hash(readFileSync(path.join(repoRoot, file)));
-				files[`${scope.repoId}:${file}`] = entries[file];
-			}
-			scopeFingerprints[key] = hash(JSON.stringify(entries));
-		} catch (error) {
-			if (error instanceof Error && error.message === "SOURCE_SCAN_LIMIT_EXCEEDED") throw error;
-			scopeFingerprints[key] = "missing";
 			missing.push(key);
 		}
 	}

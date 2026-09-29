@@ -1,6 +1,7 @@
 import { stdin, stdout } from "node:process";
 import type {
   HarnessHookEvent,
+  HarnessHookInput,
   HarnessProduct,
   NormalizedHarnessHookInput,
   UnknownRecord
@@ -63,6 +64,8 @@ export function normalizeHookInput(
     userInitiated: optionalBooleanValue(input.user_initiated ?? input.userInitiated ?? input.is_user_input ?? input.isUserInput),
     progressObservable: booleanValue(input.harness_progress_observable ?? input.progressObservable),
     progressObserved: booleanValue(input.harness_progress_observed ?? input.progressObserved),
+    workReport: (input.work_report ?? input.workReport ?? null) as HarnessHookInput["workReport"],
+    continuationRequestId: firstIdentifier(input, ["continuation_request_id", "continuationRequestId"]),
     raw: input
   };
 }

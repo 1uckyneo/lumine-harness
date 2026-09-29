@@ -34,6 +34,8 @@ export interface HarnessSessionInput {
   userInitiated?: boolean;
   progressObservable?: boolean;
   progressObserved?: boolean;
+  workReport?: WorkReport | null;
+  continuationRequestId?: string | null;
 }
 
 export interface HarnessHookInput extends HarnessSessionInput {
@@ -46,13 +48,14 @@ export interface NormalizedHarnessHookInput extends HarnessHookInput {
   raw: UnknownRecord;
 }
 
-export type WorkStatus =
-  | "done"
-  | "continue_autonomously"
-  | "needs_user_decision"
-  | "needs_credentials"
-  | "needs_manual_app_step"
-  | "blocked_external";
+export type WorkStatus = "done" | "continue" | "blocked";
+
+export interface WorkReport {
+  protocolVersion: 2;
+  status: WorkStatus;
+  reason?: string;
+  nextStep?: string;
+}
 
 export type StopDisposition =
   | "finish"
@@ -64,10 +67,12 @@ export type ContinuationDelivery = "automatic" | "manual_required" | "unsupporte
 
 export interface HarnessHookDecision {
   disposition: StopDisposition;
-  /** @deprecated Adapter migration compatibility. Use disposition instead. */
+  /** Host-neutral summary of the decision; adapters use disposition and shouldDeliver. */
   action: "allow" | "continue" | "pause" | "block";
   message?: string;
   workStatus?: WorkStatus;
+  workReport?: WorkReport;
+  cause?: "continue" | "report_invalid" | "completion_check";
   workStatusRevision?: number;
   continuationRequestId?: string;
   shouldDeliver?: boolean;
@@ -88,11 +93,15 @@ export interface SkillCatalogDiagnostic {
   message: string;
 }
 
+export type SkillReadObservability = "tool_events" | "not_observable";
+
 export interface ExpectedSkill {
   name: string;
   path: string;
   reason: string | null;
+  /** False means no observed read; it does not assert that the Agent did not read. */
   read: boolean;
+  readObservability?: SkillReadObservability;
   readAt?: string | null;
   contentHash?: string;
 }
@@ -116,7 +125,21 @@ export interface SessionState extends UnknownRecord {
   userTurnId?: string | null;
   userTurnRevision?: number;
   hostTurnRevision?: number;
+  statusProtocolVersion?: 2;
   workStatus?: WorkStatus | null;
+  workReport?: WorkReport | null;
+  workReportSource?: "text" | "structured" | null;
+  workReportHostTurnRevision?: number;
+  consumedWorkReportEmissionId?: string | null;
+  lastStopEmissionId?: string | null;
+  lastStopInputHash?: string | null;
+  lastStopDecision?: HarnessHookDecision | null;
+  repeatedFailureFingerprint?: string | null;
+  repeatedFailureCount?: number;
+  pendingContinuationUserTurnRevision?: number | null;
+  continuationDeliveryUserTurnRevision?: number | null;
+  continuationDeliveryConfirmed?: boolean;
+  migrationRequiresFreshReport?: boolean;
   workStatusEmissionId?: string | null;
   workStatusRevision?: number;
   workStatusUserTurnRevision?: number;

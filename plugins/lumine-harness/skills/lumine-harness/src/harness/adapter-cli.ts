@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import path from "node:path";
-import { adapterHelp, formatAdapterResult, formatSkillResult, runAdapterCommand, runSkillCommand, setCliWorkStatus } from "./adapter-manager.ts";
+import { readFileSync } from "node:fs";
+import { adapterHelp, formatAdapterResult, formatSkillResult, runAdapterCommand, runSkillCommand, setCliWorkStatus, setCliWorkReport } from "./adapter-manager.ts";
 import { commandLocale } from "./core/messages.ts";
 
 const argv = process.argv.slice(2);
@@ -23,12 +24,20 @@ try {
     const result = runSkillCommand(args, options);
     process.stdout.write(`${formatSkillResult(result)}\n`);
   } else if (command === "work-status") {
-    const productIndex = args.indexOf("--product");
-    const product = productIndex >= 0 ? args[productIndex + 1] : undefined;
-    const sessionIndex = args.indexOf("--session-id");
-    const sessionId = sessionIndex >= 0 ? args[sessionIndex + 1] : undefined;
-    const state = setCliWorkStatus(args[0], { ...options, product, sessionId });
-    process.stdout.write(locale === "en"
+    const value = (name: string): string | undefined => {
+      const index = args.indexOf(name);
+      if (index < 0) return undefined;
+      if (!args[index + 1] || args[index + 1].startsWith("--")) throw new Error(`${name} requires a value.`);
+      return args[index + 1];
+    };
+    const reportFile = value("--report");
+    const expected = value("--expect-turn");
+    const reportOptions = { ...options, product: value("--product"), sessionId: value("--session-id"), reason: value("--reason"), nextStep: value("--next-step"), emissionId: value("--emission-id"), ...(expected !== undefined ? { expectedUserTurnRevision: Number(expected) } : {}) };
+    if (reportFile && (reportOptions.reason || reportOptions.nextStep || (args[0] && !args[0].startsWith("--")))) throw new Error("Use one structured report or status flags, not conflicting input forms.");
+    const state = reportFile
+      ? setCliWorkReport(JSON.parse(readFileSync(reportFile === "-" ? 0 : path.resolve(reportFile), "utf8")), reportOptions)
+      : setCliWorkStatus(args[0], reportOptions);
+    process.stdout.write(args.includes("--json") ? `${JSON.stringify({ workReport: state.workReport, revision: state.workStatusRevision, userTurnRevision: state.userTurnRevision })}\n` : locale === "en"
       ? `WORK_STATUS recorded: ${state.workStatus} (revision ${state.workStatusRevision})\n`
       : `WORK_STATUS 已记录：${state.workStatus}（版本 ${state.workStatusRevision}）\n`);
   } else {

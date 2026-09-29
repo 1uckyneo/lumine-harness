@@ -4,7 +4,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { findHarnessRoot, isStartedAtHarnessRoot, projectRuntimeRoot } from "./core/root-resolver.ts";
 import { discoverSharedSkills, getSharedSkill, inspectSharedSkillCatalog, searchSharedSkills } from "./core/skill-catalog.ts";
-import { listCurrentSessionPointers, readCurrentSessionPointer, recordWorkStatus, WORK_STATUSES } from "./core/work-status.ts";
+import { listCurrentSessionPointers, readCurrentSessionPointer, recordWorkReport, readSessionState, WORK_STATUSES } from "./core/work-status.ts";
 import { beginVerificationRun, verifyRuntimeEvidence } from "./core/verification.ts";
 import { commandLocale, type Locale } from "./core/messages.ts";
 import { resolveHarnessRuntimeRoot } from "./core/runtime-layout.ts";
@@ -17,7 +17,8 @@ import type {
   CapabilityEvidenceLevel,
   HarnessAdapterCapability,
   HarnessProduct,
-  WorkStatus
+  WorkStatus,
+  WorkReport
 } from "./core/contracts.ts";
 
 const HERE = resolveHarnessRuntimeRoot(import.meta.url);
@@ -77,6 +78,10 @@ interface HarnessProjectConfig {
 }
 
 interface AdapterOptions {
+  reason?: string;
+  nextStep?: string;
+  emissionId?: string;
+  expectedUserTurnRevision?: number;
   locale?: Locale;
   cwd?: string;
   root?: string;
@@ -927,14 +932,23 @@ export function uninstallKimiAdapter(options: AdapterOptions = {}) {
 }
 
 export function setCliWorkStatus(status: string, options: AdapterOptions = {}) {
-  if (!WORK_STATUSES.has(status as WorkStatus)) throw new Error(`Invalid WORK_STATUS: ${status}`);
+  if (!WORK_STATUSES.has(status as WorkStatus)) throw new Error(`Invalid WORK_STATUS: ${status}; use done, continue or blocked.`);
+  return setCliWorkReport({ protocolVersion: 2, status: status as WorkStatus, ...(options.reason ? { reason: options.reason } : {}), ...(options.nextStep ? { nextStep: options.nextStep } : {}) }, options);
+}
+
+export function setCliWorkReport(report: WorkReport, options: AdapterOptions = {}) {
   const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
   if (!root) throw new Error("Harness root not found.");
   const product = options.product ?? process.env.HARNESS_PRODUCT;
   const sessionId = options.sessionId ?? process.env.HARNESS_SESSION_ID;
   if (!product || !sessionId) throw new Error("Pass --product and --session-id explicitly; Harness will not guess an active host session.");
   if (!isHarnessProduct(product)) throw new Error(`Invalid Harness product: ${product}`);
-  return recordWorkStatus(root, { product, sessionId, cwd: options.cwd ?? process.cwd() }, status as WorkStatus);
+  if (options.expectedUserTurnRevision !== undefined) {
+    if (!Number.isInteger(options.expectedUserTurnRevision) || options.expectedUserTurnRevision < 0) throw new Error("--expect-turn must be a non-negative integer.");
+    const current = readSessionState(root, product, sessionId);
+    if (!current || current.userTurnRevision !== options.expectedUserTurnRevision) throw new Error("STALE_WORK_REPORT: the current user turn differs from --expect-turn.");
+  }
+  return recordWorkReport(root, { product, sessionId, cwd: options.cwd ?? process.cwd() }, report, { emissionId: options.emissionId, source: "structured" });
 }
 
 function prepareManualAdapter(product: HarnessProduct, options: AdapterOptions = {}) {
@@ -1230,6 +1244,8 @@ export function adapterHelp(locale: Locale): string {
     "  adapter install <kimi|zcode|deepseek-harness>",
     "  adapter uninstall <kimi|zcode|deepseek-harness>",
     "  adapter help",
+    "  work-status <done|continue|blocked> --product <host> --session-id <id> [--reason <text>] [--next-step <text>]",
+    "  work-status --report <json-file|-> --product <host> --session-id <id> [--emission-id <id>] [--expect-turn <revision>] [--json]",
     "  --root <project-root>"
   ];
   return (locale === "en" ? [

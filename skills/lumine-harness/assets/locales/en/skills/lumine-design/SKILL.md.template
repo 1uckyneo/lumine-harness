@@ -19,3 +19,6 @@ Cover applicable normal, loading, empty, failed, unauthorized, cancelled, and re
 
 <!-- LH-DESIGN-05 -->
 Link design material from the Spec and keep implementation mapping and deviations in the Exec Plan; maintain each complete explanation once. Use lumine-run for authorized implementation. Browser evidence after implementation is distinct from a design preview. Repo Wiki cards use text and HTML; do not generate card images with this Skill.
+
+<!-- LH-DESIGN-06 -->
+Use existing product, interaction, and interface knowledge or inspect implementation directly; a knowledge query is optional. Within authorization, preserve reusable implemented interface mechanisms and limits in Wiki. Unimplemented designs remain Spec attachments or Plan content.

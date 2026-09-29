@@ -1,0 +1,25 @@
+{
+  "documentId": "lumine-root-config",
+  "revision": "dba83f00d29661b193b420ba3ffe98a5c5bc2bb2e97017623841ed030e5bf01b",
+  "sourceFingerprint": "1f805b16f12faefd76643e4e8f3d235bd724d103e025c6f6d1f9610079452665",
+  "reviewedAt": "2026-09-29T07:41:25.052Z",
+  "reviewer": {
+    "kind": "agent",
+    "role": "independent"
+  },
+  "outcome": "reviewed",
+  "scope": [
+    "显式根/cwd/workspaceRoots 解析顺序、schema 与迁移状态约束",
+    "安装项目与源仓自用的规范 Skill/Runtime 位置",
+    "仓库 ID、默认监控范围、缺失仓库与路径真实边界",
+    "会话文件身份与指针、项目任务资产及用户授权边界"
+  ],
+  "findings": [],
+  "limitations": [
+    "本 reviewer 未撰写这八篇正文，但参与了 Wiki Runtime 实现；本记录是内容作者之外的语义复核，不宣称对自身 Runtime 的完全独立代码审计。",
+    "结论限定当前工作树与所列机制，不证明部署、真实宿主自动续跑、外部服务或人类接受。",
+    "未重做全部官方宿主协议网页检索或遍历个人会话日志；已有历史宿主陈述未因此升级为本轮真实运行证据。",
+    "浏览器交互由专项验证单独记录，本审阅对阅读器仅核对源码与已执行定向测试。",
+    "未将结构检查或来源哈希一致当作全部正文/全部执行路径语义正确；未列入 scope 的实现细节不在本轮独立审阅保证内。"
+  ]
+}

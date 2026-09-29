@@ -1,0 +1,87 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { contentHash, parseDocumentMetadata } from "../core/documents.ts";
+import { resolveCurrentDocument } from "../core/document-operations.ts";
+import { checkTask, saveTaskRecord } from "../core/task-contract.ts";
+
+const frontmatter = (metadata: string, body = "# 正文\nid: body-only\n") => `---\n${metadata}\n---\n${body}`;
+const json = JSON.stringify({ id: "knowledge-session", title: "会话与身份恢复", type: "mechanism", status: "current", aliases: ["登录恢复", "session: recovery"], specIds: [], priority: 2, enabled: false }, null, 2);
+const yaml = `id: knowledge-session
+title: 会话与身份恢复
+type: mechanism
+status: current
+aliases:
+  - 登录恢复
+  - "session: recovery"
+specIds: []
+priority: 2
+enabled: false`;
+
+test("JSON and YAML frontmatter preserve the same Chinese metadata and stable identity", () => {
+  const expected = { id: "knowledge-session", title: "会话与身份恢复", type: "mechanism", status: "current", aliases: ["登录恢复", "session: recovery"], specIds: [], priority: "2", enabled: "false" };
+  assert.deepEqual(parseDocumentMetadata(frontmatter(json)), expected);
+  assert.deepEqual(parseDocumentMetadata(frontmatter(yaml).replaceAll("\n", "\r\n")), expected);
+});
+
+test("flow lists, block lists and empty fields retain string-array metadata", () => {
+  const source = frontmatter(`aliases: [中文别名, "comma, inside", 'quoted: value']
+specIds:
+  - spec-one
+  - "spec-two"
+empty:
+values: [1, false]
+summary: |
+  第一行
+  第二行`);
+  assert.deepEqual(parseDocumentMetadata(source), {
+    aliases: ["中文别名", "comma, inside", "quoted: value"], specIds: ["spec-one", "spec-two"], empty: [], values: ["1", "false"], summary: "第一行\n第二行\n"
+  });
+});
+
+test("structured Wiki metadata is not flattened into core string metadata", () => {
+  assert.deepEqual(parseDocumentMetadata(frontmatter(JSON.stringify({ id: "wiki-id", sources: [{ id: "source", path: "src/main.ts" }], detail: { id: "nested-id" }, aliases: ["valid", { name: "not-a-string" }] }))), { id: "wiki-id" });
+});
+
+test("metadata is only read from an opening frontmatter block", () => {
+  assert.deepEqual(parseDocumentMetadata("# 正文\nid: body-only\n---\nid: later-block\n---\n"), {});
+  assert.deepEqual(parseDocumentMetadata(frontmatter("")), {});
+  assert.deepEqual(parseDocumentMetadata("---\n---\nid: body-only"), {});
+  assert.deepEqual(parseDocumentMetadata(frontmatter("id: metadata-id", "id: body-only\nstatus: archived")), { id: "metadata-id" });
+});
+
+test("invalid JSON or YAML and incomplete delimiters reject instead of reading body identity", () => {
+  for (const metadata of ['{"id": "broken",', 'id: [broken', 'id: one\nid: two', '[one, two]', 'plain scalar', 'null', 'id: &identity original\nalias: *identity']) {
+    assert.throws(() => parseDocumentMetadata(frontmatter(metadata, "id: body-only")), /DOCUMENT_METADATA_INVALID/, metadata);
+  }
+  assert.throws(() => parseDocumentMetadata("---\nid: header\n---not-a-delimiter\nid: body-only"), /DOCUMENT_METADATA_INVALID/);
+});
+
+test("task knowledge refs resolve JSON Wiki IDs through current documents", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "lumine-document-metadata-"));
+  const write = (file: string, text: string) => { const target = path.join(root, file); mkdirSync(path.dirname(target), { recursive: true }); writeFileSync(target, text); };
+  const wikiFile = "docs/knowledge/会话与身份恢复.md";
+  const code = "export const session = true;\n", artifact = "metadata fixture passed\n";
+  try {
+    write(".lumine/project.json", JSON.stringify({ schemaVersion: 2, workflowVersion: 2, locale: "zh-CN", repositories: [{ id: "root", path: "." }], wiki: { root: "docs/knowledge", watchScopes: [] } }));
+    write("src/session.ts", code);
+    write("docs/validation/metadata.txt", artifact);
+    saveTaskRecord(root, {
+      schemaVersion: 2, taskId: "metadata", mode: "implement", goal: "Resolve stable knowledge identity", scope: "src/session.ts", acceptanceRefs: [],
+      evidence: [{ artifact: "docs/validation/metadata.txt", sha256: contentHash(artifact), outcome: "passed", observedAt: new Date().toISOString(), command: "metadata fixture", environment: "local fixture", codeRefs: [{ repoId: "root", path: "src/session.ts", sha256: contentHash(code) }] }],
+      knowledge: { required: true, status: "synchronized", refs: ["knowledge-session"] }
+    });
+    for (const metadata of [json, yaml]) {
+      write(wikiFile, frontmatter(metadata));
+      assert.equal(resolveCurrentDocument(root, "knowledge-session").file, wikiFile);
+      assert.equal(resolveCurrentDocument(root, "登录恢复").docId, "knowledge-session");
+      const result = checkTask(root, "metadata");
+      assert.equal(result.ok, true, result.output);
+    }
+    write(wikiFile, frontmatter('{"id": "broken",', "id: knowledge-session"));
+    assert.throws(() => resolveCurrentDocument(root, "knowledge-session"), /DOCUMENT_METADATA_INVALID/);
+    assert.ok(checkTask(root, "metadata").issues.some((issue) => issue.code === "KNOWLEDGE_REF_MISSING"));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});

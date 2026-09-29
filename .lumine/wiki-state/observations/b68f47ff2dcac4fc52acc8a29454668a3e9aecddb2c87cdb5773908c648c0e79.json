@@ -1,0 +1,34 @@
+{
+  "id": "lumine-root-config",
+  "revision": "dba83f00d29661b193b420ba3ffe98a5c5bc2bb2e97017623841ed030e5bf01b",
+  "freshness": "current",
+  "checkedAt": "2026-09-29T08:09:45.422Z",
+  "sourceFingerprint": "1f805b16f12faefd76643e4e8f3d235bd724d103e025c6f6d1f9610079452665",
+  "sources": {
+    "fingerprints": {
+      "project:skills/lumine-harness/src/harness/core/root-resolver.ts": "0df94853e2f3e6606a8bad074cf49ec7f4114a3bf1843d22107344136413df28",
+      "project:skills/lumine-harness/src/harness/core/project-config.ts": "2760756f058eb9f02e5f945933d73eb05874b70b32a24635e9bb175cb840be22",
+      "project:skills/lumine-harness/src/harness/core/runtime-layout.ts": "0454688d5ce6ec4decabf3f4d2dfce243fb2717d53d24f9e2b5e9b5ac429e341",
+      "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "5243a81165de92099d3aed9e29068331cd6a8683076ed6b128900ce39c2dadc2",
+      "project:skills/lumine-harness/src/harness/tests/core-v2.test.ts": "edf0b101b553a12f51d0cdb716fcda77ae49cba8c25577a045d2d10780b2ec7e"
+    },
+    "scopeFingerprints": {
+      "project:skills/lumine-harness/src/harness/core/root-resolver.ts": "57f1b1f2782e8bbfdffe96af3354aeaf8635ba4dfc2b47c9e16bb3229f334e6c",
+      "project:skills/lumine-harness/src/harness/core/project-config.ts": "e14762e93dd7b20005767457bba3ad889d0937f0fe006b852544995cf4a8fe3b",
+      "project:skills/lumine-harness/src/harness/core/runtime-layout.ts": "743688c33c4805a1e42a92a45c25a9d17f8878d064e7d7dead3290cd0d8af0bf",
+      "project:skills/lumine-harness/src/harness/core/work-status.ts": "772b312f2e95a5008bbd0b5300a035fc0a47beef90143105d3eef1fd092d422d",
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "8f43f781d10d8bbd89df7a2e5a999c896a43ebf703040fa7819798eb5559ddea",
+      "project:skills/lumine-harness/src/harness/tests/core-v2.test.ts": "d8b834b428534baecb164376bd0080787fd4d82f6307a2a6bbdfa35d30585b5e"
+    },
+    "files": {
+      "project:skills/lumine-harness/src/harness/core/root-resolver.ts": "0df94853e2f3e6606a8bad074cf49ec7f4114a3bf1843d22107344136413df28",
+      "project:skills/lumine-harness/src/harness/core/project-config.ts": "2760756f058eb9f02e5f945933d73eb05874b70b32a24635e9bb175cb840be22",
+      "project:skills/lumine-harness/src/harness/core/runtime-layout.ts": "0454688d5ce6ec4decabf3f4d2dfce243fb2717d53d24f9e2b5e9b5ac429e341",
+      "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "5243a81165de92099d3aed9e29068331cd6a8683076ed6b128900ce39c2dadc2",
+      "project:skills/lumine-harness/src/harness/tests/core-v2.test.ts": "edf0b101b553a12f51d0cdb716fcda77ae49cba8c25577a045d2d10780b2ec7e"
+    },
+    "missing": []
+  }
+}

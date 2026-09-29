@@ -71,6 +71,8 @@ function normalizeHookInput(product, event, input = {}) {
 		userInitiated: optionalBooleanValue(input.user_initiated ?? input.userInitiated ?? input.is_user_input ?? input.isUserInput),
 		progressObservable: booleanValue(input.harness_progress_observable ?? input.progressObservable),
 		progressObserved: booleanValue(input.harness_progress_observed ?? input.progressObserved),
+		workReport: input.work_report ?? input.workReport ?? null,
+		continuationRequestId: firstIdentifier(input, ["continuation_request_id", "continuationRequestId"]),
 		raw: input
 	};
 }

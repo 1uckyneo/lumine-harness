@@ -14,7 +14,7 @@ export const HarnessPlugin = async ({ directory }: OpenCodePluginOptions) => {
   if (!root) return {};
   const context = buildSessionStartContext({ root, cwd: directory });
   const audit = async (event: string, payload: Record<string, unknown> = {}): Promise<void> => {
-    const dir = path.join(root, ".lumine", "runtime", "opencode");
+    const dir = path.join(root, ".lumine", "local", "runtime", "opencode");
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, "latest-audit.json"),

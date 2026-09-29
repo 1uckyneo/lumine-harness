@@ -4,7 +4,7 @@ import { contentHash, resolveDocument, acceptanceSections, type ContractIssue } 
 import { loadProjectConfig, resolveProjectPath } from "./project-config.ts";
 import { resolveCurrentDocument } from "./document-operations.ts";
 import { discoverSharedSkills } from "./skill-catalog.ts";
-import { readSessionState, writeSessionState } from "./work-status.ts";
+import { readSessionState, skillReadObservability, writeSessionState } from "./work-status.ts";
 import type { HarnessProduct, SessionState } from "./contracts.ts";
 
 export type TaskMode = "plan" | "implement" | "verify" | "diagnose";
@@ -76,7 +76,7 @@ export function bindTask(root: string, product: HarnessProduct, sessionId: strin
     const skill = catalog.find((item) => item.name === name);
     if (!skill) throw new Error(`Selected Skill is missing: ${name}`);
     const used = state?.usedSkills?.find((item) => item.name === name && item.contentHash === skill.hash);
-    return { name, path: skill.file, reason: "task-selected", read: Boolean(used), contentHash: skill.hash, readAt: used?.readAt };
+    return { name, path: skill.file, reason: "task-selected", read: Boolean(used), readObservability: skillReadObservability(product), contentHash: skill.hash, readAt: used?.readAt };
   });
   return writeSessionState(root, product, sessionId, {
     taskId, taskUserTurnRevision: Number(state?.userTurnRevision ?? 0), requestedActivity: selected,
@@ -160,6 +160,8 @@ export function checkTask(root: string, taskId: string, modeOverride?: TaskMode)
   return { ok: issues.length === 0, issues, taskId, mode, output: issues.map((item) => `${item.code}: ${item.message}`).join("\n") };
 }
 export function checkSessionCompletion(root: string, state: Partial<SessionState>): TaskCheckResult {
+  // selectedSkills declares intent; observed reads belong to Adapter telemetry.
+  // Missing telemetry cannot prove a missing read or replace task evidence.
   const diagnostic = state.requestedActivity === "diagnose" || state.requestedActivity === "verify" || state.requestedActivity === "check" || state.requestedActivity === "plan";
   // A diagnostic request may finish with findings. It is not an instruction to fix them.
   if (diagnostic) return { ok: true, issues: [], mode: state.requestedActivity === "check" ? "diagnose" : state.requestedActivity as TaskMode, output: "" };

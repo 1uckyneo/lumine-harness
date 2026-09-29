@@ -1,8 +1,30 @@
 # Lumine Harness
 
-Help people and Agents deliver software with clear goals, recoverable execution records, and knowledge grounded in sources.
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-Lumine is a project-level workflow. The host supplies models, tools, and lifecycle events; Lumine preserves project boundaries, product proposals, execution progress, knowledge, and evidence. It supports single or multiple repositories, including a shared parent without Git.
+[![skills.sh](https://skills.sh/b/1uckyneo/lumine-harness)](https://skills.sh/1uckyneo/lumine-harness)
+
+> **Build a reliable engineering environment for an agent-first world.**
+
+Coding Agents can take on complete features, coordinate across repositories, and carry work across sessions. As models become more capable, delivery quality increasingly depends on whether the Agent can keep understanding the project, respect its boundaries, recover execution state, and support results with evidence.
+
+The harness built into an Agent product answers **“how does the Agent run?”** It provides the model and tool loop, context management, permissions, and lifecycle integration. **Lumine Harness is a project-level Harness** that answers **“what should the Agent do in this project, how should the work proceed, and what counts as done?”** It keeps project goals, engineering boundaries, working methods, execution progress, knowledge, and validation evidence with the project. The two layers complement each other.
+
+Lumine is an implementation of **Harness Engineering**: building an engineering environment that people and Agents can understand and maintain together, so work can continue when a session, Agent, or machine changes. Product Specs and Exec Plans preserve intent and progress; a source-linked Repo Wiki explains the existing system; validation records show what has actually been verified. These assets support the work without requiring users to invoke a fixed sequence of Skills.
+
+**Sessions end. Engineering context must remain.**
+
+## When it is useful
+
+Lumine Harness is a good fit when you want to:
+
+- delegate a complete feature or a long-running task to an Agent;
+- recover goals, decisions, and progress after changing sessions or Agents;
+- coordinate related frontend, backend, mobile, or other repositories;
+- preserve product boundaries, technical rationale, test results, and delivery evidence;
+- consolidate scattered `AGENTS.md`, Rules, Skills, Hooks, and engineering documents into a consistent project environment.
+
+It supports single repositories and multiple related repositories, including a shared parent directory that is not itself a Git repository. A temporary question or a small isolated change does not require adopting a full Harness first.
 
 ## Getting started
 
@@ -74,26 +96,33 @@ Lead with current conclusions before technical detail and history. Chinese, Engl
 
 Ask the Agent to archive a completed Plan or restore it when work resumes. For current-format plans, `task doc-archive` and `task doc-restore` move the document between `active/` and `completed/`, retain its stable ID, update current links, and record recoverable operations. They require the current content hash to protect intervening edits; historical evidence stays unchanged.
 
-## Illustrated Repo Wiki
+## Project knowledge, Agentic Search, and continuous learning
 
-Knowledge body defaults to docs/repo-wiki/, with one configurable authoritative root. Cards use HTML DOM; summaries, Markdown, and Mermaid text belong to the same content. The local reader provides search, filters, navigation, related sources, Spec/Plan reading, and stable references.
+Knowledge defaults to `docs/repo-wiki/`, with one configurable authoritative root. The Agent first understands project purpose, real entry points, module relationships, and dependencies, then builds a suitable knowledge hierarchy. Initial building covers major modules in depth by default; users may narrow or defer the scope. Large projects proceed in resumable batches. Getting-started, API, frontend, or deployment topics appear only where applicable.
 
-Diagrams explain architecture, components, sequences, flows, states, and applicable data relationships. They render on demand in the browser with enlargement, zoom, pan, reset, provenance, and Mermaid text copy/export. Split complex topics; prose and source remain available when a diagram fails.
+Wiki explains entry points, call chains, data flow, normal and failure paths, tradeoffs, change impact, and verification. Pages provide coherent explanations; important sections have stable identities. Cards reuse section conclusions, qualifications, and sources for selective expansion. The reader connects the hierarchy, body, page outline, diagrams, and source locations, with cards and lists for browsing and search. Source changes and semantic content review are shown separately.
 
-Knowledge generation, queries, maintenance, and review are text-only: no card images, thumbnails, persistent image files, image generation, vision models, or rendered SVG supplied to models. The browser may use SVG DOM internally to draw diagrams; it is not a model-input image artifact. No additional model account or background generation service is required; the active Agent performs semantic updates.
+**The Agent/model understands, judges, and writes; Runtime searches, detects changes, validates, and saves safely.** The Agent chooses knowledge, source, or both according to the goal. There is no full-library context injection or mandatory query sequence for every task. Commands do not independently understand projects or generate high-quality knowledge. When important knowledge is missing, stale, or contradictory, the Agent verifies source and preserves reusable findings within authorization. Explicit read-only requests receive a report; a small repair with no knowledge increment needs no update. Without an active Agent, changes remain pending.
 
-Common terminal commands:
+For example, after cancellation behavior changes, the Agent understands the new calls and state transitions and writes updated prose and Mermaid. The update tool checks source drift, concurrent creation, and human edits, then safely saves body, hierarchy, and durable state. A later session can retrieve the new knowledge. Upgrades update tools and managed guidance without regenerating the entire Wiki by default.
+
+The reader is installed with project adoption or upgrades. Ask the Agent to “open this project’s knowledge base”, “restart the Wiki reader”, or “stop the Wiki reader”; `lumine-knowledge` manages the project’s service when needed. Running it requires Node.js, with no separate frontend dependency installation. Direct Markdown reading and Agent retrieval need no server.
+
+These terminal commands are composable tools; users need not invoke each one:
 
 ```bash
-./.lumine/cli wiki query "login and dynamic routing"
-./.lumine/cli wiki show <knowledge-id>
+./.lumine/cli wiki map
+./.lumine/cli wiki query "Why verify task state after cancellation?"
+./.lumine/cli wiki show <knowledge-id>#<section-id>
+./.lumine/cli wiki related <knowledge-id>
 ./.lumine/cli wiki scan
 ./.lumine/cli wiki serve --port 4318
 ./.lumine/cli wiki check
-./.lumine/cli check health
 ```
 
-Return to source when knowledge is missing, stale, or contradictory; authoritative rules are not constrained by card ranking. Incremental updates protect human content, retain candidates/conflicts, and report incomplete scope. With no active Agent, updates remain pending rather than pretending semantic work completed.
+`query/show/map/related` find and expand knowledge. `scan` supplies change clues. `update` accepts Agent-authored text and handles three-way comparison, candidates, conflicts, and recovery. Checks do not substitute for semantic review, actual operation, or user acceptance. Diagrams explain architecture, sequences, flows, states, and data relationships beside the relevant prose. They retain enlargement, zoom, pan, reset, source lookup, and text copy/export. A failed diagram does not block the body.
+
+Markdown, Mermaid, and text metadata are the knowledge sources; cards are selectable, searchable, copyable HTML. Knowledge production creates no card images, thumbnails, or persistent images, uses no vision model, and never sends rendered SVG to models. Mermaid generates SVG DOM in the browser; explicit user-requested SVG export stays local and does not become knowledge source. No additional model account or background generation service is required.
 
 ## Directories, language, and recovery
 

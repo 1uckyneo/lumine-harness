@@ -20,7 +20,7 @@ Spec／Plan 使用 `id` 和类型；Wiki 单元按知识接口保存稳定 ID。
 
 Runtime 承担可确定的检查，四个能力承担各自语义评审。完成依据对应当前请求、验收子集、内容基线与真实操作，测试、运行、部署和用户接受分别表达。任务记录位于 `.lumine/tasks/`，绑定当前会话和模式；详情参见[检查与证据](runtime-checks.md)。
 
-状态保持 `done`、`continue_autonomously`、`needs_user_decision`、`needs_credentials`、`needs_manual_app_step`、`blocked_external`。诊断 done 可以包含失败发现。只有明确包含在本任务内的知识同步才能影响该任务完成。
+公共控制状态为 `done`、`continue`、`blocked`；具体阻塞原因与下一步另行说明。状态不产生授权，自动跟进共享预算和去重。诊断 done 可以包含失败发现。只有明确包含在本任务内的知识同步才能影响该任务完成。
 
 ## 知识表达
 

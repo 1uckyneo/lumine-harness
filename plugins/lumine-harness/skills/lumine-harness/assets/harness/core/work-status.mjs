@@ -8,20 +8,71 @@ import { createHash, randomUUID } from "node:crypto";
 //#region skills/lumine-harness/src/harness/core/work-status.ts
 const WORK_STATUSES = new Set([
 	"done",
-	"continue_autonomously",
-	"needs_user_decision",
-	"needs_credentials",
-	"needs_manual_app_step",
-	"blocked_external"
+	"continue",
+	"blocked"
 ]);
+const WORK_STATUS_PROTOCOL_VERSION = 2;
+/** Only the terminal standalone protocol line controls the turn. Markdown examples do not. */
+function terminalStatusLines(message) {
+	const text = String(message ?? "").replace(/\s*<oai-mem-citation>[\s\S]*?<\/oai-mem-citation>\s*$/, "");
+	const lines = text.split(/\r?\n/);
+	const eligible = [];
+	let fence = null;
+	for (const line of lines) {
+		const marker = line.match(/^ {0,3}(`{3,}|~{3,})/);
+		if (fence) {
+			eligible.push(false);
+			if (marker && marker[1][0] === fence.char && marker[1].length >= fence.size && /^ {0,3}(?:`+|~+)\s*$/.test(line)) fence = null;
+		} else if (marker) {
+			fence = {
+				char: marker[1][0],
+				size: marker[1].length
+			};
+			eligible.push(false);
+		} else eligible.push(!/^(?: {4}|\t| {0,3}>)/.test(line));
+	}
+	let last = lines.length - 1;
+	while (last >= 0 && !lines[last].trim()) last--;
+	if (last < 0 || !eligible[last] || !/^ {0,3}WORK_STATUS:/i.test(lines[last])) return [];
+	const result = [lines[last]];
+	for (let index = last - 1; index >= 0; index--) {
+		if (!lines[index].trim()) continue;
+		if (!eligible[index] || !/^ {0,3}WORK_STATUS:/i.test(lines[index])) break;
+		result.unshift(lines[index]);
+	}
+	return result;
+}
 function countWorkStatus(message = "") {
-	return [...String(message).matchAll(/WORK_STATUS:\s*([a-z_]+)/gi)].length;
+	return terminalStatusLines(message).length;
+}
+function parseWorkReport(message = "") {
+	const lines = terminalStatusLines(message);
+	if (lines.length !== 1) return null;
+	const match = lines[0].match(/^ {0,3}WORK_STATUS:[ \t]*([a-z_]+)(?:[ \t]*\|[ \t]*(.+))?[ \t]*$/i);
+	if (!match || !WORK_STATUSES.has(match[1].toLowerCase())) return null;
+	const status = match[1].toLowerCase();
+	return {
+		protocolVersion: 2,
+		status,
+		...match[2]?.trim() ? { reason: match[2].trim() } : {}
+	};
+}
+function validateWorkReport(value) {
+	if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("A structured work report is required.");
+	const report = value;
+	if (report.protocolVersion !== 2 || !WORK_STATUSES.has(report.status)) throw new Error("Unsupported work report protocol or status; use protocolVersion 2 and done, continue or blocked.");
+	for (const key of ["reason", "nextStep"]) {
+		if (report[key] !== undefined && (typeof report[key] !== "string" || !report[key]?.trim())) throw new Error(`${key} must be non-empty text.`);
+	}
+	return {
+		protocolVersion: 2,
+		status: report.status,
+		...report.reason ? { reason: report.reason.trim() } : report.status === "blocked" ? { reason: "unknown" } : {},
+		...report.nextStep ? { nextStep: report.nextStep.trim() } : {}
+	};
 }
 function extractWorkStatus(message = "") {
-	const matches = [...String(message).matchAll(/WORK_STATUS:\s*([a-z_]+)/gi)];
-	if (matches.length !== 1) return null;
-	const status = matches[0][1].toLowerCase();
-	return WORK_STATUSES.has(status) ? status : null;
+	return parseWorkReport(message)?.status ?? null;
 }
 function requireIdentity(product, sessionId) {
 	if (!product || !sessionId || sessionId === "unknown") throw new Error("Harness session identity requires explicit product and sessionId.");
@@ -105,9 +156,13 @@ function writeSessionState(root, product, sessionId, patch = {}) {
 	requireIdentity(product, sessionId);
 	const file = getSessionStatePath(root, product, sessionId);
 	mkdirSync(path.dirname(file), { recursive: true });
+	const current = readSessionState(root, product, sessionId);
+	if (existsSync(file) && !current) throw new Error("SESSION_RECOVERY_REQUIRED: preserve the unreadable session file and recover it before writing.");
+	if (current && current.statusProtocolVersion !== 2) throw new Error("STATUS_PROTOCOL_MIGRATION_REQUIRED: use the independent maintenance migration before resuming this session.");
 	const next = {
-		...readSessionState(root, product, sessionId) ?? {},
+		...current,
 		...patch,
+		statusProtocolVersion: 2,
 		product,
 		sessionId,
 		updatedAt: new Date().toISOString()
@@ -136,6 +191,14 @@ function initializeSessionState(root, input) {
 		userTurnRevision: 0,
 		hostTurnRevision: 0,
 		workStatus: null,
+		workReport: null,
+		workReportSource: null,
+		workReportHostTurnRevision: 0,
+		lastStopEmissionId: null,
+		lastStopInputHash: null,
+		lastStopDecision: null,
+		repeatedFailureFingerprint: null,
+		repeatedFailureCount: 0,
 		workStatusEmissionId: null,
 		workStatusUserTurnRevision: 0,
 		workStatusUpdatedAt: null,
@@ -180,6 +243,14 @@ function recordUserTurn(root, input, options = {}) {
 		userTurnRevision: Number(state.userTurnRevision ?? 0) + 1,
 		hostTurnRevision: 0,
 		workStatus: null,
+		workReport: null,
+		workReportSource: null,
+		workReportHostTurnRevision: 0,
+		lastStopEmissionId: null,
+		lastStopInputHash: null,
+		lastStopDecision: null,
+		repeatedFailureFingerprint: null,
+		repeatedFailureCount: 0,
 		workStatusEmissionId: null,
 		workStatusUpdatedAt: null,
 		autonomousChainCount: 0,
@@ -188,7 +259,9 @@ function recordUserTurn(root, input, options = {}) {
 		pendingContinuationRequestId: null,
 		pendingContinuationRevision: null,
 		continuationRequestedAt: null,
-		continuationDeliveredAt: state.pendingContinuationRequestId ? new Date().toISOString() : state.continuationDeliveredAt ?? null,
+		continuationDeliveredAt: state.continuationDeliveredAt ?? null,
+		pendingContinuationUserTurnRevision: null,
+		continuationDeliveryConfirmed: false,
 		lastEvaluatedContinuationRevision: null,
 		lastContinuationDisposition: null,
 		lastContinuationMessage: null,
@@ -200,7 +273,10 @@ function recordUserTurn(root, input, options = {}) {
 }
 function markContinuationDelivered(root, input, options = {}) {
 	const state = readSessionState(root, input.product, input.sessionId);
-	if (!state?.pendingContinuationRequestId || input.event === "stop") return state;
+	if (!state?.pendingContinuationRequestId || input.event === "stop" || input.userInitiated === true || options.userInitiated === true) return state;
+	const sameTurn = state.pendingContinuationUserTurnRevision === Number(state.userTurnRevision ?? 0);
+	const confirmed = sameTurn && input.continuationRequestId === state.pendingContinuationRequestId;
+	if (!sameTurn || input.continuationRequestId && !confirmed) return state;
 	const deliveryEventId = eventIdentity(input, options.eventId ?? input.eventId, "delivery");
 	if (deliveryEventId && state.lastContinuationDeliveryEventId === deliveryEventId) return state;
 	return writeSessionState(root, input.product, input.sessionId, {
@@ -208,7 +284,9 @@ function markContinuationDelivered(root, input, options = {}) {
 		lastContinuationRequestId: state.pendingContinuationRequestId,
 		pendingContinuationRequestId: null,
 		pendingContinuationRevision: null,
-		continuationDeliveredAt: new Date().toISOString(),
+		continuationDeliveredAt: confirmed ? new Date().toISOString() : null,
+		continuationDeliveryConfirmed: confirmed,
+		continuationDeliveryUserTurnRevision: confirmed ? Number(state.userTurnRevision ?? 0) : null,
 		lastContinuationDeliveryEventId: deliveryEventId
 	});
 }
@@ -239,23 +317,44 @@ function observeHarnessEvent(root, input, options = {}) {
 	return state;
 }
 function recordWorkStatus(root, input, status, options = {}) {
-	if (!WORK_STATUSES.has(status)) throw new Error(`Invalid WORK_STATUS: ${status}`);
+	return recordWorkReport(root, input, {
+		protocolVersion: 2,
+		status,
+		...options.reason ? { reason: options.reason } : {},
+		...options.nextStep ? { nextStep: options.nextStep } : {}
+	}, options);
+}
+function recordWorkReport(root, input, value, options = {}) {
+	const report = validateWorkReport(value);
 	requireIdentity(input.product, input.sessionId);
 	const state = readSessionState(root, input.product, input.sessionId) ?? initializeSessionState(root, input);
 	const candidateEmissionId = options.emissionId ?? deriveStatusEmissionId(input, state) ?? hashRuntimeIdentifier(`status:${randomUUID()}`);
 	const emissionId = /^[a-f0-9]{64}$/i.test(String(candidateEmissionId)) ? String(candidateEmissionId).toLowerCase() : hashRuntimeIdentifier(`status:${candidateEmissionId}`);
 	if (state.workStatusEmissionId === emissionId) {
-		if (state.workStatus !== status) throw new Error("One WORK_STATUS emission cannot declare multiple states.");
+		if (JSON.stringify(state.workReport) !== JSON.stringify(report)) throw new Error("One WORK_STATUS emission cannot declare conflicting reports.");
 		return state;
 	}
 	return writeSessionState(root, input.product, input.sessionId, {
 		cwd: input.cwd,
-		workStatus: status,
+		workStatus: report.status,
+		workReport: report,
+		workReportSource: options.source ?? "structured",
+		workReportHostTurnRevision: Number(state.hostTurnRevision ?? 0),
 		workStatusEmissionId: emissionId,
 		workStatusRevision: Number(state.workStatusRevision ?? 0) + 1,
 		workStatusUserTurnRevision: Number(state.userTurnRevision ?? 0),
-		workStatusUpdatedAt: new Date().toISOString()
+		workStatusUpdatedAt: new Date().toISOString(),
+		migrationRequiresFreshReport: false
 	});
+}
+/** Adapter event coverage, not a claim that a real host emitted a read event. */
+function skillReadObservability(product) {
+	return [
+		"qoder",
+		"zcode",
+		"codebuddy",
+		"deepseek-harness"
+	].includes(product) ? "tool_events" : "not_observable";
 }
 function recordUsedSkill(root, input, skill) {
 	const state = readSessionState(root, input.product, input.sessionId) ?? {};
@@ -268,12 +367,21 @@ function recordUsedSkill(root, input, skill) {
 	}];
 	return writeSessionState(root, input.product, input.sessionId, { usedSkills: next });
 }
-function readFreshStateStatus(state) {
-	if (!state?.workStatus || !WORK_STATUSES.has(state.workStatus)) return null;
+function readFreshStateReport(state) {
+	if (!state || state.statusProtocolVersion !== 2 || state.migrationRequiresFreshReport) return null;
 	if (!state.startedAt || !state.workStatusUpdatedAt) return null;
-	if (state.workStatusUserTurnRevision !== undefined && Number(state.workStatusUserTurnRevision) !== Number(state.userTurnRevision ?? 0)) return null;
-	return Date.parse(state.workStatusUpdatedAt) >= Date.parse(state.startedAt) ? state.workStatus : null;
+	if (Number(state.workStatusUserTurnRevision ?? -1) !== Number(state.userTurnRevision ?? 0)) return null;
+	if (Number(state.workReportHostTurnRevision ?? -1) !== Number(state.hostTurnRevision ?? 0)) return null;
+	if (Date.parse(state.workStatusUpdatedAt) < Date.parse(state.startedAt)) return null;
+	try {
+		return validateWorkReport(state.workReport);
+	} catch {
+		return null;
+	}
+}
+function readFreshStateStatus(state) {
+	return readFreshStateReport(state)?.status ?? null;
 }
 
 //#endregion
-export { WORK_STATUSES, countWorkStatus, deriveStatusEmissionId, extractWorkStatus, getCurrentSessionPointerPath, getSessionStatePath, hashRuntimeIdentifier, initializeSessionState, listCurrentSessionPointers, markContinuationDelivered, observeHarnessEvent, readCurrentSessionPointer, readFreshStateStatus, readSessionState, recordProgressObservation, recordUsedSkill, recordUserTurn, recordWorkStatus, setProgressObservability, writeCurrentSessionPointer, writeSessionState };
+export { WORK_STATUSES, WORK_STATUS_PROTOCOL_VERSION, countWorkStatus, deriveStatusEmissionId, extractWorkStatus, getCurrentSessionPointerPath, getSessionStatePath, hashRuntimeIdentifier, initializeSessionState, listCurrentSessionPointers, markContinuationDelivered, observeHarnessEvent, parseWorkReport, readCurrentSessionPointer, readFreshStateReport, readFreshStateStatus, readSessionState, recordProgressObservation, recordUsedSkill, recordUserTurn, recordWorkReport, recordWorkStatus, setProgressObservability, skillReadObservability, validateWorkReport, writeCurrentSessionPointer, writeSessionState };

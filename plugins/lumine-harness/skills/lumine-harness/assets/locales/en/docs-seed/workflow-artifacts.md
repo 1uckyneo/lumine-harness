@@ -29,3 +29,7 @@ Project language controls defaults for new content; existing documents retain th
 ## Knowledge and implementation
 
 A proposed approach in a Plan does not become current Wiki knowledge before implementation. Promote only affected stable findings afterward. Engineering conventions cite authoritative rules without changing action boundaries; distinguish source, observed behavior, and deployment scope.
+
+The Agent maintains knowledge after understanding sources. Organize the hierarchy around actual capabilities and cover major modules at initial setup by default. During tasks, choose Wiki, source, or both without mandatory queries. After verifying gaps, stale explanations, or contradictions, preserve reusable findings in affected topics within authorization; explicit read-only requests receive reports only. Tools support search, change clues, and safe saving, not semantic understanding.
+
+Use done, continue, or blocked for closeout and explain blockers and next steps separately. Status grants no authorization. Judge discussion, diagnosis, implementation, runtime verification, and deployment against the current request.

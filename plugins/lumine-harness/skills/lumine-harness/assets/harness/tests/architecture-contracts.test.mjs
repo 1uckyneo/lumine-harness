@@ -33,11 +33,8 @@ test("public project template stays host-neutral and portable", () => {
 	assert.match(template, /\.agents\/skills/);
 	for (const status of [
 		"done",
-		"continue_autonomously",
-		"needs_user_decision",
-		"needs_credentials",
-		"needs_manual_app_step",
-		"blocked_external"
+		"continue",
+		"blocked"
 	]) {
 		assert.match(template, new RegExp(`\\b${status}\\b`));
 	}
@@ -222,8 +219,8 @@ test("parallel sessions keep independent state and continuation is consumed per 
 			reason: null,
 			read: false
 		}] });
-		const first = recordWorkStatus(root, alpha, "continue_autonomously");
-		recordWorkStatus(root, beta, "needs_user_decision");
+		const first = recordWorkStatus(root, alpha, "continue");
+		recordWorkStatus(root, beta, "blocked");
 		assert.equal(first.workStatusRevision, 1);
 		assert.equal(evaluateStopPolicy(alpha, { root }).action, "continue");
 		const repeated = evaluateStopPolicy(alpha, { root });
@@ -233,7 +230,7 @@ test("parallel sessions keep independent state and continuation is consumed per 
 		const betaState = readSessionState(root, beta.product, beta.sessionId);
 		assert.ok(betaState);
 		assert.equal(betaState.continuationConsumedRevision, null);
-		const second = recordWorkStatus(root, alpha, "continue_autonomously");
+		const second = recordWorkStatus(root, alpha, "continue");
 		assert.equal(second.workStatusRevision, 2);
 		assert.equal(evaluateStopPolicy(alpha, { root }).action, "continue");
 		initializeSessionState(root, {
@@ -335,7 +332,7 @@ test("runtime probes are opt-in, redact local identity, and report evidence per 
 		}, { decision: {
 			action: "continue",
 			disposition: "request_continuation",
-			workStatus: "continue_autonomously",
+			workStatus: "continue",
 			workStatusRevision: 1,
 			continuationRequestId: "request-1",
 			shouldDeliver: true
@@ -351,7 +348,7 @@ test("runtime probes are opt-in, redact local identity, and report evidence per 
 		assert.ok(result.capabilities);
 		assert.equal(result.capabilities.project_instructions.result, "passed");
 		assert.equal(result.capabilities.skill_read.evidenceLevel, "runtime_observed");
-		assert.equal(result.capabilities.automatic_continuation.result, "passed");
+		assert.equal(result.capabilities.automatic_continuation.result, "not_tested", "a later assistant event without a matching receipt is not automatic continuation evidence");
 		assert.equal(result.capabilities.work_status_matrix.result, "not_tested");
 		assert.equal(JSON.stringify(result).includes("host_verified"), false);
 		assert.equal(JSON.stringify(result).includes("behavior_verified"), false);
@@ -424,7 +421,7 @@ test("runtime verification can observe two isolated session streams in one expli
 			}, { decision: {
 				action: "continue",
 				disposition: "request_continuation",
-				workStatus: "continue_autonomously",
+				workStatus: "continue",
 				workStatusRevision: 1,
 				continuationRequestId: requestId,
 				shouldDeliver: true

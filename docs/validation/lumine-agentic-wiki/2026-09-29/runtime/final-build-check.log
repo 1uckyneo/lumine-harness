@@ -1,0 +1,94 @@
+$ tsx scripts/build-runtime.ts --check
+ℹ tsdown v0.22.14 powered by rolldown v1.2.5
+ℹ config file: <lumine-harness-root>/tsdown.config.ts 
+ℹ entry: skills/lumine-harness/src/harness/adapter-cli.ts, skills/lumine-harness/src/harness/adapter-manager.ts, skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts, skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts, skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts, skills/lumine-harness/src/harness/check.ts, skills/lumine-harness/src/harness/core/continuation-delivery.ts, skills/lumine-harness/src/harness/core/document-operations.ts, skills/lumine-harness/src/harness/core/documents.ts, skills/lumine-harness/src/harness/core/hook-io.ts, skills/lumine-harness/src/harness/core/messages.ts, skills/lumine-harness/src/harness/core/phase-router.ts, skills/lumine-harness/src/harness/core/project-checks.ts, skills/lumine-harness/src/harness/core/project-config.ts, skills/lumine-harness/src/harness/core/root-resolver.ts, skills/lumine-harness/src/harness/core/runtime-layout.ts, skills/lumine-harness/src/harness/core/session-context.ts, skills/lumine-harness/src/harness/core/skill-catalog.ts, skills/lumine-harness/src/harness/core/stop-policy.ts, skills/lumine-harness/src/harness/core/task-cli.ts, skills/lumine-harness/src/harness/core/task-contract.ts, skills/lumine-harness/src/harness/core/verification.ts, skills/lumine-harness/src/harness/core/work-status.ts, skills/lumine-harness/src/harness/tests/adapter-manager-cli.test.ts, skills/lumine-harness/src/harness/tests/adoption-manager.test.ts, skills/lumine-harness/src/harness/tests/architecture-contracts.test.ts, skills/lumine-harness/src/harness/tests/core-v2.test.ts, skills/lumine-harness/src/harness/tests/coverage-groups.test.ts, skills/lumine-harness/src/harness/tests/document-lifecycle.test.ts, skills/lumine-harness/src/harness/tests/document-metadata.test.ts, skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts, skills/lumine-harness/src/harness/tests/migration-legacy.test.ts, skills/lumine-harness/src/harness/tests/migration-work-status.test.ts, skills/lumine-harness/src/harness/tests/multi-agent-adapters.test.ts, skills/lumine-harness/src/harness/tests/session-start.test.ts, skills/lumine-harness/src/harness/tests/status-protocol.test.ts, skills/lumine-harness/src/harness/tests/stop-gate.test.ts, skills/lumine-harness/src/harness/tests/wiki-agentic.test.ts, skills/lumine-harness/src/harness/tests/wiki-map-markdown.test.ts, skills/lumine-harness/src/harness/tests/wiki-reader.test.ts, skills/lumine-harness/src/harness/tests/wiki-snapshot.test.ts, skills/lumine-harness/src/harness/tests/wiki.test.ts, skills/lumine-harness/src/harness/vendor/ignore.ts, skills/lumine-harness/src/harness/vendor/yaml.ts, skills/lumine-harness/src/harness/wiki.ts, skills/lumine-harness/src/harness/wiki/coverage.ts, skills/lumine-harness/src/harness/wiki/documents.ts, skills/lumine-harness/src/harness/wiki/engine.ts, skills/lumine-harness/src/harness/wiki/files.ts, skills/lumine-harness/src/harness/wiki/index.ts, skills/lumine-harness/src/harness/wiki/map-markdown.ts, skills/lumine-harness/src/harness/wiki/merge.ts, skills/lumine-harness/src/harness/wiki/messages.ts, skills/lumine-harness/src/harness/wiki/reader-model.ts, skills/lumine-harness/src/harness/wiki/references.ts, skills/lumine-harness/src/harness/wiki/search.ts, skills/lumine-harness/src/harness/wiki/sections.ts, skills/lumine-harness/src/harness/wiki/server.ts, skills/lumine-harness/src/harness/wiki/transactions.ts, skills/lumine-harness/src/harness/wiki/types.ts, skills/lumine-harness/src/opencode/plugins/harness.ts, skills/lumine-harness/src/scripts/harness-manager.ts, skills/lumine-harness/src/migration/knowledge.ts, skills/lumine-harness/src/migration/legacy.ts, skills/lumine-harness/src/migration/work-status.ts
+ℹ target: node18
+ℹ tsconfig: tsconfig.json
+ℹ Build start
+ℹ Granting execute permission to <build-temp>/stage/harness/adapter-cli.mjs
+ℹ Granting execute permission to <build-temp>/stage/harness/core/task-cli.mjs
+ℹ Granting execute permission to <build-temp>/stage/scripts/harness-manager.mjs
+ℹ <build-temp>/stage/harness/adapter-manager.mjs                                                                       60.53 kB │ gzip: 17.44 kB
+ℹ <build-temp>/stage/harness/wiki/engine.mjs                                                                           34.45 kB │ gzip:  8.76 kB
+ℹ <build-temp>/stage/scripts/harness-manager.mjs                                                                       31.97 kB │ gzip:  9.78 kB
+ℹ <build-temp>/stage/harness/tests/core-v2.test.mjs                                                                    30.89 kB │ gzip:  7.77 kB
+ℹ <build-temp>/stage/harness/tests/wiki-agentic.test.mjs                                                               27.99 kB │ gzip:  6.78 kB
+ℹ <build-temp>/stage/harness/tests/adapter-manager-cli.test.mjs                                                        25.69 kB │ gzip:  6.15 kB
+ℹ <build-temp>/stage/harness/tests/multi-agent-adapters.test.mjs                                                       22.61 kB │ gzip:  4.77 kB
+ℹ <build-temp>/stage/harness/tests/wiki.test.mjs                                                                       22.43 kB │ gzip:  5.81 kB
+ℹ <build-temp>/stage/harness/tests/architecture-contracts.test.mjs                                                     18.08 kB │ gzip:  5.12 kB
+ℹ <build-temp>/stage/harness/core/work-status.mjs                                                                      17.38 kB │ gzip:  4.25 kB
+ℹ <build-temp>/stage/harness/tests/adoption-manager.test.mjs                                                           17.36 kB │ gzip:  3.95 kB
+ℹ <build-temp>/stage/harness/core/document-operations.mjs                                                              15.50 kB │ gzip:  4.65 kB
+ℹ <build-temp>/stage/harness/core/verification.mjs                                                                     14.44 kB │ gzip:  4.33 kB
+ℹ <build-temp>/stage/harness/tests/migration-knowledge.test.mjs                                                        13.33 kB │ gzip:  3.12 kB
+ℹ <build-temp>/stage/harness/tests/stop-gate.test.mjs                                                                  13.12 kB │ gzip:  2.65 kB
+ℹ <build-temp>/stage/harness/tests/status-protocol.test.mjs                                                            12.99 kB │ gzip:  3.53 kB
+ℹ <build-temp>/stage/harness/wiki/files.mjs                                                                            12.79 kB │ gzip:  4.17 kB
+ℹ <build-temp>/stage/migration/legacy.mjs                                                                              12.31 kB │ gzip:  3.78 kB
+ℹ <build-temp>/stage/harness/core/task-contract.mjs                                                                    12.12 kB │ gzip:  3.95 kB
+ℹ <build-temp>/stage/harness/tests/wiki-reader.test.mjs                                                                11.90 kB │ gzip:  3.47 kB
+ℹ <build-temp>/stage/harness/wiki/server.mjs                                                                           11.05 kB │ gzip:  3.52 kB
+ℹ <build-temp>/stage/harness/core/stop-policy.mjs                                                                      10.83 kB │ gzip:  3.50 kB
+ℹ <build-temp>/stage/harness/wiki/documents.mjs                                                                         9.97 kB │ gzip:  3.41 kB
+ℹ <build-temp>/stage/harness/core/documents.mjs                                                                         9.84 kB │ gzip:  3.41 kB
+ℹ <build-temp>/stage/harness/wiki.mjs                                                                                   9.82 kB │ gzip:  3.69 kB
+ℹ <build-temp>/stage/harness/tests/migration-legacy.test.mjs                                                            9.53 kB │ gzip:  2.64 kB
+ℹ <build-temp>/stage/harness/tests/document-lifecycle.test.mjs                                                          9.48 kB │ gzip:  2.56 kB
+ℹ <build-temp>/stage/harness/check.mjs                                                                                  9.08 kB │ gzip:  3.54 kB
+ℹ <build-temp>/stage/harness/wiki/search.mjs                                                                            8.80 kB │ gzip:  3.32 kB
+ℹ <build-temp>/stage/harness/core/messages.mjs                                                                          8.69 kB │ gzip:  4.13 kB
+ℹ <build-temp>/stage/harness/core/phase-router.mjs                                                                      8.22 kB │ gzip:  2.81 kB
+ℹ <build-temp>/stage/harness/core/skill-catalog.mjs                                                                     7.98 kB │ gzip:  2.99 kB
+ℹ <build-temp>/stage/migration/knowledge.mjs                                                                            7.38 kB │ gzip:  2.58 kB
+ℹ <build-temp>/stage/harness/tests/wiki-snapshot.test.mjs                                                               7.32 kB │ gzip:  1.91 kB
+ℹ <build-temp>/stage/harness/wiki/messages.mjs                                                                          6.54 kB │ gzip:  3.31 kB
+ℹ <build-temp>/stage/harness/core/session-context.mjs                                                                   6.29 kB │ gzip:  3.27 kB
+ℹ <build-temp>/stage/migration/work-status.mjs                                                                          5.87 kB │ gzip:  2.17 kB
+ℹ <build-temp>/stage/harness/adapters/zcode/hooks/dispatch.mjs                                                          5.68 kB │ gzip:  1.74 kB
+ℹ <build-temp>/stage/harness/adapters/codebuddy/hooks/dispatch.mjs                                                      5.67 kB │ gzip:  1.75 kB
+ℹ <build-temp>/stage/harness/tests/document-metadata.test.mjs                                                           5.57 kB │ gzip:  2.10 kB
+ℹ <build-temp>/stage/harness/adapters/deepseek-harness/hooks/dispatch.mjs                                               5.22 kB │ gzip:  1.70 kB
+ℹ <build-temp>/stage/harness/core/project-config.mjs                                                                    4.94 kB │ gzip:  1.65 kB
+ℹ <build-temp>/stage/harness/tests/wiki-map-markdown.test.mjs                                                           4.73 kB │ gzip:  1.94 kB
+ℹ <build-temp>/stage/harness/core/task-cli.mjs                                                                          4.42 kB │ gzip:  1.56 kB
+ℹ <build-temp>/stage/harness/wiki/map-markdown.mjs                                                                      4.03 kB │ gzip:  1.87 kB
+ℹ <build-temp>/stage/harness/wiki/transactions.mjs                                                                      3.91 kB │ gzip:  1.47 kB
+ℹ <build-temp>/stage/harness/adapter-cli.mjs                                                                            3.52 kB │ gzip:  1.42 kB
+ℹ <build-temp>/stage/harness/tests/migration-work-status.test.mjs                                                       3.51 kB │ gzip:  1.38 kB
+ℹ <build-temp>/stage/harness/wiki/coverage.mjs                                                                          3.00 kB │ gzip:  1.18 kB
+ℹ <build-temp>/stage/harness/wiki/merge.mjs                                                                             2.94 kB │ gzip:  1.05 kB
+ℹ <build-temp>/stage/harness/core/hook-io.mjs                                                                           2.77 kB │ gzip:  0.98 kB
+ℹ <build-temp>/stage/harness/core/root-resolver.mjs                                                                     2.67 kB │ gzip:  1.06 kB
+ℹ <build-temp>/stage/harness/core/project-checks.mjs                                                                    2.44 kB │ gzip:  1.04 kB
+ℹ <build-temp>/stage/harness/adapters/kimi/hooks/dispatch.mjs                                                           2.31 kB │ gzip:  0.89 kB
+ℹ <build-temp>/stage/harness/wiki/reader-model.mjs                                                                      2.21 kB │ gzip:  0.81 kB
+ℹ <build-temp>/stage/harness/adapters/cursor/hooks/stop.mjs                                                             2.21 kB │ gzip:  0.88 kB
+ℹ <build-temp>/stage/harness/wiki/sections.mjs                                                                          2.10 kB │ gzip:  0.99 kB
+ℹ <build-temp>/stage/harness/adapters/qoder/hooks/tool-after.mjs                                                        1.95 kB │ gzip:  0.68 kB
+ℹ <build-temp>/stage/harness/adapters/qoder/hooks/prompt-submit.mjs                                                     1.75 kB │ gzip:  0.78 kB
+ℹ <build-temp>/stage/harness/tests/coverage-groups.test.mjs                                                             1.67 kB │ gzip:  0.70 kB
+ℹ <build-temp>/stage/harness/core/runtime-layout.mjs                                                                    1.55 kB │ gzip:  0.56 kB
+ℹ <build-temp>/stage/opencode/plugins/harness.mjs                                                                       1.53 kB │ gzip:  0.71 kB
+ℹ <build-temp>/stage/harness/adapters/qoder/hooks/tool-before.mjs                                                       1.45 kB │ gzip:  0.67 kB
+ℹ <build-temp>/stage/harness/adapters/codex/hooks/lib/stop-gate.mjs                                                     1.38 kB │ gzip:  0.55 kB
+ℹ <build-temp>/stage/harness/adapters/qoder/hooks/stop.mjs                                                              1.37 kB │ gzip:  0.57 kB
+ℹ <build-temp>/stage/harness/adapters/trae/hooks/stop.mjs                                                               1.36 kB │ gzip:  0.56 kB
+ℹ <build-temp>/stage/harness/tests/session-start.test.mjs                                                               1.23 kB │ gzip:  0.57 kB
+ℹ <build-temp>/stage/harness/adapters/codex/hooks/session-start.mjs                                                     1.20 kB │ gzip:  0.57 kB
+ℹ <build-temp>/stage/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.mjs   1.20 kB │ gzip:  0.60 kB
+ℹ <build-temp>/stage/harness/adapters/kimi/installed-dispatcher.mjs                                                     1.15 kB │ gzip:  0.58 kB
+ℹ <build-temp>/stage/harness/adapters/trae/hooks/session-start.mjs                                                      1.13 kB │ gzip:  0.51 kB
+ℹ <build-temp>/stage/harness/adapters/cursor/hooks/session-start.mjs                                                    1.07 kB │ gzip:  0.49 kB
+ℹ <build-temp>/stage/harness/wiki/references.mjs                                                                        1.06 kB │ gzip:  0.57 kB
+ℹ <build-temp>/stage/harness/wiki/index.mjs                                                                             1.05 kB │ gzip:  0.36 kB
+ℹ <build-temp>/stage/harness/adapters/cursor/hooks/after-agent-response.mjs                                             0.92 kB │ gzip:  0.47 kB
+ℹ <build-temp>/stage/harness/adapters/codex/hooks/stop-gate.mjs                                                         0.64 kB │ gzip:  0.39 kB
+ℹ <build-temp>/stage/harness/core/continuation-delivery.mjs                                                             0.62 kB │ gzip:  0.36 kB
+ℹ <build-temp>/stage/harness/adapters/codex/hooks/lib/session-start-context.mjs                                         0.56 kB │ gzip:  0.30 kB
+ℹ <build-temp>/stage/harness/vendor/yaml.mjs                                                                            0.10 kB │ gzip:  0.08 kB
+ℹ <build-temp>/stage/harness/vendor/ignore.mjs                                                                          0.07 kB │ gzip:  0.07 kB
+ℹ <build-temp>/stage/harness/wiki/types.mjs                                                                             0.01 kB │ gzip:  0.03 kB
+ℹ 81 files, total: 674.45 kB
+✔ Build complete in 40ms
+Reader bundle and offline assets verified

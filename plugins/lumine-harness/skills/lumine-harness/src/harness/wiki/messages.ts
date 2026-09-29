@@ -7,7 +7,7 @@ const diagnostics: Record<string, [string, string]> = {
   QUERY_BUDGET_INVALID: ['检索条数和文本预算必须为正整数。', 'Card count and text budget must be positive integers.'],
   UPDATE_PACKET_AND_CANDIDATE_REQUIRED: ['请提供工作包 ID 和 --candidate 文本候选文件。', 'Provide the packet ID and a --candidate text candidate file.'],
   UPDATE_DECISION_ARGUMENTS_REQUIRED: ['请提供工作包、文档 ID、处理方式及说明。', 'Provide the packet, document ID, decision and reason.'],
-  UPDATE_ACTION_REQUIRED: ['请选择 prepare、apply、decide 或 recover。', 'Choose prepare, apply, decide or recover.'],
+  UPDATE_ACTION_REQUIRED: ['请选择 prepare、apply、decide、review 或 recover。', 'Choose prepare, apply, decide, review or recover.'],
   UPDATE_NOT_FOUND: ['未找到更新工作包。请先准备工作包或核实 ID。', 'Update packet not found. Prepare a packet or verify its ID.'],
   UPDATE_DOCUMENT_NOT_FOUND: ['工作包未包含该文档。请核实工作包和文档 ID。', 'The packet does not contain this document. Verify both IDs.'],
   UPDATE_OUTSIDE_SCOPE: ['候选文档不在工作包范围内，请重新准备。', 'The candidate is outside the packet scope. Prepare another packet.'],
@@ -25,6 +25,12 @@ const diagnostics: Record<string, [string, string]> = {
   TRANSACTION_DOCUMENT_CONFLICT: ['恢复材料与当前正文冲突，已保留人工修改。请核实后继续恢复。', 'Recovery material conflicts with current text. Human changes are preserved; review before recovering.'],
   TRANSACTION_STATE_CONFLICT: ['恢复材料与当前知识状态冲突，请核实后继续恢复。', 'Recovery material conflicts with current knowledge state. Review before recovering.'],
   DOCUMENT_METADATA_INVALID: ['文档元数据无效，请检查 YAML 格式。', 'Document metadata is invalid. Check its YAML syntax.'],
+  FRAGMENT_NOT_FOUND: ['未找到指定章节或图解。请用 show --outline 查看可用引用。', 'Section or diagram not found. Use show --outline to inspect available references.'],
+  COVERAGE_CHANGED: ['准备工作包后知识地图已被修改。保留当前内容并重新准备。', 'The knowledge map changed after preparation. Preserve it and prepare again.'],
+  REVIEW_BASELINE_MISMATCH: ['审阅记录与当前正文或来源版本不符，请核实实际审阅范围。', 'The review does not match the current text or source version. Check the actual review scope.'],
+  REVIEW_FILE_REQUIRED: ['请用 --file 指定文本审阅记录。', 'Specify the text review record with --file.'],
+  DOCUMENT_PATH_COLLISION: ['文档路径与已有文件或规范化名称冲突。请选择不同名称。', 'The document path conflicts with an existing or normalized name. Choose another name.'],
+  CHANGE_MANIFEST_INVALID: ['变更清单格式无效，请检查 schemaVersion 和 changes。', 'The change manifest is invalid. Check schemaVersion and changes.'],
   UNKNOWN_COMMAND: ['未知知识命令，请查看 wiki --help。', 'Unknown Wiki command. See wiki --help.'],
   WIKI_FAILED: ['操作未完成，请核实参数、来源与维护状态后重试。', 'The operation did not complete. Check arguments, sources and maintenance state before retrying.'],
 };
@@ -37,6 +43,6 @@ export function wikiDiagnostic(error: unknown, locale: Locale): { code: string; 
   return { code, message, ...(candidates.length ? { candidates } : {}) };
 }
 export function wikiStatus(value: string, locale: Locale): string {
-  const labels: Record<string, string> = { current:'已核实',stale:'待更新',unverified:'待核实','missing-source':'来源缺失',conflict:'待处理冲突',applied:'已应用',partial:'部分完成',prepared:'已准备',protected:'原文已保护','source-drift':'来源已变化','config-drift':'配置已变化',invalid:'无效',passed:'通过',failed:'未通过',error:'错误',warning:'提醒',pending:'待处理' };
+  const labels: Record<string, string> = { current:'上次核对来源未变化',stale:'待更新',unverified:'待核实','missing-source':'来源缺失',conflict:'待处理冲突',applied:'已应用',partial:'部分完成',prepared:'已准备',protected:'原文已保护','source-drift':'来源已变化','config-drift':'配置已变化',invalid:'无效',passed:'通过',failed:'未通过',error:'错误',warning:'提醒',pending:'待处理' };
   return locale === 'zh-CN' ? labels[value] ?? value : value;
 }

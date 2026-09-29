@@ -1,0 +1,122 @@
+/** One-time knowledge format conversion, kept outside the daily Runtime. */
+import { createHash } from 'node:crypto';
+import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import { parseDocument as parseYaml } from 'yaml';
+import { parseSections } from '../harness/wiki/sections.ts';
+import { containedPath } from '../harness/wiki/files.ts';
+
+const hash = (value: string | Uint8Array): string => createHash('sha256').update(value).digest('hex');
+const json = (value: unknown): string => JSON.stringify(value, null, 2) + '\n';
+export interface KnowledgeMigrationChange { path: string; beforeHash: string | null; afterHash: string; content: string }
+export interface KnowledgeMigrationIssue { path: string; code: string; message: string }
+export interface KnowledgeMigrationPlan { changes: KnowledgeMigrationChange[]; issues: KnowledgeMigrationIssue[] }
+export function convertKnowledgeMarkdown(markdown: string): string {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(markdown);
+  if (!match) return markdown;
+  const metadata = parseYaml(match[1], { uniqueKeys: true });
+  if (metadata.errors.length) throw new Error('Invalid knowledge metadata; retain the original.');
+  const values = metadata.toJS({ maxAliasCount: 0 });
+  if (!values || typeof values.id !== 'string') return markdown;
+  let changed = false;
+  if (Array.isArray(values.relations) && values.relations.some((relation: unknown) => typeof relation === 'string')) {
+    metadata.set('relations', values.relations.map((relation: unknown) => typeof relation === 'string' ? { target: relation, kind: 'related' } : relation));
+    changed = true;
+  }
+  let body = markdown.slice(match[0].length);
+  const lines = body.split(/\r?\n/);
+  const sections = parseSections(body);
+  // Embed the existing heading reference, so historic section links retain meaning.
+  for (const section of sections.filter((entry) => !entry.stable).reverse()) {
+    lines.splice(section.startLine - 1, 0, `<a id="${section.id}"></a>`);
+    changed = true;
+  }
+  if (!changed) return markdown;
+  body = lines.join('\n');
+  return `---\n${metadata.toString()}---\n${body}`;
+}
+
+export function planKnowledgeMigration(root: string, wikiRoot = 'docs/repo-wiki'): KnowledgeMigrationPlan {
+  const result: KnowledgeMigrationPlan = { changes: [], issues: [] };
+  const marker = containedPath(root, '.lumine/wiki-state/format.json', false);
+  if (existsSync(marker)) {
+    const format = JSON.parse(readFileSync(marker, 'utf8'));
+    if (format.schemaVersion !== 1 || format.knowledgeFormat !== 3) throw new Error('Unknown knowledge format; do not overwrite it.');
+    // A marker cannot prove that a later writer did not add old-format assets.
+    // Re-inventory under the shared writer lock when applying or finalizing.
+  }
+  const files: string[] = [];
+  const walk = (relative: string): void => {
+    const absolute = containedPath(root, relative, false);
+    if (!existsSync(absolute)) return;
+    if (lstatSync(absolute).isSymbolicLink()) throw new Error('Knowledge migration refuses symbolic links.');
+    for (const item of readdirSync(absolute, { withFileTypes: true })) {
+      const rel = `${relative}/${item.name}`;
+      if (item.isSymbolicLink()) { result.issues.push({ path: rel, code: 'KNOWLEDGE_PROTECTED', message: 'Preserve linked content; it was not read or converted.' }); continue; }
+      if (item.isDirectory()) walk(rel);
+      else if (item.isFile()) files.push(rel);
+    }
+  };
+  walk(wikiRoot);
+  for (const directory of ['documents', 'updates', 'transactions']) walk(`.lumine/wiki-state/${directory}`);
+  const input = new Map(files.map((relative) => [relative, readFileSync(containedPath(root, relative), 'utf8')]));
+  // Finish in-flight old writes before changing their contract. The old Runtime is still present at preflight.
+  for (const [relative, content] of input) if (/wiki-state\/transactions\/.*\.json$/.test(relative)) {
+    try { const value = JSON.parse(content); if (value.status !== 'complete') result.issues.push({ path: relative, code: 'KNOWLEDGE_RECOVERY_REQUIRED', message: 'Recover this transaction with the current installed Runtime before creating an upgrade proposal. No recovery material has been changed.' }); }
+    catch { result.issues.push({ path: relative, code: 'KNOWLEDGE_RECOVERY_REQUIRED', message: 'Unreadable transaction; preserve it and recover before upgrade.' }); }
+  }
+  if (result.issues.length) return result;
+  const replacements = new Map<string, string>(), revisions = new Map<string, string>();
+  const convert = (text: string): string => {
+    if (replacements.has(text)) return replacements.get(text)!;
+    const next = convertKnowledgeMarkdown(text);
+    replacements.set(text, next); if (next !== text) revisions.set(hash(text), hash(next));
+    return next;
+  };
+  const markdownKeys = new Set(['generatedMarkdown', 'currentMarkdown', 'markdown', 'content']);
+  const collect = (value: unknown, key = ''): void => {
+    if (typeof value === 'string') { if (markdownKeys.has(key) && /^---\r?\n/.test(value)) convert(value); return; }
+    if (Array.isArray(value)) { value.forEach((entry) => collect(entry)); return; }
+    if (value && typeof value === 'object') for (const [name, entry] of Object.entries(value)) collect(entry, name);
+  };
+  const parsed = new Map<string, any>();
+  for (const [relative, content] of input) {
+    try {
+      if (relative.endsWith('.md')) convert(content);
+      else if (relative.endsWith('.json') && !relative.includes('/transactions/')) { const value = JSON.parse(content); parsed.set(relative, value); collect(value); }
+    } catch (error) { result.issues.push({ path: relative, code: 'KNOWLEDGE_CONVERSION_FAILED', message: error instanceof Error ? error.message : String(error) }); }
+  }
+  if (result.issues.length) return { changes: [], issues: result.issues };
+  const revisionKeys = new Set(['currentRevision', 'appliedRevision', 'previousRevision', 'revision']);
+  const transform = (value: any, key = ''): any => {
+    if (typeof value === 'string') {
+      if (markdownKeys.has(key)) return replacements.get(value) ?? value;
+      if (revisionKeys.has(key)) return revisions.get(value) ?? value;
+      return value;
+    }
+    if (Array.isArray(value)) return value.map((entry) => transform(entry));
+    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([name, entry]) => [name, transform(entry, name)]));
+    return value;
+  };
+  const add = (relative: string, before: string | null, after: string): void => { if (before !== after) result.changes.push({ path: relative, beforeHash: before === null ? null : hash(before), afterHash: hash(after), content: after }); };
+  for (const [relative, content] of input) {
+    if (relative.endsWith('.md')) add(relative, content, replacements.get(content) ?? content);
+    else if (parsed.has(relative)) {
+      const original = parsed.get(relative), next = transform(original);
+      if (JSON.stringify(original) !== JSON.stringify(next)) add(relative, content, json(next));
+    }
+  }
+  // This is an inventory, not a model-authored hierarchy or a semantic completion claim.
+  const coverageFile = containedPath(root, '.lumine/wiki-state/coverage.json', false);
+  if (!existsSync(coverageFile)) {
+    const topics = [...input].filter(([relative, content]) => relative.startsWith(wikiRoot + '/') && relative.endsWith('.md') && /^---\r?\n/.test(content)).flatMap(([relative, content]) => {
+      const match = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content); if (!match) return [];
+      const meta = parseYaml(match[1]).toJS({ maxAliasCount: 0 });
+      if (!meta?.id || meta.status === 'historical') return [];
+      return [{ id: `topic-${meta.id}`, title: meta.title ?? path.basename(relative, '.md'), questions: [], sourceScopes: meta.watchScopes ?? [], documentRefs: [meta.id], status: 'partial', reason: 'Existing content inventoried; project coverage and semantic review are not yet established.' }];
+    });
+    add('.lumine/wiki-state/coverage.json', null, json({ schemaVersion: 1, topics }));
+  }
+  if (!existsSync(marker)) add('.lumine/wiki-state/format.json', null, json({ schemaVersion: 1, knowledgeFormat: 3 }));
+  return result;
+}

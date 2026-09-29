@@ -1,3 +1,23 @@
 {
-  "docs/exec-plans/active/Lumine 一次性重构.md": "lumine-source-refactor-plan"
+  "docs/exec-plans/active/Lumine 一次性重构.md": "lumine-source-refactor-plan",
+  "lumine-architecture#一次修改怎样进入项目": "lumine-architecture#canonical-source",
+  "lumine-architecture#core-和宿主各管什么": "lumine-architecture#canonical-source",
+  "lumine-architecture#为什么单独构建阅读器": "lumine-architecture#server-browser-boundary",
+  "lumine-architecture#边界与核实入口": "lumine-architecture#build-failures-verification",
+  "lumine-architecture#自用与安装项目如何共用入口": "lumine-architecture#locales-and-installation",
+  "lumine-wiki#卡片和正文只有一份知识": "lumine-wiki#hierarchy-and-sections",
+  "lumine-wiki#扫描为什么同时看引用和范围": "lumine-wiki#source-and-review",
+  "lumine-wiki#三方比较保护什么": "lumine-wiki#protected-update",
+  "lumine-wiki#只读服务与图解失败": "lumine-wiki-reader#text-diagrams",
+  "lumine-wiki#从当前方案追溯记录": "lumine-wiki-reader#reader-evidence",
+  "lumine-task-check#任务检查停止状态与继续条件": "lumine-task-check#lumine-task-check-overview",
+  "lumine-task-check#完成先对应当前请求": "lumine-task-check#status-answer",
+  "lumine-task-check#六种公共状态": "lumine-task-check#status-values",
+  "lumine-task-check#内容变化怎样影响任务": "lumine-workflow#workflow-identity",
+  "lumine-task-check#检查和语义判断的边界": "lumine-task-check#status-checks",
+  "lumine-adoption#提案先固定什么": "lumine-adoption#proposal-inputs",
+  "lumine-adoption#为什么备份在-runtime-之外": "lumine-adoption#cas-and-recovery",
+  "lumine-adoption#升级保护和真实宿主边界": "lumine-adoption#hosts-and-assets",
+  "lumine-adoption#修改时注意": "lumine-adoption#knowledge-and-session-conversion",
+  "lumine-adoption#取消选用宿主": "lumine-adoption#hosts-and-assets"
 }

@@ -1,0 +1,434 @@
+{
+  "schemaVersion": 1,
+  "topics": [
+    {
+      "id": "lumine-overview",
+      "title": "理解 Lumine",
+      "questions": [
+        "Agent Harness 与项目 Harness 怎样配合？",
+        "规范源码如何进入安装和 Plugin 分发？"
+      ],
+      "documentRefs": [
+        "lumine-architecture"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "README.zh-CN.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/phase-router.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-reader.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/sync-plugin-wrapper.sh"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/check-repo-sync.sh"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts"
+        }
+      ],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-project",
+      "title": "项目边界与工作方法",
+      "questions": [
+        "从子仓或新会话开始时如何找到目标和依据？"
+      ],
+      "documentRefs": [],
+      "sourceScopes": [],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-project-roots",
+      "title": "配置、根与仓库身份",
+      "parentId": "lumine-project",
+      "questions": [
+        "项目根和 Runtime 根有何区别？",
+        "多仓来源如何保持稳定且不越界？"
+      ],
+      "documentRefs": [
+        "lumine-root-config"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/root-resolver.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/project-config.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-layout.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-contract.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/tests/core-v2.test.ts"
+        }
+      ],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-project-workflow",
+      "title": "方案、任务与证据",
+      "parentId": "lumine-project",
+      "questions": [
+        "四个 Skill 如何组合而不成为四道手续？",
+        "Spec、Plan、任务与验证怎样关联？"
+      ],
+      "documentRefs": [
+        "lumine-workflow"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-design/SKILL.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/phase-router.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/documents.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-contract.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts"
+        }
+      ],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-control",
+      "title": "宿主与连续执行",
+      "questions": [
+        "什么时候结束、继续或等待，证据如何区分？"
+      ],
+      "documentRefs": [],
+      "sourceScopes": [],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-control-status",
+      "title": "检查与停止策略",
+      "parentId": "lumine-control",
+      "questions": [
+        "诊断有失败能否完成？",
+        "重复报告和完成检查失败怎样共用预算？"
+      ],
+      "documentRefs": [
+        "lumine-task-check"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-contract.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/continuation-delivery.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/tests/status-protocol.test.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/document-operations.ts"
+        }
+      ],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-control-adapters",
+      "title": "各宿主协议边界",
+      "parentId": "lumine-control",
+      "questions": [
+        "哪些入口能观察读取或控制停止？",
+        "协议测试与真实自动续跑如何区分？"
+      ],
+      "documentRefs": [
+        "lumine-adapters"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/hook-io.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/continuation-delivery.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/validation/lumine-refactor/2026-09-29/README.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts"
+        }
+      ],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-knowledge",
+      "title": "持续工程知识",
+      "questions": [
+        "Agent 和工具分别承担什么？",
+        "检索、三方合并和目录事务如何维护知识？"
+      ],
+      "documentRefs": [
+        "lumine-wiki"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/files.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/merge.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/documents.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/sections.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/coverage.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/transactions.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md"
+        }
+      ],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-knowledge-reader",
+      "title": "目录、图解和来源阅读",
+      "parentId": "lumine-knowledge",
+      "questions": [
+        "如何从卡片进入章节和源码？",
+        "无模型、离线时为什么仍能阅读绘图？"
+      ],
+      "documentRefs": [
+        "lumine-wiki-reader"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/reader-model.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/files.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-reader.ts"
+        }
+      ],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-maintenance",
+      "title": "采用、升级与恢复",
+      "questions": [
+        "安装之后谁完成初次建库？",
+        "并发变化、中断、回滚及宿主切换怎么保护资产？"
+      ],
+      "documentRefs": [
+        "lumine-adoption"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/migration/legacy.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/migration/knowledge.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/migration/work-status.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/references/adoption.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/tests/adoption-manager.test.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts"
+        }
+      ],
+      "status": "covered"
+    }
+  ]
+}

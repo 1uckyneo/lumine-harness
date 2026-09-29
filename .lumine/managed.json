@@ -14,7 +14,7 @@
       "source": "lumine-harness"
     },
     "docs/templates/repo-wiki.md": {
-      "hash": "7c52e2c207d23c214ac604c2d923871781fedcd38c1a3242ec58b3f82f977d4b",
+      "hash": "7aee990816ea2b908a7b923b3042a9bc620e5c3ffe157cba5ef63ad742f28fe6",
       "source": "lumine-harness"
     },
     "docs/FRONTEND.md": {
@@ -45,12 +45,12 @@
       "hash": "618ce9db7f4bed3810207bbf6205831f961cfc8567f843ef0d69013b7210f054",
       "source": "lumine-harness"
     },
-    "docs/workflow-artifacts.md": {
-      "hash": "fea7ccada93ff8746e804fde92ca810734cf451f3a665cc57d461ac1c416e238",
-      "source": "lumine-harness"
-    },
     ".codex/hooks.json": {
       "hash": "4b8a98e88a631b245e03a5703cc4252ab6d3af7a1a9918bd66ad04f8a8c09c59",
+      "source": "lumine-harness"
+    },
+    "docs/workflow-artifacts.md": {
+      "hash": "f4dda264373c6deb4ee03d34daeecfbf0d7e9a61e96bc85fe0b0d3646e9e10e3",
       "source": "lumine-harness"
     },
     ".lumine/project.json": {
@@ -58,7 +58,7 @@
       "source": "lumine-harness"
     },
     ".lumine/root.json": {
-      "hash": "738acc402abc673dc43a2acf5b6f1c6649ca36ae9e502e91dfd9ae68855d106c",
+      "hash": "9d5bec304eed186be7f353384c43b77735c746f91ce40715dd6dbe305f80a4d1",
       "source": "lumine-harness"
     }
   }

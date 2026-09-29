@@ -16,15 +16,17 @@
 页面围绕真实问题组织，解释机制、技术选择、代价和修改边界。图选用架构／组件关系、时序、流程、状态或实际需要的数据关系；给出来源和适用状态。复杂图拆分，不用图数量作验收。人类修订、图解、摘要和来源须同步评估。运行观察与开发源码分开，不推定部署。
 
 <!-- LH-WIKI-06 -->
-用 `wiki check` 检查结构和关联，用源码及证据做语义复核。查询任务不要求更新全仓；只有明确需要维护时才应用结果。每个更新以可读的结果、覆盖范围、冲突和未解决事项收口。全新克隆应能无缓存、无模型调用地阅读和搜索已有知识。
+用 `wiki check` 检查结构和关联，用源码及证据做语义复核。调查产生可复用结论时在授权范围内回写受影响知识；明确只读时只报告，不更新全仓。来源未变只说明快照一致，语义审阅须另有记录。每个更新以可读的结果、覆盖范围、冲突和未解决事项收口。全新克隆应能无缓存、无模型调用地阅读和搜索已有知识。
 
 
 ## CLI 与知识字段
 
 ```bash
+./.lumine/cli wiki map
 ./.lumine/cli wiki scan
 ./.lumine/cli wiki query "目标问题" --limit 6
-./.lumine/cli wiki show <id-or-path>
+./.lumine/cli wiki show <id-or-path>#<section-or-diagram-id>
+./.lumine/cli wiki related <id>
 ./.lumine/cli wiki update prepare <id>
 ./.lumine/cli wiki update apply <packet-id> --candidate <candidate.json>
 ./.lumine/cli wiki check
@@ -33,3 +35,13 @@
 支持 `--root <root>` 与 `--json`。prepare 保存工作包并返回身份；apply 的候选文件是 `{ "candidates": [{ "id": "knowledge-id", "markdown": "完整 Markdown" }] }`。候选保留为可恢复状态，不当作已应用正文。
 
 参考 `docs/templates/repo-wiki.md`。知识 frontmatter 包含 `id`、`title`、`summary`、`type`、`status`、`locale`、`sources` 与 `watchScopes`；状态为 current／proposed／historical。来源使用 `repoId` 和相对 `path`。图在 `diagrams` 数组中用 `id`、`title`、`caption`、`sources` 声明，按正文 Mermaid 块顺序对应；图身份不能依赖渲染 DOM ID。
+
+## 章节、目录与变更组
+
+重要标题前放独立 `<a id="稳定章节ID"></a>`，ID 不随标题变化；frontmatter 可用 `sections: [{id: "章节ID", sources: ["来源ID"]}]` 关联精确依据。未关联时返回页面来源，不伪造章节证据。`relations` 使用 `{target: "文档ID#片段ID", kind: related|depends_on|decision, note: "关系说明"}`；目录父子归属只在知识地图维护。
+
+新建、拆页或调整目录时，使用 `wiki update prepare --manifest changes.json`。清单为 `schemaVersion: 1`，`changes` 包含 `kind: create|update`、`id`、新建所需 `path`、相关 `sourceRefs`、`watchScopes` 和可选 `group`。可同时附 `coverage` 和 `referenceMoves`。每个新页预期不存在；同组正文、目录和身份变更不能半完成后冒充可用。`coverage.topics` 用 `id/title/parentId?/questions/sourceScopes/documentRefs/status/reason?`，数组顺序即同级顺序；状态为 planned／partial／covered／deferred，covered 必须有实际内容依据。
+
+纯语义审阅可用 `wiki update review --file review.json`，记录 `documentId/revision/sourceFingerprint/reviewedAt/reviewer/outcome/scope/findings/limitations`，不强迫重写正文。`reviewer` 记录真实的 agent 或 human、author 或 independent；不可把作者自检写成独立审阅。来源核对、语义审阅、运行验证分别说明。
+
+只有实际保存且能够恢复的内容才算基线；新建采用“预期不存在”检查，更新采用三方比较。拆页同时维护总览、子页与引用。冲突和中断通过 `wiki update decide/recover` 处理，按命令帮助提供精确对象与原因，不强制覆盖人工修改。

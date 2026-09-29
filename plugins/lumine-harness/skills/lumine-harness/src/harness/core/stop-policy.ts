@@ -1,180 +1,134 @@
 import { createHash } from "node:crypto";
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import { loadProjectConfig } from "./project-config.ts";
-import { checkSessionCompletion } from "./task-contract.ts";
-import { countWorkStatus, deriveStatusEmissionId, extractWorkStatus, readFreshStateStatus, readSessionState, recordUserTurn, recordWorkStatus, writeSessionState } from "./work-status.ts";
-import type {
-  HarnessHookDecision,
-  HarnessProduct,
-  HarnessSessionInput,
-  SessionState,
-  StopDisposition,
-  UnknownRecord,
-  WorkStatus
-} from "./contracts.ts";
+import { checkSessionCompletion, taskRecordPath } from "./task-contract.ts";
+import { continuationDeliveryFor } from "./continuation-delivery.ts";
+import { countWorkStatus, deriveStatusEmissionId, getSessionStatePath, initializeSessionState, parseWorkReport, readFreshStateReport, readSessionState, recordUserTurn, recordWorkReport, validateWorkReport, writeSessionState } from "./work-status.ts";
+import type { HarnessHookDecision, HarnessProduct, HarnessSessionInput, SessionState, StopDisposition, UnknownRecord, WorkReport } from "./contracts.ts";
 
-type PauseWorkStatus = Exclude<WorkStatus, "done" | "continue_autonomously">;
-
-const PAUSE_MESSAGES: Record<PauseWorkStatus, string> = {
-  needs_user_decision: "Pause and ask the user for the decision that changes direction, scope, or trade-offs.",
-  needs_credentials: "Pause because credentials or authenticated access are required.",
-  needs_manual_app_step: "Pause because a manual action in an external application is required.",
-  blocked_external: "Pause because an external dependency is unavailable and no safe autonomous workaround remains."
-};
-
-export const DEFAULT_AUTONOMY_POLICY = Object.freeze({
-  maxContinuationChain: 20,
-  noProgressThreshold: 2
-});
-
-export interface AutonomyPolicy {
-  maxContinuationChain: number;
-  noProgressThreshold: number;
-}
-
-export interface StopCheckResult {
-  ok: boolean;
-  output?: string;
-}
-
-export interface StopPolicyOptions {
-  root: string;
-  autonomy?: Partial<AutonomyPolicy>;
-  runCheck?: (root: string) => StopCheckResult;
-}
-
+export const DEFAULT_AUTONOMY_POLICY = Object.freeze({ maxContinuationChain: 20, noProgressThreshold: 2 });
+export interface AutonomyPolicy { maxContinuationChain: number; noProgressThreshold: number; }
+export interface StopCheckResult { ok: boolean; output?: string; }
+export interface StopPolicyOptions { root: string; autonomy?: Partial<AutonomyPolicy>; runCheck?: (root: string) => StopCheckResult; }
 type RuntimeHookInput = HarnessSessionInput & { raw?: UnknownRecord };
-
 const HOST_CONTINUATION_LIMITS: Readonly<Partial<Record<HarnessProduct, number>>> = Object.freeze({ zcode: 3 });
-
 function positiveInteger(value: unknown, fallback: number): number {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
-
-export function resolveAutonomyPolicy(
-  root: string,
-  product: HarnessProduct,
-  override: Partial<AutonomyPolicy> = {}
-): AutonomyPolicy {
+export function resolveAutonomyPolicy(root: string, product: HarnessProduct, override: Partial<AutonomyPolicy> = {}): AutonomyPolicy {
   const configured = loadProjectConfig(root).autonomy;
-  const requestedMax = positiveInteger(override.maxContinuationChain ?? configured.maxContinuationChain, DEFAULT_AUTONOMY_POLICY.maxContinuationChain);
-  const hostMax = HOST_CONTINUATION_LIMITS[product] ?? Number.POSITIVE_INFINITY;
   return {
-    maxContinuationChain: Math.min(requestedMax, hostMax),
-    noProgressThreshold: positiveInteger(override.noProgressThreshold ?? configured.noProgressThreshold, DEFAULT_AUTONOMY_POLICY.noProgressThreshold)
+    maxContinuationChain: Math.min(positiveInteger(override.maxContinuationChain ?? configured.maxContinuationChain, 20), HOST_CONTINUATION_LIMITS[product] ?? Infinity),
+    noProgressThreshold: positiveInteger(override.noProgressThreshold ?? configured.noProgressThreshold, 2)
   };
 }
-
-function legacyAction(disposition: StopDisposition): HarnessHookDecision["action"] {
-  const actions: Record<StopDisposition, HarnessHookDecision["action"]> = {
-    finish: "allow",
-    request_continuation: "continue",
-    pause_for_human: "pause",
-    reject_completion: "block"
-  };
-  return actions[disposition];
+function decision(disposition: StopDisposition, fields: Omit<Partial<HarnessHookDecision>, "disposition" | "action"> = {}): HarnessHookDecision {
+  const actions: Record<StopDisposition, HarnessHookDecision["action"]> = { finish: "allow", request_continuation: "continue", pause_for_human: "pause", reject_completion: "block" };
+  return { disposition, action: actions[disposition], ...fields };
 }
+const hash = (value: string): string => createHash("sha256").update(value).digest("hex");
 
-function decision(
-  disposition: StopDisposition,
-  fields: Omit<Partial<HarnessHookDecision>, "disposition" | "action"> = {}
-): HarnessHookDecision {
-  return { disposition, action: legacyAction(disposition), ...fields };
-}
-
-function continuationRequestId(input: HarnessSessionInput, revision: number): string {
-  return createHash("sha256").update(`${input.product}\0${input.sessionId}\0${revision}`).digest("hex");
-}
-
-function resolveStatus(input: RuntimeHookInput, root: string): { status: WorkStatus | null; reason: "message" | "state"; state?: SessionState | null } {
-  const message = input.lastAssistantMessage ?? "";
-  if (message) {
-    if (countWorkStatus(message) !== 1) return { status: null, reason: "message" };
-    const status = extractWorkStatus(message);
-    const current = readSessionState(root, input.product, input.sessionId) ?? {};
-    const emissionId = deriveStatusEmissionId(input, current);
-    const state = status ? recordWorkStatus(root, input, status, { emissionId }) : null;
-    return { status, reason: "message", state };
+function resolveReport(input: RuntimeHookInput, state: SessionState): WorkReport {
+  const terminal = parseWorkReport(input.lastAssistantMessage);
+  if (countWorkStatus(input.lastAssistantMessage) > 0 && (!terminal || countWorkStatus(input.lastAssistantMessage) !== 1)) throw new Error("Use one terminal WORK_STATUS line with done, continue or blocked.");
+  const fresh = state.workReportSource === "structured" && state.workStatusEmissionId !== state.consumedWorkReportEmissionId ? readFreshStateReport(state) : null;
+  const candidates = [input.workReport, terminal, fresh].filter((value): value is WorkReport => Boolean(value));
+  if (!candidates.length) throw new Error("Record a fresh structured report or one terminal WORK_STATUS line before stopping.");
+  const merged = { ...candidates[0] };
+  for (const report of candidates.slice(1)) {
+    if (report.status !== merged.status || report.protocolVersion !== merged.protocolVersion) throw new Error("Structured and terminal work reports conflict; report the current intention explicitly.");
+    for (const key of ["reason", "nextStep"] as const) {
+      if (report[key] && merged[key] && report[key] !== merged[key]) throw new Error(`Work report ${key} conflicts across channels.`);
+      if (report[key]) merged[key] = report[key];
+    }
   }
-  const state = readSessionState(root, input.product, input.sessionId);
-  return { status: readFreshStateStatus(state), reason: "state", state };
+  return validateWorkReport(merged);
 }
 
+/** Every automatic follow-up, including report correction, uses this one budget and deduplication path. */
 export function evaluateStopPolicy(input: RuntimeHookInput, options: StopPolicyOptions): HarnessHookDecision {
-  const root = options.root;
-  // Some hosts expose a stable user-turn identifier only on their Stop event.
-  // Reset the autonomous chain only when that explicit identifier changes;
-  // Hook retries and loop counters are transport metadata, not user input.
-  if (input.userTurnId) recordUserTurn(root, input, { userTurnId: input.userTurnId });
-  const resolved = resolveStatus(input, root);
-  if (!resolved.status) return decision("reject_completion", { message: "Record exactly one fresh WORK_STATUS before stopping." });
-  const status = resolved.status;
-  const state: Partial<SessionState> = resolved.state ?? readSessionState(root, input.product, input.sessionId) ?? {};
-  const workStatusRevision = Number(state.workStatusRevision ?? 0);
-  if (status === "continue_autonomously") {
-    const revision = workStatusRevision;
-    if (Number(state.lastEvaluatedContinuationRevision ?? -1) === revision) {
-      const disposition: StopDisposition = state.lastContinuationDisposition ?? "pause_for_human";
-      return decision(disposition, {
-        workStatus: status,
-        workStatusRevision,
-        continuationRequestId: state.lastContinuationRequestId ?? state.pendingContinuationRequestId ?? undefined,
-        shouldDeliver: false,
-        message: state.lastContinuationMessage ?? "This continuation status was already evaluated."
-      });
-    }
-
-    const policy = resolveAutonomyPolicy(root, input.product, options.autonomy);
-    const chainCount = Number(state.autonomousChainCount ?? state.continuationCount ?? 0);
-    if (chainCount >= policy.maxContinuationChain) {
-      const message = `Automatic continuation reached the current limit of ${policy.maxContinuationChain}; pause for human review.`;
-      writeSessionState(root, input.product, input.sessionId, {
-        lastEvaluatedContinuationRevision: revision,
-        lastContinuationDisposition: "pause_for_human",
-        lastContinuationMessage: message
-      });
-      return decision("pause_for_human", { workStatus: status, workStatusRevision, shouldDeliver: false, message });
-    }
-
-    const progressRevision = Number(state.progressRevision ?? 0);
-    const hadProgressBaseline = state.lastContinuationProgressRevision !== null && state.lastContinuationProgressRevision !== undefined;
-    const noProgressCount = state.progressObservable && hadProgressBaseline && progressRevision === Number(state.lastContinuationProgressRevision)
-      ? Number(state.noProgressCount ?? 0) + 1
-      : 0;
-    if (state.progressObservable && noProgressCount >= policy.noProgressThreshold) {
-      const message = `No observable progress was recorded across ${policy.noProgressThreshold} continuation cycles; pause for human review.`;
-      writeSessionState(root, input.product, input.sessionId, {
-        noProgressCount,
-        lastContinuationProgressRevision: progressRevision,
-        lastEvaluatedContinuationRevision: revision,
-        lastContinuationDisposition: "pause_for_human",
-        lastContinuationMessage: message
-      });
-      return decision("pause_for_human", { workStatus: status, workStatusRevision, shouldDeliver: false, message });
-    }
-
-    const requestId = continuationRequestId(input, revision);
-    const message = "Continue with the next concrete autonomous step, then report a fresh WORK_STATUS.";
-    writeSessionState(root, input.product, input.sessionId, {
-      autonomousChainCount: chainCount + 1,
-      continuationCount: chainCount + 1,
-      continuationConsumedRevision: revision,
-      pendingContinuationRequestId: requestId,
-      pendingContinuationRevision: revision,
-      continuationRequestedAt: new Date().toISOString(),
-      lastContinuationRequestId: requestId,
-      lastContinuationRequestRevision: revision,
-      lastContinuationProgressRevision: progressRevision,
-      noProgressCount,
-      lastEvaluatedContinuationRevision: revision,
-      lastContinuationDisposition: "request_continuation",
-      lastContinuationMessage: message
-    });
-    return decision("request_continuation", { workStatus: status, workStatusRevision, continuationRequestId: requestId, shouldDeliver: true, message });
+  const lock = `${getSessionStatePath(options.root, input.product, input.sessionId)}.stop-lock`;
+  mkdirSync(path.dirname(lock), { recursive: true });
+  let descriptor: number;
+  try { descriptor = openSync(lock, "wx", 0o600); }
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    return decision("pause_for_human", { shouldDeliver: false, message: "STOP_EVALUATION_IN_PROGRESS: a concurrent evaluation or interrupted lock must be resolved before another continuation is delivered." });
   }
-  if (status !== "done") return decision("pause_for_human", { workStatus: status, workStatusRevision, message: PAUSE_MESSAGES[status as PauseWorkStatus] });
-  const diagnostic = ["plan", "verify", "diagnose", "check"].includes(state.requestedActivity ?? "");
-  const check = diagnostic ? { ok: true } : options.runCheck ? options.runCheck(root) : checkSessionCompletion(root, state);
-  if (!check.ok) return decision("reject_completion", { workStatus: status, workStatusRevision, message: check.output || "Harness checks failed." });
-  return decision("finish", { workStatus: status, workStatusRevision });
+  try {
+    writeFileSync(descriptor, JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }));
+    return evaluateLockedStopPolicy(input, options);
+  } finally { closeSync(descriptor); unlinkSync(lock); }
+}
+
+function evaluateLockedStopPolicy(input: RuntimeHookInput, options: StopPolicyOptions): HarnessHookDecision {
+  const root = options.root;
+  let state = readSessionState(root, input.product, input.sessionId);
+  if (!state && existsSync(getSessionStatePath(root, input.product, input.sessionId))) return decision("pause_for_human", { shouldDeliver: false, message: "SESSION_RECOVERY_REQUIRED: preserve the unreadable session before continuing." });
+  if (state && state.statusProtocolVersion !== 2) return decision("pause_for_human", { shouldDeliver: false, message: "STATUS_PROTOCOL_MIGRATION_REQUIRED: resume with the independent maintenance migration; existing task progress is preserved." });
+  state ??= initializeSessionState(root, input);
+  if (input.userTurnId) state = recordUserTurn(root, input, { userTurnId: input.userTurnId });
+  const emissionId = deriveStatusEmissionId(input, state)
+    ?? (!input.workReport && !input.lastAssistantMessage ? state.workStatusEmissionId : null)
+    ?? hash(JSON.stringify([input.product, input.sessionId, state.userTurnRevision ?? 0, state.hostTurnRevision ?? 0, input.workReport ?? null, input.lastAssistantMessage ?? ""]));
+  const inputHash = hash(JSON.stringify([input.lastAssistantMessage ?? null, input.workReport ?? null, input.lastAssistantMessage || input.workReport ? null : state.workStatusEmissionId ?? null]));
+  if (state.lastStopEmissionId === emissionId && state.lastStopDecision) {
+    if (state.lastStopInputHash !== inputHash) return decision("pause_for_human", { shouldDeliver: false, message: "WORK_REPORT_IDENTITY_CONFLICT: one response identity supplied different reports; preserve the original and inspect the host event." });
+    return { ...state.lastStopDecision, shouldDeliver: false };
+  }
+  let report: WorkReport | undefined;
+  let cause: HarnessHookDecision["cause"] = "report_invalid";
+  let failure = "";
+  try {
+    report = resolveReport(input, state);
+    state = recordWorkReport(root, input, report, { emissionId, source: input.workReport ? "structured" : "text" });
+  } catch (error) { failure = error instanceof Error ? error.message : String(error); }
+  const common = { ...(report ? { workStatus: report.status, workReport: report } : {}), workStatusRevision: Number(state.workStatusRevision ?? 0) };
+  const persist = (result: HarnessHookDecision, patch: Partial<SessionState> = {}): HarnessHookDecision => {
+    writeSessionState(root, input.product, input.sessionId, {
+      ...patch, lastStopEmissionId: emissionId, lastStopInputHash: inputHash, lastStopDecision: result,
+      consumedWorkReportEmissionId: state?.workStatusEmissionId ?? null
+    });
+    return result;
+  };
+  if (report?.status === "blocked") return persist(decision("pause_for_human", { ...common, shouldDeliver: false, message: [report.reason, report.nextStep].filter(Boolean).join("\n") }));
+  if (report?.status === "done") {
+    const diagnostic = ["plan", "verify", "diagnose", "check"].includes(state.requestedActivity ?? "");
+    const check = diagnostic ? { ok: true } : options.runCheck ? options.runCheck(root) : checkSessionCompletion(root, state);
+    if (check.ok) return persist(decision("finish", common), { repeatedFailureFingerprint: null, repeatedFailureCount: 0 });
+    cause = "completion_check";
+    failure = check.output || "The current task completion evidence is insufficient.";
+  } else if (report?.status === "continue") cause = "continue";
+
+  const disposition: StopDisposition = failure ? "reject_completion" : "request_continuation";
+  const message = failure
+    ? `${failure}\nReassess only the current request. Correct the report or evidence within existing authorization; findings do not authorize a repair, changed acceptance, deployment or broader work. If unable to continue, report blocked with the concrete reason.`
+    : "Continue with the next concrete step within the existing authorization, then report the current work status.";
+  if (continuationDeliveryFor(input.product, { disposition }) !== "automatic") return persist(decision(disposition, { ...common, cause, shouldDeliver: false, message }));
+  const policy = resolveAutonomyPolicy(root, input.product, options.autonomy);
+  const chainCount = Number(state.autonomousChainCount ?? 0);
+  if (chainCount >= policy.maxContinuationChain) return persist(decision("pause_for_human", { ...common, cause, shouldDeliver: false, message: `Automatic continuation reached the limit of ${policy.maxContinuationChain}; human review is required.` }));
+
+  let taskBaseline = "";
+  if (state.taskId) { try { taskBaseline = hash(readFileSync(taskRecordPath(root, state.taskId), "utf8")); } catch { /* The completion diagnostic already reports missing task input. */ } }
+  const fingerprint = failure ? hash(JSON.stringify([cause, failure, state.taskId, state.requestedActivity, taskBaseline, state.progressObservable ? state.progressRevision : null])) : null;
+  const repeated = fingerprint && state.repeatedFailureFingerprint === fingerprint ? Number(state.repeatedFailureCount ?? 0) + 1 : failure ? 1 : 0;
+  if (repeated >= policy.noProgressThreshold) return persist(decision("pause_for_human", { ...common, cause, shouldDeliver: false, message: `The same completion or report failure recurred without changed inputs; stop automatic retries.\n${failure}` }), { repeatedFailureFingerprint: fingerprint, repeatedFailureCount: repeated });
+
+  const progressRevision = Number(state.progressRevision ?? 0);
+  const hadBaseline = state.lastContinuationProgressRevision !== null && state.lastContinuationProgressRevision !== undefined;
+  const noProgressCount = state.progressObservable && hadBaseline && progressRevision === state.lastContinuationProgressRevision ? Number(state.noProgressCount ?? 0) + 1 : 0;
+  if (state.progressObservable && noProgressCount >= policy.noProgressThreshold) return persist(decision("pause_for_human", { ...common, cause, shouldDeliver: false, message: `No observable progress was recorded across ${policy.noProgressThreshold} continuation cycles; human review is required.` }), { noProgressCount, lastContinuationProgressRevision: progressRevision });
+  const requestId = hash(`${input.product}\0${input.sessionId}\0${state.userTurnRevision ?? 0}\0${emissionId}`);
+  return persist(decision(disposition, { ...common, cause, continuationRequestId: requestId, shouldDeliver: true, message }), {
+    autonomousChainCount: chainCount + 1, continuationCount: chainCount + 1,
+    pendingContinuationRequestId: requestId, pendingContinuationRevision: common.workStatusRevision,
+    pendingContinuationUserTurnRevision: Number(state.userTurnRevision ?? 0),
+    continuationRequestedAt: new Date().toISOString(), continuationDeliveredAt: null, continuationDeliveryConfirmed: false,
+    lastContinuationRequestId: requestId, lastContinuationRequestRevision: common.workStatusRevision,
+    lastContinuationProgressRevision: progressRevision, noProgressCount,
+    repeatedFailureFingerprint: fingerprint, repeatedFailureCount: repeated
+  });
 }

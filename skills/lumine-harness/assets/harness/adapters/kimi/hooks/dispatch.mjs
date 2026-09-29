@@ -5,8 +5,8 @@ import { initializeSessionState, observeHarnessEvent } from "../../../core/work-
 import { appendVerificationEvent } from "../../../core/verification.mjs";
 import { normalizeHookInput } from "../../../core/hook-io.mjs";
 import { buildSessionStartContext } from "../../../core/session-context.mjs";
-import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
 import { continuationDeliveryFor } from "../../../core/continuation-delivery.mjs";
+import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
 
 //#region skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts
 async function handleKimiHook(raw = {}) {
@@ -31,7 +31,7 @@ async function handleKimiHook(raw = {}) {
 		decision
 	});
 	const delivery = continuationDeliveryFor(input.product, decision);
-	if (decision.disposition === "reject_completion" && delivery === "automatic") {
+	if (decision.disposition === "reject_completion" && decision.shouldDeliver === true && delivery === "automatic") {
 		return {
 			exitCode: 2,
 			stderr: decision.message

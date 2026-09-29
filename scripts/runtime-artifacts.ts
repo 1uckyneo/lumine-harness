@@ -45,6 +45,7 @@ export function runtimeArtifacts(repoRoot: string): RuntimeArtifact[] {
       source: "scripts/harness-manager.ts",
       stage: "scripts/harness-manager.mjs",
       destination: "skills/lumine-harness/scripts/harness-manager.mjs",
+      transform: (content) => content.replaceAll("../harness/", "../assets/harness/"),
       executable: true
     },
     {

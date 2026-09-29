@@ -2,7 +2,7 @@
 // Source: skills/lumine-harness/src/harness/core/task-contract.ts
 import { loadProjectConfig, resolveProjectPath } from "./project-config.mjs";
 import { discoverSharedSkills } from "./skill-catalog.mjs";
-import { readSessionState, writeSessionState } from "./work-status.mjs";
+import { readSessionState, skillReadObservability, writeSessionState } from "./work-status.mjs";
 import { acceptanceSections, contentHash, resolveDocument } from "./documents.mjs";
 import { resolveCurrentDocument } from "./document-operations.mjs";
 import path from "node:path";
@@ -79,6 +79,7 @@ function bindTask(root, product, sessionId, taskId, mode) {
 			path: skill.file,
 			reason: "task-selected",
 			read: Boolean(used),
+			readObservability: skillReadObservability(product),
 			contentHash: skill.hash,
 			readAt: used?.readAt
 		};

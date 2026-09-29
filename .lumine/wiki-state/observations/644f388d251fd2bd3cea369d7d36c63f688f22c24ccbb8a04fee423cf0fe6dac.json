@@ -1,0 +1,43 @@
+{
+  "id": "lumine-wiki",
+  "revision": "b68a64028835a71aef11bc0aa01f5a32fcffae563db9b1106d82d7dd9401549a",
+  "freshness": "current",
+  "checkedAt": "2026-09-29T08:09:45.422Z",
+  "sourceFingerprint": "b8d2fecc13510790a0612924f38e13e2faec79aca29927cd79b54cd089c1b780",
+  "sources": {
+    "fingerprints": {
+      "project:skills/lumine-harness/src/harness/wiki/engine.ts": "bcf4380e3f2c32f2e13a6c8dd76c523f1d8ff55576972d65df87a5b6cd1e8463",
+      "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+      "project:skills/lumine-harness/src/harness/wiki/merge.ts": "81ea65a12e24471e785f528443463f68c69a853a095d68f3840577eccf454b7b",
+      "project:skills/lumine-harness/src/harness/wiki/documents.ts": "d1dc13d340310809d69742a94b6fe78b183193d2e8ec07eb5c6e6dd2a6436d72",
+      "project:skills/lumine-harness/src/harness/wiki/sections.ts": "3f425ecd340031fe058b499bf3bfabc93138e6376f5e3ea1c189842b8679e0c3",
+      "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "f9e647229ffceae8071f729dd4e119a5d2cead3df52ca1d75c9e75490e07a6a0",
+      "project:skills/lumine-harness/src/harness/wiki/search.ts": "5334986f62932dbc0481e4a4328f582c75bf7d6956279b4e094d911f3069187f",
+      "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "4ca902993c3486347d5f3613b2afde7de52b936429faca072c05ed7aa3a738d1",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "ffae595261f1504bd4f28afe82760f0777a40ed4aaca867e1511ccebc15d4fae"
+    },
+    "scopeFingerprints": {
+      "project:skills/lumine-harness/src/harness/wiki/engine.ts": "bc5afd149b9c97b61efd911d47c17821247aa48f1375ce31cf29d05e517a00a9",
+      "project:skills/lumine-harness/src/harness/wiki/files.ts": "d43f81bd3f6049c4d8f1df5b3ae8f53ec71c1c6791a2a646cbd966b828e3635a",
+      "project:skills/lumine-harness/src/harness/wiki/merge.ts": "b6f050f919f67b56512204f6e5b859c393539ee04440cb622c0859597e99eafe",
+      "project:skills/lumine-harness/src/harness/wiki/documents.ts": "1465fba902f2823c54a9dce579c0473addaf1ed4660fe5e2c3e1c95b30582eca",
+      "project:skills/lumine-harness/src/harness/wiki/sections.ts": "dd234ed0c4a261190c99d8b9306d8e7b4da8f232f51ae4d2095ea857b44f4ae9",
+      "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "e9a2ab8b81595653d13ba8f7048e7f94658e4994e588ff03f540fef4d282a71d",
+      "project:skills/lumine-harness/src/harness/wiki/search.ts": "5f57e99b72c181c539f39ef757f12f85360239de1e2166fa047ed2de272ccc64",
+      "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "3ee1984a16a6bb0b53d10e49950f15758d051f9155d752335a8ad10647cb3a82",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "641b790c484e334df41b29aabe559725106a2ea890d740026ec3bc10e552828d"
+    },
+    "files": {
+      "project:skills/lumine-harness/src/harness/wiki/engine.ts": "bcf4380e3f2c32f2e13a6c8dd76c523f1d8ff55576972d65df87a5b6cd1e8463",
+      "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+      "project:skills/lumine-harness/src/harness/wiki/merge.ts": "81ea65a12e24471e785f528443463f68c69a853a095d68f3840577eccf454b7b",
+      "project:skills/lumine-harness/src/harness/wiki/documents.ts": "d1dc13d340310809d69742a94b6fe78b183193d2e8ec07eb5c6e6dd2a6436d72",
+      "project:skills/lumine-harness/src/harness/wiki/sections.ts": "3f425ecd340031fe058b499bf3bfabc93138e6376f5e3ea1c189842b8679e0c3",
+      "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "f9e647229ffceae8071f729dd4e119a5d2cead3df52ca1d75c9e75490e07a6a0",
+      "project:skills/lumine-harness/src/harness/wiki/search.ts": "5334986f62932dbc0481e4a4328f582c75bf7d6956279b4e094d911f3069187f",
+      "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "4ca902993c3486347d5f3613b2afde7de52b936429faca072c05ed7aa3a738d1",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "ffae595261f1504bd4f28afe82760f0777a40ed4aaca867e1511ccebc15d4fae"
+    },
+    "missing": []
+  }
+}

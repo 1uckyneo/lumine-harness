@@ -1,0 +1,32 @@
+{
+  "id": "lumine-wiki-reader",
+  "revision": "6875894e23182addc05ed7dc41a34b3ec2b0897ce24c8b14759de433769d1ae5",
+  "freshness": "current",
+  "checkedAt": "2026-09-29T08:09:45.422Z",
+  "sourceFingerprint": "7abf746242456c754b6e310315c3046cc97ddcd3bae1430974e67ad68aafbd85",
+  "sources": {
+    "fingerprints": {
+      "project:skills/lumine-harness/src/browser/reader.ts": "c8675aa87ce05392105fbfc8cac3f5eade668a2a4c4fca1159cf09aedc1398a5",
+      "project:skills/lumine-harness/src/harness/wiki/reader-model.ts": "881b9f326047b2a4b546df57bdf3c8c38c70f41e960bd2ca343617539c131125",
+      "project:skills/lumine-harness/src/harness/wiki/server.ts": "ef41214899be8e32d265522973bc88dde8a5a5c99030133304ebc39aa346d582",
+      "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+      "project:scripts/build-reader.ts": "91e03836584c49079231ce0c81c0a9d596434dd141e36b95f30d94a3e4057f33",
+      "project:skills/lumine-harness/src/harness/wiki/engine.ts": "bcf4380e3f2c32f2e13a6c8dd76c523f1d8ff55576972d65df87a5b6cd1e8463"
+    },
+    "scopeFingerprints": {
+      "project:skills/lumine-harness/src/browser/reader.ts": "05bfcedc37ef36d114325b1d0749bc43b692c471b9e500a0f357b93ea0cf9949",
+      "project:skills/lumine-harness/src/harness/wiki/reader-model.ts": "66d61962066ea83e638aacf2de71bc031c61fc2aded506888bf3ca4f29f77a0c",
+      "project:skills/lumine-harness/src/harness/wiki/server.ts": "8e42d34fb4ccec19ebea103881d82f67524989fe0d9474321b05d393bdab710c",
+      "project:skills/lumine-harness/src/harness/wiki/files.ts": "d43f81bd3f6049c4d8f1df5b3ae8f53ec71c1c6791a2a646cbd966b828e3635a",
+      "project:scripts/build-reader.ts": "db812615e54a084357194f832d176541ff8ffa8581fd7e0a140c9f77f2773c34"
+    },
+    "files": {
+      "project:skills/lumine-harness/src/browser/reader.ts": "c8675aa87ce05392105fbfc8cac3f5eade668a2a4c4fca1159cf09aedc1398a5",
+      "project:skills/lumine-harness/src/harness/wiki/reader-model.ts": "881b9f326047b2a4b546df57bdf3c8c38c70f41e960bd2ca343617539c131125",
+      "project:skills/lumine-harness/src/harness/wiki/server.ts": "ef41214899be8e32d265522973bc88dde8a5a5c99030133304ebc39aa346d582",
+      "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+      "project:scripts/build-reader.ts": "91e03836584c49079231ce0c81c0a9d596434dd141e36b95f30d94a3e4057f33"
+    },
+    "missing": []
+  }
+}

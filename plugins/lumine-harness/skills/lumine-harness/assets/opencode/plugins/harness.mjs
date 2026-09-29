@@ -14,7 +14,7 @@ const HarnessPlugin = async ({ directory }) => {
 		cwd: directory
 	});
 	const audit = async (event, payload = {}) => {
-		const dir = path.join(root, ".lumine", "runtime", "opencode");
+		const dir = path.join(root, ".lumine", "local", "runtime", "opencode");
 		await mkdir(dir, { recursive: true });
 		await writeFile(path.join(dir, "latest-audit.json"), `${JSON.stringify({
 			event,

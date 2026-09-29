@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { parse as parseYaml } from "../vendor/yaml.ts";
 import { resolveProjectPath } from "./project-config.ts";
 
 export interface ProjectDocument { root?: string; docId: string; type: string; status: string; file: string; metadata: Record<string, string | string[]>; source: string; }
@@ -8,25 +9,23 @@ export interface AcceptanceSection { acId: string; title: string; content: strin
 export interface ContractIssue { code: string; message: string; path?: string; remediation: string; }
 export function contentHash(content: string | Buffer): string { return createHash("sha256").update(content).digest("hex"); }
 export function parseDocumentMetadata(source: string): Record<string, string | string[]> {
-  const block = source.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
-  const result: Record<string, string | string[]> = {};
-  let listKey: string | null = null;
-  for (const line of block.split(/\r?\n/)) {
-    const pair = line.match(/^([A-Za-z][A-Za-z0-9_-]*):\s*(.*?)\s*$/);
-    if (pair) {
-      const [, key, value] = pair;
-      listKey = value ? null : key;
-      if (!value) { result[key] = []; continue; }
-      if (value.startsWith("[") && value.endsWith("]")) {
-        try { const parsed = JSON.parse(value); result[key] = Array.isArray(parsed) ? parsed.map(String) : value; }
-        catch { result[key] = value.slice(1, -1).split(",").map((item) => item.trim().replace(/^['"]|['"]$/g, "")).filter(Boolean); }
-      } else result[key] = value.replace(/^['"]|['"]$/g, "");
-    } else if (listKey) {
-      const item = line.match(/^\s+-\s+(.+?)\s*$/);
-      if (item) (result[listKey] as string[]).push(item[1].replace(/^['"]|['"]$/g, ""));
-    }
+  if (!/^---\r?\n/.test(source) || /^---\r?\n---(?:\r?\n|$)/.test(source)) return {};
+  const block = source.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1];
+  if (block === undefined) throw new Error("DOCUMENT_METADATA_INVALID: frontmatter closing delimiter is missing");
+  if (!block.trim()) return {};
+  let metadata: unknown;
+  try { metadata = parseYaml(block, { maxAliasCount: 0, uniqueKeys: true, prettyErrors: false }); }
+  catch (error) { throw new Error(`DOCUMENT_METADATA_INVALID: ${error instanceof Error ? error.message : String(error)}`); }
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) throw new Error("DOCUMENT_METADATA_INVALID: frontmatter must be a mapping");
+  const scalar = (value: unknown): value is string | number | boolean => ["string", "number", "boolean"].includes(typeof value);
+  const entries: [string, string | string[]][] = [];
+  for (const [key, value] of Object.entries(metadata)) {
+    if (scalar(value)) entries.push([key, String(value)]);
+    // Empty YAML list fields historically read as []; structured Wiki fields belong to its own parser.
+    else if (value === null) entries.push([key, []]);
+    else if (Array.isArray(value) && value.every(scalar)) entries.push([key, value.map(String)]);
   }
-  return result;
+  return Object.fromEntries(entries);
 }
 export function readProjectDocument(root: string, file: string): ProjectDocument {
   const absolute = resolveProjectPath(root, file, "document");

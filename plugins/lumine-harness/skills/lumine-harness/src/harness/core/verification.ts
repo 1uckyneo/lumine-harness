@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { resolveProjectPath } from "./project-config.ts";
+import { readSessionState, skillReadObservability } from "./work-status.ts";
 import type {
   AdapterCapabilityName,
   AdapterCapabilityResult,
@@ -27,7 +28,6 @@ export const ADAPTER_CAPABILITIES: readonly AdapterCapabilityName[] = [
   "session_isolation"
 ];
 
-const TOOL_EVENT_PRODUCTS = new Set<HarnessProduct>(["qoder", "zcode", "codebuddy", "deepseek-harness"]);
 
 interface VerificationChallenge {
   schemaVersion: number;
@@ -52,6 +52,11 @@ interface VerificationEvent {
   challengeHash: string | null;
   hostVersion: string | null;
   hostVersionSource: string;
+  statusProtocolVersion?: number;
+  userTurnRevision?: number;
+  userTurnIdHash?: string | null;
+  userInitiated?: boolean;
+  continuationReceipt?: { requestId: string; userTurnRevision: number } | null;
   observations?: AdapterCapabilityName[];
   skill?: Pick<SharedSkill, "name" | "hash"> & { source: string };
   decision?: {
@@ -221,8 +226,19 @@ export function appendVerificationEvent(
   if (!challenge || challenge.product !== input.product || Date.now() > Date.parse(challenge.expiresAt)) return null;
   mkdirSync(dir, { recursive: true });
   const relativeCwd = path.relative(root, path.resolve(input.cwd)) || ".";
+  const state = readSessionState(root, input.product, input.sessionId);
+  const receipt = input.event !== "stop" && input.userInitiated !== true && input.continuationRequestId
+    && state?.continuationDeliveryConfirmed === true
+    && input.continuationRequestId === state.lastContinuationRequestId
+    && state.continuationDeliveryUserTurnRevision === Number(state.userTurnRevision ?? 0)
+    ? { requestId: input.continuationRequestId, userTurnRevision: Number(state.userTurnRevision ?? 0) } : null;
   const record = {
     schemaVersion: 1,
+    statusProtocolVersion: state?.statusProtocolVersion ?? 2,
+    userTurnRevision: Number(state?.userTurnRevision ?? 0),
+    userTurnIdHash: state?.userTurnId ?? null,
+    userInitiated: input.userInitiated === true,
+    continuationReceipt: receipt,
     verificationRunId: runId,
     product: input.product,
     event: input.event,
@@ -278,7 +294,7 @@ function candidateRuns(root: string, product: HarnessProduct): CandidateRun[] {
 function capabilityDefaults(product: HarnessProduct): CapabilitySummary {
   return Object.fromEntries(ADAPTER_CAPABILITIES.map((capability) => {
     let result: CapabilityResult = "not_tested";
-    if (["skill_read", "pre_mutation_gate"].includes(capability) && !TOOL_EVENT_PRODUCTS.has(product)) result = "not_observable";
+    if (["skill_read", "pre_mutation_gate"].includes(capability) && skillReadObservability(product) === "not_observable") result = "not_observable";
     if (product === "opencode" && ["stop_gate", "automatic_continuation", "work_status_matrix"].includes(capability)) result = "not_applicable";
     const evidenceLevel: CapabilityEvidenceLevel = "official_declared";
     return [capability, { result, evidenceLevel, observedAt: null, evidence: null }];
@@ -288,25 +304,34 @@ function capabilityDefaults(product: HarnessProduct): CapabilitySummary {
 function summarizeCapabilities(product: HarnessProduct, events: VerificationEvent[], evidence: string): CapabilitySummary {
   const capabilities = capabilityDefaults(product);
   const observedAt = events.at(-1)?.at ?? null;
-  const observations = new Set(events.flatMap((event) => event.observations ?? []));
+  // Protocol claims require correlated events, not arbitrary observation labels.
+  const observations = new Set(events.flatMap((event) => event.observations ?? []).filter((name) =>
+    !["automatic_continuation", "work_status_matrix"].includes(name) &&
+    !(skillReadObservability(product) === "not_observable" && ["skill_read", "pre_mutation_gate"].includes(name))));
   if (events.some((event) => ["session_start", "prompt_submit"].includes(event.event))) observations.add("session_context");
   if (events.some((event) => event.skill?.source?.startsWith(".agents/skills/"))) {
     observations.add("skill_discovery");
-    observations.add("skill_read");
+    if (skillReadObservability(product) === "tool_events") observations.add("skill_read");
   }
   if (events.some((event) => event.event === "stop")) observations.add("stop_gate");
 
   const statuses = new Set<WorkStatus>(events
-    .filter((event) => event.event === "stop")
+    .filter((event) => event.event === "stop" && event.statusProtocolVersion === 2)
     .map((event) => event.decision?.workStatus)
     .filter((status): status is WorkStatus => Boolean(status)));
-  const allWorkStatuses: readonly WorkStatus[] = ["done", "continue_autonomously", "needs_user_decision", "needs_credentials", "needs_manual_app_step", "blocked_external"];
+  const allWorkStatuses: readonly WorkStatus[] = ["done", "continue", "blocked"];
   if (allWorkStatuses.every((status) => statuses.has(status))) {
     observations.add("work_status_matrix");
   }
 
-  const continuationIndex = events.findIndex((event) => event.event === "stop" && event.decision?.disposition === "request_continuation" && event.decision?.continuationRequestId);
-  if (continuationIndex >= 0 && events.slice(continuationIndex + 1).some((event) => event.event !== "stop")) observations.add("automatic_continuation");
+  const delivered = events.some((request, index) => request.statusProtocolVersion === 2 && request.event === "stop"
+    && request.decision?.shouldDeliver === true && request.decision.continuationRequestId
+    && events.slice(index + 1).some((receipt) => receipt.statusProtocolVersion === 2 && receipt.event !== "stop"
+      && receipt.userInitiated !== true && receipt.sessionIdHash === request.sessionIdHash
+      && receipt.userTurnRevision === request.userTurnRevision && receipt.userTurnIdHash === request.userTurnIdHash
+      && receipt.continuationReceipt?.requestId === request.decision?.continuationRequestId
+      && receipt.continuationReceipt?.userTurnRevision === request.userTurnRevision));
+  if (delivered) observations.add("automatic_continuation");
 
   const sessions = new Map<string, VerificationEvent[]>();
   for (const event of events) {

@@ -3,7 +3,7 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { canonicalSkillsRoot } from "./root-resolver.ts";
-import { readSessionState, writeSessionState } from "./work-status.ts";
+import { readSessionState, skillReadObservability, writeSessionState } from "./work-status.ts";
 import { discoverSharedSkills } from "./skill-catalog.ts";
 import type {
   ExpectedSkill,
@@ -52,7 +52,7 @@ export function recordPromptRoute(root: string, input: NormalizedHarnessHookInpu
     if (!skill) return [];
     const used = state?.usedSkills?.find((item) => item.name === name && item.contentHash === skill.hash);
     const previous = state?.expectedSkills?.find((item) => item.name === name && item.contentHash === skill.hash && item.read);
-    return [{ name, path: skill.file, reason: "selected-skill", read: Boolean(used || previous), contentHash: skill.hash, readAt: used?.readAt ?? previous?.readAt }];
+    return [{ name, path: skill.file, reason: "selected-skill", read: Boolean(used || previous), readObservability: skillReadObservability(input.product), contentHash: skill.hash, readAt: used?.readAt ?? previous?.readAt }];
   });
   const phases = HARNESS_PHASES.filter((phase) => names.includes(phase.skill));
   const skillCandidates = suggestHarnessPhases(prompt).flatMap((phase) => {
@@ -105,7 +105,7 @@ export function requireExpectedSkillRead(
   const expectedSkills = Array.isArray(state?.expectedSkills) ? [...state.expectedSkills] : [];
   const index = expectedSkills.findIndex((item) => path.resolve(item.path) === target);
   const alreadyRead = state?.usedSkills?.some((item) => item.name === skill.name && item.contentHash === skill.hash) ?? false;
-  const required = { name: skill.name, path: skill.file, reason, read: alreadyRead, contentHash: skill.hash };
+  const required = { name: skill.name, path: skill.file, reason, read: alreadyRead, readObservability: skillReadObservability(input.product), contentHash: skill.hash };
   if (index === -1) expectedSkills.push(required);
   else expectedSkills[index] = { ...expectedSkills[index], ...required, readAt: null };
   return writeSessionState(root, input.product, input.sessionId, {

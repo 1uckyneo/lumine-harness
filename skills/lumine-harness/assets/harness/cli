@@ -10,9 +10,9 @@ case "${1:-}" in
   LUMINE_LOCALE="$(node -e 'try { const fs=require("node:fs"),p=require("node:path");let r=process.cwd();while(!fs.existsSync(p.join(r,".lumine/project.json"))&&p.dirname(r)!==r)r=p.dirname(r);const f=fs.existsSync(p.join(r,".lumine/project.json"))?p.join(r,".lumine/project.json"):process.argv[1];process.stdout.write(JSON.parse(fs.readFileSync(f,"utf8")).locale||"en") } catch {}' "$LUMINE_RUNTIME/project.json")"
   if [[ "$LUMINE_LOCALE" == "zh-CN" ]]; then
    echo "Lumine：check 检查 | wiki 知识 | task 任务和文档 | skills 技能 | adapter 宿主适配 | work-status 工作状态"
-   echo "知识：wiki scan / query / show / update / serve / check；项目健康：check health"
+   echo "知识：wiki map / query / show / related / scan / update / check / serve；项目健康：check health"
   else
-   echo "Lumine: check | wiki scan/query/show/update/serve/check | task | skills | adapter | work-status"
+   echo "Lumine: check | wiki map/query/show/related/scan/update/check/serve | task | skills | adapter | work-status"
    echo "Project health: check health. Use each command's help for its options."
   fi ;;
  *) echo "Unknown command / 未知命令: $1" >&2; exit 2 ;;

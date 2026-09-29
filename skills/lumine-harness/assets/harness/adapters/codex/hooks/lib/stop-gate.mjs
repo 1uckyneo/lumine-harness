@@ -4,8 +4,8 @@ import { requireHarnessRoot } from "../../../../core/root-resolver.mjs";
 import { WORK_STATUSES, countWorkStatus, extractWorkStatus } from "../../../../core/work-status.mjs";
 import { appendVerificationEvent } from "../../../../core/verification.mjs";
 import { normalizeHookInput } from "../../../../core/hook-io.mjs";
-import { evaluateStopPolicy } from "../../../../core/stop-policy.mjs";
 import { continuationDeliveryFor } from "../../../../core/continuation-delivery.mjs";
+import { evaluateStopPolicy } from "../../../../core/stop-policy.mjs";
 
 //#region skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts
 function decideStopHookResponse(raw = {}) {
@@ -23,11 +23,10 @@ function decideStopHookResponse(raw = {}) {
 			reason: decision.message
 		} : null;
 	}
-	if (decision.disposition === "reject_completion" && delivery === "automatic") {
+	if (decision.disposition === "reject_completion" && decision.shouldDeliver === true && delivery === "automatic") {
 		return {
-			continue: false,
-			stopReason: decision.message,
-			systemMessage: decision.message
+			decision: "block",
+			reason: decision.message
 		};
 	}
 	return null;

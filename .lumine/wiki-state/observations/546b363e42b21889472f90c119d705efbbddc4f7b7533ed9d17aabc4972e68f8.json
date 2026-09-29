@@ -1,0 +1,43 @@
+{
+  "id": "lumine-task-check",
+  "revision": "83759284288c8e1a91125442932380e11df5d8e86cb824359f5f44ab0c2dafa9",
+  "freshness": "current",
+  "checkedAt": "2026-09-29T08:09:45.422Z",
+  "sourceFingerprint": "f5c5d1f8e8b105436285b65239b3573fc07c1943190fe0174ee5c147dea92309",
+  "sources": {
+    "fingerprints": {
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "5243a81165de92099d3aed9e29068331cd6a8683076ed6b128900ce39c2dadc2",
+      "project:skills/lumine-harness/src/harness/core/stop-policy.ts": "e5907c1066bc049a11059be1491dd8e72457a692ce69c5db4c46a726e76c4b59",
+      "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+      "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+      "project:skills/lumine-harness/src/harness/core/verification.ts": "5523fdad61a206b0f6f393131eb0006177d6ab8771dffcd9add2dcd930e7e71b",
+      "project:skills/lumine-harness/src/harness/adapter-manager.ts": "7d5cbfbcdc4de8abf2c2d0531d499960c152b2643b61e54d2111db3cf50ce482",
+      "project:skills/lumine-harness/src/harness/check.ts": "00331dbea61b4e25535aa3f2dc821c590e3e18175ee88201cc46733808e2500a",
+      "project:skills/lumine-harness/src/harness/tests/status-protocol.test.ts": "1a255c1ecdf7a5912bfbb0e8271a7b8563f4633473d8e81a3716c68eaf306c18",
+      "project:skills/lumine-harness/src/harness/core/document-operations.ts": "4b8979a4316be9af2ceaa164dca0e996ddfa9ca7a0ffb23b04e45470665b9f4e"
+    },
+    "scopeFingerprints": {
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "8f43f781d10d8bbd89df7a2e5a999c896a43ebf703040fa7819798eb5559ddea",
+      "project:skills/lumine-harness/src/harness/core/stop-policy.ts": "be0b752f38f1516fbf9e12d7bd3e06c155500b90061e0d57ca32ce884d884256",
+      "project:skills/lumine-harness/src/harness/core/work-status.ts": "772b312f2e95a5008bbd0b5300a035fc0a47beef90143105d3eef1fd092d422d",
+      "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "fcf865b6b40c753dc57a1e0e88c9a8bb7a701f4ed43f51f03569a37e760804c4",
+      "project:skills/lumine-harness/src/harness/core/verification.ts": "dd9e3bf6dfb3a321b3d785e2e4d61ea395b8582633314809978f2ee4455a6f0c",
+      "project:skills/lumine-harness/src/harness/adapter-manager.ts": "bcac175456ee20d0661f4d616c89c92d49eee23475a961f65668c06c7a88102d",
+      "project:skills/lumine-harness/src/harness/check.ts": "a3dd19c9b1a291315e6bf6043ca568265ebe33ad1963ecb5323e73beff679ef0",
+      "project:skills/lumine-harness/src/harness/tests/status-protocol.test.ts": "db10da7d414bfdc344d9485606562b6bc96bb3bb267810374bcf3e993fcbf0c5",
+      "project:skills/lumine-harness/src/harness/core/document-operations.ts": "d2f4ce87e97659c9d6d7b3e6458ece4e35d60cbdfbd4260b90aef28ee9f544a8"
+    },
+    "files": {
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "5243a81165de92099d3aed9e29068331cd6a8683076ed6b128900ce39c2dadc2",
+      "project:skills/lumine-harness/src/harness/core/stop-policy.ts": "e5907c1066bc049a11059be1491dd8e72457a692ce69c5db4c46a726e76c4b59",
+      "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+      "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+      "project:skills/lumine-harness/src/harness/core/verification.ts": "5523fdad61a206b0f6f393131eb0006177d6ab8771dffcd9add2dcd930e7e71b",
+      "project:skills/lumine-harness/src/harness/adapter-manager.ts": "7d5cbfbcdc4de8abf2c2d0531d499960c152b2643b61e54d2111db3cf50ce482",
+      "project:skills/lumine-harness/src/harness/check.ts": "00331dbea61b4e25535aa3f2dc821c590e3e18175ee88201cc46733808e2500a",
+      "project:skills/lumine-harness/src/harness/tests/status-protocol.test.ts": "1a255c1ecdf7a5912bfbb0e8271a7b8563f4633473d8e81a3716c68eaf306c18",
+      "project:skills/lumine-harness/src/harness/core/document-operations.ts": "4b8979a4316be9af2ceaa164dca0e996ddfa9ca7a0ffb23b04e45470665b9f4e"
+    },
+    "missing": []
+  }
+}

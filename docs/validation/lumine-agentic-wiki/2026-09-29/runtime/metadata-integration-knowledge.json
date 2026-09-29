@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-09-29T08:09:48.847Z",
+  "reports": [
+    {
+      "name": "source",
+      "packetId": "c0d7196d-b2c2-4d5f-a873-d91cdc79e14f",
+      "applied": "applied",
+      "documents": [
+        {
+          "id": "lumine-workflow",
+          "revision": "5453e706877f1dc326fb99d10b030c25087dcccaf35e57979219d6dea3f0b1b7"
+        }
+      ],
+      "reviewRole": "author",
+      "scope": "Only final metadata parser change and unchanged Wiki conclusions; prior independent reports retained."
+    },
+    {
+      "name": "parent",
+      "documents": [],
+      "status": "unchanged"
+    }
+  ]
+}

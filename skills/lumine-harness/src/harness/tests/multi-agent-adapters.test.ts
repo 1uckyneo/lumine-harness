@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { doctorAdapter, formatSkillResult, installKimiAdapter, setCliWorkStatus, uninstallKimiAdapter } from "../adapter-manager.ts";
 import { findHarnessRoot } from "../core/root-resolver.ts";
 import { inspectSharedSkillCatalog } from "../core/skill-catalog.ts";
@@ -66,7 +67,9 @@ function tempHarness(): string {
 }
 
 function runHook(relative: string, payload: HookPayload) {
-  return spawnSync("node", [sourcePath(relative)], { cwd: payload.cwd ?? ROOT, input: JSON.stringify(payload), encoding: "utf8" });
+  const sourceMode = import.meta.url.endsWith(".ts") && relative.startsWith(".lumine/");
+  const file = sourceMode ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", relative.slice(".lumine/".length).replace(/\.mjs$/, ".ts")) : sourcePath(relative);
+  return spawnSync(process.execPath, [...(sourceMode ? ["--import", "tsx"] : []), file], { cwd: sourceMode ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../..") : payload.cwd ?? ROOT, input: JSON.stringify(payload), encoding: "utf8" });
 }
 
 function writeSharedSkill(root: string, name: string, description: string, body = "Follow the canonical workflow."): string {
@@ -84,10 +87,10 @@ test("root lookup crosses nested Git boundaries", () => {
   finally { rmSync(root, { recursive: true, force: true }); }
 });
 
-test("public Stop Policy preserves all six states and deduplicates one status revision", () => {
+test("public Stop Policy preserves all three states and deduplicates one status revision", () => {
   const root = tempHarness();
   try {
-    for (const status of ["needs_user_decision", "needs_credentials", "needs_manual_app_step", "blocked_external"] as const satisfies readonly WorkStatus[]) {
+    for (const status of ["blocked"] as const satisfies readonly WorkStatus[]) {
       const input: HarnessSessionInput = { product: "kimi", sessionId: status, cwd: root };
       initializeSessionState(root, input);
       recordWorkStatus(root, input, status);
@@ -99,7 +102,7 @@ test("public Stop Policy preserves all six states and deduplicates one status re
     assert.equal(evaluateStopPolicy(done, { root, runCheck: () => ({ ok: true }) }).action, "allow");
     const next: HarnessSessionInput = { product: "kimi", sessionId: "next", cwd: root };
     initializeSessionState(root, next);
-    recordWorkStatus(root, next, "continue_autonomously");
+    recordWorkStatus(root, next, "continue");
     const first = evaluateStopPolicy(next, { root });
     assert.equal(first.disposition, "request_continuation");
     assert.equal(first.shouldDeliver, true);
@@ -115,17 +118,17 @@ test("ZCode applies its three-cycle host limit without limiting later user-autho
   try {
     initializeSessionState(root, input);
     for (let index = 1; index <= 3; index += 1) {
-      recordWorkStatus(root, input, "continue_autonomously", { emissionId: `status-${index}` });
+      recordWorkStatus(root, input, "continue", { emissionId: `status-${index}` });
       const decision = evaluateStopPolicy(input, { root });
       assert.equal(decision.disposition, "request_continuation");
       assert.equal(decision.shouldDeliver, true);
       observeHarnessEvent(root, { ...input, event: "tool_before", eventId: `delivery-${index}` });
     }
-    recordWorkStatus(root, input, "continue_autonomously", { emissionId: "status-4" });
+    recordWorkStatus(root, input, "continue", { emissionId: "status-4" });
     assert.equal(evaluateStopPolicy(input, { root }).disposition, "pause_for_human");
 
     observeHarnessEvent(root, { ...input, event: "prompt_submit", eventId: "new-user-turn" }, { userInitiated: true });
-    recordWorkStatus(root, input, "continue_autonomously", { emissionId: "status-after-user" });
+    recordWorkStatus(root, input, "continue", { emissionId: "status-after-user" });
     assert.equal(evaluateStopPolicy(input, { root }).disposition, "request_continuation");
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
@@ -203,12 +206,12 @@ test("CodeBuddy gates Harness and explicitly requested shared Skills through can
     const allowed = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
 
-    setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "codebuddy", sessionId: common.session_id });
+    setCliWorkStatus("continue", { root, cwd: root, product: "codebuddy", sessionId: common.session_id });
     const stop = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: false });
     assert.match(stop.stdout, /"continue":false/);
     const duplicateStop = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: true });
     assert.equal(duplicateStop.stdout, "");
-    setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "codebuddy", sessionId: common.session_id });
+    setCliWorkStatus("continue", { root, cwd: root, product: "codebuddy", sessionId: common.session_id });
     const nextRevision = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: true });
     assert.match(nextRevision.stdout, /"continue":false/);
     const verificationRunId = probe.verificationRunId;
@@ -269,7 +272,7 @@ test("DeepSeek Harness bridge verifies native Skill evidence before mutation", (
     runHook(".lumine/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "skill", tool_response: "Loaded skill metadata: name: lumine-run" });
     const allowed = runHook(".lumine/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
-    setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "deepseek-harness", sessionId: common.session_id });
+    setCliWorkStatus("continue", { root, cwd: root, product: "deepseek-harness", sessionId: common.session_id });
     const stop = runHook(".lumine/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", last_assistant_message: null, stop_hook_active: false });
     assert.match(stop.stdout, /decision":"block/);
   } finally { rmSync(root, { recursive: true, force: true }); }
@@ -281,7 +284,7 @@ test("Cursor emits one followup_message per continuation status revision", () =>
   try {
     const start = runHook(".lumine/adapters/cursor/hooks/session-start.mjs", common);
     assert.equal(start.status, 0, start.stderr);
-    setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "cursor", sessionId: common.session_id });
+    setCliWorkStatus("continue", { root, cwd: root, product: "cursor", sessionId: common.session_id });
     const first = runHook(".lumine/adapters/cursor/hooks/stop.mjs", { ...common, status: "completed" });
     assert.match(first.stdout, /followup_message/);
     const duplicate = runHook(".lumine/adapters/cursor/hooks/stop.mjs", { ...common, status: "completed", loop_count: 1 });

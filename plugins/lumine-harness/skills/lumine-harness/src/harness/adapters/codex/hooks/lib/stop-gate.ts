@@ -18,8 +18,8 @@ export function decideStopHookResponse(raw = {}) {
       ? { decision: "block", reason: decision.message }
       : null;
   }
-  if (decision.disposition === "reject_completion" && delivery === "automatic") {
-    return { continue: false, stopReason: decision.message, systemMessage: decision.message };
+  if (decision.disposition === "reject_completion" && decision.shouldDeliver === true && delivery === "automatic") {
+    return { decision: "block", reason: decision.message };
   }
   return null;
 }

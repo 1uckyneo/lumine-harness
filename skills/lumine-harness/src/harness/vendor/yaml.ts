@@ -1,1 +1,1 @@
-export { parse, stringify } from "yaml";
+export { parse, parseDocument, stringify } from "yaml";

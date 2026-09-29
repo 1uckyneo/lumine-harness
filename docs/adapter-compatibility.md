@@ -20,6 +20,8 @@ The table describes each product's setup path and the Adapter provided by the Lu
 
 Every project Skill body lives only under `.agents/skills/`. Products that support this directory discover it directly. For Qoder, CodeBuddy, and ZCode, the Adapter maps an explicit Skill name or Harness phase to the canonical file, requires the Agent to read it, and checks the read event when the host exposes one. The Adapter neither copies Skill bodies nor reads them on the model's behalf.
 
+The public control protocol uses done/continue/blocked, with reasons and next actions in the report. Automatic follow-ups share a budget and deduplication; completed diagnosis does not require repair. Verified continuation requires a receipt tied to the same session, user turn, and continuation request. Later human input is not automatic recovery. When a host exposes no attributable receipt, continuation remains unverified: a Hook call or emitted request does not prove delivery.
+
 ## The most important Hook difference: can the Agent check before stopping?
 
 Most products can add engineering context when a session starts or a prompt is submitted. What matters most for long-running work is whether the host provides a pre-stop gate before the Agent actually becomes idle. This guide uses Stop Gate as a shared name for this class of pre-stop capability; it is not necessarily the event name used by each product.

@@ -22,7 +22,7 @@ export async function handleKimiHook(raw: UnknownRecord = {}): Promise<HookResul
   const decision = evaluateStopPolicy(input, { root });
   appendVerificationEvent(root, input, { raw, decision });
   const delivery = continuationDeliveryFor(input.product, decision);
-  if (decision.disposition === "reject_completion" && delivery === "automatic") {
+  if (decision.disposition === "reject_completion" && decision.shouldDeliver === true && delivery === "automatic") {
     return { exitCode: 2, stderr: decision.message };
   }
   if (decision.disposition === "request_continuation" && decision.shouldDeliver === true && delivery === "automatic") {

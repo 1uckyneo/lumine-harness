@@ -3,7 +3,7 @@
 import { sourcePath, wikiConfig } from "../wiki/files.mjs";
 import { parseDocument } from "../wiki/documents.mjs";
 import { threeWayMerge } from "../wiki/merge.mjs";
-import { applyUpdate, checkWiki, prepareUpdate, queryKnowledge, scanWiki, showKnowledge } from "../wiki/engine.mjs";
+import { applyUpdate, checkWiki, prepareUpdate, queryKnowledge, recordSemanticReview, scanWiki, showKnowledge } from "../wiki/engine.mjs";
 import { serveWiki } from "../wiki/server.mjs";
 import path from "node:path";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
@@ -62,20 +62,42 @@ function establish(root, markdown) {
 	}]);
 	assert.equal(result.results[0].status, "applied");
 }
-test("Chinese and English queries return the same stable text identity; cold cache is unnecessary", () => {
+test("cold cache preserves bilingual knowledge and review but requires local source verification", () => {
 	const data = fixture();
 	try {
 		establish(data.root, data.markdown);
 		assert.equal(queryKnowledge(data.root, "登录").cards[0].id, "login-flow");
 		assert.equal(queryKnowledge(data.root, "authentication").cards[0].id, "login-flow");
+		const before = showKnowledge(data.root, "login-flow");
+		recordSemanticReview(data.root, {
+			documentId: before.id,
+			revision: before.revision,
+			sourceFingerprint: before.sourceObservation.sourceFingerprint,
+			reviewedAt: new Date().toISOString(),
+			reviewer: {
+				kind: "agent",
+				role: "author"
+			},
+			outcome: "reviewed",
+			scope: ["登录与会话源码边界"],
+			findings: [],
+			limitations: ["未核实部署"]
+		});
 		rmSync(path.join(data.root, ".lumine/local"), {
 			recursive: true,
 			force: true
 		});
-		assert.equal(showKnowledge(data.root, "登录与会话").freshness, "current");
+		const cold = showKnowledge(data.root, "登录与会话");
+		assert.equal(cold.freshness, "unverified");
+		assert.equal(cold.semanticReview.status, "reviewed");
+		assert.match(cold.body, /登录创建会话/);
+		assert.equal(queryKnowledge(data.root, "登录").cards[0].id, "login-flow");
+		assert.equal(queryKnowledge(data.root, "authentication").cards[0].id, "login-flow");
 		const response = JSON.stringify(queryKnowledge(data.root, "login"));
 		assert.doesNotMatch(response, /<svg|data:image|base64|<img/);
 		assert.equal(showKnowledge(data.root, "login-flow").diagrams[0].id, "login-sequence");
+		scanWiki(data.root);
+		assert.equal(showKnowledge(data.root, "login-flow").freshness, "current");
 	} finally {
 		data.close();
 	}
@@ -324,25 +346,35 @@ test("a pending document-write transaction restores its baseline and refuses lat
 		};
 		const journal = path.join(data.root, ".lumine/wiki-state/transactions/interrupted.json");
 		writeJson(journal, {
+			schemaVersion: 1,
 			id: "interrupted",
 			status: "pending",
-			path: "docs/repo-wiki/登录与会话.md",
-			previousRevision: hash(data.markdown),
-			content,
-			baseline,
-			previousBaseline: previous
+			mutations: [{
+				path: "docs/repo-wiki/登录与会话.md",
+				before: data.markdown,
+				after: content
+			}, {
+				path: `.lumine/wiki-state/documents/${hash("login-flow")}.json`,
+				before: JSON.stringify(previous, null, 2) + "\n",
+				after: JSON.stringify(baseline, null, 2) + "\n"
+			}]
 		});
 		writeFileSync(data.file, content);
 		assert.deepEqual(recoverWiki(data.root).recovered, ["interrupted"]);
 		assert.equal(baselineFor(data.root, "login-flow")?.appliedRevision, hash(content));
 		writeJson(journal, {
+			schemaVersion: 1,
 			id: "interrupted",
 			status: "pending",
-			path: "docs/repo-wiki/登录与会话.md",
-			previousRevision: hash(data.markdown),
-			content,
-			baseline,
-			previousBaseline: previous
+			mutations: [{
+				path: "docs/repo-wiki/登录与会话.md",
+				before: data.markdown,
+				after: content
+			}, {
+				path: `.lumine/wiki-state/documents/${hash("login-flow")}.json`,
+				before: JSON.stringify(previous, null, 2) + "\n",
+				after: JSON.stringify(baseline, null, 2) + "\n"
+			}]
 		});
 		writeFileSync(data.file, content + "\n人工修改\n");
 		assert.throws(() => recoverWiki(data.root), /DOCUMENT_CONFLICT/);
@@ -367,7 +399,7 @@ test("explicit per-topic watch scopes avoid invalidating unrelated knowledge", (
 test("diagram captions, relations and Mermaid labels participate in text retrieval", () => {
 	const data = fixture();
 	try {
-		const markdown = data.markdown.replace("caption: 用户提交后建立会话。", "caption: 稀有词量子绿洲只出现于读图说明。").replace("aliases: [authentication, login, session]", "aliases: [authentication, login, session]\nrelations: [related-unique-reference]");
+		const markdown = data.markdown.replace("caption: 用户提交后建立会话。", "caption: 稀有词量子绿洲只出现于读图说明。").replace("aliases: [authentication, login, session]", "aliases: [authentication, login, session]\nrelations: [{target: related-unique-reference, kind: related}]");
 		writeFileSync(data.file, markdown);
 		assert.equal(queryKnowledge(data.root, "量子绿洲").cards[0].id, "login-flow");
 		assert.equal(queryKnowledge(data.root, "related-unique-reference").cards[0].id, "login-flow");
@@ -440,11 +472,16 @@ test("reader resolves historical and validation Markdown references without serv
 			kind: "attachment",
 			path: "docs/validation/trace.txt"
 		});
+		writeFileSync(path.join(data.root, "src/undeclared.ts"), "undeclared source bytes");
+		const declared = await get("login-flow", "../../src/login.ts");
+		assert.equal(declared.status, 200);
+		assert.equal(declared.body.kind, "source");
+		assert.equal(declared.body.documentId, "login-flow");
 		for (const target of [
 			"../validation/private.md",
 			"../validation/escape.md",
 			"../../.lumine/project.json",
-			"../../src/login.ts",
+			"../../src/undeclared.ts",
 			"https://evil.example/doc.md",
 			"../validation/%2e%2e/%2e%2e/.lumine/project.json"
 		]) {

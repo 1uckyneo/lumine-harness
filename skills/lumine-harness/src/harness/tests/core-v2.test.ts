@@ -15,6 +15,7 @@ import { evaluateStopPolicy } from "../core/stop-policy.ts";
 import { buildSessionStartContext } from "../core/session-context.ts";
 import { applyDocumentOperation, prepareDocumentRename, recoverDocumentOperation, renameDocument, resolveCurrentDocument } from "../core/document-operations.ts";
 import { commandLocale, formatCommandError, formatHumanIssue } from "../core/messages.ts";
+import { appendVerificationEvent, beginVerificationRun, verifyRuntimeEvidence } from "../core/verification.ts";
 import { runChecks } from "../check.ts";
 
 function write(root: string, file: string, text: string): void { const target = path.join(root, file); mkdirSync(path.dirname(target), { recursive: true }); writeFileSync(target, text); }
@@ -194,7 +195,7 @@ test("task knowledge references accept Wiki IDs and preserve them across readabl
 test("diagnostics can finish with failures without authorizing repairs or requiring an implementation task", () => {
   const root = fixture();
   try {
-    const input = normalizeHookInput("codex", "stop", { cwd: root, session_id: "diagnosis", last_assistant_message: "Found a failure. WORK_STATUS: done" });
+    const input = normalizeHookInput("codex", "stop", { cwd: root, session_id: "diagnosis", last_assistant_message: "Found a failure.\nWORK_STATUS: done" });
     initializeSessionState(root, input);
     recordPromptRoute(root, input, "只诊断失败，不要修复");
     assert.equal(evaluateStopPolicy(input, { root }).action, "allow");
@@ -414,5 +415,36 @@ test("an unknown explicit name is diagnostic data and cannot poison later task b
     assert.deepEqual(state.expectedSkills?.map((entry) => entry.name), ["lumine-run"]);
     assert.deepEqual(state.skillSelectionDiagnostics, [{ name: "uninstalled-skill", code: "unknown-skill" }]);
     assert.doesNotThrow(() => bindTask(root, input.product, input.sessionId!, "search"));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+
+test("Codex completes a validated task without inventing unobservable Skill reads", () => {
+  const root = fixture();
+  try {
+    const record = task(root); record.selectedSkills = ["lumine-run", "lumine-knowledge"]; saveTaskRecord(root, record);
+    const input = normalizeHookInput("codex", "session_start", { cwd: root, session_id: "unobservable-reads" });
+    initializeSessionState(root, input);
+    const bound = bindTask(root, input.product, input.sessionId!, record.taskId);
+    assert.equal(bound.expectedSkillRead, false);
+    assert.ok(bound.expectedSkills?.every((skill) => skill.read === false && skill.readObservability === "not_observable"));
+    assert.equal(checkSessionCompletion(root, bound).ok, true);
+    const decision = evaluateStopPolicy({ ...input, statusEmissionId: "completion-1", lastAssistantMessage: "WORK_STATUS: done" }, { root });
+    assert.equal(decision.disposition, "finish");
+    const after = readSessionState(root, input.product, input.sessionId)!;
+    assert.equal(after.expectedSkillRead, false);
+    assert.ok(!after.usedSkills?.length, "declared selection must not synthesize observed reads");
+    write(root, "app/src/main.ts", "export const result = 2;\n");
+    assert.equal(evaluateStopPolicy({ ...input, statusEmissionId: "completion-2", lastAssistantMessage: "WORK_STATUS: done" }, { root }).disposition, "reject_completion", "missing read telemetry must not bypass actual evidence checks");
+    const observable = normalizeHookInput("qoder", "session_start", { cwd: root, session_id: "observable-reads" });
+    initializeSessionState(root, observable);
+    assert.ok(bindTask(root, observable.product, observable.sessionId!, record.taskId).expectedSkills?.every((skill) => skill.readObservability === "tool_events" && !skill.read));
+    const run = beginVerificationRun(root, "codex", { hostVersion: "fixture", hostVersionSource: "test" });
+    assert.ok(appendVerificationEvent(root, { ...input, event: "stop" }, { observations: ["skill_read", "pre_mutation_gate"], decision }));
+    const evidence = verifyRuntimeEvidence(root, "codex", { verificationRunId: run.verificationRunId });
+    assert.equal(evidence.status, "runtime_observed");
+    assert.ok(evidence.capabilities);
+    assert.equal(evidence.capabilities.skill_read.result, "not_observable");
+    assert.equal(evidence.capabilities.pre_mutation_gate.result, "not_observable");
   } finally { rmSync(root, { recursive: true, force: true }); }
 });

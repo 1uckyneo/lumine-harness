@@ -2,7 +2,7 @@
 // Source: skills/lumine-harness/src/harness/adapter-manager.ts
 import { findHarnessRoot, isStartedAtHarnessRoot, projectRuntimeRoot } from "./core/root-resolver.mjs";
 import { discoverSharedSkills, getSharedSkill, inspectSharedSkillCatalog, searchSharedSkills } from "./core/skill-catalog.mjs";
-import { WORK_STATUSES, listCurrentSessionPointers, readCurrentSessionPointer, recordWorkStatus } from "./core/work-status.mjs";
+import { WORK_STATUSES, listCurrentSessionPointers, readCurrentSessionPointer, readSessionState, recordWorkReport } from "./core/work-status.mjs";
 import { beginVerificationRun, verifyRuntimeEvidence } from "./core/verification.mjs";
 import { commandLocale } from "./core/messages.mjs";
 import { resolveHarnessRuntimeRoot } from "./core/runtime-layout.mjs";
@@ -831,18 +831,34 @@ function uninstallKimiAdapter(options = {}) {
 	};
 }
 function setCliWorkStatus(status, options = {}) {
-	if (!WORK_STATUSES.has(status)) throw new Error(`Invalid WORK_STATUS: ${status}`);
+	if (!WORK_STATUSES.has(status)) throw new Error(`Invalid WORK_STATUS: ${status}; use done, continue or blocked.`);
+	return setCliWorkReport({
+		protocolVersion: 2,
+		status,
+		...options.reason ? { reason: options.reason } : {},
+		...options.nextStep ? { nextStep: options.nextStep } : {}
+	}, options);
+}
+function setCliWorkReport(report, options = {}) {
 	const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
 	if (!root) throw new Error("Harness root not found.");
 	const product = options.product ?? process.env.HARNESS_PRODUCT;
 	const sessionId = options.sessionId ?? process.env.HARNESS_SESSION_ID;
 	if (!product || !sessionId) throw new Error("Pass --product and --session-id explicitly; Harness will not guess an active host session.");
 	if (!isHarnessProduct(product)) throw new Error(`Invalid Harness product: ${product}`);
-	return recordWorkStatus(root, {
+	if (options.expectedUserTurnRevision !== undefined) {
+		if (!Number.isInteger(options.expectedUserTurnRevision) || options.expectedUserTurnRevision < 0) throw new Error("--expect-turn must be a non-negative integer.");
+		const current = readSessionState(root, product, sessionId);
+		if (!current || current.userTurnRevision !== options.expectedUserTurnRevision) throw new Error("STALE_WORK_REPORT: the current user turn differs from --expect-turn.");
+	}
+	return recordWorkReport(root, {
 		product,
 		sessionId,
 		cwd: options.cwd ?? process.cwd()
-	}, status);
+	}, report, {
+		emissionId: options.emissionId,
+		source: "structured"
+	});
 }
 function prepareManualAdapter(product, options = {}) {
 	const root = options.root ?? findHarnessRoot(options.cwd ?? process.cwd());
@@ -1185,6 +1201,8 @@ function adapterHelp(locale) {
 		"  adapter install <kimi|zcode|deepseek-harness>",
 		"  adapter uninstall <kimi|zcode|deepseek-harness>",
 		"  adapter help",
+		"  work-status <done|continue|blocked> --product <host> --session-id <id> [--reason <text>] [--next-step <text>]",
+		"  work-status --report <json-file|-> --product <host> --session-id <id> [--emission-id <id>] [--expect-turn <revision>] [--json]",
 		"  --root <project-root>"
 	];
 	return (locale === "en" ? [
@@ -1203,4 +1221,4 @@ function adapterHelp(locale) {
 }
 
 //#endregion
-export { adapterCheck, adapterHelp, adapterStatus, doctorAdapter, formatAdapterResult, formatSkillResult, hasManagedKimiBlock, installKimiAdapter, listAdapters, runAdapterCommand, runSkillCommand, setCliWorkStatus, uninstallKimiAdapter, verifyAdapter };
+export { adapterCheck, adapterHelp, adapterStatus, doctorAdapter, formatAdapterResult, formatSkillResult, hasManagedKimiBlock, installKimiAdapter, listAdapters, runAdapterCommand, runSkillCommand, setCliWorkReport, setCliWorkStatus, uninstallKimiAdapter, verifyAdapter };

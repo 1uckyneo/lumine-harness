@@ -4,8 +4,8 @@ import { requireHarnessRoot } from "../../../core/root-resolver.mjs";
 import { readSessionState } from "../../../core/work-status.mjs";
 import { appendVerificationEvent } from "../../../core/verification.mjs";
 import { normalizeHookInput, readHookInput, writeHookOutput } from "../../../core/hook-io.mjs";
-import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
 import { continuationDeliveryFor } from "../../../core/continuation-delivery.mjs";
+import { evaluateStopPolicy } from "../../../core/stop-policy.mjs";
 import { existsSync, readFileSync } from "node:fs";
 
 //#region skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts
@@ -34,7 +34,7 @@ try {
 		decision
 	});
 	const delivery = continuationDeliveryFor(input.product, decision);
-	if (decision.disposition === "reject_completion" && delivery === "automatic") {
+	if (decision.disposition === "reject_completion" && decision.shouldDeliver === true && delivery === "automatic") {
 		writeHookOutput({ followup_message: decision.message });
 	} else if (decision.disposition === "request_continuation" && decision.shouldDeliver === true && delivery === "automatic") {
 		writeHookOutput({ followup_message: decision.message });

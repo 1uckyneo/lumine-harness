@@ -6,7 +6,7 @@ description: Clarify requirements and create or review product specifications an
 # Requirements and solution planning
 
 <!-- LH-PLAN-01 -->
-Work toward the outcome requested in this turn. Read project AGENTS.md, applicable rules, and the existing task. Use lumine-knowledge when useful to locate sources and related knowledge; inspect source directly when knowledge is missing or unreliable rather than creating a Wiki first.
+Work toward the outcome requested in this turn. Read AGENTS.md, applicable rules, and the existing task. Choose Wiki, source, or both to understand current behavior and impact; not every task requires a query. Verify important missing, stale, or contradictory knowledge against source and preserve reusable findings within authorization. Read lumine-knowledge for deeper methods; honor explicit read-only requests.
 
 <!-- LH-PLAN-02 -->
 - For product problems, scenarios, rules, and acceptance, read [Product specification](references/product-spec.md) and maintain the Spec in place.

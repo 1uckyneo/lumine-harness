@@ -45,7 +45,7 @@ Checks are Runtime tools, not a fifth Skill. Structural checks do not replace do
 ## Facts, language, and knowledge
 
 - Spec defines intended behavior, Plan defines this technical change and progress, and Wiki explains known implementation. Source supports development facts; tests, actual operation, deployment, and user acceptance are distinct.
-- Retrieve related knowledge for new goals, material scope changes, and recovery. Verify source when knowledge is missing or contradictory. Authoritative rules are never limited by card budgets or search ranking.
+- Choose Wiki, source, or both according to the goal; do not inject the whole library or require every task to query. After verifying gaps, stale content, or contradictions, preserve reusable findings within authorization; honor explicit read-only requests. Authoritative rules are never limited by card budgets or search ranking.
 - Requirements, acceptance items, documents, and diagrams have stable identities; titles and readable Chinese/English filenames can change. Fingerprints detect changes but do not establish user approval.
 - Project locale controls defaults for new content; existing documents retain their own language. A temporary response-language request does not change project configuration.
 - Wiki body, summary, and Mermaid are the sole knowledge content; cards use HTML. Knowledge maintenance creates no image, screenshot, or vision-model input.
@@ -59,11 +59,10 @@ Parallel writers have exclusive ownership, inputs, write scope, acceptance, and 
 Emit exactly one WORK_STATUS: <status> at closeout:
 
 - done: the current request is complete; a diagnostic report may contain failures without repairing them.
-- continue_autonomously: the next action is clear, in scope, and needs no new input.
-- needs_user_decision: a material goal, scope, or tradeoff needs a decision.
-- needs_credentials: required credentials or login authorization are missing.
-- needs_manual_app_step: an external application needs a human action.
-- blocked_external: an external dependency blocks progress with no available alternative.
+- continue: the next action is clear and can proceed under current authorization.
+- blocked: autonomous progress is unavailable; explain the concrete reason and next action in the response.
+
+Status grants no new authorization, and alternative continuation paths cannot bypass the budget. A completed diagnosis does not require repair. Runtime owns the detailed protocol.
 
 ## Project conventions
 

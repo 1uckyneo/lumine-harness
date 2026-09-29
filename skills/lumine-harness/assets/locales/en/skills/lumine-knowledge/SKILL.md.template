@@ -1,6 +1,6 @@
 ---
 name: lumine-knowledge
-description: Locate repositories and implementation entry points, query and verify project knowledge, and build or incrementally maintain Repo Wiki using Markdown, Mermaid text, and source evidence without generating card images.
+description: Locate implementation, query and maintain Repo Wiki, or open, start, restart, and stop its local reader. Maintain knowledge as Markdown, Mermaid text, and source evidence without generating card images.
 ---
 
 # Project knowledge
@@ -9,10 +9,10 @@ description: Locate repositories and implementation entry points, query and veri
 Read the constraints and map in AGENTS.md, then use the confirmed Harness root and .lumine/project.json configuration. The default Wiki root is docs/repo-wiki/; configuration is authoritative. The nearest Git root is not necessarily a multi-repository Harness root. Retrieval never replaces mandatory project rules.
 
 <!-- LH-KNOWLEDGE-02 -->
-For queries, start with ./.lumine/cli wiki query or show and inspect scope, provenance, and freshness. Return to source when knowledge is missing, stale, or contradictory. Expand relevant pages as needed; default to at most six cards with a total context budget. Use synonyms or query reformulation for Chinese, English, and code identifiers. A lookup does not require generating a complete Wiki.
+Choose the knowledge map, section search, direct Markdown reading, or source inspection according to the question. No mandatory Wiki-first step or tool-call quota applies. When useful, use `wiki map / query / show / related` to expand selectively. Results are limited to six and a context budget; inspect scope, provenance, and freshness, and reformulate Chinese, English, or code-identifier queries as needed. See [Investigation and retrieval](references/investigation.md).
 
 <!-- LH-KNOWLEDGE-03 -->
-For maintenance, read [Knowledge maintenance](references/maintenance.md). Use wiki scan to detect changes and wiki update to prepare work packages and apply semantic results; follow command help for exact arguments. The CLI supplies deterministic mechanisms; the active Agent interprets and verifies content. Do not claim background semantic updates when no Agent is active.
+For initialization, read [Understanding and building](references/building.md). Cover all major modules in depth by default with a project-specific hierarchy; users may narrow or defer the scope. For maintenance, read [Knowledge maintenance](references/maintenance.md). The Agent/model interprets sources, assesses semantic impact, and writes prose and Mermaid. `scan` supplies change clues; `update` validates and safely saves Agent-authored text without calling a model to produce knowledge. Without an active Agent, only pending work can be registered.
 
 <!-- LH-KNOWLEDGE-04 -->
 Body text, summaries, Mermaid text, and sources form one shared content set for people and Agents. Cards use HTML DOM; diagrams render on demand in the browser. Scanning, generation, updates, queries, and review use text only: no image generation, screenshot recognition, vision models, card images, thumbnail files, or rendered SVG in model input. Copy and export Markdown or Mermaid text. Dedicated browser UI verification is separate from the knowledge pipeline.
@@ -21,4 +21,7 @@ Body text, summaries, Mermaid text, and sources form one shared content set for 
 Semantic review verifies actual sources and material relationships. Wiki describes known implementation, Spec describes intended behavior, and Plan describes the current technical change. Do not turn an unimplemented proposal into current knowledge. Engineering conventions explain and cite authoritative rules; label inferred design rationale and distinguish source implementation from deployment or observed behavior.
 
 <!-- LH-KNOWLEDGE-06 -->
-Organize each topic as answer, mechanism and diagrams, tradeoffs and limits, then sources. Give diagrams stable identities, reading guidance, and evidence. Split complex topics instead of presenting file lists or dense graphs as explanations. Mermaid within the body is the sole diagram source; keep summaries, relations, and freshness consistent when it changes. Preserve human edits, useful candidates, and conflicts. Rebuilding a cache does not mean asking a model to regenerate unique content.
+Organize topics as answer, mechanism and diagrams, tradeoffs and limits, then sources. Stable sections expose concrete mechanisms and constraints, beyond whole-page introductions. The hierarchy, pages, sections, and cards share body text and the knowledge map; split complex topics. After investigating missing, stale, or contradictory content, write reusable verified findings back within authorization; explicit read-only requests receive a report only. No knowledge change is required when none was learned, and queries need no compulsory log. Protect human edits, useful candidates, and conflicts.
+
+<!-- LH-KNOWLEDGE-07 -->
+When asked to open the knowledge base or start, restart, or stop its reader, read [Reader management](references/reader.md). Prefer reusing a service owned by the current project, and verify process ownership before stopping it. Direct Markdown reading and Agent retrieval need no server.

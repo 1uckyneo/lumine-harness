@@ -27,6 +27,9 @@ import {
   finishLegacy,
   restoreLegacy,
 } from "../migration/legacy.ts";
+import { planKnowledgeMigration } from "../migration/knowledge.ts";
+import { withWikiLock } from "../harness/wiki/files.ts";
+import { convertWorkStatusSession, planWorkStatusMigration } from "../migration/work-status.ts";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SKILL_ROOT =
   path.basename(path.dirname(here)) === "src"
@@ -478,7 +481,7 @@ export function createProposal(
   };
   add(".lumine/root.json", Buffer.from(json(marker)), undefined, 0o644, true);
   for (const [rel, body] of convertLegacySessions(root)) {
-    if (!existsSync(target(root, rel))) add(rel, Buffer.from(body));
+    if (!existsSync(target(root, rel))) add(rel, Buffer.from(json(convertWorkStatusSession(JSON.parse(body)))));
   }
   for (const rel of legacyRetirements(root, options.reviewedRetirements)) {
     if (operations.some((o) => o.path === rel)) continue;
@@ -541,6 +544,19 @@ export function createProposal(
       rel.endsWith("/cli") ? 0o755 : 0o644,
       true,
     );
+  // Maintenance conversion is planned with the same backup/CAS/recovery contract as installation.
+  // Project knowledge remains an asset, never a distribution-owned file.
+  const conversions = [planKnowledgeMigration(root, project.wiki.root), planWorkStatusMigration(root)];
+  for (const conversion of conversions) {
+    for (const issue of conversion.issues) {
+      retirementWarnings.push(`${issue.code}: ${issue.path}: ${issue.message}`);
+      if (!operations.some((op) => op.path === issue.path)) operations.push({ path: issue.path, action: "conflict", before: fingerprint(target(root, issue.path)), after: null });
+    }
+    for (const change of conversion.changes) {
+      if (operations.some((op) => op.path === change.path)) throw new Error("Migration ownership conflict: " + change.path);
+      operations.push({ path: change.path, action: "write", before: change.beforeHash, after: change.afterHash, content: Buffer.from(change.content).toString("base64"), mode: 0o644 });
+    }
+  }
   const managed = {
     schemaVersion: 2,
     files: Object.fromEntries(
@@ -614,6 +630,22 @@ interface Journal {
   appliedAt?: string;
   finalized?: Record<string, string>;
 }
+// The maintenance writer shares the Wiki writer lock. Re-scan even when a format
+// marker exists: proposals and partially applied migrations are not snapshots of
+// files created later, and an old pending journal must be recovered before upgrade.
+function verifyKnowledgeInputs(p: Proposal, requireComplete = false) {
+  const plan = planKnowledgeMigration(p.targetRoot, p.project.wiki.root);
+  if (plan.issues.length) {
+    const issue = plan.issues[0];
+    throw new Error(`${issue.code}: ${issue.path}: ${issue.message}`);
+  }
+  for (const change of plan.changes) {
+    const operation = p.operations.find((op) => op.path === change.path);
+    if (requireComplete || operation?.action !== "write" || operation.before !== change.beforeHash || operation.after !== change.afterHash)
+      throw new Error(`KNOWLEDGE_PROPOSAL_STALE: ${change.path}: recover or roll back the current proposal before reviewing newly required conversion.`);
+  }
+}
+
 export function applyProposal(
   proposalFile: string,
   options: {
@@ -624,6 +656,9 @@ export function applyProposal(
 ) {
   const p = JSON.parse(readFileSync(proposalFile, "utf8")) as Proposal;
   verify(p);
+  return withWikiLock(p.targetRoot, () => applyVerifiedProposal(p, options));
+}
+function applyVerifiedProposal(p: Proposal, options: { failAfter?: number; failAfterWrite?: number; failAfterIgnore?: boolean }) {
   if (p.operations.some((o) => o.action === "conflict"))
     throw new Error(
       "Proposal contains conflicts; supply reviewed overrides before applying.",
@@ -638,6 +673,7 @@ export function applyProposal(
         applied: [],
         backups: {},
       };
+  verifyKnowledgeInputs(p, journal.status === "complete");
   if (journal.status === "complete")
     return { status: "complete", proposalId: p.proposalId, backupDir: dir };
   // Validate all affected files before writing; tolerate only original or precisely applied content.
@@ -691,7 +727,9 @@ export function applyProposal(
   atomic(jf, Buffer.from(json(journal)), 0o600);
   if (p.legacy) backupLegacy(p.targetRoot, dir, p.legacy.before);
   let count = 0;
-  for (const op of p.operations) {
+  // The format marker is a commit indicator, not permission to skip residual conversion.
+  const writes = [...p.operations].sort((a, b) => Number(a.path === ".lumine/wiki-state/format.json") - Number(b.path === ".lumine/wiki-state/format.json"));
+  for (const op of writes) {
     if (op.action === "preserve") continue;
     const file = target(p.targetRoot, op.path);
     if (fingerprint(file) !== op.after) {
@@ -709,6 +747,7 @@ export function applyProposal(
     if (options.failAfter !== undefined && count === options.failAfter)
       throw new Error("Injected migration interruption");
   }
+  verifyKnowledgeInputs(p, true);
   pruneRetiredSkillDirectories(p.targetRoot);
   journal.appliedAt ??= new Date().toISOString();
   journal.status = p.project.selectedAdapters.length
@@ -727,6 +766,14 @@ export function applyProposal(
 export function rollbackProposal(proposalFile: string) {
   const p = JSON.parse(readFileSync(proposalFile, "utf8")) as Proposal;
   verify(p, false);
+  return withWikiLock(p.targetRoot, () => rollbackVerifiedProposal(p));
+}
+function rollbackVerifiedProposal(p: Proposal) {
+  // Pending writes can reference either version; recover them with their installed
+  // Runtime before replacing it. Newly added ordinary documents remain protected.
+  const knowledge = planKnowledgeMigration(p.targetRoot, p.project.wiki.root);
+  const recovery = knowledge.issues.find((issue) => issue.code === "KNOWLEDGE_RECOVERY_REQUIRED");
+  if (recovery) throw new Error(`${recovery.code}: ${recovery.path}: ${recovery.message}`);
   const dir = recoveryDir(p),
     jf = path.join(dir, "journal.json"),
     j = readJson(jf) as Journal;
@@ -772,9 +819,15 @@ export function rollbackProposal(proposalFile: string) {
 export function finalizeProposal(proposalFile: string, evidenceFile?: string) {
   const p = JSON.parse(readFileSync(proposalFile, "utf8")) as Proposal;
   verify(p, false);
+  return withWikiLock(p.targetRoot, () => finalizeVerifiedProposal(p, evidenceFile));
+}
+function finalizeVerifiedProposal(p: Proposal, evidenceFile?: string) {
+  verifyKnowledgeInputs(p, true);
   const dir = recoveryDir(p),
     jf = path.join(dir, "journal.json"),
     j = readJson(jf) as Journal;
+  if (!["applied", "awaiting_host_verification", "finalizing", "complete"].includes(j.status))
+    throw new Error("Migration application is incomplete; resume the proposal before finalization.");
   if (j.status === "complete")
     return { status: "complete", proposalId: p.proposalId };
   if (p.project.selectedAdapters.length) {
@@ -807,7 +860,7 @@ export function finalizeProposal(proposalFile: string, evidenceFile?: string) {
     if (
       op.action === "preserve" ||
       (!op.source &&
-        !op.path.startsWith(".lumine/") &&
+        ![".lumine/project.json", ".lumine/root.json", ".lumine/managed.json", ".lumine/cli"].includes(op.path) &&
         !p.legacy?.bridges[op.path])
     )
       continue;
@@ -822,6 +875,19 @@ export function finalizeProposal(proposalFile: string, evidenceFile?: string) {
       )
     )
       throw new Error("Finalization input changed: " + op.path);
+  }
+  // Sessions and knowledge are live project assets: real host verification may advance them.
+  // Verify their new contract, not the old migration bytes; rollback remains compare-and-swap.
+  for (const op of p.operations) {
+    if (op.action !== "write") continue;
+    if (op.path.startsWith(".lumine/local/runtime/sessions/")) {
+      const session = readJson(target(p.targetRoot, op.path));
+      if (session.statusProtocolVersion !== 2) throw new Error("Session conversion is incomplete: " + op.path);
+    }
+    if (op.path === ".lumine/wiki-state/format.json") {
+      const format = readJson(target(p.targetRoot, op.path));
+      if (format.schemaVersion !== 1 || format.knowledgeFormat !== 3) throw new Error("Knowledge conversion is incomplete");
+    }
   }
   j.status = "finalizing";
   atomic(jf, Buffer.from(json(j)), 0o600);

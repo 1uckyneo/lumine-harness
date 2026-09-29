@@ -2,7 +2,7 @@
 // Source: skills/lumine-harness/src/harness/core/phase-router.ts
 import { canonicalSkillsRoot } from "./root-resolver.mjs";
 import { discoverSharedSkills } from "./skill-catalog.mjs";
-import { readSessionState, writeSessionState } from "./work-status.mjs";
+import { readSessionState, skillReadObservability, writeSessionState } from "./work-status.mjs";
 import path from "node:path";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -69,6 +69,7 @@ function recordPromptRoute(root, input, prompt) {
 			path: skill.file,
 			reason: "selected-skill",
 			read: Boolean(used || previous),
+			readObservability: skillReadObservability(input.product),
 			contentHash: skill.hash,
 			readAt: used?.readAt ?? previous?.readAt
 		}];
@@ -131,6 +132,7 @@ function requireExpectedSkillRead(root, input, state, skill, reason = "adapter-r
 		path: skill.file,
 		reason,
 		read: alreadyRead,
+		readObservability: skillReadObservability(input.product),
 		contentHash: skill.hash
 	};
 	if (index === -1) expectedSkills.push(required);
