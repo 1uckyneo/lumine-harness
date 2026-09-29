@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "kind": "document-archive",
+  "operationId": "5a802dc0-552b-452b-b768-3132f7b85025",
+  "documentId": "lumine-source-refactor-plan",
+  "from": "docs/exec-plans/active/Lumine 一次性重构.md",
+  "to": "docs/exec-plans/completed/Lumine 一次性重构.md",
+  "status": "complete",
+  "mutations": [
+    {
+      "path": "docs/exec-plans/completed/Lumine 一次性重构.md",
+      "before": null,
+      "after": "---\nid: lumine-source-refactor-plan\ntitle: Lumine 源仓重构执行记录\ntype: exec-plan\nlocale: zh-CN\nstatus: completed\nspecIds: [lumine-refactor-product]\n---\n\n# Lumine 源仓重构执行记录\n\n## 当前结果与下一步\n\n本次授权的重构、两项目迁移及临时入口清理已收口。四个日常 Skill、双语资源、文本 Wiki、HTML 阅读器、独立迁移与检查已交付；两个项目仅启用实际使用的 Codex，社区 Adapter 的规范与分发保留。\n\n最后修复了源仓 Adapter 资源定位、取消选用宿主时的受管配置保护，以及计划归档后的稳定引用。源码和分发测试各 133 项：132 通过、1 项既有用例跳过；Node18 隔离增量 8 项通过。八篇 Wiki 已同步，十二问检索通过，158 个历史验证文件和两个业务子仓未变。\n\n迁移器已将两项目状态标记 complete，旧目录与临时转发已退出。实际 Codex 新入口、源仓 CLI 自用、社区协议回归、独立宿主生命周期和真人接受的覆盖范围分别记录，未实测能力没有写成通过。无需为本次收口打开 Trae 或其他社区应用。不提交、不推送、不发布。\n\n完整结果和恢复位置见 [9 月 29 日收口记录](../../validation/lumine-refactor/2026-09-29/README.md)。此计划归档后仍可按稳定 ID 查询，重开同一任务可受控恢复。\n## 技术安排\n\nTypeScript 保持唯一源码。服务端 Runtime、浏览器 bundle 与迁移工具分别构建；所选语言进入提案后固定，项目安装只发现一种语言的四个 Skill。规范资源先集成并验证，再自用及迁移目标项目，最后核对历史文件和真实宿主。\n\n知识 Markdown/Mermaid 与实际基线纳入版本管理，来源与工作包绑定指纹，人工修改通过三方比较保护。运行缓存、迁移备份与本机 worktree 分别管理，不以清理缓存删除唯一材料。\n\n## 验收与恢复\n\n本计划承担产品方案的全部 AC；结构测试、语义审阅、浏览器交互、Node18 离线和宿主验证分开留证。源码产物运行 pnpm runtime:typecheck、runtime:build、runtime:check、runtime:test:source、runtime:test，以及包和 wrapper 检查。\n\n迁移以提案、逐文件日志和外置备份续跑或回滚。保持已有用户修改，禁止自动提交、推送或发布。项目健康检查不能扩展为业务仓修复。\n\n实际使用知识：`lumine-architecture`、`lumine-adoption`、`lumine-task-check`、`lumine-wiki`。验证见[本次记录](../../validation/lumine-refactor/2026-09-28/README.md)。\n\n## 2026-09-29 收口范围确认\n\n用户已刷新 Codex，并明确 Trae 和其他 Agent 应用只用于社区兼容。本次两个项目仅选择 Codex，社区 Adapter 的规范实现、分发和协议回归继续保留；不再要求用户逐一打开社区宿主。父项目已有刷新后的真实 SessionStart；源仓没有旧运行树，以本次真实 Codex 会话执行规范 Skill 与新 CLI 证明自用入口。独立源仓 Hook 生命周期及自动续跑另列未实测，不将目录迁移完成等同于宿主全部能力认证。\n\n本次已补齐取消选用 Adapter 的受管配置保护、源仓 Runtime 定位及计划归档引用；新提案应用、复验和临时入口清理均已完成。验收合同仅调整 AC-verification 的宿主适用范围；其余验收和历史证据保持原适用范围。\n"
+    },
+    {
+      "path": ".lumine/wiki-state/document-aliases.json",
+      "before": null,
+      "after": "{\n  \"docs/exec-plans/active/Lumine 一次性重构.md\": \"lumine-source-refactor-plan\"\n}\n"
+    },
+    {
+      "path": "docs/exec-plans/active/Lumine 一次性重构.md",
+      "before": "---\nid: lumine-source-refactor-plan\ntitle: Lumine 源仓重构执行记录\ntype: exec-plan\nlocale: zh-CN\nstatus: active\nspecIds: [lumine-refactor-product]\n---\n\n# Lumine 源仓重构执行记录\n\n## 当前结果与下一步\n\n本次授权的重构、两项目迁移及临时入口清理已收口。四个日常 Skill、双语资源、文本 Wiki、HTML 阅读器、独立迁移与检查已交付；两个项目仅启用实际使用的 Codex，社区 Adapter 的规范与分发保留。\n\n最后修复了源仓 Adapter 资源定位、取消选用宿主时的受管配置保护，以及计划归档后的稳定引用。源码和分发测试各 133 项：132 通过、1 项既有用例跳过；Node18 隔离增量 8 项通过。八篇 Wiki 已同步，十二问检索通过，158 个历史验证文件和两个业务子仓未变。\n\n迁移器已将两项目状态标记 complete，旧目录与临时转发已退出。实际 Codex 新入口、源仓 CLI 自用、社区协议回归、独立宿主生命周期和真人接受的覆盖范围分别记录，未实测能力没有写成通过。无需为本次收口打开 Trae 或其他社区应用。不提交、不推送、不发布。\n\n完整结果和恢复位置见 [9 月 29 日收口记录](../../validation/lumine-refactor/2026-09-29/README.md)。此计划归档后仍可按稳定 ID 查询，重开同一任务可受控恢复。\n## 技术安排\n\nTypeScript 保持唯一源码。服务端 Runtime、浏览器 bundle 与迁移工具分别构建；所选语言进入提案后固定，项目安装只发现一种语言的四个 Skill。规范资源先集成并验证，再自用及迁移目标项目，最后核对历史文件和真实宿主。\n\n知识 Markdown/Mermaid 与实际基线纳入版本管理，来源与工作包绑定指纹，人工修改通过三方比较保护。运行缓存、迁移备份与本机 worktree 分别管理，不以清理缓存删除唯一材料。\n\n## 验收与恢复\n\n本计划承担产品方案的全部 AC；结构测试、语义审阅、浏览器交互、Node18 离线和宿主验证分开留证。源码产物运行 pnpm runtime:typecheck、runtime:build、runtime:check、runtime:test:source、runtime:test，以及包和 wrapper 检查。\n\n迁移以提案、逐文件日志和外置备份续跑或回滚。保持已有用户修改，禁止自动提交、推送或发布。项目健康检查不能扩展为业务仓修复。\n\n实际使用知识：`lumine-architecture`、`lumine-adoption`、`lumine-task-check`、`lumine-wiki`。验证见[本次记录](../../validation/lumine-refactor/2026-09-28/README.md)。\n\n## 2026-09-29 收口范围确认\n\n用户已刷新 Codex，并明确 Trae 和其他 Agent 应用只用于社区兼容。本次两个项目仅选择 Codex，社区 Adapter 的规范实现、分发和协议回归继续保留；不再要求用户逐一打开社区宿主。父项目已有刷新后的真实 SessionStart；源仓没有旧运行树，以本次真实 Codex 会话执行规范 Skill 与新 CLI 证明自用入口。独立源仓 Hook 生命周期及自动续跑另列未实测，不将目录迁移完成等同于宿主全部能力认证。\n\n本次已补齐取消选用 Adapter 的受管配置保护、源仓 Runtime 定位及计划归档引用；新提案应用、复验和临时入口清理均已完成。验收合同仅调整 AC-verification 的宿主适用范围；其余验收和历史证据保持原适用范围。\n",
+      "after": null
+    }
+  ]
+}

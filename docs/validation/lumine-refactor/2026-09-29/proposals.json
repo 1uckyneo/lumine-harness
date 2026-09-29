@@ -1,0 +1,42 @@
+[
+  {
+    "project": "parent",
+    "proposalId": "056af440-d787-47c3-8c65-4be66fcdda7f",
+    "selectedAdapters": [
+      "codex"
+    ],
+    "operations": 204,
+    "deletions": [
+      ".trae/hooks.json",
+      ".lumine/adapters/trae/hooks/session-start.mjs",
+      ".lumine/adapters/trae/hooks/stop.mjs"
+    ],
+    "legacyBridges": [
+      ".harness/adapters/codex/hooks/session-start.mjs",
+      ".harness/adapters/codex/hooks/stop-gate.mjs",
+      ".harness/cli"
+    ],
+    "legacyFiles": 34,
+    "protected": [],
+    "conflicts": [],
+    "warnings": [
+      "历史文档保留，项目专有约束通过已审阅内容转换。迁移完成前需要刷新宿主并核实新入口的实际调用。"
+    ]
+  },
+  {
+    "project": "source",
+    "proposalId": "4becfce1-175a-4074-9075-1dde32289526",
+    "selectedAdapters": [
+      "codex"
+    ],
+    "operations": 23,
+    "deletions": [
+      ".trae/hooks.json"
+    ],
+    "legacyBridges": [],
+    "legacyFiles": 0,
+    "protected": [],
+    "conflicts": [],
+    "warnings": []
+  }
+]

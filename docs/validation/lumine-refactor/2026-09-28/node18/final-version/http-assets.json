@@ -1,0 +1,880 @@
+{
+  "origin": "<loopback-reader>",
+  "runtimeNode": "18.20.8",
+  "manifestFiles": 116,
+  "httpAssetChecks": [
+    {
+      "path": "chunks/abnfDiagram-N423BO3Z-I7S2MPMJ.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/architecture-7GRP2DOG-SNEBEUMC.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/architectureDiagram-T3A2C74G-RHCVRE37.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/blockDiagram-VBNYF7ZC-PNRBTWKO.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/c4Diagram-5PPSVZJV-QHBAI2Y3.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-372HXR2C.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-37A5HA4E.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-3UXCYVDA.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-3ZIGILXN.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-4AL3YOXJ.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-4LPMS5I3.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-4PJNGS3V.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-5ERCSKIE.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-5OJNVHMS.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-6KU4IOS6.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-75O2FKZS.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-ACC7BCQK.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-AIFDXLFL.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-CNXIQ33Q.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-DB453Z6Q.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-DEN7TNYX.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-DIZ42OWK.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-EKW6WL37.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-F6L7KA3F.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-FXIIJKVX.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-G46N24PV.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-GJGOXJO5.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-HYX5Q5UD.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-ICOAG7UG.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-IO6LXN3D.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-IVKHGDOE.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-IZNN5DO5.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-KULSAXJ3.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-LDPZ6WLC.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-LIWMOK7F.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-LJWSDTLT.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-MEKUQYLZ.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-MIQTORAF.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-NCUBXNYU.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-NV7TQ3PQ.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-OT3T5U35.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-PQ6DSH24.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-PRL4AVG3.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-QHDNOTBI.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-S3CGXTRJ.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-TBV5XTGP.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-VMNPMWRH.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-WQ4ZWICK.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-XXUKEYXA.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-XZEE746Q.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-YEYK5MQC.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-YLY4D6YG.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-YYOVST5G.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/chunk-ZA5KOOWO.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/classDiagram-JCYQIIEL-RMUH5KJK.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/classDiagram-v2-OCEON4UE-4VZNBALC.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/cose-bilkent-JH36ORCC-VWXMDG3E.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/cynefin-OW5HDTMX-SYWOO2BR.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/cynefinDiagram-MW4NZA55-5PBOA6DZ.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/dagre-VZM6K2ZE-Z5ECMMKY.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/diagram-7IWD3JNH-2VLYE5K3.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/diagram-B4RE2ZJO-2UBUADTA.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/diagram-LBJQPF4R-RPK4HYU7.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/diagram-Q27KOJAE-3X7Q3W2L.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/diagram-UB23O5K3-TT5CRYV6.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/ebnfDiagram-BXEA7PRR-7LSIM6T5.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/erDiagram-JOGREHBK-B3A3YP63.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/eventmodeling-NTZA5JFV-27WMAKW7.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/flowDiagram-UKHOOZJN-C5TGSOBS.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/ganttDiagram-PKOTCBZU-W5PVABTY.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/gitGraph-4MIJSDKK-J7FOPXNB.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/gitGraphDiagram-DS77QQ5N-7OMNG6X4.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/info-A6RAGUB7-EMTIHUDG.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/infoDiagram-6WML65LV-RYRK5AS4.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/ishikawaDiagram-WSZJBQD7-RMCNKJWW.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/journeyDiagram-NVQOT4AX-2PJCN43V.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/kanban-definition-27J2QSJJ-CADDNZBJ.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/katex-A5WYER45.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/mermaid.core-BKOI5I3D.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/mindmap-definition-FAOFIHXS-CI5T5UWR.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/packet-AYTQ26CC-TTGCBCI6.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/pegDiagram-VL7TDLO6-ZFKJ3V7K.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/pie-WAS4IAKB-W3KQACHS.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/pieDiagram-7S7Q4E2Y-UFRGD5PA.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/quadrantDiagram-CIZ2JOQS-WH5NRWEM.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/radar-RG4KPBEZ-ESFVDXKC.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/railroad-74A4TZTK-AQOHG5VS.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/railroad-abnf-HS5TGJTU-CHUWY3XH.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/railroad-ebnf-LZEXJU2U-6SII5Y54.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/railroad-peg-WCYAUIDC-W7QCYJ7D.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/railroadDiagram-AXF67PYL-PNVZUSCB.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/requirementDiagram-LRYGKXZP-7MTZ56KW.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/sankeyDiagram-W5VNT64P-HSIC5FKY.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/sequenceDiagram-SI44F4Z6-C5B7CY63.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/sizeCapture-X5ZJPWSS-PQH5VEOB.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/stateDiagram-OKZ733FA-6PBMRZJA.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/stateDiagram-v2-UEYNNEHI-H4LOAAZR.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/swimlanes-SLNWSIFB-U22BTWEV.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/swimlanesDiagram-ULZ7WXOC-CYKMMYV6.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/timeline-definition-Z64GVDOM-CKBWIYDT.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/treeView-Q6P3EWNA-LMQ6WIZZ.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/treemap-WGGIJYW6-RV7DDBW2.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/vennDiagram-T6HMQDX7-QK7OEXB4.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/wardley-WFR3VGLG-BKYSONI2.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/wardleyDiagram-T6FBY63Y-KKUMDRM4.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "chunks/xychartDiagram-ELKLHX3M-LYJFFWX4.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "path": "reader.js",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "styles.css",
+      "status": 200,
+      "sha256Matches": true,
+      "contentType": "text/css; charset=utf-8"
+    }
+  ],
+  "api": {
+    "config": {
+      "status": 200,
+      "body": {
+        "locale": "zh-CN",
+        "repositories": [
+          {
+            "id": "app"
+          }
+        ],
+        "maxCards": 6
+      }
+    },
+    "catalog": {
+      "status": 200,
+      "body": {
+        "documents": [
+          {
+            "id": "login-flow",
+            "title": "登录与会话",
+            "summary": "登录建立会话，并将会话交给页面使用。",
+            "type": "architecture",
+            "status": "current",
+            "locale": "zh-CN",
+            "tags": [
+              "login",
+              "session",
+              "登录"
+            ],
+            "aliases": [
+              "authentication",
+              "login",
+              "session"
+            ],
+            "repositories": [
+              "app"
+            ],
+            "relations": [],
+            "sources": [
+              {
+                "id": "login-source",
+                "repoId": "app",
+                "path": "src/login.ts",
+                "startLine": 1,
+                "endLine": 1
+              }
+            ],
+            "watchScopes": [],
+            "path": "docs/repo-wiki/登录与会话.md",
+            "collection": "wiki",
+            "revision": "014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4",
+            "freshness": "unverified",
+            "issues": [],
+            "diagrams": [
+              {
+                "id": "login-sequence",
+                "title": "登录流程",
+                "caption": "登录提交后建立会话；静态源码不证明服务已部署。",
+                "sources": [
+                  "login-source"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "login-plan",
+            "title": "登录优化",
+            "summary": "",
+            "type": "exec-plan",
+            "status": "active",
+            "locale": "zh-CN",
+            "tags": [],
+            "aliases": [],
+            "repositories": [],
+            "relations": [],
+            "sources": [],
+            "watchScopes": [],
+            "path": "docs/exec-plans/active/登录优化.md",
+            "collection": "plan",
+            "revision": "3d99a872d1c69d51f1bfaa63be85facfc23c529fd0e73488587099a050098b27",
+            "freshness": "unverified",
+            "issues": [],
+            "diagrams": []
+          }
+        ]
+      }
+    },
+    "query": {
+      "status": 200,
+      "body": {
+        "query": "authentication",
+        "cards": [
+          {
+            "id": "login-flow",
+            "title": "登录与会话",
+            "summary": "登录建立会话，并将会话交给页面使用。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/登录与会话.md",
+            "revision": "014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4",
+            "freshness": "unverified",
+            "repositories": [
+              "app"
+            ],
+            "tags": [
+              "login",
+              "session",
+              "登录"
+            ],
+            "sources": [
+              {
+                "id": "login-source",
+                "repoId": "app",
+                "path": "src/login.ts",
+                "startLine": 1,
+                "endLine": 1
+              }
+            ],
+            "relations": [],
+            "diagramIds": [
+              "login-sequence"
+            ],
+            "diagramTypes": [
+              "sequenceDiagram"
+            ],
+            "reason": "authentication"
+          }
+        ],
+        "total": 1,
+        "contextChars": 542
+      }
+    },
+    "document": {
+      "status": 200,
+      "body": {
+        "id": "login-flow",
+        "title": "登录与会话",
+        "summary": "登录建立会话，并将会话交给页面使用。",
+        "type": "architecture",
+        "status": "current",
+        "locale": "zh-CN",
+        "tags": [
+          "login",
+          "session",
+          "登录"
+        ],
+        "aliases": [
+          "authentication",
+          "login",
+          "session"
+        ],
+        "repositories": [
+          "app"
+        ],
+        "relations": [],
+        "sources": [
+          {
+            "id": "login-source",
+            "repoId": "app",
+            "path": "src/login.ts",
+            "startLine": 1,
+            "endLine": 1
+          }
+        ],
+        "diagrams": [
+          {
+            "id": "login-sequence",
+            "title": "登录流程",
+            "caption": "登录提交后建立会话；静态源码不证明服务已部署。",
+            "sources": [
+              "login-source"
+            ],
+            "code": "sequenceDiagram\n  用户->>服务: 登录\n  服务-->>用户: 会话"
+          }
+        ],
+        "watchScopes": [],
+        "path": "docs/repo-wiki/登录与会话.md",
+        "collection": "wiki",
+        "body": "\n# 登录与会话\n\n登录创建会话。该知识描述本地源码机制，不代表部署或用户验收。\n\n```mermaid\nsequenceDiagram\n  用户->>服务: 登录\n  服务-->>用户: 会话\n```\n\n## 来源与限制\n\n可从来源区查看 src/login.ts，现有正文无需模型调用即可读取。\n",
+        "markdown": "---\nid: login-flow\ntitle: 登录与会话\nsummary: 登录建立会话，并将会话交给页面使用。\ntype: architecture\nstatus: current\nlocale: zh-CN\ntags: [login, session, 登录]\naliases: [authentication, login, session]\nrepositories: [app]\nsources:\n  - id: login-source\n    repoId: app\n    path: src/login.ts\n    startLine: 1\n    endLine: 1\ndiagrams:\n  - id: login-sequence\n    title: 登录流程\n    caption: 登录提交后建立会话；静态源码不证明服务已部署。\n    sources: [login-source]\n---\n\n# 登录与会话\n\n登录创建会话。该知识描述本地源码机制，不代表部署或用户验收。\n\n```mermaid\nsequenceDiagram\n  用户->>服务: 登录\n  服务-->>用户: 会话\n```\n\n## 来源与限制\n\n可从来源区查看 src/login.ts，现有正文无需模型调用即可读取。\n",
+        "revision": "014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4",
+        "freshness": "unverified",
+        "issues": []
+      }
+    },
+    "source": {
+      "status": 200,
+      "body": {
+        "source": {
+          "id": "login-source",
+          "repoId": "app",
+          "path": "src/login.ts",
+          "startLine": 1,
+          "endLine": 1
+        },
+        "text": "export function login(user) { return { session: user.id }; }",
+        "fingerprint": "40c580df46280d9ab3aa7348310fe75e79d45cf4cc0fcf658cc0f019d6cde8ac",
+        "startLine": 1,
+        "endLine": 1,
+        "totalLines": 2
+      }
+    }
+  },
+  "readOnlyPost": {
+    "status": 405,
+    "body": {
+      "code": "READ_ONLY"
+    }
+  },
+  "foreignOrigin": {
+    "status": 403,
+    "body": {
+      "code": "ORIGIN_REJECTED"
+    }
+  },
+  "contentSecurityPolicy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'none'; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+  "status": "passed"
+}

@@ -1,0 +1,24 @@
+---
+name: lumine-plan
+description: Clarify requirements and create or review product specifications and technical execution plans; use for product discussion, Spec revisions, technical options, or implementation planning without automatically starting implementation.
+---
+
+# Requirements and solution planning
+
+<!-- LH-PLAN-01 -->
+Work toward the outcome requested in this turn. Read project AGENTS.md, applicable rules, and the existing task. Use lumine-knowledge when useful to locate sources and related knowledge; inspect source directly when knowledge is missing or unreliable rather than creating a Wiki first.
+
+<!-- LH-PLAN-02 -->
+- For product problems, scenarios, rules, and acceptance, read [Product specification](references/product-spec.md) and maintain the Spec in place.
+- For technical choices, execution order, and recovery, read [Execution plan](references/exec-plan.md) and reference the applicable Spec acceptance items.
+- A Spec-only discussion or revision does not require an Exec Plan. A review request produces findings, evidence, and focused corrections, not implementation.
+- Use lumine-design when unresolved visual or interaction choices need concrete material. Product rules remain in the Spec.
+
+<!-- LH-PLAN-03 -->
+Feature work normally uses a Spec and Plan. A local repair may go directly to lumine-run when it introduces no new product decision, changes no agreed behavior contract, and needs no independent cross-task coordination. File count does not determine simplicity.
+
+<!-- LH-PLAN-04 -->
+Reuse existing authorization; changing capabilities does not add approval steps. Present concrete choices for unresolved goals, scope, or material tradeoffs. An approved field, a generated document, or a fingerprint is not user authorization. Continue to lumine-run when implementation is already authorized and the approach is ready; conclude with planning results when planning alone was requested.
+
+<!-- LH-PLAN-05 -->
+Review product and technical consistency, testable acceptance, and missing boundaries. Runtime checks validate structure and references, not semantic quality. Lead with conclusions and current decisions, omit irrelevant sections, and link to logs rather than copying them. Follow the project language; readable filenames and stable identities are separate.

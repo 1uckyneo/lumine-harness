@@ -1,0 +1,40 @@
+{
+  "modules": [
+    "workflow",
+    "workers",
+    "design"
+  ],
+  "repositories": [
+    {
+      "id": "project",
+      "path": "."
+    }
+  ],
+  "autonomy": {
+    "maxContinuationChain": 20,
+    "noProgressThreshold": 2
+  },
+  "extensions": {},
+  "schemaVersion": 2,
+  "workflowVersion": 2,
+  "locale": "zh-CN",
+  "topology": "library-or-cli",
+  "selectedAdapters": [
+    "codex"
+  ],
+  "wiki": {
+    "root": "docs/repo-wiki",
+    "watchScopes": [
+      {
+        "repoId": "project",
+        "path": "skills/lumine-harness/src"
+      },
+      {
+        "repoId": "project",
+        "path": "scripts"
+      }
+    ],
+    "maxCards": 6,
+    "maxContextChars": 12000
+  }
+}

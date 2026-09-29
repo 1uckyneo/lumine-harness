@@ -1,0 +1,88 @@
+[
+  {
+    "locale": "zh-CN",
+    "args": [
+      "--help"
+    ],
+    "exitCode": 0,
+    "stdout": "文本知识库：检索、核实、更新和阅读。\nwiki scan\nwiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan]\nwiki show <id|path|title>\nwiki check\nwiki update prepare [document-id...]\nwiki update apply <packet-id> --candidate <json-file>\nwiki update decide <packet-id> <document-id> --decision keep-current|defer --reason <text>\nwiki update recover\nwiki serve [--port 4318]\n--root <harness-root>\n--json\n",
+    "stderr": ""
+  },
+  {
+    "locale": "zh-CN",
+    "args": [
+      "query",
+      "authentication",
+      "--json"
+    ],
+    "exitCode": 0,
+    "stdout": "{\n  \"query\": \"authentication\",\n  \"cards\": [\n    {\n      \"id\": \"session\",\n      \"title\": \"登录、会话与身份边界\",\n      \"summary\": \"从首次访问到会话建立，理解浏览器、API 和权限菜单之间的职责与信任边界。\",\n      \"type\": \"architecture\",\n      \"status\": \"current\",\n      \"collection\": \"wiki\",\n      \"locale\": \"zh-CN\",\n      \"path\": \"docs/repo-wiki/登录与身份.md\",\n      \"revision\": \"08a982e8b897c19ed8683531e736724550edb8b5bc08cd5803e36840e8dfbf9a\",\n      \"freshness\": \"current\",\n      \"repositories\": [\n        \"root\"\n      ],\n      \"tags\": [],\n      \"sources\": [\n        {\n          \"id\": \"session-source\",\n          \"repoId\": \"root\",\n          \"path\": \"src/session.ts\"\n        }\n      ],\n      \"relations\": [],\n      \"diagramIds\": [\n        \"session-boundary\",\n        \"session-sequence\"\n      ],\n      \"diagramTypes\": [\n        \"flowchart\",\n        \"sequenceDiagram\"\n      ],\n      \"reason\": \"authentication\"\n    }\n  ],\n  \"total\": 1,\n  \"contextChars\": 551\n}\n",
+    "stderr": ""
+  },
+  {
+    "locale": "zh-CN",
+    "args": [
+      "show",
+      "missing-id"
+    ],
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "[DOCUMENT_NOT_FOUND] 未找到文档。请使用知识 ID、路径或无歧义标题。\n"
+  },
+  {
+    "locale": "zh-CN",
+    "args": [
+      "query",
+      "authentication",
+      "--limit",
+      "no",
+      "--json"
+    ],
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "{\"code\":\"QUERY_BUDGET_INVALID\",\"message\":\"检索条数和文本预算必须为正整数。\"}\n"
+  },
+  {
+    "locale": "en",
+    "args": [
+      "--help"
+    ],
+    "exitCode": 0,
+    "stdout": "Text knowledge: query, verify, update and read.\nwiki scan\nwiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan]\nwiki show <id|path|title>\nwiki check\nwiki update prepare [document-id...]\nwiki update apply <packet-id> --candidate <json-file>\nwiki update decide <packet-id> <document-id> --decision keep-current|defer --reason <text>\nwiki update recover\nwiki serve [--port 4318]\n--root <harness-root>\n--json\n",
+    "stderr": ""
+  },
+  {
+    "locale": "en",
+    "args": [
+      "query",
+      "authentication",
+      "--json"
+    ],
+    "exitCode": 0,
+    "stdout": "{\n  \"query\": \"authentication\",\n  \"cards\": [\n    {\n      \"id\": \"session\",\n      \"title\": \"登录、会话与身份边界\",\n      \"summary\": \"从首次访问到会话建立，理解浏览器、API 和权限菜单之间的职责与信任边界。\",\n      \"type\": \"architecture\",\n      \"status\": \"current\",\n      \"collection\": \"wiki\",\n      \"locale\": \"zh-CN\",\n      \"path\": \"docs/repo-wiki/登录与身份.md\",\n      \"revision\": \"08a982e8b897c19ed8683531e736724550edb8b5bc08cd5803e36840e8dfbf9a\",\n      \"freshness\": \"current\",\n      \"repositories\": [\n        \"root\"\n      ],\n      \"tags\": [],\n      \"sources\": [\n        {\n          \"id\": \"session-source\",\n          \"repoId\": \"root\",\n          \"path\": \"src/session.ts\"\n        }\n      ],\n      \"relations\": [],\n      \"diagramIds\": [\n        \"session-boundary\",\n        \"session-sequence\"\n      ],\n      \"diagramTypes\": [\n        \"flowchart\",\n        \"sequenceDiagram\"\n      ],\n      \"reason\": \"authentication\"\n    }\n  ],\n  \"total\": 1,\n  \"contextChars\": 551\n}\n",
+    "stderr": ""
+  },
+  {
+    "locale": "en",
+    "args": [
+      "show",
+      "missing-id"
+    ],
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "[DOCUMENT_NOT_FOUND] Document not found. Use its ID, path or an unambiguous title.\n"
+  },
+  {
+    "locale": "en",
+    "args": [
+      "query",
+      "authentication",
+      "--limit",
+      "no",
+      "--json"
+    ],
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "{\"code\":\"QUERY_BUDGET_INVALID\",\"message\":\"Card count and text budget must be positive integers.\"}\n"
+  }
+]

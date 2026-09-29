@@ -1,0 +1,25 @@
+[
+  {
+    "project": "source",
+    "result": {
+      "status": "awaiting_host_verification",
+      "proposalId": "4becfce1-175a-4074-9075-1dde32289526",
+      "backupDir": "<source-root>/.lumine-migrations/4becfce1-175a-4074-9075-1dde32289526",
+      "preserved": []
+    }
+  },
+  {
+    "project": "parent",
+    "result": {
+      "status": "awaiting_host_verification",
+      "proposalId": "056af440-d787-47c3-8c65-4be66fcdda7f",
+      "backupDir": "<workspace-root>/.lumine-migrations/056af440-d787-47c3-8c65-4be66fcdda7f",
+      "preserved": [
+        "docs/FRONTEND.md",
+        "docs/references/browser-automation/index.md",
+        "docs/references/index.md",
+        "docs/references/vendor-llms/index.md"
+      ]
+    }
+  }
+]

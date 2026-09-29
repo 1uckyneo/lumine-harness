@@ -1,7 +1,1 @@
-{
-  "schemaVersion": 1,
-  "kind": "harness-root",
-  "distributionVersion": "0.3.0",
-  "instructions": "AGENTS.md",
-  "skills": ".agents/skills"
-}
+{"schemaVersion":2,"kind":"lumine-root","distributionVersion":"2.0.0","instructions":"AGENTS.md","skills":".agents/skills"}

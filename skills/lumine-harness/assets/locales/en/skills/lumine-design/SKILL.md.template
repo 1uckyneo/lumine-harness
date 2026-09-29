@@ -1,0 +1,21 @@
+---
+name: lumine-design
+description: Explore, create, or review page visuals and interactions using readable explanations, HTML prototypes, or design references as needed; reuse approved material without redefining product rules.
+---
+
+# Visual and interaction design
+
+<!-- LH-DESIGN-01 -->
+Read AGENTS.md, applicable interface rules, the Spec, and existing design evidence. Separate product behavior questions from presentation choices: use lumine-plan for the former and this Skill for the latter. A review request produces judgment and evidence, not implementation by default.
+
+<!-- LH-DESIGN-02 -->
+Choose the smallest useful material for unresolved visual, interaction, or feasibility questions, such as an HTML prototype, flow diagram, or explanation. Reuse external designs, references, and approved approaches. Do not regenerate attachments merely because the work enters another stage or require DESIGN, component maps, and multiple handoff formats together.
+
+<!-- LH-DESIGN-03 -->
+Identify the pages/states covered, related Spec, and approval scope. Present concrete choices for material new tradeoffs; existing explicit authorization remains valid. A document status or Agent assessment is not user approval. Do not treat an unapproved direction as an approved implementation reference.
+
+<!-- LH-DESIGN-04 -->
+Cover applicable normal, loading, empty, failed, unauthorized, cancelled, and recovery states. Review accessibility, narrow layouts, content density, and user-facing copy. Explain the objects, actions, and next steps users need, without development notes. Review alignment between product goals and visual/interaction decisions; deterministic checks cannot replace this judgment.
+
+<!-- LH-DESIGN-05 -->
+Link design material from the Spec and keep implementation mapping and deviations in the Exec Plan; maintain each complete explanation once. Use lumine-run for authorized implementation. Browser evidence after implementation is distinct from a design preview. Repo Wiki cards use text and HTML; do not generate card images with this Skill.

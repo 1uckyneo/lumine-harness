@@ -1,0 +1,1 @@
+{"schemaVersion":2,"workflowVersion":2,"locale":"en","repositories":[{"id":"project","path":"."}],"selectedAdapters":[],"wiki":{"root":"docs/repo-wiki","watchScopes":[{"repoId":"project","path":"."}],"maxCards":6,"maxContextChars":12000},"autonomy":{"maxContinuationChain":20,"noProgressThreshold":2},"extensions":{}}

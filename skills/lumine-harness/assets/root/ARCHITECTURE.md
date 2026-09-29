@@ -1,18 +1,18 @@
 # {{project_name}} 架构地图
 
-本文件描述系统结构、实现路径和架构不变量。`AGENTS.md` 负责行动入口，`docs/generated/**` 只提供导航索引；三者职责不同。
+本页给出项目边界和关键入口，专题机制与图解在配置的 Repo Wiki 中按需展开。这里只记录有源码、配置、验证或用户决定依据的内容。
 
 ## 仓库形态
 
-- topology：`{{topology}}`
-- implementation surfaces：`{{implementation_surfaces}}`
-- primary languages / frameworks：`{{tech_signals}}`
+- 形态：{{topology}}
+- 实现范围：{{implementation_surfaces}}
+- 技术信号：{{tech_signals}}
 
-## 目录与模块关系
+## 目录地图
 
 {{detailed_directory_map}}
 
-## 主要实现路径
+## 实现路径
 
 {{implementation_paths}}
 
@@ -24,12 +24,10 @@
 
 {{architecture_invariants}}
 
-这里只记录从现有源码、测试、运行配置或用户确认中得到的项目事实。不为所有项目预设 Controller、Service、租户、权限、审计、导入导出或其他特定架构。
-
 ## 运行与验证入口
 
 {{verification_entry_points}}
 
-## 已知缺口
+## 已知限制
 
 {{known_gaps}}

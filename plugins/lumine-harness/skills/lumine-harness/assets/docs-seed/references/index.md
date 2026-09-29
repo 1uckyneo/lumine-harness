@@ -1,5 +1,8 @@
-# References
+# 项目参考资料
 
-`docs/references/` 存放可共享的项目上下文、设计参考、外部资料摘要和 LLM-readable vendor notes。
+长期资料说明适用范围、来源和版本，正文只保存必要结论，避免复制外部系统或整仓源码。Wiki、Spec 和 Plan 按需要引用。
 
-本地私有资料放在 `docs/references/<slug>/local/`，并按项目需要加入 `.gitignore`。
+私有配置和临时凭据放入明确忽略的本地位置；写入前验证忽略规则，不能仅因目录名含 local 就认为安全。不要将真实凭据、本机路径或内部地址写入公开材料。
+
+- [浏览器验证](browser-automation/index.md)
+- [外部模型服务](vendor-llms/index.md)

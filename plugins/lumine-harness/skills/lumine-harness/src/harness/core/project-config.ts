@@ -1,0 +1,84 @@
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import path from "node:path";
+import type { HarnessProduct } from "./contracts.ts";
+
+export interface RepositoryConfig { id: string; path: string; }
+export interface ProjectConfig {
+  schemaVersion: 2;
+  locale: "zh-CN" | "en";
+  workflowVersion: 2;
+  repositories: RepositoryConfig[];
+  wiki: { root: string; watchScopes: Array<{ repoId: string; path: string }>; maxCards: number; maxContextChars: number };
+  selectedAdapters: HarnessProduct[];
+  extensions: Record<string, unknown>;
+  autonomy: { maxContinuationChain: number; noProgressThreshold: number };
+  [key: string]: unknown;
+}
+
+const PRODUCTS = new Set(["codex", "qoder", "trae", "kimi", "cursor", "opencode", "zcode", "codebuddy", "deepseek-harness"]);
+function object(value: unknown, name: string): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${name} must be an object`);
+  return value as Record<string, unknown>;
+}
+function positive(value: unknown, fallback: number, name: string): number {
+  if (value === undefined) return fallback;
+  if (!Number.isSafeInteger(value) || Number(value) < 1) throw new Error(`${name} must be a positive integer`);
+  return Number(value);
+}
+export function resolveProjectPath(root: string, relative: string, name = "path"): string {
+  if (!relative || path.isAbsolute(relative) || relative.includes("\0")) throw new Error(`${name} must be a project-relative path`);
+  const base = path.resolve(root);
+  const resolved = path.resolve(base, relative);
+  if (resolved !== base && !resolved.startsWith(`${base}${path.sep}`)) throw new Error(`${name} escapes the project root`);
+  // Resolve the nearest existing ancestor, including a symlink in a new path.
+  let ancestor = resolved;
+  while (!existsSync(ancestor) && path.dirname(ancestor) !== ancestor) ancestor = path.dirname(ancestor);
+  let baseAncestor = base;
+  while (!existsSync(baseAncestor) && path.dirname(baseAncestor) !== baseAncestor) baseAncestor = path.dirname(baseAncestor);
+  const canonicalBase = path.resolve(realpathSync(baseAncestor), path.relative(baseAncestor, base));
+  const canonicalResolved = path.resolve(realpathSync(ancestor), path.relative(ancestor, resolved));
+  if (canonicalResolved !== canonicalBase && !canonicalResolved.startsWith(`${canonicalBase}${path.sep}`)) throw new Error(`${name} escapes the project root through a symlink`);
+  return resolved;
+}
+export function loadProjectConfig(root: string): ProjectConfig {
+  const file = resolveProjectPath(root, ".lumine/project.json", "project config");
+  const raw = existsSync(file) ? object(JSON.parse(readFileSync(file, "utf8")), "project config") : {};
+  if (raw.schemaVersion !== undefined && raw.schemaVersion !== 2) throw new Error("Unsupported project schemaVersion; use the upgrade tool.");
+  if (raw.workflowVersion !== undefined && raw.workflowVersion !== 2) throw new Error("Unsupported workflowVersion");
+  const locale = raw.locale ?? "en";
+  if (locale !== "zh-CN" && locale !== "en") throw new Error("locale must be zh-CN or en");
+  const entries = raw.repositories ?? [{ id: "root", path: "." }];
+  if (!Array.isArray(entries) || entries.length === 0) throw new Error("repositories must be a non-empty array");
+  const ids = new Set<string>();
+  const repositories = entries.map((entry) => {
+    const repo = object(entry, "repository");
+    if (typeof repo.id !== "string" || !/^[a-z0-9][a-z0-9_-]*$/i.test(repo.id) || ids.has(repo.id)) throw new Error("repository IDs must be unique stable identifiers");
+    if (typeof repo.path !== "string") throw new Error("repository.path is required");
+    resolveProjectPath(root, repo.path, "repository.path");
+    ids.add(repo.id);
+    return { id: repo.id, path: repo.path };
+  });
+  const wiki = raw.wiki === undefined ? {} : object(raw.wiki, "wiki");
+  const wikiRoot = wiki.root ?? "docs/repo-wiki";
+  if (typeof wikiRoot !== "string") throw new Error("wiki.root must be a relative path");
+  resolveProjectPath(root, wikiRoot, "wiki.root");
+  const scopes = wiki.watchScopes ?? repositories.map((repo) => ({ repoId: repo.id, path: "." }));
+  if (!Array.isArray(scopes)) throw new Error("wiki.watchScopes must be an array");
+  const watchScopes = scopes.map((entry) => {
+    const scope = object(entry, "watch scope");
+    const repo = repositories.find((item) => item.id === scope.repoId);
+    if (!repo || typeof scope.path !== "string") throw new Error("watch scope requires a registered repoId and relative path");
+    resolveProjectPath(resolveProjectPath(root, repo.path), scope.path, "watch scope path");
+    return { repoId: repo.id, path: scope.path };
+  });
+  const adapters = raw.selectedAdapters ?? [];
+  if (!Array.isArray(adapters) || adapters.some((item) => typeof item !== "string" || !PRODUCTS.has(item))) throw new Error("selectedAdapters contains an unsupported product");
+  const autonomy = raw.autonomy === undefined ? {} : object(raw.autonomy, "autonomy");
+  return {
+    ...raw, schemaVersion: 2, locale, workflowVersion: 2, repositories,
+    wiki: { root: wikiRoot, watchScopes, maxCards: positive(wiki.maxCards, 6, "wiki.maxCards"), maxContextChars: positive(wiki.maxContextChars, 12000, "wiki.maxContextChars") },
+    selectedAdapters: [...new Set(adapters)] as HarnessProduct[],
+    extensions: raw.extensions === undefined ? {} : object(raw.extensions, "extensions"),
+    autonomy: { maxContinuationChain: positive(autonomy.maxContinuationChain, 20, "autonomy.maxContinuationChain"), noProgressThreshold: positive(autonomy.noProgressThreshold, 2, "autonomy.noProgressThreshold") }
+  };
+}

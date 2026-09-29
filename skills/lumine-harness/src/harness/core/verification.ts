@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { resolveProjectPath } from "./project-config.ts";
 import type {
   AdapterCapabilityName,
   AdapterCapabilityResult,
@@ -110,7 +111,7 @@ function safe(value: unknown): string {
 }
 
 function verificationRoot(root: string): string {
-  return path.join(root, ".harness", "runtime", "probes");
+  return resolveProjectPath(root, ".lumine/local/runtime/probes", "verification probes");
 }
 
 function activeProbeFile(root: string, product: HarnessProduct): string {

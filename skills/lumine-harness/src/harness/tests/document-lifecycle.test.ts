@@ -1,0 +1,129 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { acceptanceSections, contentHash, listProjectDocuments, resolveDocument } from "../core/documents.ts";
+import { applyDocumentOperation, archivePlan, preparePlanLifecycle, recoverDocumentOperation, renameDocument, restorePlan } from "../core/document-operations.ts";
+import { checkTask, saveTaskRecord } from "../core/task-contract.ts";
+import { runTaskCommand } from "../core/task-cli.ts";
+
+const active = "docs/exec-plans/active/中文 空格计划.md";
+const completed = "docs/exec-plans/completed/中文 空格计划.md";
+function write(root: string, file: string, body: string): void {
+  mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
+  writeFileSync(path.join(root, file), body);
+}
+function fixture(): string {
+  const root = mkdtempSync(path.join(os.tmpdir(), "lumine-lifecycle-"));
+  write(root, ".lumine/root.json", JSON.stringify({ schemaVersion: 2, kind: "lumine-root", skills: ".agents/skills" }));
+  write(root, ".lumine/project.json", JSON.stringify({ schemaVersion: 2, locale: "en", repositories: [{ id: "project", path: "." }] }));
+  write(root, "docs/product-specs/产品 方案.md", "---\nid: product-test\ntype: product-spec\nstatus: active\n---\n# 产品方案\n\n### AC-preserve 保留身份\n归档不改变文档或验收身份。\n");
+  write(root, active, "---\nid: plan-test\ntype: exec-plan\nstatus: active\nspecIds: [product-test]\n---\n# 中文计划\n\n[产品方案](<../../product-specs/产品 方案.md>)\n[任务自己](<中文 空格计划.md#step>)\n\n### AC-local 技术验证\n[产品说明](<../../product-specs/产品 方案.md>)保持适用。\n");
+  write(root, "README.md", `[计划](<${active}>)\n`);
+  return root;
+}
+const hashFile = (root: string, file: string): string => contentHash(readFileSync(path.join(root, file)));
+
+test("archive and restore preserve Chinese plan IDs, task references and acceptance baselines", () => {
+  const root = fixture();
+  try {
+    const original = readFileSync(path.join(root, active), "utf8");
+    const specBaseline = acceptanceSections(resolveDocument(root, "product-test"));
+    const planBaseline = acceptanceSections(resolveDocument(root, "plan-test"));
+    saveTaskRecord(root, { schemaVersion: 2, taskId: "lifecycle", mode: "diagnose", goal: "Verify lifecycle", scope: "documents only", specRef: "product-test", planRef: "plan-test", acceptanceRefs: [], evidence: [] });
+    const result = runTaskCommand(["doc-archive", "plan-test", "--expect", hashFile(root, active), "--root", root]) as { status: string };
+    assert.equal(result.status, "complete");
+    assert.equal(existsSync(path.join(root, active)), false);
+    assert.equal(resolveDocument(root, "plan-test").file, completed);
+    assert.equal(resolveDocument(root, "plan-test").status, "completed");
+    assert.equal(resolveDocument(root, active).file, completed, "old path alias finds the archived identity");
+    assert.equal((runTaskCommand(["doc-resolve", "plan-test", "--root", root]) as { file: string }).file, completed);
+    assert.equal(listProjectDocuments(root).some((doc) => doc.docId === "plan-test"), false, "current context stays free of completed plans");
+    assert.equal(checkTask(root, "lifecycle").ok, true);
+    assert.deepEqual(acceptanceSections(resolveDocument(root, "product-test")), specBaseline);
+    assert.deepEqual(acceptanceSections(resolveDocument(root, "plan-test")), planBaseline);
+    assert.match(readFileSync(path.join(root, "README.md"), "utf8"), /exec-plans\/completed/);
+    const restored = runTaskCommand(["doc-restore", "plan-test", "--expect", hashFile(root, completed), "--root", root]) as { status: string };
+    assert.equal(restored.status, "complete");
+    assert.equal(resolveDocument(root, "plan-test").file, active);
+    assert.equal(resolveDocument(root, "plan-test").status, "active");
+    assert.equal(readFileSync(path.join(root, active), "utf8"), original);
+    assert.equal(resolveDocument(root, completed).file, active);
+    assert.equal(checkTask(root, "lifecycle").ok, true);
+    assert.deepEqual(acceptanceSections(resolveDocument(root, "plan-test")), planBaseline);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("historical evidence stays immutable and no-ID histories are not indexed", () => {
+  const root = fixture();
+  try {
+    const history = "docs/exec-plans/completed/旧 记录.md";
+    const body = `---\nid: old-plan\ntype: exec-plan\nstatus: historical\n---\n# 历史\n[旧链接](<../active/中文 空格计划.md>)\n`;
+    write(root, history, body);
+    write(root, "docs/exec-plans/completed/无身份.md", "# 历史计划\n");
+    assert.throws(() => resolveDocument(root, "old-plan"), /missing or ambiguous/);
+    assert.throws(() => runTaskCommand(["doc-resolve", "docs/exec-plans/completed/无身份.md", "--root", root]), /stable id/);
+    assert.throws(() => restorePlan(root, history, hashFile(root, history)), /current-protocol/);
+    archivePlan(root, "plan-test", hashFile(root, active));
+    assert.equal(readFileSync(path.join(root, history), "utf8"), body);
+    assert.throws(() => renameDocument(root, "plan-test", "docs/exec-plans/active/新名字.md", hashFile(root, completed)), /immutable/);
+    assert.throws(() => archivePlan(root, "product-test", hashFile(root, "docs/product-specs/产品 方案.md")), /current-protocol/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("archive recovery resumes an interrupted move and rollback preserves subsequent edits", () => {
+  const root = fixture();
+  try {
+    const operation = preparePlanLifecycle(root, "plan-test", hashFile(root, active), "archive");
+    const changed = "A newer readme edit\n";
+    write(root, "README.md", changed);
+    assert.throws(() => applyDocumentOperation(root, operation), /conflict/);
+    assert.equal(existsSync(path.join(root, completed)), true, "destination was written before interruption");
+    assert.equal(existsSync(path.join(root, active)), true, "source retained until the move completes");
+    assert.equal(readFileSync(path.join(root, "README.md"), "utf8"), changed);
+    write(root, "README.md", operation.mutations.find((mutation) => mutation.path === "README.md")!.before!);
+    assert.equal(recoverDocumentOperation(root, operation.operationId).status, "complete");
+    const original = readFileSync(path.join(root, completed), "utf8");
+    write(root, completed, original + "\nA later human edit.\n");
+    assert.throws(() => recoverDocumentOperation(root, operation.operationId, true), /conflict/);
+    assert.match(readFileSync(path.join(root, completed), "utf8"), /later human edit/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("restore rejects existing and Unicode-equivalent destinations and stale source hashes", () => {
+  const root = fixture();
+  try {
+    archivePlan(root, "plan-test", hashFile(root, active));
+    write(root, active, "# Another task\n");
+    assert.throws(() => restorePlan(root, "plan-test", hashFile(root, completed)), /collides/);
+    rmSync(path.join(root, active));
+    assert.throws(() => restorePlan(root, "plan-test", "outdated-hash"), /Document changed/);
+    const cafe = "docs/exec-plans/completed/Café Plan.md";
+    write(root, cafe, "---\nid: cafe-plan\ntype: exec-plan\nstatus: completed\n---\n# Cafe\n");
+    write(root, "docs/exec-plans/active/Cafe\u0301 Plan.md", "# Another task\n");
+    assert.throws(() => restorePlan(root, "cafe-plan", hashFile(root, cafe)), /collides/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("lifecycle journals cannot mutate other archived records or escape the plan collections", () => {
+  const root = fixture();
+  try {
+    const operation = preparePlanLifecycle(root, "plan-test", hashFile(root, active), "archive");
+    operation.mutations.push({ path: "docs/exec-plans/completed/无关历史.md", before: null, after: "tampered" });
+    assert.throws(() => applyDocumentOperation(root, operation), /Invalid document operation target/);
+    const tampered = preparePlanLifecycle(root, "plan-test", hashFile(root, active), "archive");
+    tampered.to = "docs/validation/计划.md";
+    assert.throws(() => applyDocumentOperation(root, tampered), /Invalid plan lifecycle paths/);
+    const rewritten = preparePlanLifecycle(root, "plan-test", hashFile(root, active), "archive");
+    rewritten.mutations[0].after += "\nInvented approval\n";
+    assert.throws(() => applyDocumentOperation(root, rewritten), /preserve the document/);
+    const duplicate = preparePlanLifecycle(root, "plan-test", hashFile(root, active), "archive");
+    duplicate.mutations.push({ ...duplicate.mutations[0], after: "changed archived content" });
+    assert.throws(() => applyDocumentOperation(root, duplicate), /Duplicate document operation target/);
+    const escaped = preparePlanLifecycle(root, "plan-test", hashFile(root, active), "archive");
+    escaped.mutations.push({ path: "docs/exec-plans/active/../../../unrelated.md", before: null, after: "unrelated" });
+    assert.throws(() => applyDocumentOperation(root, escaped), /Invalid document operation target/);
+    assert.equal(existsSync(path.join(root, completed)), false);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});

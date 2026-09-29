@@ -1,0 +1,43 @@
+[
+  {
+    "project": "source",
+    "observedAt": "2026-09-29T04:11:02.725290+00:00",
+    "result": {
+      "status": "complete",
+      "proposalId": "4becfce1-175a-4074-9075-1dde32289526"
+    },
+    "root": {
+      "schemaVersion": 2,
+      "kind": "lumine-root",
+      "projectId": "a392df2c-e0f5-46d1-ab66-fa1107e3d106",
+      "distributionVersion": "2.0.0",
+      "instructions": "AGENTS.md",
+      "skills": "skills/lumine-harness/assets/skills",
+      "runtime": "skills/lumine-harness/assets/harness",
+      "migrationId": "4becfce1-175a-4074-9075-1dde32289526",
+      "migrationStatus": "complete"
+    },
+    "oldRuntimeExists": false,
+    "unusedTraeHookExists": false
+  },
+  {
+    "project": "workspace",
+    "observedAt": "2026-09-29T04:11:02.841167+00:00",
+    "result": {
+      "status": "complete",
+      "proposalId": "056af440-d787-47c3-8c65-4be66fcdda7f"
+    },
+    "root": {
+      "schemaVersion": 2,
+      "kind": "lumine-root",
+      "projectId": "0a2b1de4-d97b-4246-b82c-a3320d2e47b7",
+      "distributionVersion": "2.0.0",
+      "instructions": "AGENTS.md",
+      "skills": ".agents/skills",
+      "migrationId": "056af440-d787-47c3-8c65-4be66fcdda7f",
+      "migrationStatus": "complete"
+    },
+    "oldRuntimeExists": false,
+    "unusedTraeHookExists": false
+  }
+]

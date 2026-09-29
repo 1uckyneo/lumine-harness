@@ -1,0 +1,953 @@
+{
+  "schemaVersion": 2,
+  "taskId": "lumine-refactor-v2",
+  "mode": "implement",
+  "goal": "完成流程简化、文本 Repo Wiki、双语资源和两个项目迁移",
+  "scope": "Harness 源仓与当前父仓；业务子仓只读；不提交、推送或发布；真实宿主验证后再清理临时入口",
+  "specRef": "lumine-refactor-product",
+  "planRef": "lumine-source-refactor-plan",
+  "selectedSkills": [
+    "lumine-run",
+    "lumine-knowledge"
+  ],
+  "acceptanceRefs": [
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-workflow",
+      "baselineHash": "cd27744fea7d995e2a20330ec4d32babb2cdf05f4b12a52306e14323ac337334"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-task",
+      "baselineHash": "f238b336fe76b63aa14fc14d3dde18da14930740e9166d7dd79d61ea8cd04b46"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-skills",
+      "baselineHash": "adde66eb1607cf6b77fa06894b804b342ff81d1ee7e054de5557832f211ff200"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-locale",
+      "baselineHash": "c3380c7e32f21df2a46f1d7c23f3830485274643e7e3ac847fc237aa2e39990a"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-identity",
+      "baselineHash": "fdab23ef6ab20e7af6ed6f85602dee4dd8b401d558296e4ec1cd86baf6ce472d"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-knowledge",
+      "baselineHash": "d6ef2678569f19d06f21f8111473565425263b5c371bf73b610642900ae17eda"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-text",
+      "baselineHash": "c1d4f4c33449e92e760a43bbcc25cd1200e29bc1265b34926760707e0dae12cf"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-reader",
+      "baselineHash": "bf6bb66cbe88cefd2445909adea74d9a679d6d5572b8a93c9fdd37d830c46a91"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-update",
+      "baselineHash": "69693df414be1adb8d71f2f97a25511ad5217d10817dc49fc8c4d8b11ac27564"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-cold",
+      "baselineHash": "7af70c558b9ce7a25853f950de8f98ff62c4fa783d114a79dbf3d57823b089d8"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-migrate",
+      "baselineHash": "3e1b8c5441b8f93276e72b05f35db3a8337032fadab2c7e4a74971627fb9aefd"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-distribution",
+      "baselineHash": "07ead5852acf56e382f8b6093cf0ee5abf47759b38387d6c7f67ba6158aa2b5a"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-migration-content",
+      "baselineHash": "3be52908e284e7d8827803d106b77da906f5efaf4acdf390a8d1b6068e2617e2"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-verification",
+      "baselineHash": "f53a569b507b9a5f4182f7a6562b3a6801093fb362df8ec9f6c0984ee879aea6"
+    }
+  ],
+  "evidence": [
+    {
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/lumine-test-dist.log",
+      "sha256": "dea02fefdbe3f9905c8a1b1fe14088d678730b90d7350c0d3d94bc2598dd0797",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:16:18.105Z",
+      "command": "pnpm runtime:test (generated distribution test suite; full operation recorded in validation log)",
+      "environment": "macOS; repository maintenance Node; controlled automated fixtures, not a real host acceptance",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-workflow",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/lumine-test-source.log",
+      "sha256": "c80040ec73294d8cddf973595719205befec92f82fcad6dd2ac9427c1972cb10",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-workflow: integration/lumine-test-source.log; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-task",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/lumine-test-source.log",
+      "sha256": "c80040ec73294d8cddf973595719205befec92f82fcad6dd2ac9427c1972cb10",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-task: integration/lumine-test-source.log; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-task",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/node18/final-task-version/task-cli-results.json",
+      "sha256": "996652aa63f396f48af972505c1ea7f0736fa92fdcd1c180df042823b34bcd9b",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-task: node18/final-task-version/task-cli-results.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-skills",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/lumine-package.log",
+      "sha256": "5e51c0b966e9717b80ca25ed47fe0fb97f5b05cd7d72abdc7d97be6f231db29c",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-skills: integration/lumine-package.log; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-locale",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/lumine-package.log",
+      "sha256": "5e51c0b966e9717b80ca25ed47fe0fb97f5b05cd7d72abdc7d97be6f231db29c",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-locale: integration/lumine-package.log; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-locale",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/wiki-browser/cli-locales.json",
+      "sha256": "33fa665bc98f0297c7577d581616e8b1369cc4cf3ca2e883dae08c6b358424d8",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-locale: wiki-browser/cli-locales.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-identity",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/lumine-test-source.log",
+      "sha256": "c80040ec73294d8cddf973595719205befec92f82fcad6dd2ac9427c1972cb10",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-identity: integration/lumine-test-source.log; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-identity",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/node18/final-task-version/task-cli-results.json",
+      "sha256": "996652aa63f396f48af972505c1ea7f0736fa92fdcd1c180df042823b34bcd9b",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-identity: node18/final-task-version/task-cli-results.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-knowledge",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/knowledge-questions/task-integration-final.json",
+      "sha256": "2ae922962ec53410d9d7458b51b0d1a504bd78440a3fc8d2ca14781f4ac813c7",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-knowledge: knowledge-questions/task-integration-final.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-text",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/wiki-baselines-final.json",
+      "sha256": "442572b1fcb93ad51ed52a3a8273e66cf81b6598f898cb1e9b8e3b3148509428",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-text: integration/wiki-baselines-final.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-text",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/knowledge-questions/task-integration-final.json",
+      "sha256": "2ae922962ec53410d9d7458b51b0d1a504bd78440a3fc8d2ca14781f4ac813c7",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-text: knowledge-questions/task-integration-final.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-reader",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/wiki-browser/results.json",
+      "sha256": "62e6b120888bfc9a57a11fb1ce9043d1861a995e2a02e4f9f5fa4895a73b9132",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-reader: wiki-browser/results.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/wiki-reader/reader.js",
+          "sha256": "5515555673ae3704155c99d62984732d77f8efb49840250c6cbf898a0fa20b37"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/server.mjs",
+          "sha256": "c2aaa06eba8e8a5ca9825d448a2659b6d01af9437e419fbc9bca627ce05b86ba"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-reader",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/wiki-browser/installed/results.json",
+      "sha256": "7577fef4a37e37b0aaa601631c333f3e4ebff9f8ce454d2a7d2b5339340ef12c",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-reader: wiki-browser/installed/results.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/wiki-reader/reader.js",
+          "sha256": "5515555673ae3704155c99d62984732d77f8efb49840250c6cbf898a0fa20b37"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/server.mjs",
+          "sha256": "c2aaa06eba8e8a5ca9825d448a2659b6d01af9437e419fbc9bca627ce05b86ba"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-reader",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/node18/final-version/browser-results.json",
+      "sha256": "fa87aef57d48ce996bda6159091436fefe961e4baf8988f896abe419286af6ac",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-reader: node18/final-version/browser-results.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/wiki-reader/reader.js",
+          "sha256": "5515555673ae3704155c99d62984732d77f8efb49840250c6cbf898a0fa20b37"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/server.mjs",
+          "sha256": "c2aaa06eba8e8a5ca9825d448a2659b6d01af9437e419fbc9bca627ce05b86ba"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-update",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/lumine-test-source.log",
+      "sha256": "c80040ec73294d8cddf973595719205befec92f82fcad6dd2ac9427c1972cb10",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-update: integration/lumine-test-source.log; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-update",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/wiki-baselines-final.json",
+      "sha256": "442572b1fcb93ad51ed52a3a8273e66cf81b6598f898cb1e9b8e3b3148509428",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-update: integration/wiki-baselines-final.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-cold",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/node18/cli-results.json",
+      "sha256": "10ad96571b7ef50294df627e310dff5baab501dd7c239b3d10940cdab2e3d6ed",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-cold: node18/cli-results.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-cold",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/node18/final-version/http-assets.json",
+      "sha256": "61de9e9cab6758c95f984cc7646f86594345e5e7a07d09875aed2990beb06c19",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-cold: node18/final-version/http-assets.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-distribution",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/node18/final-task-version/release-hashes.json",
+      "sha256": "897e2801a489577cb15ee02ebe8f1893cb501943523d09fda65baec95bb8dfcb",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-distribution: node18/final-task-version/release-hashes.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-distribution",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/node18/final-version/http-assets.json",
+      "sha256": "61de9e9cab6758c95f984cc7646f86594345e5e7a07d09875aed2990beb06c19",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-distribution: node18/final-version/http-assets.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-distribution",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/lumine-package.log",
+      "sha256": "5e51c0b966e9717b80ca25ed47fe0fb97f5b05cd7d72abdc7d97be6f231db29c",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-distribution: integration/lumine-package.log; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-migration-content",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/integration/history-protection.json",
+      "sha256": "065fe630f7ad277e38dc727dff8da3d1ab6c968846159954a221a2044c55e244",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-migration-content: integration/history-protection.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-migration-content",
+      "artifact": "docs/validation/lumine-refactor/2026-09-28/knowledge-questions/document-review.json",
+      "sha256": "daf1bad03bd36accbf1f3658b45d2be38ab6eb3b96e07785d28624de70027f42",
+      "outcome": "passed",
+      "observedAt": "2026-09-28T12:17:46.215Z",
+      "command": "Review recorded executable checks for AC-migration-content: knowledge-questions/document-review.json; original operations and results retained in artifact",
+      "environment": "macOS; source/distribution tests, Node18 isolated CLI, browser and read-only semantic review as specified per artifact. Real host and user acceptance remain pending separately.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/task-contract.mjs",
+          "sha256": "e83f2db320dbadf6e6ee326c0d14fe498622f0b8a2ed4893fe7e735cc4588a2d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/wiki/engine.mjs",
+          "sha256": "19edd8a99b916938802ab76eddef81ad93193473de5c5d21a6aa31452765f5b3"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-migrate",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/finalize.json",
+      "sha256": "92931390dd9364d48e81a31cbb1c43321046c66db276c6181175206f4ec1b69b",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.195Z",
+      "command": "Review actual closeout operations for AC-migrate: finalize.json; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        },
+        {
+          "repoId": "project",
+          "path": ".lumine/root.json",
+          "sha256": "738acc402abc673dc43a2acf5b6f1c6649ca36ae9e502e91dfd9ae68855d106c"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-migrate",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/host-results.json",
+      "sha256": "08239b71e6279fafb669f2c15e345551ef8b147ef5ab7a492478c4fbe7b935bc",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.195Z",
+      "command": "Review actual closeout operations for AC-migrate: host-results.json; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        },
+        {
+          "repoId": "project",
+          "path": ".lumine/root.json",
+          "sha256": "738acc402abc673dc43a2acf5b6f1c6649ca36ae9e502e91dfd9ae68855d106c"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-verification",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/README.md",
+      "sha256": "641170cd46c797a2b477ab3610fc59867f8fb8e11bea0873d43512c3121791ac",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.195Z",
+      "command": "Review actual closeout operations for AC-verification: README.md; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-verification",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/checks/results.json",
+      "sha256": "7ce9a5bf7981c73fd2d15fa068caaf675258333da507c2f59a3414560df6f510",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.195Z",
+      "command": "Review actual closeout operations for AC-verification: checks/results.json; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-task",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/checks/test-source.log",
+      "sha256": "992f1a12d73a7d9f65e4445f97d7d57c0c5aec56fb7a9b7c75094953aa771f05",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.195Z",
+      "command": "Review actual closeout operations for AC-task: checks/test-source.log; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-identity",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/node18/results.json",
+      "sha256": "a3295398acb1ae48c2e769c3539c52f28da68410e12c206b5e94a518762ec179",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.196Z",
+      "command": "Review actual closeout operations for AC-identity: node18/results.json; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-distribution",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/node18/summary.json",
+      "sha256": "84f551bea5055681ef2044d312f84ee949df5965637897396ad1d27f699beef7",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.196Z",
+      "command": "Review actual closeout operations for AC-distribution: node18/summary.json; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-distribution",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/checks/results.json",
+      "sha256": "7ce9a5bf7981c73fd2d15fa068caaf675258333da507c2f59a3414560df6f510",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.196Z",
+      "command": "Review actual closeout operations for AC-distribution: checks/results.json; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-skills",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/checks/skill-package.log",
+      "sha256": "5e51c0b966e9717b80ca25ed47fe0fb97f5b05cd7d72abdc7d97be6f231db29c",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.196Z",
+      "command": "Review actual closeout operations for AC-skills: checks/skill-package.log; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-knowledge",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/queries.json",
+      "sha256": "b16b475d052f4870d5aadd42e0461c0cae25314108400171f42fc20d659a6a92",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.196Z",
+      "command": "Review actual closeout operations for AC-knowledge: queries.json; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-update",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/wiki-update.json",
+      "sha256": "6e3b5af15c8d54d52545462ac81dbdd57be7c12c3ee737120c1ad3c6a64ea37f",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.196Z",
+      "command": "Review actual closeout operations for AC-update: wiki-update.json; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-text",
+      "artifact": "docs/validation/lumine-refactor/2026-09-29/wiki-update.json",
+      "sha256": "6e3b5af15c8d54d52545462ac81dbdd57be7c12c3ee737120c1ad3c6a64ea37f",
+      "outcome": "passed",
+      "observedAt": "2026-09-29T04:17:11.196Z",
+      "command": "Review actual closeout operations for AC-text: wiki-update.json; commands, results and coverage retained in artifact",
+      "environment": "macOS; final source/distribution and Node18 isolated checks; actual Codex-session CLI plus separately observed workspace SessionStart. Independent source Hook lifecycle, full continuation matrix, community apps and human usability testing remain unverified; these are not claimed as passed.",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/documents.mjs",
+          "sha256": "3caaf9da8e3aed94330e3bce476bc2d76e492e08ee58e307c2e8f60b406d317d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/core/document-operations.mjs",
+          "sha256": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/adapter-manager.mjs",
+          "sha256": "1a513369ed32166761e16d5270f962d9a394da8a7f3522a47caf68bc29b67e93"
+        }
+      ]
+    }
+  ],
+  "knowledge": {
+    "required": true,
+    "status": "synchronized",
+    "refs": [
+      "lumine-architecture",
+      "lumine-wiki",
+      "lumine-task-check",
+      "lumine-adoption"
+    ]
+  },
+  "summary": "当前授权范围已收口：两项目迁移complete、临时入口退出、八篇知识同步、十二问通过，源码/分发各132通过1跳过，Node18增量8通过。仅实际启用Codex；源仓独立Hook、完整续跑、社区宿主和真人可用性未实测，未宣称完整宿主认证。父仓外部暂存保持原样；不提交推送。"
+}

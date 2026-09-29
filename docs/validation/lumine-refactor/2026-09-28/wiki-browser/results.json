@@ -1,0 +1,151 @@
+{
+  "verifiedAt": "2026-09-28T11:40:32.582313+00:00",
+  "environment": {
+    "browser": "Playwright CLI isolated Chrome profile",
+    "widths": [
+      1440,
+      390
+    ],
+    "externalNetwork": "Every page request outside the loopback Wiki service aborted by route guard",
+    "runtime": "Source TypeScript engine; bundled reader assets",
+    "readerManifestSHA256": "d710d21a403c3e6fb24f12865f9906624b8076971c30659710112ff1975e1ddd"
+  },
+  "browserStages": [
+    {
+      "stage": 1,
+      "result": [
+        "three text cards",
+        "cards contain no image or canvas",
+        "English alias finds Chinese knowledge identity",
+        "interface changes to English",
+        "English title",
+        "body and card title remain authored language",
+        "list switch",
+        "Chinese flowchart text rendered",
+        "sequence diagram rendered"
+      ]
+    },
+    {
+      "stage": 2,
+      "result": [
+        "zoom button changes transform",
+        "keyboard pan",
+        "keyboard zoom",
+        "reset restores natural scale",
+        "stable document and diagram reference copied",
+        "Mermaid text is accessible",
+        "explicit Mermaid and SVG exports downloaded",
+        "Escape closes viewer",
+        "closing restores reading position",
+        "registered source excerpt available",
+        "Markdown export downloaded"
+      ]
+    },
+    {
+      "stage": 3,
+      "result": [
+        "state diagram renders",
+        "ER diagram renders",
+        "invalid rejected with readable explanation",
+        "invalid text source retained",
+        "malicious rejected with readable explanation",
+        "malicious text source retained",
+        "oversized rejected with readable explanation",
+        "oversized text source retained",
+        "valid graph renders after invalid graph",
+        "no orphan renderer error overlay",
+        "relative Markdown link preserves stable diagram target",
+        "missing source freshness explicit",
+        "missing source gives human feedback"
+      ]
+    },
+    {
+      "stage": 4,
+      "result": [
+        "narrow library has no horizontal overflow",
+        "mobile navigation opens",
+        "mobile navigation closes",
+        "narrow article has no horizontal overflow",
+        "narrow viewer fits viewport",
+        "empty search feedback",
+        "type filter narrows cards",
+        "freshness filter"
+      ]
+    },
+    {
+      "stage": 5,
+      "result": {
+        "checks": [
+          "cold page loads with every external request blocked",
+          "card preview renders Mermaid on demand",
+          "Escape closes mobile sidebar"
+        ],
+        "requested": 35,
+        "externalAttempts": [],
+        "localResourcePaths": [
+          "/",
+          "/styles.css",
+          "/reader.js",
+          "/chunks/chunk-PQ6DSH24.js",
+          "/chunks/chunk-QHDNOTBI.js",
+          "/api/config",
+          "/api/catalog",
+          "/api/document?id=session",
+          "/chunks/mermaid.core-BKOI5I3D.js",
+          "/chunks/chunk-S3CGXTRJ.js",
+          "/chunks/chunk-XXUKEYXA.js",
+          "/chunks/chunk-TBV5XTGP.js",
+          "/chunks/chunk-IVKHGDOE.js",
+          "/chunks/chunk-VMNPMWRH.js",
+          "/chunks/chunk-4PJNGS3V.js",
+          "/chunks/chunk-WQ4ZWICK.js",
+          "/chunks/chunk-ZA5KOOWO.js",
+          "/chunks/chunk-5OJNVHMS.js",
+          "/chunks/chunk-LDPZ6WLC.js",
+          "/chunks/chunk-4LPMS5I3.js",
+          "/chunks/chunk-GJGOXJO5.js",
+          "/chunks/chunk-NCUBXNYU.js",
+          "/chunks/chunk-5ERCSKIE.js",
+          "/chunks/chunk-YYOVST5G.js",
+          "/chunks/chunk-OT3T5U35.js",
+          "/chunks/flowDiagram-UKHOOZJN-C5TGSOBS.js",
+          "/chunks/chunk-FXIIJKVX.js",
+          "/chunks/chunk-3ZIGILXN.js",
+          "/chunks/chunk-G46N24PV.js",
+          "/chunks/chunk-DIZ42OWK.js",
+          "/chunks/chunk-YEYK5MQC.js",
+          "/chunks/dagre-VZM6K2ZE-Z5ECMMKY.js",
+          "/chunks/chunk-DB453Z6Q.js",
+          "/chunks/chunk-MIQTORAF.js",
+          "/chunks/chunk-ACC7BCQK.js"
+        ]
+      }
+    }
+  ],
+  "cliExecutions": 8,
+  "engineTests": {
+    "passed": 15,
+    "failed": 0
+  },
+  "exports": {
+    "mermaidText": true,
+    "markdownText": true,
+    "explicitSVG": {
+      "labels": true,
+      "metadata": {
+        "title": "登录请求时序",
+        "status": "current",
+        "revision": "08a982e8b897c19ed8683531e736724550edb8b5bc08cd5803e36840e8dfbf9a",
+        "documentId": "session",
+        "diagramId": "session-sequence"
+      },
+      "scriptForeignObjectImageLinksOrLocalPaths": false
+    }
+  },
+  "limitations": [
+    "Fixture browser QA does not establish semantic truth of the eight real topics.",
+    "Installed-package Node 18 and real host acceptance are separate integration checks.",
+    "Screenshots and explicit SVG exports are validation artifacts; no knowledge update produced image assets.",
+    "Initial raw HTTP test needed loopback permission; rerun with that permission passed all 15 tests."
+  ]
+}

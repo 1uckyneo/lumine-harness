@@ -29,8 +29,8 @@ export function runtimeArtifacts(repoRoot: string): RuntimeArtifact[] {
       source: path.join("harness", relative),
       stage: path.join("harness", relative.replace(/\.ts$/, ".mjs")),
       destination: path.join("skills/lumine-harness/assets/harness", relative.replace(/\.ts$/, ".mjs")),
-      transform: relative === path.join("tests", "adoption-manager.test.ts")
-        ? (content: string) => content.replaceAll("../../scripts/harness-manager.mjs", "../../../scripts/harness-manager.mjs")
+      transform: relative.startsWith("tests/")
+        ? (content: string) => content.replaceAll("../../scripts/harness-manager.mjs", "../../../scripts/harness-manager.mjs").replaceAll("../../migration/", "../../../migration/")
         : undefined
     }));
 
@@ -39,7 +39,7 @@ export function runtimeArtifacts(repoRoot: string): RuntimeArtifact[] {
       source: "opencode/plugins/harness.ts",
       stage: "opencode/plugins/harness.mjs",
       destination: "skills/lumine-harness/assets/opencode/plugins/harness.mjs",
-      transform: (content) => content.replaceAll("../../harness/", "../../.harness/")
+      transform: (content) => content.replaceAll("../../harness/", "../../.lumine/")
     },
     {
       source: "scripts/harness-manager.ts",
@@ -53,6 +53,10 @@ export function runtimeArtifacts(repoRoot: string): RuntimeArtifact[] {
       destination: "skills/lumine-harness/assets/harness/core/contracts.d.ts"
     }
   );
+
+  for (const relative of collectTypeScriptFiles(path.join(sourceRoot, "migration"))) {
+    artifacts.push({source: path.join("migration", relative), stage: path.join("migration", relative.replace(/\.ts$/, ".mjs")), destination: path.join("skills/lumine-harness/migration", relative.replace(/\.ts$/, ".mjs")), transform: (content) => content.replaceAll("../harness/", "../assets/harness/")});
+  }
 
   return artifacts.sort((left, right) => left.destination.localeCompare(right.destination));
 }

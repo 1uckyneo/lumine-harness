@@ -1,11 +1,7 @@
-# Browser Automation
+# 浏览器验证
 
-本文件属于可选 Browser 模块；只有目标工程需要浏览器验证时生成。
+优先使用当前环境已提供的浏览器工具。按用户目标核实真实页面、关键操作、相关网络结果及必要的持久化／恢复，不以请求 200 或截图存在代替能力验收。
 
-浏览器验证优先顺序：
+记录日期、页面／环境范围、操作、结果和未覆盖项。敏感会话不导出到公开记录；需要业务写入时遵守实际授权。
 
-1. Chrome DevTools MCP / live Chrome：适合真实登录态、console/network/DOM/screenshot；live session 必须 preflight。
-2. 当前 Agent 宿主提供的浏览器自动化能力：在 DevTools 中途断开或授权失效时接管。
-3. Playwright/headless：适合 prototype、mock、视觉回归和无需个人登录态的路径。
-
-没有截图、DOM、console 或 network 记录，不得声称浏览器验证通过。
+Repo Wiki 的扫描、更新和查询是全文本流程，不截图后交给视觉模型。专项界面验收的截图只作为验证资料，不是知识卡片、摘要或图解的生成输入，也不进入日常自动维护流水线。

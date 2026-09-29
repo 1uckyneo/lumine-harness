@@ -1,0 +1,165 @@
+{
+  "observedAt": "2026-09-29T04:18:51.118046+00:00",
+  "status": "passed",
+  "results": [
+    {
+      "project": "workspace",
+      "operations": [
+        {
+          "command": [
+            "./.lumine/cli",
+            "check",
+            "health",
+            "--json"
+          ],
+          "exitCode": 0,
+          "result": {
+            "ok": true,
+            "scope": "health",
+            "issues": [],
+            "evidenceLevel": "repository_checked"
+          }
+        },
+        {
+          "command": [
+            "./.lumine/cli",
+            "check",
+            "task",
+            "lumine-refactor-v2",
+            "--json"
+          ],
+          "exitCode": 0,
+          "result": {
+            "ok": true,
+            "scope": "task",
+            "issues": [],
+            "evidenceLevel": "repository_checked"
+          }
+        },
+        {
+          "command": [
+            "./.lumine/cli",
+            "wiki",
+            "check",
+            "--json"
+          ],
+          "exitCode": 0,
+          "result": {
+            "status": "passed",
+            "issues": [],
+            "verified": [
+              "api-migration-auth-routing",
+              "workspace-system-boundaries",
+              "chat-stream-and-image-recovery",
+              "reporter-template-request-flow"
+            ],
+            "notVerified": [
+              "semantic accuracy",
+              "runtime behavior",
+              "human acceptance"
+            ]
+          }
+        },
+        {
+          "command": [
+            "./.lumine/cli",
+            "task",
+            "doc-resolve",
+            "lumine-refactor-v2"
+          ],
+          "exitCode": 0,
+          "result": {
+            "docId": "lumine-refactor-v2",
+            "file": "docs/exec-plans/completed/Lumine 一次性重构.md",
+            "status": "completed",
+            "sha256": "f49e3391ba74e6e9d3bebe6c9c0f963c25de1105273e730ac5151ac86244c22c"
+          }
+        }
+      ],
+      "migrationStatus": "complete",
+      "legacyRuntimeAbsent": true
+    },
+    {
+      "project": "source",
+      "operations": [
+        {
+          "command": [
+            "./.lumine/cli",
+            "check",
+            "health",
+            "--json"
+          ],
+          "exitCode": 0,
+          "result": {
+            "ok": true,
+            "scope": "health",
+            "issues": [],
+            "evidenceLevel": "repository_checked"
+          }
+        },
+        {
+          "command": [
+            "./.lumine/cli",
+            "check",
+            "task",
+            "lumine-refactor-v2",
+            "--json"
+          ],
+          "exitCode": 0,
+          "result": {
+            "ok": true,
+            "scope": "task",
+            "issues": [],
+            "evidenceLevel": "repository_checked"
+          }
+        },
+        {
+          "command": [
+            "./.lumine/cli",
+            "wiki",
+            "check",
+            "--json"
+          ],
+          "exitCode": 0,
+          "result": {
+            "status": "passed",
+            "issues": [],
+            "verified": [
+              "lumine-architecture",
+              "lumine-wiki",
+              "lumine-task-check",
+              "lumine-adoption"
+            ],
+            "notVerified": [
+              "semantic accuracy",
+              "runtime behavior",
+              "human acceptance"
+            ]
+          }
+        },
+        {
+          "command": [
+            "./.lumine/cli",
+            "task",
+            "doc-resolve",
+            "lumine-source-refactor-plan"
+          ],
+          "exitCode": 0,
+          "result": {
+            "docId": "lumine-source-refactor-plan",
+            "file": "docs/exec-plans/completed/Lumine 一次性重构.md",
+            "status": "completed",
+            "sha256": "132d276dce6cc4fda7fb5a30e40334a6ce66d261d3343d3a48ed4192490bbc4c"
+          }
+        }
+      ],
+      "migrationStatus": "complete",
+      "legacyRuntimeAbsent": true
+    }
+  ],
+  "historicalHashesVerified": 158,
+  "readerFilesUnchanged": 117,
+  "businessRepositoriesUnchanged": true,
+  "noCommitOrPush": true,
+  "review": "Independent read-only reviewer also verified community resources and skill purity; full host certification is not claimed."
+}

@@ -1,8 +1,50 @@
 {
   "hooks": {
-    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node .harness/adapters/qoder/hooks/prompt-submit.mjs", "timeout": 30 }] }],
-    "PreToolUse": [{ "matcher": "Write|Edit|SearchReplace|Bash|RunCommand|write_to_file|search_replace|run_in_terminal", "hooks": [{ "type": "command", "command": "node .harness/adapters/qoder/hooks/tool-before.mjs", "timeout": 10 }] }],
-    "PostToolUse": [{ "matcher": "Read|ReadFile|View|OpenFile|read_file|Skill", "hooks": [{ "type": "command", "command": "node .harness/adapters/qoder/hooks/tool-after.mjs", "timeout": 10 }] }],
-    "Stop": [{ "hooks": [{ "type": "command", "command": "node .harness/adapters/qoder/hooks/stop.mjs", "timeout": 120 }] }]
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'const fs=require(\"node:fs\"),p=require(\"node:path\"),cp=require(\"node:child_process\");let r=process.cwd();while(!fs.existsSync(p.join(r,\".lumine/root.json\"))&&p.dirname(r)!==r)r=p.dirname(r);if(!fs.existsSync(p.join(r,\".lumine/root.json\"))){console.error(\"Lumine root not found\");process.exit(2)}const m=JSON.parse(fs.readFileSync(p.join(r,\".lumine/root.json\"),\"utf8\"));const rt=m.runtime||\".lumine\";if(p.isAbsolute(rt)||rt.split(/[\\\\/]/).includes(\"..\")){console.error(\"Invalid runtime path\");process.exit(2)}const x=cp.spawnSync(process.execPath,[p.join(r,rt,\"adapters/qoder/hooks/prompt-submit.mjs\"),...[]],{stdio:\"inherit\"});if(x.error){console.error(x.error.message);process.exit(1)}process.exit(x.status??1)'",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|SearchReplace|Bash|RunCommand|write_to_file|search_replace|run_in_terminal",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'const fs=require(\"node:fs\"),p=require(\"node:path\"),cp=require(\"node:child_process\");let r=process.cwd();while(!fs.existsSync(p.join(r,\".lumine/root.json\"))&&p.dirname(r)!==r)r=p.dirname(r);if(!fs.existsSync(p.join(r,\".lumine/root.json\"))){console.error(\"Lumine root not found\");process.exit(2)}const m=JSON.parse(fs.readFileSync(p.join(r,\".lumine/root.json\"),\"utf8\"));const rt=m.runtime||\".lumine\";if(p.isAbsolute(rt)||rt.split(/[\\\\/]/).includes(\"..\")){console.error(\"Invalid runtime path\");process.exit(2)}const x=cp.spawnSync(process.execPath,[p.join(r,rt,\"adapters/qoder/hooks/tool-before.mjs\"),...[]],{stdio:\"inherit\"});if(x.error){console.error(x.error.message);process.exit(1)}process.exit(x.status??1)'",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Read|ReadFile|View|OpenFile|read_file|Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'const fs=require(\"node:fs\"),p=require(\"node:path\"),cp=require(\"node:child_process\");let r=process.cwd();while(!fs.existsSync(p.join(r,\".lumine/root.json\"))&&p.dirname(r)!==r)r=p.dirname(r);if(!fs.existsSync(p.join(r,\".lumine/root.json\"))){console.error(\"Lumine root not found\");process.exit(2)}const m=JSON.parse(fs.readFileSync(p.join(r,\".lumine/root.json\"),\"utf8\"));const rt=m.runtime||\".lumine\";if(p.isAbsolute(rt)||rt.split(/[\\\\/]/).includes(\"..\")){console.error(\"Invalid runtime path\");process.exit(2)}const x=cp.spawnSync(process.execPath,[p.join(r,rt,\"adapters/qoder/hooks/tool-after.mjs\"),...[]],{stdio:\"inherit\"});if(x.error){console.error(x.error.message);process.exit(1)}process.exit(x.status??1)'",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'const fs=require(\"node:fs\"),p=require(\"node:path\"),cp=require(\"node:child_process\");let r=process.cwd();while(!fs.existsSync(p.join(r,\".lumine/root.json\"))&&p.dirname(r)!==r)r=p.dirname(r);if(!fs.existsSync(p.join(r,\".lumine/root.json\"))){console.error(\"Lumine root not found\");process.exit(2)}const m=JSON.parse(fs.readFileSync(p.join(r,\".lumine/root.json\"),\"utf8\"));const rt=m.runtime||\".lumine\";if(p.isAbsolute(rt)||rt.split(/[\\\\/]/).includes(\"..\")){console.error(\"Invalid runtime path\");process.exit(2)}const x=cp.spawnSync(process.execPath,[p.join(r,rt,\"adapters/qoder/hooks/stop.mjs\"),...[]],{stdio:\"inherit\"});if(x.error){console.error(x.error.message);process.exit(1)}process.exit(x.status??1)'",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
   }
 }

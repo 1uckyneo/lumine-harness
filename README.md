@@ -1,337 +1,141 @@
 # Lumine Harness
 
-English | [简体中文](README.zh-CN.md)
+Help people and Agents deliver software with clear goals, recoverable execution records, and knowledge grounded in sources.
 
-[![skills.sh](https://skills.sh/b/1uckyneo/lumine-harness)](https://skills.sh/1uckyneo/lumine-harness)
+Lumine is a project-level workflow. The host supplies models, tools, and lifecycle events; Lumine preserves project boundaries, product proposals, execution progress, knowledge, and evidence. It supports single or multiple repositories, including a shared parent without Git.
 
-> **Build a reliable engineering environment for an agent-first world.**
+## Getting started
 
-Coding Agents are no longer just tools for assisting with code changes. They can own complete features, work across repositories, and run for hours. As models become more capable, delivery quality depends less on whether they can write code and more on whether they can keep understanding the project, respect its boundaries, recover execution state, and support results with evidence.
+The distributed Runtime requires Node.js 18 or newer. Maintaining this repository or rebuilding the Runtime requires Node.js 22.18+ or 24.11+. Choose either source to install the same initialization Skill.
 
-The harness built into an Agent product answers “how does the Agent run?” **Lumine Harness** is a project-level Harness that answers “what should it do in this project, and what counts as done?” One is the runtime foundation; the other is the project environment. They complement each other.
-
-It is also an implementation of Harness Engineering: keeping project goals, engineering boundaries, execution progress, and validation evidence inside the project so an Agent can understand and continue the work after a session changes.
-
-**Sessions end. Engineering context must remain.**
-
-## When it is useful
-
-Lumine Harness is a good fit when you want to:
-
-- delegate a complete feature or long-running task to an Agent;
-- recover goals, decisions, and progress after changing sessions or Agents;
-- coordinate related frontend, backend, mobile, or other repositories;
-- preserve product boundaries, test results, and delivery evidence;
-- consolidate scattered `AGENTS.md`, Rules, Skills, Hooks, or engineering documents into one workflow.
-
-If you only need a temporary answer or a tiny isolated code change that will not affect future project context, adopting a full Harness is usually unnecessary.
-
-## Start in 3 steps
-
-### 1. Install the entry Skill globally
-
-With Node.js 18 or newer, choose a source that is accessible from your network.
-
-Install from GitHub / skills.sh:
+GitHub / skills.sh:
 
 ```bash
 npx skills add 1uckyneo/lumine-harness -g
 ```
 
-Install from Gitee / skills.sh:
+Gitee / skills.sh:
 
 ```bash
 npx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
 ```
 
-Both commands install the same `lumine-harness` Skill for initial adoption and upgrades. Installing it does not immediately modify the target project.
-
-If the `skills` CLI is unavailable, clone from GitHub or Gitee instead (choose one):
+Installing the entry Skill does not immediately modify the target project. Alternatively, clone one source and ask your Agent to read `skills/lumine-harness/SKILL.md`:
 
 ```bash
 git clone https://github.com/1uckyneo/lumine-harness.git
 git clone https://gitee.com/thrulife2gether/lumine-harness.git
 ```
 
-After a manual clone, use this message in step 3 so the Agent reads the entry Skill first:
+Start a conversation at the single-repository root or the common directory covering related repositories, then say:
 
 ```text
-Read <clone-directory>/skills/lumine-harness/SKILL.md in full.
-Inspect <target-project-directory> and present a Migration Proposal first.
-Do not modify files until I approve it.
+Use lumine-harness to inspect this project with English first and propose concrete adoption changes.
+Preserve business rules, uncommitted changes, and repository boundaries.
 ```
 
-#### Update later
+The Agent inspects the target and prepares a Migration Proposal listing writes, preserved files, backups, language, and host limits, then acts within existing authorization. If writes are not yet authorized, review the concrete proposal first. Choose English first (en) or Simplified Chinese first (zh-CN) before the proposal is generated.
 
-After installing with the `skills` CLI, use the same command to update the globally installed entry Skill whether you originally chose GitHub or Gitee. The CLI reuses the source recorded during installation:
+## Everyday development
+
+State your outcome directly rather than invoking each capability manually. Feature work normally follows:
+
+**Product Spec → necessary design → technical Exec Plan → implementation/verification → affected knowledge updates.**
+
+| Everyday Skill | Responsibility |
+| --- | --- |
+| lumine-plan | Clarify requirements and revise or review product proposals and technical plans; a Spec-only discussion needs no Plan. |
+| lumine-run | Implement, continue, recover, verify, and diagnose; verification-only work does not automatically repair. |
+| lumine-knowledge | Locate source, query knowledge, verify provenance, and maintain Wiki. |
+| lumine-design | Explore and review concrete visual and interaction choices. |
+
+lumine-harness remains the initialization/upgrade entry. Checks are Runtime tools, not another manual phase.
+
+Example requests:
+
+```text
+Develop a product proposal for this requirement without implementing it yet.
+Compare two technical approaches and update the Plan without changing business code.
+Continue the confirmed approach and verify the actual outcome.
+Diagnose this issue and report causes and evidence without automatically repairing it.
+Explain how login and dynamic routing cooperate, with source references.
+```
+
+Local repairs may proceed directly when they introduce no product choice, change no agreed behavior contract, and need no independent coordination. Existing authorization survives capability changes; real unresolved choices need user input. A generated Plan, approved field, or passing tool check does not establish authorization or acceptance.
+
+## Engineering records for people and Agents
+
+- **Product Spec:** product problems, scenarios, rules, scope, and stable acceptance items.
+- **Exec Plan:** this technical change, current progress, next action, and evidence summaries; references the Spec instead of duplicating requirements.
+- **Repo Wiki:** existing mechanisms, architecture, technical rationale, and limits linked to source, decisions, and runtime evidence.
+- **Validation:** actual actions and outcomes, separating tests, runtime behavior, deployment, and user acceptance.
+
+Lead with current conclusions before technical detail and history. Chinese, English, and mixed filenames are supported without mandatory English slugs; stable identities are separate from names. Historical content, human edits, and actual approvals are not rewritten in bulk.
+
+Ask the Agent to archive a completed Plan or restore it when work resumes. For current-format plans, `task doc-archive` and `task doc-restore` move the document between `active/` and `completed/`, retain its stable ID, update current links, and record recoverable operations. They require the current content hash to protect intervening edits; historical evidence stays unchanged.
+
+## Illustrated Repo Wiki
+
+Knowledge body defaults to docs/repo-wiki/, with one configurable authoritative root. Cards use HTML DOM; summaries, Markdown, and Mermaid text belong to the same content. The local reader provides search, filters, navigation, related sources, Spec/Plan reading, and stable references.
+
+Diagrams explain architecture, components, sequences, flows, states, and applicable data relationships. They render on demand in the browser with enlargement, zoom, pan, reset, provenance, and Mermaid text copy/export. Split complex topics; prose and source remain available when a diagram fails.
+
+Knowledge generation, queries, maintenance, and review are text-only: no card images, thumbnails, persistent image files, image generation, vision models, or rendered SVG supplied to models. The browser may use SVG DOM internally to draw diagrams; it is not a model-input image artifact. No additional model account or background generation service is required; the active Agent performs semantic updates.
+
+Common terminal commands:
+
+```bash
+./.lumine/cli wiki query "login and dynamic routing"
+./.lumine/cli wiki show <knowledge-id>
+./.lumine/cli wiki scan
+./.lumine/cli wiki serve --port 4318
+./.lumine/cli wiki check
+./.lumine/cli check health
+```
+
+Return to source when knowledge is missing, stale, or contradictory; authoritative rules are not constrained by card ranking. Incremental updates protect human content, retain candidates/conflicts, and report incomplete scope. With no active Agent, updates remain pending rather than pretending semantic work completed.
+
+## Directories, language, and recovery
+
+```text
+.lumine/                  Configuration, Runtime, tasks, and maintenance state
+  wiki-state/             Shareable durable knowledge state
+  local/wiki/             Rebuildable caches and machine state
+.agents/skills/           Four canonical everyday Skills
+docs/product-specs/       Product proposals
+docs/exec-plans/          Technical plans and execution history
+docs/repo-wiki/           Default knowledge body
+docs/validation/          Verification evidence
+```
+
+Version knowledge body and necessary maintenance state; ignore indexes and machine caches by default. Clearing caches preserves human edits, useful candidates, and conflicts. Asking a model to regenerate content is not lossless recovery. A fresh clone can read and search existing knowledge without model calls. Other content under `.lumine/local/` may include private inputs and migration recovery files; do not clear the whole directory as cache.
+
+Initialization language covers entry points, Skills, templates, CLI, and reader. Existing documents retain their own language; switching interface language does not translate content. Permanent language changes migrate defaults and managed resources without bulk-translating history.
+
+## Host integrations
+
+Shared rules live in `AGENTS.md` and `.agents/skills/`. Adapters translate host protocols without duplicating Skills. Install only the Adapters you select. When you deselect one, an upgrade removes only unchanged configuration owned by Lumine; edited or shared settings are preserved for review.
+
+Host support changes Hooks, continuation, and discovery, not goals or evidence responsibilities. Report configuration presence, static checks, and actual host operation separately. This refactor has exercised the new entry points and CLI in Codex; community Adapters retain protocol and distribution regression coverage, but each host application has not been tested live.
+
+See [Integration and limitations](docs/adapter-compatibility.md). Ask the Agent to inspect the current environment with:
+
+```bash
+./.lumine/cli adapter check current
+```
+
+Codex users may also use the repository's Plugin wrapper. It distributes the same canonical Skill as standalone installation, so installing both is unnecessary. Host-specific setup, user-level configuration, and external publication retain their own authorization boundaries.
+
+## Upgrades and migration
+
+Update the global entry with:
 
 ```bash
 npx skills update lumine-harness -g -y
 ```
 
-For a manual clone, update through the remote already configured for that clone:
+For a manual clone, fast-forward using its configured remote. Then ask the Agent for a project upgrade proposal and apply it within authorization; updating the entry does not upgrade the project automatically. Migration records baselines/backups, preserves existing changes, resumes interruptions, and marks completion only after verification. It does not automatically commit, push, or publish.
 
-```bash
-git -C <clone-directory> pull --ff-only
-```
+Legacy `.harness/` projects are handled by the separate migration tools. Temporary forwarding entries are retired after host verification; everyday Skills and the Runtime use `.lumine/` without retaining a second legacy workflow. Historical records and recovery backups remain available.
 
-### 2. Start a new session from the correct project root
-
-| Project shape | Directory to open |
-| --- | --- |
-| Single repository | The repository root |
-| Related repositories | Their common parent directory |
-
-The common parent does not have to be a Git repository. What matters is that the Agent can access every related codebase, rule, and runtime entry point. Opening only one child repository leaves cross-repository context, checks, and recovery incomplete.
-
-### 3. Send this message to the Agent
-
-```text
-Use the lumine-harness Skill to inspect this project.
-
-First identify the correct Harness root and present a Migration Proposal
-that lists what you plan to add, change, and preserve.
-Do not modify any files until I approve it.
-```
-
-At this point the Agent only inspects the project and proposes a migration. It writes files only after you approve the proposal.
-
-## What happens next
-
-```text
-Inspect → propose a migration → write after approval → check the adoption
-```
-
-1. **Inspect**
-   Detect repository topology, technology signals, Git state, existing Agent instructions, Skills, Hooks, and engineering documents.
-
-2. **Migration Proposal**
-   List files to add, update, or preserve; optional modules; selected Adapters; known limitations; and the exact write set.
-
-3. **Adopt after approval**
-   Create engineering maps, project phase Skills, workflow records, Harness Core, and selected Adapters. Design, browser, database, and other modules are enabled only when the project needs them.
-
-4. **Check the adoption**
-   Refresh engineering navigation, run Harness Check, and report Agent-product settings that still require a person.
-
-If an unmanaged existing file conflicts with the proposal, adoption stops and reports the conflict instead of overwriting it silently. Resolve the conflict, then generate and approve a new proposal.
-
-## Everyday development
-
-### Start with a Draft
-
-A requirement that enters the Harness workflow starts in `docs/drafts/<slug>.md`. The Draft is a working requirement document, not the final specification. Even a few initial lines should preserve the problem, expected outcome, known boundaries, and open questions so they can be refined over multiple conversations.
-
-`<slug>` is the short, stable name reused by every later artifact. Prefer a readable lowercase English name with hyphens, such as `notification-preferences`:
-
-```text
-docs/drafts/notification-preferences.md
-docs/design-docs/notification-preferences/          # only when design is needed
-docs/product-specs/notification-preferences.md
-docs/exec-plans/active/notification-preferences.md
-docs/validation/notification-preferences/<date>/
-```
-
-You may create the Draft file and write the initial ideas yourself, or ask the Agent to do it:
-
-```text
-I want to add notification preferences:
-<describe the requirement, background, and initial ideas here>
-
-Start by turning this into a Draft, then tell me what context is missing.
-```
-
-### Without a separate design step
-
-```text
-Draft → human confirmation → Product Spec → Exec Plan → authorize implementation
-      → implementation, tests, fixes → Validation → archive
-```
-
-### With design confirmation
-
-```text
-Draft → human confirmation → Design / Prototype → human confirmation
-      → Product Spec → Exec Plan → authorize implementation
-      → implementation, tests, fixes → Validation → archive
-```
-
-The main artifacts in this requirement workflow are:
-
-- **Draft**: original needs, open questions, and decisions still being refined;
-- **Design**: optional interaction, visual direction, and prototype confirmation;
-- **Product Spec**: product goals, scope, rules, and acceptance criteria;
-- **Exec Plan**: implementation path, current progress, and validation strategy;
-- **Validation**: evidence of what happened and which results have been proven.
-
-After confirming the Draft, continue with prompts such as:
-
-```text
-This Draft can move forward. Decide whether it needs design first; do not implement yet.
-```
-
-```text
-Create the Product Spec and Exec Plan, but do not implement yet.
-```
-
-```text
-The plan is approved. Start implementation, test, fix failures, and update Validation.
-```
-
-Small changes may use shorter records, but they must not make the engineering map, current state, or validation evidence unreliable for future sessions.
-
-## What adoption adds to the project
-
-A typical single-repository project gains these engineering assets:
-
-```text
-my-project/
-├── AGENTS.md
-├── ARCHITECTURE.md
-├── docs/
-│   ├── drafts/
-│   ├── design-docs/          # only when design is needed
-│   ├── product-specs/
-│   ├── exec-plans/
-│   │   ├── active/
-│   │   └── completed/
-│   ├── validation/
-│   └── generated/
-├── .agents/
-│   └── skills/
-├── .harness/
-└── src/
-```
-
-A multi-repository project uses the same Harness assets and also contains related repositories such as `frontend/`, `backend/`, or `mobile/` beneath the common root.
-
-### Engineering records shared by people and Agents
-
-| Asset | Question it answers |
-| --- | --- |
-| `AGENTS.md` | Where should the Agent start, and what are the project boundaries and phase rules? |
-| `ARCHITECTURE.md` | What composes the system, and how do modules connect? |
-| Draft | What was requested, and what remains unclear? |
-| Design (optional) | What should the experience look like, and which design decisions and prototypes were approved? |
-| Product Spec | What should be built, within which scope and acceptance criteria? |
-| Exec Plan | How will it be implemented, and where is execution now? |
-| Validation | What happened, and which results have been proven? |
-
-### Runtime support used by the Agent and tools
-
-- `.agents/skills` stores project methods for each phase and is the only content source for project Skills;
-- `.harness` provides the CLI, checks, state management, and product Adapters;
-- generated navigation points the Agent toward relevant source and engineering entry points, but does not replace source, tests, or runtime evidence.
-
-## Names that are easy to confuse
-
-| Name | Role |
-| --- | --- |
-| `lumine-harness` entry Skill | Inspect, adopt, or upgrade a project |
-| Project `lumine-harness-*` Skills | Run the adopted project's daily draft, design, plan, implementation, and check phases |
-| Harness Core | Lives in `.harness` and provides the CLI, checks, state, and shared runtime logic |
-| Adapter | Translates shared Harness behavior into an Agent product's lifecycle protocol |
-| Codex Plugin | An optional distribution wrapper for the entry Skill, not another Harness or project Adapter |
-
-## What people should read
-
-You do not need to read every file the Agent uses. People usually focus on:
-
-- unresolved decisions in the Draft;
-- approved Design and prototypes;
-- Product Spec;
-- decision, progress, and risk summaries in the Exec Plan;
-- Validation summaries;
-- security-sensitive, architecture-critical, or anomalous code.
-
-The Agent and tools consume complete source, generated navigation, detailed plans, test output, check logs, and lifecycle state. Harness does not remove code review; it moves more human attention toward product direction, technical boundaries, evidence quality, and high-risk code.
-
-## Using different Agent products
-
-Lumine Harness keeps shared engineering assets in `AGENTS.md`, `.agents/skills`, Docs, and `.harness` instead of copying the workflow for every product.
-
-After project adoption, coding agents use the same Draft, Product Spec, Exec Plan, and Validation workflow. Users mainly need to know whether a product requires one-time setup, how it discovers project Skills, and whether a Stop Gate can check the Agent's state before the turn ends.
-
-The compatibility guide reflects published product protocols and the Adapter implementation in this repository. It does not mean that the current session on your machine has already been verified.
-
-After adoption, start a new session in the Agent you actually plan to use and send:
-
-```text
-Check whether Lumine Harness is active in the current Agent.
-```
-
-The result tells you directly:
-
-- whether you can start now;
-- whether one setup step is still required;
-- whether a product limitation changes how you use the workflow.
-
-See [Using Lumine Harness with Different Coding Agents](docs/adapter-compatibility.md) for one-time setup, Skill discovery, and Stop Gate differences. Protocol evidence and real-host acceptance are maintainer concerns, not a daily-development prerequisite.
-
-## Safety boundaries
-
-- The Migration Proposal must be approved before the target project is modified.
-- Unmanaged conflicting files are never overwritten silently.
-- Existing worktree changes are preserved; Lumine Harness does not automatically commit, push, stash, reset, switch branches, or change remotes.
-- User-level product configuration requires separate authorization.
-- generated navigation cannot replace source, tests, runtime verification, or human decisions.
-
-## Reference
-
-The commands, troubleshooting notes, and alternate installation methods below are available when you need them.
-
-<details>
-<summary><strong>Open the reference section</strong></summary>
-
-### Common commands
-
-```bash
-./.harness/cli check all
-./.harness/cli generated refresh all
-```
-
-For ordinary troubleshooting, see [Using Lumine Harness Across Coding Agents](docs/adapter-compatibility.md). Only Adapter maintainers or host-protocol investigations need [Adapter diagnostics and release checks](docs/adapter-verification.md).
-
-### Troubleshooting
-
-**The entry Skill is not visible after installation**
-Run `npx skills list -g`, then start a new session. Global discovery differs by Agent product; use the manual method below when necessary.
-
-**The Agent sees only one child repository**
-Restart it from the common project root that contains every related repository.
-
-**Will an existing `AGENTS.md` or AI workflow be overwritten?**
-No. Inspection reports overlapping unmanaged files as conflicts. Adoption does not continue until the conflict is resolved and a new proposal is approved.
-
-**A Hook file exists but does not run**
-Ask the Agent to check whether Lumine Harness is active. If the result is still inconclusive, follow the one-time setup for that product in the compatibility guide.
-
-**generated says `Review status: pending`**
-Only deterministic scanning is complete. The Agent still needs to sample the referenced source and update review metadata.
-
-### Other installation methods
-
-Install globally with pnpm:
-
-```bash
-pnpm dlx skills add 1uckyneo/lumine-harness -g
-pnpm dlx skills add https://gitee.com/thrulife2gether/lumine-harness.git -g
-```
-
-Omit `-g` to write the entry Skill into the current project. This creates Skill files in the current directory, so first confirm that it is the intended installation target:
-
-```bash
-npx skills add 1uckyneo/lumine-harness
-```
-
-Codex users may also use `$skill-installer` or the optional Plugin distribution. The Plugin and the separately installed entry Skill contain the same Skill; do not install both unless you are switching methods. See the [OpenAI Plugin documentation](https://developers.openai.com/codex/plugins).
-
-</details>
-
-## Maintaining this repository
-
-If you want to maintain or contribute to Lumine Harness, read the root [`AGENTS.md`](AGENTS.md).
-
-## License
-
-[MIT](LICENSE)
+Maintainers: [AGENTS.md](AGENTS.md). 简体中文：[README.zh-CN.md](README.zh-CN.md)。 License: [MIT](LICENSE).

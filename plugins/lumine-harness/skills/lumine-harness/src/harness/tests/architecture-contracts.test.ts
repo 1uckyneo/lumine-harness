@@ -31,8 +31,8 @@ const REPOSITORY_ROOT = path.dirname(path.dirname(SKILL_ROOT));
 
 function tempHarness() {
   const root = mkdtempSync(path.join(os.tmpdir(), "lumine-contract-test-"));
-  mkdirSync(path.join(root, ".harness"), { recursive: true });
-  writeFileSync(path.join(root, ".harness", "root.json"), '{"schemaVersion":1,"kind":"harness-root"}\n');
+  mkdirSync(path.join(root, ".lumine"), { recursive: true });
+  writeFileSync(path.join(root, ".lumine", "root.json"), '{"schemaVersion":2,"kind":"lumine-root"}\n');
   return root;
 }
 
@@ -128,8 +128,8 @@ test("capability manifest separates implementation, setup, runtime evidence, and
 test("public compatibility summaries separate repository implementation from current-session proof", () => {
   const english = readFileSync(path.join(REPOSITORY_ROOT, "README.md"), "utf8");
   const chinese = readFileSync(path.join(REPOSITORY_ROOT, "README.zh-CN.md"), "utf8");
-  assert.match(english, /published product protocols[\s\S]*does not mean that the current session/i);
-  assert.match(chinese, /公开协议[\s\S]*不等于你本机的当前会话已经验证通过/);
+  assert.match(english, /configuration presence, static checks, and actual host operation separately/i);
+  assert.match(chinese, /配置存在、静态检查通过和真实宿主生效分别报告/);
 });
 
 test("public compatibility docs expose the OpenCode Stop Gate gap", () => {
@@ -146,13 +146,13 @@ test("dynamic Skill catalog discovers arbitrary project Skills and limits prompt
   const root = tempHarness();
   try {
     writeSkill(root, "security-audit", "Audit authentication, authorization, and permission boundaries");
-    writeSkill(root, "lumine-harness-run", "Run an approved Exec Plan and capture validation evidence");
+    writeSkill(root, "lumine-run", "Run an approved Exec Plan and capture validation evidence");
     writeSkill(root, "database-migration", "Plan and verify safe database migrations");
 
-    assert.deepEqual(discoverSharedSkills(root).map((skill) => skill.name), ["database-migration", "lumine-harness-run", "security-audit"]);
+    assert.deepEqual(discoverSharedSkills(root).map((skill) => skill.name), ["database-migration", "lumine-run", "security-audit"]);
     assert.equal(getSharedSkill(root, "$security-audit")?.relativeSource, ".agents/skills/security-audit/SKILL.md");
     assert.equal(searchSharedSkills(root, "authorization", { limit: 2 })[0]?.name, "security-audit");
-    assert.equal(searchSharedSkills(root, "approved Exec Plan", { limit: 1 })[0]?.name, "lumine-harness-run");
+    assert.equal(searchSharedSkills(root, "approved Exec Plan", { limit: 1 })[0]?.name, "lumine-run");
     const catalog = buildSharedSkillCatalog(root, { query: "audit run database", limit: 2 });
     assert.equal((catalog.match(/^-/gm) ?? []).length, 2);
     assert.ok(catalog.length <= 1200, `catalog exceeded prompt budget: ${catalog.length}`);
@@ -249,7 +249,7 @@ test("runtime probes are opt-in, redact local identity, and report evidence per 
   try {
     const incomplete: HarnessSessionInput = { product: "codebuddy", sessionId: "incomplete", cwd: root };
     assert.equal(appendVerificationEvent(root, { ...incomplete, event: "session_start" }), null);
-    assert.equal(existsSync(path.join(root, ".harness", "runtime", "probes")), false);
+    assert.equal(existsSync(path.join(root, ".lumine", "local", "runtime", "probes")), false);
     assert.equal(verifyRuntimeEvidence(root, "codebuddy").status, "not_tested");
 
     beginVerificationRun(root, "codebuddy", { verificationRunId: "verified", hostVersion: "test-host-1" });
@@ -273,7 +273,7 @@ test("runtime probes are opt-in, redact local identity, and report evidence per 
     assert.equal(result.capabilities.work_status_matrix.result, "not_tested");
     assert.equal(JSON.stringify(result).includes("host_verified"), false);
     assert.equal(JSON.stringify(result).includes("behavior_verified"), false);
-    const eventsFile = path.join(root, ".harness", "runtime", "probes", "verified", "events.jsonl");
+    const eventsFile = path.join(root, ".lumine", "local", "runtime", "probes", "verified", "events.jsonl");
     const eventsSource = readFileSync(eventsFile, "utf8");
     assert.equal(eventsSource.includes(path.resolve(root)), false);
     const events = eventsSource.trim().split(/\r?\n/).map((line): VerificationEventFixture => JSON.parse(line) as VerificationEventFixture);

@@ -1,0 +1,143 @@
+[
+  {
+    "project": "workspace",
+    "observedAt": "2026-09-29T04:10:23.983Z",
+    "check": {
+      "status": "passed",
+      "issues": [],
+      "verified": [
+        "api-migration-auth-routing",
+        "workspace-system-boundaries",
+        "chat-stream-and-image-recovery",
+        "reporter-template-request-flow"
+      ],
+      "notVerified": [
+        "semantic accuracy",
+        "runtime behavior",
+        "human acceptance"
+      ]
+    },
+    "documents": [
+      {
+        "id": "api-migration-auth-routing",
+        "path": "docs/repo-wiki/API迁移中的登录与动态路由.md",
+        "revision": "9a2d2c96cda61f6885d6f4169a33893e590ecb9b4f2d2de1ad83cf7bce6a0b9d",
+        "freshness": "current",
+        "diagrams": [
+          "permission-bootstrap",
+          "session-isolation"
+        ]
+      },
+      {
+        "id": "workspace-system-boundaries",
+        "path": "docs/repo-wiki/三仓职责与系统运行边界.md",
+        "revision": "1ef0b59b1a678c738345c33fa68df54abdc75e1d4f8f375ff2b4eab3a61edded",
+        "freshness": "current",
+        "diagrams": [
+          "repository-map",
+          "evidence-boundary"
+        ]
+      },
+      {
+        "id": "chat-stream-and-image-recovery",
+        "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+        "revision": "c944a16bdd813919f67572b8c50e15b4c9f18cfa66375d587703c71e09e4e399",
+        "freshness": "current",
+        "diagrams": [
+          "request-paths",
+          "recovery-path",
+          "cancellation-path"
+        ]
+      },
+      {
+        "id": "reporter-template-request-flow",
+        "path": "docs/repo-wiki/记者四模板与提示词请求.md",
+        "revision": "ed948eef23520626ad7d0b6125f3a0df225245432f7096898db17c440b487421",
+        "freshness": "current",
+        "diagrams": [
+          "template-to-prompt",
+          "accepted-send"
+        ]
+      }
+    ]
+  },
+  {
+    "project": "source",
+    "observedAt": "2026-09-29T04:10:23.996Z",
+    "check": {
+      "status": "passed",
+      "issues": [],
+      "verified": [
+        "lumine-architecture",
+        "lumine-wiki",
+        "lumine-task-check",
+        "lumine-adoption"
+      ],
+      "notVerified": [
+        "semantic accuracy",
+        "runtime behavior",
+        "human acceptance"
+      ]
+    },
+    "documents": [
+      {
+        "id": "lumine-architecture",
+        "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+        "revision": "89e70a54b1f7c2e5ff4a7a5f2a23eff5abfdb4f348176b866b996637ed6590af",
+        "freshness": "current",
+        "diagrams": [
+          "layers"
+        ]
+      },
+      {
+        "id": "lumine-wiki",
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+        "revision": "36320a7e159603137f8480d3983400b23bded488522bbcf9ba87d25a0f47097e",
+        "freshness": "current",
+        "diagrams": [
+          "knowledge",
+          "merge"
+        ]
+      },
+      {
+        "id": "lumine-task-check",
+        "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+        "revision": "b89570a4d23f24f9dac5fa129355e6d0167e26dec7c0416689d74ef0378d50ec",
+        "freshness": "current",
+        "diagrams": [
+          "checks"
+        ]
+      },
+      {
+        "id": "lumine-adoption",
+        "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+        "revision": "992efbb8f335ffceaf1513925c5f97b0f8442148b9bf87f27d0d3b1168e7f94f",
+        "freshness": "current",
+        "diagrams": [
+          "migration"
+        ]
+      }
+    ],
+    "scopePreparation": "New references registered explicitly before taking the replacement source snapshot.",
+    "originalPartialPacket": "a98f93e1-3cc4-43b9-a075-8ec5d89562f2",
+    "replacementPacket": "0734f4e7-9235-45ac-b56a-5e7c76df3134",
+    "applied": {
+      "packetId": "0734f4e7-9235-45ac-b56a-5e7c76df3134",
+      "status": "applied",
+      "results": [
+        {
+          "id": "lumine-architecture",
+          "status": "applied",
+          "reason": "正文与生成基线已一致保存。",
+          "candidatePath": ".lumine/wiki-state/updates/0734f4e7-9235-45ac-b56a-5e7c76df3134/candidates/ce9559b6bb68e6cf640171fe03f7722138038b72da987b33249c27d0fda324fb.md"
+        },
+        {
+          "id": "lumine-task-check",
+          "status": "applied",
+          "reason": "正文与生成基线已一致保存。",
+          "candidatePath": ".lumine/wiki-state/updates/0734f4e7-9235-45ac-b56a-5e7c76df3134/candidates/546b363e42b21889472f90c119d705efbbddc4f7b7533ed9d17aabc4972e68f8.md"
+        }
+      ]
+    }
+  }
+]

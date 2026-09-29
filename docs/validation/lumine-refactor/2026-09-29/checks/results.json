@@ -1,0 +1,58 @@
+[
+  {
+    "name": "typecheck",
+    "command": "pnpm runtime:typecheck",
+    "exitCode": 0,
+    "observedAt": "2026-09-29T04:07:32.784025+00:00",
+    "log": "typecheck.log"
+  },
+  {
+    "name": "build",
+    "command": "pnpm runtime:build",
+    "exitCode": 0,
+    "observedAt": "2026-09-29T04:07:33.995051+00:00",
+    "log": "build.log"
+  },
+  {
+    "name": "wrapper-sync",
+    "command": "bash scripts/sync-plugin-wrapper.sh",
+    "exitCode": 0,
+    "observedAt": "2026-09-29T04:07:34.082691+00:00",
+    "log": "wrapper-sync.log"
+  },
+  {
+    "name": "build-check",
+    "command": "pnpm runtime:check",
+    "exitCode": 0,
+    "observedAt": "2026-09-29T04:07:35.629955+00:00",
+    "log": "build-check.log"
+  },
+  {
+    "name": "test-source",
+    "command": "pnpm runtime:test:source",
+    "exitCode": 0,
+    "observedAt": "2026-09-29T04:07:41.219855+00:00",
+    "log": "test-source.log"
+  },
+  {
+    "name": "test-dist",
+    "command": "pnpm runtime:test",
+    "exitCode": 0,
+    "observedAt": "2026-09-29T04:07:41.219913+00:00",
+    "log": "test-dist.log"
+  },
+  {
+    "name": "skill-package",
+    "command": "bash skills/lumine-harness/scripts/check-skill-package.sh",
+    "exitCode": 0,
+    "observedAt": "2026-09-29T04:07:35.671612+00:00",
+    "log": "skill-package.log"
+  },
+  {
+    "name": "wrapper-check",
+    "command": "bash scripts/check-repo-sync.sh",
+    "exitCode": 0,
+    "observedAt": "2026-09-29T04:07:35.722748+00:00",
+    "log": "wrapper-check.log"
+  }
+]

@@ -1,0 +1,192 @@
+{
+  "origin": "<loopback-reader>",
+  "requests": [
+    {
+      "url": "<loopback-reader>/",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/styles.css",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/reader.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-PQ6DSH24.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-QHDNOTBI.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/config",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/catalog",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/document?id=login-plan",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/reference?from=docs%2Fexec-plans%2Factive%2F%E7%99%BB%E5%BD%95%E4%BC%98%E5%8C%96.md&target=..%2Fhistory%2F%25E6%2597%25A7%25E7%2599%25BB%25E5%25BD%2595%25E6%2596%25B9%25E6%25A1%2588.md",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/document?id=historic-login-plan",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/reference?from=docs%2Fexec-plans%2Fhistory%2F%E6%97%A7%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88.md&target=..%2F..%2Fvalidation%2Flogin%2F%25E9%25AA%258C%25E8%25AF%2581%25E8%25AE%25B0%25E5%25BD%2595.md",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/reference?from=docs%2Fvalidation%2Flogin%2F%E9%AA%8C%E8%AF%81%E8%AE%B0%E5%BD%95.md&target=%25E5%25A4%258D%25E6%25A0%25B8%25E8%25AF%25B4%25E6%2598%258E.md",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/reference?from=docs%2Fexec-plans%2Fhistory%2F%E6%97%A7%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88.md&target=..%2F..%2Fvalidation%2Flogin%2F%25E9%25AA%258C%25E8%25AF%2581%25E8%25AE%25B0%25E5%25BD%2595.md",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/reference?from=docs%2Fvalidation%2Flogin%2F%E9%AA%8C%E8%AF%81%E8%AE%B0%E5%BD%95.md&target=%25E7%25BB%2593%25E6%259E%259C.json",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/?doc=login-flow",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/styles.css",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/reader.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-PQ6DSH24.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-QHDNOTBI.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/config",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/catalog",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/api/document?id=login-flow",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/mermaid.core-BKOI5I3D.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-S3CGXTRJ.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-XXUKEYXA.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-TBV5XTGP.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-IVKHGDOE.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-VMNPMWRH.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-4PJNGS3V.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-WQ4ZWICK.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-ZA5KOOWO.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-5OJNVHMS.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-LDPZ6WLC.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-4LPMS5I3.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-GJGOXJO5.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-NCUBXNYU.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-5ERCSKIE.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-YYOVST5G.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-OT3T5U35.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/sequenceDiagram-SI44F4Z6-C5B7CY63.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-37A5HA4E.js",
+      "method": "GET"
+    },
+    {
+      "url": "<loopback-reader>/chunks/chunk-YEYK5MQC.js",
+      "method": "GET"
+    }
+  ],
+  "blocked": [],
+  "errors": [],
+  "consoleErrors": [],
+  "checks": [
+    "active-plan-link-opens-history-document",
+    "history-status-clearly-visible",
+    "plan-type-localized-in-chinese",
+    "history-link-opens-rendered-validation-markdown",
+    "validation-displays-source-path",
+    "nested-markdown-reference-renders",
+    "attachment-displays-path-without-serving-bytes",
+    "final-reader-renders-offline-mermaid",
+    "no-off-origin-request-attempts",
+    "all-browser-requests-same-origin",
+    "no-browser-page-errors",
+    "no-browser-console-errors"
+  ],
+  "attachmentText": "来源依据\n关闭\n此附件不在阅读器内预览，请按以下项目相对路径查看原文件。\n\ndocs/validation/login/结果.json",
+  "status": "passed"
+}

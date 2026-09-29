@@ -1,0 +1,58 @@
+[
+  {
+    "name": "task-record",
+    "command": "bash <fixture>/.lumine/cli task record <fixture>/task-input.json",
+    "cwd": "app/src",
+    "status": 0,
+    "stdout": "{\n  \"taskId\": \"knowledge-reference\",\n  \"record\": \".lumine/tasks/knowledge-reference.json\",\n  \"sha256\": \"d9c3df668e3a8b94d678a89a25136a4ad1115a32555c8caf5a21190991a8b1d7\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "stable-wiki-id-check",
+    "command": "bash <fixture>/.lumine/cli task check knowledge-reference --json",
+    "cwd": "app/src",
+    "status": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"issues\": [],\n  \"taskId\": \"knowledge-reference\",\n  \"mode\": \"implement\",\n  \"output\": \"\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "resolve-wiki-id",
+    "command": "bash <fixture>/.lumine/cli task doc-resolve login-flow",
+    "cwd": "app/src",
+    "status": 0,
+    "stdout": "{\n  \"docId\": \"login-flow\",\n  \"type\": \"architecture\",\n  \"status\": \"current\",\n  \"file\": \"docs/repo-wiki/登录与会话.md\",\n  \"metadata\": {\n    \"id\": \"login-flow\",\n    \"title\": \"登录与会话\",\n    \"summary\": \"登录建立会话，并将会话交给页面使用。\",\n    \"type\": \"architecture\",\n    \"status\": \"current\",\n    \"locale\": \"zh-CN\",\n    \"tags\": [\n      \"login\",\n      \"session\",\n      \"登录\"\n    ],\n    \"aliases\": [\n      \"authentication\",\n      \"login\",\n      \"session\"\n    ],\n    \"repositories\": [\n      \"app\"\n    ],\n    \"sources\": [\n      \"id: login-source\"\n    ],\n    \"diagrams\": [\n      \"id: login-sequence\"\n    ]\n  },\n  \"source\": \"---\\nid: login-flow\\ntitle: 登录与会话\\nsummary: 登录建立会话，并将会话交给页面使用。\\ntype: architecture\\nstatus: current\\nlocale: zh-CN\\ntags: [login, session, 登录]\\naliases: [authentication, login, session]\\nrepositories: [app]\\nsources:\\n  - id: login-source\\n    repoId: app\\n    path: src/login.ts\\n    startLine: 1\\n    endLine: 1\\ndiagrams:\\n  - id: login-sequence\\n    title: 登录流程\\n    caption: 登录提交后建立会话；静态源码不证明服务已部署。\\n    sources: [login-source]\\n---\\n\\n# 登录与会话\\n\\n登录创建会话。该知识描述本地源码机制，不代表部署或用户验收。\\n\\n```mermaid\\nsequenceDiagram\\n  用户->>服务: 登录\\n  服务-->>用户: 会话\\n```\\n\\n## 来源与限制\\n\\n可从来源区查看 src/login.ts，现有正文无需模型调用即可读取。\\n\",\n  \"sha256\": \"014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "rename-wiki-document",
+    "command": "bash <fixture>/.lumine/cli task doc-rename login-flow docs/repo-wiki/中文 名称/会话知识.md --expect 014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4",
+    "cwd": "app/src",
+    "status": 0,
+    "stdout": "{\n  \"operationId\": \"c552bd69-c281-46da-aee8-81d7749a75c9\",\n  \"documentId\": \"login-flow\",\n  \"from\": \"docs/repo-wiki/登录与会话.md\",\n  \"to\": \"docs/repo-wiki/中文 名称/会话知识.md\",\n  \"status\": \"complete\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "stable-id-and-old-alias-after-rename",
+    "command": "bash <fixture>/.lumine/cli task check knowledge-reference --json",
+    "cwd": "app/src",
+    "status": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"issues\": [],\n  \"taskId\": \"knowledge-reference\",\n  \"mode\": \"implement\",\n  \"output\": \"\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "old-path-alias-resolves",
+    "command": "bash <fixture>/.lumine/cli task doc-resolve docs/repo-wiki/登录与会话.md",
+    "cwd": "app/src",
+    "status": 0,
+    "stdout": "{\n  \"docId\": \"login-flow\",\n  \"type\": \"architecture\",\n  \"status\": \"current\",\n  \"file\": \"docs/repo-wiki/中文 名称/会话知识.md\",\n  \"metadata\": {\n    \"id\": \"login-flow\",\n    \"title\": \"登录与会话\",\n    \"summary\": \"登录建立会话，并将会话交给页面使用。\",\n    \"type\": \"architecture\",\n    \"status\": \"current\",\n    \"locale\": \"zh-CN\",\n    \"tags\": [\n      \"login\",\n      \"session\",\n      \"登录\"\n    ],\n    \"aliases\": [\n      \"authentication\",\n      \"login\",\n      \"session\"\n    ],\n    \"repositories\": [\n      \"app\"\n    ],\n    \"sources\": [\n      \"id: login-source\"\n    ],\n    \"diagrams\": [\n      \"id: login-sequence\"\n    ]\n  },\n  \"source\": \"---\\nid: login-flow\\ntitle: 登录与会话\\nsummary: 登录建立会话，并将会话交给页面使用。\\ntype: architecture\\nstatus: current\\nlocale: zh-CN\\ntags: [login, session, 登录]\\naliases: [authentication, login, session]\\nrepositories: [app]\\nsources:\\n  - id: login-source\\n    repoId: app\\n    path: src/login.ts\\n    startLine: 1\\n    endLine: 1\\ndiagrams:\\n  - id: login-sequence\\n    title: 登录流程\\n    caption: 登录提交后建立会话；静态源码不证明服务已部署。\\n    sources: [login-source]\\n---\\n\\n# 登录与会话\\n\\n登录创建会话。该知识描述本地源码机制，不代表部署或用户验收。\\n\\n```mermaid\\nsequenceDiagram\\n  用户->>服务: 登录\\n  服务-->>用户: 会话\\n```\\n\\n## 来源与限制\\n\\n可从来源区查看 src/login.ts，现有正文无需模型调用即可读取。\\n\",\n  \"sha256\": \"014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "missing-wiki-reference-rejected",
+    "command": "bash <fixture>/.lumine/cli task check knowledge-reference --json",
+    "cwd": "app/src",
+    "status": 1,
+    "stdout": "{\n  \"ok\": false,\n  \"issues\": [\n    {\n      \"code\": \"KNOWLEDGE_REF_MISSING\",\n      \"message\": \"Knowledge reference is missing or inaccessible: login-flow\",\n      \"remediation\": \"Review the relevant requirement and evidence; a diagnostic finding does not authorize a repair.\"\n    },\n    {\n      \"code\": \"KNOWLEDGE_REF_MISSING\",\n      \"message\": \"Knowledge reference is missing or inaccessible: docs/repo-wiki/登录与会话.md\",\n      \"remediation\": \"Review the relevant requirement and evidence; a diagnostic finding does not authorize a repair.\"\n    }\n  ],\n  \"taskId\": \"knowledge-reference\",\n  \"mode\": \"implement\",\n  \"output\": \"KNOWLEDGE_REF_MISSING: Knowledge reference is missing or inaccessible: login-flow\\nKNOWLEDGE_REF_MISSING: Knowledge reference is missing or inaccessible: docs/repo-wiki/登录与会话.md\"\n}\n",
+    "stderr": ""
+  }
+]

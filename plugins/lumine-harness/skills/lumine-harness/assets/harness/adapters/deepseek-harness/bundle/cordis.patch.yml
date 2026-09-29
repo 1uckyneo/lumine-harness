@@ -2,6 +2,6 @@
     - id: lumine-harness-hooks-codex
       name: '@deepseek-ai/dsh-hooks-codex'
       config:
-        configPath: ./.harness/adapters/deepseek-harness/hooks.json
+        configPath: ./.lumine/adapters/deepseek-harness/hooks.json
         defaultTimeoutMs: 600000
         stderrSummaryMaxChars: 500

@@ -1,0 +1,406 @@
+{
+  "installed-topics": {
+    "topics": [
+      {
+        "project": "workspace",
+        "id": "api-migration-auth-routing",
+        "title": "API迁移中的登录与动态路由",
+        "revision": "9a2d2c96cda61f6885d6f4169a33893e590ecb9b4f2d2de1ad83cf7bce6a0b9d",
+        "freshness": "current",
+        "diagrams": [
+          {
+            "id": "permission-bootstrap",
+            "title": "从身份到可访问页面",
+            "textLabels": 19,
+            "rendered": true
+          },
+          {
+            "id": "session-isolation",
+            "title": "旧响应如何被隔离",
+            "textLabels": 9,
+            "rendered": true
+          }
+        ],
+        "source": {
+          "id": "session",
+          "repoId": "ai-conv-plus",
+          "path": "src/api-v2/session.ts",
+          "excerptReadable": true
+        }
+      },
+      {
+        "project": "workspace",
+        "id": "workspace-system-boundaries",
+        "title": "三仓职责与系统运行边界",
+        "revision": "1ef0b59b1a678c738345c33fa68df54abdc75e1d4f8f375ff2b4eab3a61edded",
+        "freshness": "current",
+        "diagrams": [
+          {
+            "id": "repository-map",
+            "title": "三个仓库与两个前端",
+            "textLabels": 10,
+            "rendered": true
+          },
+          {
+            "id": "evidence-boundary",
+            "title": "实现、运行与交付分别回答什么",
+            "textLabels": 6,
+            "rendered": true
+          }
+        ],
+        "source": {
+          "id": "workspace-boundary",
+          "repoId": "project",
+          "path": ".gitignore",
+          "excerptReadable": true
+        }
+      },
+      {
+        "project": "workspace",
+        "id": "chat-stream-and-image-recovery",
+        "title": "聊天流式输出与图片任务恢复",
+        "revision": "c944a16bdd813919f67572b8c50e15b4c9f18cfa66375d587703c71e09e4e399",
+        "freshness": "current",
+        "diagrams": [
+          {
+            "id": "request-paths",
+            "title": "两种图片能力走不同请求链",
+            "textLabels": 8,
+            "rendered": true
+          },
+          {
+            "id": "recovery-path",
+            "title": "精确恢复原消息",
+            "textLabels": 12,
+            "rendered": true
+          },
+          {
+            "id": "cancellation-path",
+            "title": "取消操作的确认边界",
+            "textLabels": 12,
+            "rendered": true
+          }
+        ],
+        "source": {
+          "id": "chat-page",
+          "repoId": "ai-conv-plus",
+          "path": "src/views/Chat/ChatPage.vue",
+          "excerptReadable": true
+        }
+      },
+      {
+        "project": "workspace",
+        "id": "reporter-template-request-flow",
+        "title": "记者四模板与提示词请求",
+        "revision": "ed948eef23520626ad7d0b6125f3a0df225245432f7096898db17c440b487421",
+        "freshness": "current",
+        "diagrams": [
+          {
+            "id": "template-to-prompt",
+            "title": "配置如何成为可编辑写作要求",
+            "textLabels": 7,
+            "rendered": true
+          },
+          {
+            "id": "accepted-send",
+            "title": "只有页面接受发送后才清表锁定",
+            "textLabels": 19,
+            "rendered": true
+          }
+        ],
+        "source": {
+          "id": "template-parser",
+          "repoId": "ai-conv-plus",
+          "path": "src/api-v2/writingTemplates.ts",
+          "excerptReadable": true
+        }
+      },
+      {
+        "project": "source",
+        "id": "lumine-architecture",
+        "title": "Core、Skill、Adapter 与构建分发",
+        "revision": "750ae7e3a28dbe026680a8f76ff9101170a08c6865b15193de7df4598af7f73d",
+        "freshness": "current",
+        "diagrams": [
+          {
+            "id": "layers",
+            "title": "职责和产物关系",
+            "textLabels": 12,
+            "rendered": true
+          }
+        ],
+        "source": {
+          "id": "core",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+          "excerptReadable": true
+        }
+      },
+      {
+        "project": "source",
+        "id": "lumine-wiki",
+        "title": "Wiki 扫描、检索、增量更新与阅读",
+        "revision": "86a7840bab1e57ceeccbf076416108e3e9ee575b7c4beee96982d0f87cf4a2fd",
+        "freshness": "current",
+        "diagrams": [
+          {
+            "id": "knowledge",
+            "title": "文本更新与两种阅读面",
+            "textLabels": 11,
+            "rendered": true
+          },
+          {
+            "id": "merge",
+            "title": "人工修改的三方比较",
+            "textLabels": 8,
+            "rendered": true
+          }
+        ],
+        "source": {
+          "id": "engine",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "excerptReadable": true
+        }
+      },
+      {
+        "project": "source",
+        "id": "lumine-task-check",
+        "title": "任务检查、停止状态与继续条件",
+        "revision": "e9bf1325a0e8be93786a065e82f21df3cc943863696e039828d7b4fcbd74ffe2",
+        "freshness": "current",
+        "diagrams": [
+          {
+            "id": "checks",
+            "title": "任务完成的证据路径",
+            "textLabels": 8,
+            "rendered": true
+          }
+        ],
+        "source": {
+          "id": "task",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+          "excerptReadable": true
+        }
+      },
+      {
+        "project": "source",
+        "id": "lumine-adoption",
+        "title": "首次采用、升级与迁移恢复",
+        "revision": "aed01236b32310ce2e5c543a84a4b09cd211f0ecc434e8ba052e83ebed516fc4",
+        "freshness": "current",
+        "diagrams": [
+          {
+            "id": "migration",
+            "title": "提案到收口的状态",
+            "textLabels": 15,
+            "rendered": true
+          }
+        ],
+        "source": {
+          "id": "manager",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "excerptReadable": true
+        }
+      }
+    ],
+    "totalTopics": 8,
+    "totalRenderedDiagrams": 14,
+    "defaultHistoricalEntries": 0
+  },
+  "installed-documents": {
+    "documents": [
+      {
+        "project": "workspace",
+        "id": "go-api-migration",
+        "title": "Go API 迁移产品方案",
+        "status": "active",
+        "path": "docs/product-specs/Go API 迁移产品方案.md",
+        "collection": "spec",
+        "renderedTextLength": 2793,
+        "headings": [
+          "目标与当前边界",
+          "用户场景与业务规则",
+          "验收",
+          "AC-auth 登录与会话隔离",
+          "AC-menu 动态菜单和权限",
+          "AC-chat 聊天与图片恢复",
+          "AC-upload 上传识图",
+          "AC-reporter 四类记者模板"
+        ]
+      },
+      {
+        "project": "workspace",
+        "id": "lumine-refactor-product",
+        "title": "Lumine 流程与文本知识体验",
+        "status": "active",
+        "path": "docs/product-specs/Lumine 流程与文本知识体验.md",
+        "collection": "spec",
+        "renderedTextLength": 3373,
+        "headings": [
+          "为什么要改",
+          "使用方式",
+          "验收合同",
+          "AC-workflow 减少重复与正确授权",
+          "AC-task 任务、证据与完成判断",
+          "AC-skills 四个纯净日常入口",
+          "AC-locale 中文与英文体验",
+          "AC-identity 中文文件名与稳定引用"
+        ]
+      },
+      {
+        "project": "workspace",
+        "id": "go-api-migration-plan",
+        "title": "Go API 迁移执行计划",
+        "status": "active",
+        "path": "docs/exec-plans/active/Go API 迁移执行计划.md",
+        "collection": "plan",
+        "renderedTextLength": 1788,
+        "headings": [
+          "当前结果与下一步",
+          "技术方案与取舍",
+          "任务和验证",
+          "恢复与历史"
+        ]
+      },
+      {
+        "project": "workspace",
+        "id": "lumine-refactor-v2",
+        "title": "Lumine 一次性重构",
+        "status": "active",
+        "path": "docs/exec-plans/active/Lumine 一次性重构.md",
+        "collection": "plan",
+        "renderedTextLength": 1394,
+        "headings": [
+          "当前进度",
+          "技术方案与约束",
+          "任务与所有权",
+          "验收"
+        ]
+      },
+      {
+        "project": "workspace",
+        "id": "plan-dc430c9b5fbef3d2",
+        "title": "Tech Debt Tracker",
+        "status": "current",
+        "path": "docs/exec-plans/tech-debt-tracker.md",
+        "collection": "plan",
+        "renderedTextLength": 256,
+        "headings": []
+      },
+      {
+        "project": "workspace",
+        "id": "reporter-template-parity",
+        "title": "硅基记者模板对齐",
+        "status": "active",
+        "path": "docs/exec-plans/active/硅基记者模板对齐.md",
+        "collection": "plan",
+        "renderedTextLength": 2411,
+        "headings": [
+          "当前结果与下一步",
+          "范围与适用验收",
+          "技术方案与取舍",
+          "剩余工作与通过条件",
+          "验证与证据入口",
+          "恢复与历史边界"
+        ]
+      },
+      {
+        "project": "source",
+        "id": "lumine-refactor-product",
+        "title": "Lumine 流程与文本知识体验",
+        "status": "active",
+        "path": "docs/product-specs/Lumine 流程与文本知识体验.md",
+        "collection": "spec",
+        "renderedTextLength": 3373,
+        "headings": [
+          "为什么要改",
+          "使用方式",
+          "验收合同",
+          "AC-workflow 减少重复与正确授权",
+          "AC-task 任务、证据与完成判断",
+          "AC-skills 四个纯净日常入口",
+          "AC-locale 中文与英文体验",
+          "AC-identity 中文文件名与稳定引用"
+        ]
+      },
+      {
+        "project": "source",
+        "id": "lumine-source-refactor-plan",
+        "title": "Lumine 源仓重构执行记录",
+        "status": "active",
+        "path": "docs/exec-plans/active/Lumine 一次性重构.md",
+        "collection": "plan",
+        "renderedTextLength": 547,
+        "headings": [
+          "当前结果与下一步",
+          "技术安排",
+          "验收与恢复"
+        ]
+      }
+    ],
+    "readableDocuments": 8,
+    "businessActivePlans": [
+      "go-api-migration-plan",
+      "reporter-template-parity"
+    ],
+    "historicalDefaultEntries": 0
+  },
+  "reference-reading": [
+    "historical link resolves stable identity",
+    "historical state clearly labeled",
+    "exec-plan type translated",
+    "validation Markdown rendered",
+    "validation table readable",
+    "original Markdown accessible",
+    "nested validation Markdown relative link readable",
+    "attachment body is not served",
+    "attachment displays project-relative path",
+    "historical document remains outside default catalog"
+  ],
+  "verifiedAt": "2026-09-28T12:03:53.082591+00:00",
+  "limitations": [
+    "Business implementation and deployment acceptance remain separate from this documentation-reader validation.",
+    "Actual host Hook switching is a separate integration check."
+  ],
+  "installed-final-references": {
+    "checks": [
+      {
+        "activePlan": "go-api-migration-plan",
+        "historicalIdentity": "go-api-plan-history-20260928",
+        "historicalTextLength": 42306,
+        "historicalExcludedFromCatalog": true,
+        "validationTitle": "数字主播媒体鉴权修复验证",
+        "validationRenderedTextLength": 1868,
+        "originalMarkdownReadable": true
+      },
+      {
+        "activePlan": "reporter-template-parity",
+        "historicalIdentity": "reporter-plan-history-20260928",
+        "historicalTextLength": 10057,
+        "historicalExcludedFromCatalog": true,
+        "validationTitle": "硅基记者四模板客户端联调记录",
+        "validationRenderedTextLength": 3761,
+        "originalMarkdownReadable": true
+      }
+    ],
+    "activePlanToSpec": true,
+    "localizedTypes": [
+      "执行计划",
+      "产品方案",
+      "实现机制"
+    ],
+    "defaultHistoricalEntries": 0
+  },
+  "finalVerifiedAt": "2026-09-28T12:09:12.517477+00:00",
+  "latestEngineTests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "browserStrictTypecheck": "passed",
+  "fixtureService": "stopped",
+  "realReaders": "kept running",
+  "installedReaderManifestSHA256": "dbf3704431fa10112455fa8e51fe454ae92b6aca3c2fe442be9bddce9e50e9a4"
+}

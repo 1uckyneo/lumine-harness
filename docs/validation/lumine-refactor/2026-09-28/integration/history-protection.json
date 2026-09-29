@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-09-28T12:14:43.621724+00:00",
+  "historicalValidationFilesChecked": 158,
+  "mismatches": [],
+  "historicalDraftAndCompletedDiff": "",
+  "repositories": {
+    "workspace": {
+      "head": "6cfe2c946ec46c6add5765a73c41bcd2d44a999d",
+      "branch": "master",
+      "status": "authorized refactor changes present"
+    },
+    "lumine": {
+      "head": "261e678723f2ac9199ebeccb3f9c01c43c7bb8c0",
+      "branch": "main",
+      "status": "authorized refactor changes present"
+    },
+    "frontend": {
+      "head": "923b00457ffed3df6bc8fd5dc5894ff91e2d9bb6",
+      "branch": "bole-migration",
+      "status": ""
+    },
+    "backend": {
+      "head": "069d05a73515a8365f7988b86f02df2759a97943",
+      "branch": "dev-custom",
+      "status": ""
+    }
+  },
+  "localRelocationVerified": true,
+  "note": "No commits or pushes; existing validation files are preserved byte-for-byte. Local relocation details remain ignored private recovery material."
+}

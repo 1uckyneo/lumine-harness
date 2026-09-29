@@ -1,19 +1,7 @@
-# Design Gate
+# 设计判断与批准范围
 
-## 内部等级
+存在尚未确定且影响目标的新视觉／交互选择时，提供具体材料供决定。已有参考、既定行为和已批准方案可以复用，不因文件名、排版或进入实现阶段重新确认。
 
-- `L0`：不涉及 UI。
-- `L1`：小 UI 改动，不需要单独设计稿。
-- `L2`：需要先生成设计稿并人工确认。
+记录相关 Spec、材料来源、覆盖页面与状态，以及实际决定的范围。Agent 自评或 `approved` 字段不产生批准。未解决的实质选择不能被写成已经批准。
 
-这些等级由当前模型判断、由 Agent 写回和维护，不要求用户在提示词里使用。
-
-## 通过条件
-
-- 页面级 `DESIGN.md` 包含 `design_status: approved`。
-- `prototype_mode: html` 有 `prototypes[]`，且每个页面都有 HTML、component map、handoff、design_data 和截图。
-- `handoff` 和 `design_data` 是模型生成的实现上下文，不是用户批准源；冲突时以 `DESIGN.md`、HTML 原型和截图为准。
-- `design_data` 必须包含 `meta.authority: implementation_context`、reviewStatus、sourceRefs 和 deviationPolicy；业务字段可按页面需要扩展或留空。
-- `prototype_mode: hybrid` 还必须有视觉方向图和 `selected_visual_direction`。
-- `prototype_mode: image` 只能作为探索态，不能直接进入 implementation。
-- `approved_scope` 必须说明批准的是全部页面还是指定页面；真实实现只能覆盖已批准页面。
+小范围样式修复与复用既有设计不强制生成独立设计稿。复杂交互使用足以说明问题的材料，不强制 HTML、截图、component map、两种 handoff 同时存在。实现偏差在 Plan 中说明，真实页面结果单独验证。

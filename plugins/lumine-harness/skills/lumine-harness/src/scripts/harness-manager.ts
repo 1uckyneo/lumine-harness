@@ -1,512 +1,943 @@
 #!/usr/bin/env node
 import { createHash, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, rmdirSync, statSync, writeFileSync, copyFileSync } from "node:fs";
-import os from "node:os";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+  renameSync,
+  chmodSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const SKILL_ROOT_CANDIDATE = path.resolve(SCRIPT_DIR, "..");
-const SKILL_ROOT = path.basename(SKILL_ROOT_CANDIDATE) === "src"
-  ? path.dirname(SKILL_ROOT_CANDIDATE)
-  : SKILL_ROOT_CANDIDATE;
-const PRODUCTS = ["codex", "qoder", "trae", "kimi", "cursor", "opencode", "zcode", "codebuddy", "deepseek-harness"] as const;
-const CORE_MODULES = ["workflow", "generated"] as const;
-
-type Product = (typeof PRODUCTS)[number];
-type WriteAction = "create" | "update-managed" | "preserve-project" | "conflict" | "unchanged" | "delete-managed" | "create-project-template" | "generate-config" | "update-config" | "generate-manifest" | "update-manifest";
-
-interface PackageManifest {
-  dependencies?: Record<string, unknown>;
-  devDependencies?: Record<string, unknown>;
-  peerDependencies?: Record<string, unknown>;
-}
-
-interface TargetInspection {
-  schemaVersion: number;
-  targetRoot: string;
-  topology: string;
-  childRepositories: string[];
-  signals: {
-    backend: boolean;
-    frontend: boolean;
-    database: boolean;
-    nodeProject: boolean;
-    libraryOrCli: boolean;
-  };
-  hasGit: boolean;
-  gitStatus: string;
-  aiWorkflowSurfaces: string[];
-}
-
-interface ManagedFile {
-  hash: string;
-  source: string;
-}
-
-interface ManagedState {
-  files: Record<string, ManagedFile>;
-}
-
-interface ProjectConfig {
-  schemaVersion?: number;
-  topology?: string;
-  childRepositories?: string[];
-  modules?: string[];
-  selectedAdapters?: Product[];
-  generatedTargets?: string[];
-  autonomy?: Record<string, unknown>;
-  extensions?: {
-    projectChecks?: string;
-    generatedImplementation?: string;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
-interface WriteSetItem {
+import {
+  inspectLegacy,
+  legacyRetirements,
+  pruneRetiredSkillDirectories,
+  legacyRetirementConflicts,
+  convertLegacyProject,
+  convertLegacySessions,
+  legacyTransition,
+  backupLegacy,
+  finishLegacy,
+  restoreLegacy,
+} from "../migration/legacy.ts";
+const here = path.dirname(fileURLToPath(import.meta.url));
+const SKILL_ROOT =
+  path.basename(path.dirname(here)) === "src"
+    ? path.resolve(here, "../..")
+    : path.resolve(here, "..");
+const PRODUCTS = [
+  "codex",
+  "qoder",
+  "trae",
+  "kimi",
+  "cursor",
+  "opencode",
+  "zcode",
+  "codebuddy",
+  "deepseek-harness",
+];
+// Only these files are installer-owned root entries; their containing directories
+// can also hold user settings and must never be retired recursively.
+const ROOT_ADAPTER_ENTRIES: Record<string, string> = {
+  codex: "codex/hooks.json",
+  trae: "trae/hooks.json",
+  qoder: "qoder/settings.json",
+  cursor: "cursor/hooks.json",
+  codebuddy: "codebuddy/settings.json",
+  opencode: "opencode/plugins/harness.mjs",
+};
+export type Locale = "zh-CN" | "en";
+type Config = Record<string, any>;
+export interface Operation {
   path: string;
-  action: WriteAction;
+  action: "write" | "delete" | "preserve" | "conflict";
+  before: string | null;
+  after: string | null;
+  content?: string;
+  mode?: number;
+  source?: string;
   sourceHash?: string;
-  currentHash?: string | null;
-  previousHash?: string | null;
-  reason?: string;
-  projectModified?: boolean;
 }
-
-interface Proposal {
-  schemaVersion: number;
+export interface Proposal {
+  schemaVersion: 2;
   proposalId: string;
-  mode: string;
-  createdAt: string;
   targetRoot: string;
-  inspect: TargetInspection;
-  selectedAdapters: Product[];
-  modules: string[];
-  writeSet: WriteSetItem[];
-  targetFingerprint: string;
-  backupRequired: boolean;
+  mode: string;
+  locale: Locale;
+  createdAt: string;
+  project: Config;
+  inspect: ReturnType<typeof inspectTarget>;
+  operations: Operation[];
   integrity: string;
+  warnings: string[];
+  legacy?: {
+    before: Record<string, string>;
+    bridges: Record<string, string>;
+    protectedPaths?: string[];
+  };
 }
-
-interface ProposalOptions {
+export interface ProposalOptions {
   adapters?: string;
   modules?: string;
+  locale?: Locale;
   mode?: string;
+  overrides?: Record<string, string>;
+  sourceSelfUse?: boolean;
+  reviewedRetirements?: string[];
+  reviewedLegacyFiles?: string[];
 }
-
-function hash(value: string | NodeJS.ArrayBufferView): string { return createHash("sha256").update(value).digest("hex"); }
-function slash(value: string): string { return value.replaceAll(path.sep, "/"); }
-function readJson<T>(file: string): T { return JSON.parse(readFileSync(file, "utf8")) as T; }
-function fileHash(file: string): string { return hash(readFileSync(file)); }
-function relative(root: string, file: string): string { return slash(path.relative(root, file)); }
-
-function walk(dir: string, out: string[] = []): string[] {
-  if (!existsSync(dir)) return out;
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if ([".git", "node_modules", "dist", "target"].includes(entry.name)) continue;
-    if (path.basename(dir) === ".harness" && ["runtime", "local"].includes(entry.name)) continue;
-    const file = path.join(dir, entry.name);
-    if (entry.isDirectory()) walk(file, out);
-    else if (entry.isFile()) out.push(file);
+const hash = (v: string | Uint8Array) =>
+  createHash("sha256").update(v).digest("hex");
+const json = (v: unknown) => JSON.stringify(v, null, 2) + "\n";
+const readJson = (f: string): Config => JSON.parse(readFileSync(f, "utf8"));
+const slash = (s: string) => s.split(path.sep).join("/");
+function files(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true })
+    .flatMap((e) =>
+      e.isSymbolicLink()
+        ? []
+        : e.isDirectory()
+          ? [".git", "node_modules"].includes(e.name)
+            ? []
+            : files(path.join(dir, e.name))
+          : e.isFile()
+            ? [path.join(dir, e.name)]
+            : [],
+    )
+    .sort();
+}
+function fingerprint(f: string): string | null {
+  if (!existsSync(f)) return null;
+  if (!lstatSync(f).isFile() || lstatSync(f).isSymbolicLink())
+    throw new Error("Unsupported file type: " + f);
+  return hash(readFileSync(f));
+}
+function target(root: string, rel: string): string {
+  if (
+    path.isAbsolute(rel) ||
+    rel.includes("\\") ||
+    rel.split("/").includes("..")
+  )
+    throw new Error("Unsafe target path: " + rel);
+  const f = path.resolve(root, rel);
+  if (!f.startsWith(root + path.sep)) throw new Error("Target outside project");
+  let p = f;
+  while (p !== root) {
+    if (existsSync(p) && lstatSync(p).isSymbolicLink())
+      throw new Error("Symlink target rejected: " + rel);
+    p = path.dirname(p);
   }
-  return out;
+  return f;
 }
-
-function childGitRepositories(root: string): string[] {
-  const result: string[] = [];
-  for (const entry of readdirSync(root, { withFileTypes: true })) {
-    if (!entry.isDirectory() || [".git", ".harness", "node_modules"].includes(entry.name)) continue;
-    const candidate = path.join(root, entry.name);
-    if (existsSync(path.join(candidate, ".git"))) result.push(entry.name);
-    for (const nested of readdirSync(candidate, { withFileTypes: true })) {
-      if (!nested.isDirectory()) continue;
-      const nestedRoot = path.join(candidate, nested.name);
-      if (existsSync(path.join(nestedRoot, ".git"))) result.push(slash(path.join(entry.name, nested.name)));
-    }
-  }
-  return [...new Set(result)].sort();
+function atomic(f: string, content: Uint8Array, mode = 0o644) {
+  mkdirSync(path.dirname(f), { recursive: true });
+  const tmp = f + ".lumine-" + randomUUID() + ".tmp";
+  writeFileSync(tmp, content, { mode });
+  renameSync(tmp, f);
+  chmodSync(f, mode);
 }
-
 function git(root: string, args: string[]): string {
-  try { return execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim(); }
-  catch { return ""; }
-}
-
-export function inspectTarget(targetRoot: string): TargetInspection {
-  const root = realpathSync(path.resolve(targetRoot));
-  const childRepositories = childGitRepositories(root);
-  const files = walk(root).filter((file) => !file.includes(`${path.sep}.git${path.sep}`) && !file.includes(`${path.sep}node_modules${path.sep}`));
-  const names = new Set(files.map((file) => path.basename(file)));
-  const backend = ["pom.xml", "build.gradle", "go.mod", "pyproject.toml", "requirements.txt"].some((name) => names.has(name));
-  const packageFile = path.join(root, "package.json");
-  let packageNames = new Set<string>();
-  if (existsSync(packageFile)) {
-    try {
-      const pkg = readJson<PackageManifest>(packageFile);
-      packageNames = new Set([...Object.keys(pkg.dependencies ?? {}), ...Object.keys(pkg.devDependencies ?? {}), ...Object.keys(pkg.peerDependencies ?? {})]);
-    } catch {
-      packageNames = new Set();
-    }
+  try {
+    return execFileSync("git", args, {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
   }
-  const frontendPackages = ["@angular/core", "@sveltejs/kit", "next", "nuxt", "react", "svelte", "vite", "vue"];
-  const frontend = ["vite.config.ts", "vite.config.js", "next.config.js", "next.config.mjs", "nuxt.config.ts", "svelte.config.js", "angular.json"].some((name) => names.has(name))
-    || frontendPackages.some((name) => packageNames.has(name));
-  const nodeProject = existsSync(packageFile);
-  const database = files.some((file) => file.endsWith(".sql") || file.endsWith(".prisma") || file.includes(`${path.sep}migrations${path.sep}`));
-  const libraryOrCli = nodeProject && !backend && !frontend;
-  const topology = childRepositories.length ? "workspace-with-child-repos" : backend && frontend ? "single-fullstack" : backend ? "backend-only" : frontend ? "frontend-only" : libraryOrCli ? "library-or-cli" : "unknown-traditional";
-  const aiWorkflowSurfaces = ["AGENTS.md", "CLAUDE.md", "CODEBUDDY.md", ".agents/skills", ".harness", ".codex/hooks.json", ".qoder/settings.json", ".trae/hooks.json", ".cursor/hooks.json", ".opencode/plugins", ".codebuddy/settings.json"]
-    .filter((item) => existsSync(path.join(root, item)));
+}
+export function inspectTarget(input: string) {
+  const root = realpathSync(path.resolve(input));
+  const childRepositories = readdirSync(root, { withFileTypes: true })
+    .filter(
+      (e) =>
+        e.isDirectory() &&
+        !e.name.startsWith(".") &&
+        existsSync(path.join(root, e.name, ".git")),
+    )
+    .map((e) => e.name)
+    .sort();
+  const roots = [root, ...childRepositories.map((r) => path.join(root, r))];
+  const backend = roots.some((r) =>
+    ["go.mod", "server/go.mod", "pom.xml", "pyproject.toml"].some((f) =>
+      existsSync(path.join(r, f)),
+    ),
+  );
+  const frontend = roots.some((r) =>
+    ["vite.config.ts", "nuxt.config.ts", "web/package.json", "src/views"].some(
+      (f) => existsSync(path.join(r, f)),
+    ),
+  );
+  const nodeProject = existsSync(path.join(root, "package.json"));
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     targetRoot: root,
-    topology,
     childRepositories,
-    signals: { backend, frontend, database, nodeProject, libraryOrCli },
-    hasGit: Boolean(git(root, ["rev-parse", "--show-toplevel"])),
+    hasGit: git(root, ["rev-parse", "--show-toplevel"]) === root,
     gitStatus: git(root, ["status", "--porcelain=v1", "-uall"]),
-    aiWorkflowSurfaces
+    topology: childRepositories.length
+      ? "workspace-with-child-repos"
+      : backend && frontend
+        ? "single-fullstack"
+        : backend
+          ? "backend-only"
+          : frontend
+            ? "frontend-only"
+            : nodeProject
+              ? "library-or-cli"
+              : "unknown-traditional",
+    signals: {
+      backend,
+      frontend,
+      nodeProject,
+      database: backend,
+      libraryOrCli: nodeProject && !frontend && !backend,
+    },
+    aiWorkflowSurfaces: [
+      "AGENTS.md",
+      ".agents/skills",
+      ".lumine",
+      ".codex/hooks.json",
+      ".trae/hooks.json",
+    ].filter((f) => existsSync(path.join(root, f))),
   };
 }
-
-function selectedModules(inspect: TargetInspection, requested = "auto"): string[] {
-  if (requested !== "auto") return [...new Set([...CORE_MODULES, ...requested.split(",").map((item) => item.trim()).filter(Boolean)])].sort();
-  const modules: string[] = [...CORE_MODULES];
-  if (inspect.signals.frontend) modules.push("design", "frontend", "browser");
-  if (inspect.signals.database) modules.push("database");
-  return modules.sort();
+function localized(relative: string, locale: Locale): string {
+  const local = path.join(SKILL_ROOT, "assets/locales", locale, relative);
+  if (locale === "en" && existsSync(local)) return local;
+  return path.join(SKILL_ROOT, "assets", relative);
 }
-
-function parseProducts(value = "none"): Product[] {
-  if (value === "none" || !value) return [];
-  const products = [...new Set(value.split(",").map((item) => item.trim()).filter(Boolean))];
-  const unknown = products.filter((product) => !PRODUCTS.includes(product as Product));
-  if (unknown.length) throw new Error(`Unknown Adapter products: ${unknown.join(", ")}`);
-  return products.sort() as Product[];
-}
-
-function addTree(map: Map<string, string>, sourceRoot: string, targetRoot: string, filter: (file: string) => boolean = () => true): void {
-  for (const source of walk(sourceRoot)) {
-    if (!filter(source)) continue;
-    map.set(slash(path.join(targetRoot, relative(sourceRoot, source))), source);
-  }
-}
-
-function sourceMap(_inspect: TargetInspection, adapters: Product[], modules: string[]): Map<string, string> {
+function sourceMap(locale: Locale, adapters: string[]): Map<string, string> {
   const map = new Map<string, string>();
-  const adapterRoot = path.join(SKILL_ROOT, "assets", "harness", "adapters");
-  addTree(map, path.join(SKILL_ROOT, "assets", "harness"), ".harness", (file) => {
-    if (file.includes(`${path.sep}tests${path.sep}`) || file.endsWith(`${path.sep}project.json`) || file.endsWith(`${path.sep}managed.json`)) return false;
-    if (!file.startsWith(`${adapterRoot}${path.sep}`)) return true;
-    const product = relative(adapterRoot, file).split("/")[0];
-    return adapters.includes(product as Product);
-  });
-  addTree(map, path.join(SKILL_ROOT, "assets", "skills"), ".agents/skills");
-  const entries: Partial<Record<Product, readonly [string, string]>> = {
-    codex: ["assets/codex/hooks.json", ".codex/hooks.json"],
-    qoder: ["assets/qoder/settings.json", ".qoder/settings.json"],
-    trae: ["assets/trae/hooks.json", ".trae/hooks.json"],
-    cursor: ["assets/cursor/hooks.json", ".cursor/hooks.json"],
-    opencode: ["assets/opencode/plugins/harness.mjs", ".opencode/plugins/harness.mjs"],
-    codebuddy: ["assets/codebuddy/settings.json", ".codebuddy/settings.json"]
+  const add = (
+    dir: string,
+    prefix: string,
+    filter: (f: string) => boolean = () => true,
+  ) => {
+    for (const f of files(dir)) {
+      if (filter(f))
+        map.set(
+          slash(path.join(prefix, path.relative(dir, f))).replace(
+            /\.template$/,
+            "",
+          ),
+          f,
+        );
+    }
   };
-  for (const product of adapters) {
-    const item = entries[product];
-    if (item) map.set(item[1], path.join(SKILL_ROOT, item[0]));
+  add(path.join(SKILL_ROOT, "assets/harness"), ".lumine", (f) => {
+    const rel = slash(
+      path.relative(path.join(SKILL_ROOT, "assets/harness"), f),
+    );
+    return (
+      !rel.startsWith("tests/") &&
+      !["project.json", "root.json", "managed.json"].includes(rel) &&
+      !rel.startsWith("generated") &&
+      (!rel.startsWith("adapters/") || adapters.includes(rel.split("/")[1]))
+    );
+  });
+  add(path.join(SKILL_ROOT, "assets/wiki-reader"), ".lumine/wiki-reader");
+  add(localized("skills", locale), ".agents/skills");
+  add(localized("docs-templates", locale), "docs/templates");
+  add(localized("docs-seed", locale), "docs");
+  for (const name of ["AGENTS.md", "ARCHITECTURE.md"])
+    map.set(name, localized("root/" + name, locale));
+  for (const a of adapters) {
+    const entry = ROOT_ADAPTER_ENTRIES[a];
+    if (entry)
+      map.set("." + entry, path.join(SKILL_ROOT, "assets", entry));
   }
-  const docs: Array<readonly [string, string, string]> = [
-    ["assets/docs-seed/workflow-artifacts.md", "docs/workflow-artifacts.md", "workflow"],
-    ["assets/docs-seed/generated/index.md", "docs/generated/index.md", "generated"],
-    ["assets/docs-seed/drafts-index.md", "docs/drafts/index.md", "workflow"],
-    ["assets/docs-seed/design-docs/index.md", "docs/design-docs/index.md", "design"],
-    ["assets/docs-seed/design-docs/core-beliefs.md", "docs/design-docs/core-beliefs.md", "design"],
-    ["assets/docs-seed/design-docs/design-gate.md", "docs/design-docs/design-gate.md", "design"],
-    ["assets/docs-seed/FRONTEND.md", "docs/FRONTEND.md", "frontend"],
-    ["assets/docs-seed/references/browser-automation/index.md", "docs/references/browser-automation/index.md", "browser"],
-    ["assets/docs-seed/references/vendor-llms/index.md", "docs/references/vendor-llms/index.md", "workflow"]
-  ];
-  for (const [source, target, module] of docs) if (modules.includes(module)) map.set(target, path.join(SKILL_ROOT, source));
-  const designTemplates = new Set(["DESIGN.md", "component-map.md", "handoff.md", "handoff.design.json"]);
-  addTree(map, path.join(SKILL_ROOT, "assets", "docs-templates"), "docs/templates", (file) => modules.includes("design") || !designTemplates.has(path.basename(file)));
   return map;
 }
-
-function managedState(root: string): ManagedState {
-  const file = path.join(root, ".harness", "managed.json");
-  return existsSync(file) ? readJson<ManagedState>(file) : { files: {} };
-}
-
-function isProjectOwnedPath(target: string, project: ProjectConfig = {}): boolean {
-  if (["AGENTS.md", "ARCHITECTURE.md"].includes(target)) return true;
-  if (target.startsWith(".agents/skills/") || target.startsWith("docs/")) return true;
-  const extensions = project.extensions ?? {};
-  const extensionPaths = [extensions.projectChecks, extensions.generatedImplementation]
-    .filter((value): value is string => typeof value === "string" && Boolean(value.trim()))
-    .map((value) => slash(path.normalize(value)));
-  return extensionPaths.includes(target);
-}
-
-function targetFingerprint(root: string, inspect: TargetInspection, paths: string[]): string {
-  const state = paths.map((rel) => {
-    const file = path.join(root, rel);
-    if (!existsSync(file)) return [rel, null];
-    const stat = lstatSync(file);
-    return [rel, stat.isFile() ? fileHash(file) : `type:${stat.mode}`];
+function renderRootTemplate(
+  content: string,
+  root: string,
+  project: Config,
+  inspect: ReturnType<typeof inspectTarget>,
+  locale: Locale,
+): string {
+  const zh = locale === "zh-CN",
+    map = project.repositories
+      .map((r: any) => "- " + r.id + ": `" + r.path + "`")
+      .join("\n");
+  const unverified = zh
+    ? "尚未核实；按当前任务从登记仓库的源码、配置和验证记录确认，不将目录信号当作运行证明。"
+    : "Not yet verified. Inspect registered source, configuration and evidence for the current task; directory signals do not establish runtime behavior.";
+  const values: Record<string, string> = {
+    project_name: path.basename(root),
+    topology: inspect.topology,
+    repo_rules_entry: "AGENTS.md",
+    directory_map: map,
+    detailed_directory_map: map,
+    fact_index_targets: "- " + project.wiki.root,
+    tech_signals: JSON.stringify(inspect.signals),
+    implementation_surface: zh
+      ? "登记仓库及其相对位置：\n" + map
+      : "Registered repositories and their relative locations:\n" + map,
+    implementation_surfaces: project.repositories
+      .map((r: any) => r.id)
+      .join(", "),
+    project_specific_rules: zh
+      ? "保留既有项目规则及当前请求明确的写入范围。首次采用不会为业务代码或外部操作增加授权。"
+      : "Preserve existing project rules and the write scope of the current request. Adoption does not grant permission for business changes or external actions.",
+    implementation_paths: unverified,
+    domain_map: unverified,
+    architecture_invariants: zh
+      ? "每个登记仓库保持独立边界；源码、历史证据与部署状态分别判断。"
+      : "Keep registered repository boundaries separate; distinguish source, historical evidence and deployed behavior.",
+    verification_entry_points:
+      "`./.lumine/cli check health` · `./.lumine/cli wiki check`",
+    known_gaps: unverified,
+  };
+  const rendered = content.replace(/{{([a-z_]+)}}/g, (_, key) => {
+    if (!(key in values)) throw new Error("Unknown template field: " + key);
+    return values[key];
   });
-  return hash(JSON.stringify({ topology: inspect.topology, gitStatus: inspect.gitStatus, state }));
+  return rendered;
 }
-
-export function createProposal(targetRoot: string, options: ProposalOptions = {}): Proposal {
-  const inspect = inspectTarget(targetRoot);
-  const selectedAdapters = parseProducts(options.adapters ?? "none");
-  const modules = selectedModules(inspect, options.modules ?? "auto");
-  const sources = sourceMap(inspect, selectedAdapters, modules);
-  const previous = managedState(inspect.targetRoot);
-  const currentProjectFile = path.join(inspect.targetRoot, ".harness", "project.json");
-  const currentProject = existsSync(currentProjectFile) ? readJson<ProjectConfig>(currentProjectFile) : {};
-  const writeSet: WriteSetItem[] = [];
-  for (const [target, source] of sources) {
-    const targetFile = path.join(inspect.targetRoot, target);
-    const existing = existsSync(targetFile);
-    const previousHash = previous.files?.[target]?.hash;
-    const currentHash = existing && statSync(targetFile).isFile() ? fileHash(targetFile) : null;
-    let action: WriteAction = !existing
-      ? "create"
-      : previousHash && currentHash === previousHash
-        ? "update-managed"
-        : isProjectOwnedPath(target, currentProject)
-          ? "preserve-project"
-          : "conflict";
-    if (existing && currentHash === fileHash(source)) action = "unchanged";
-    writeSet.push({ path: target, action, sourceHash: fileHash(source), currentHash });
+function sign(p: Omit<Proposal, "integrity"> | Proposal): string {
+  const { integrity: _, ...v } = p as Proposal;
+  return hash(JSON.stringify(v));
+}
+export function createProposal(
+  input: string,
+  options: ProposalOptions = {},
+): Proposal {
+  const inspect = inspectTarget(input),
+    root = inspect.targetRoot;
+  const legacy = inspectLegacy(root);
+  const configFile = path.join(root, ".lumine/project.json");
+  const current = existsSync(configFile)
+    ? readJson(configFile)
+    : legacy.project;
+  if (existsSync(configFile) && legacy.exists) {
+    const marker = path.join(root, ".lumine/root.json");
+    const m = existsSync(marker) ? readJson(marker) : {};
+    if (!m.migrationId || typeof m.migrationId !== "string") throw new Error("Conflicting active roots; recover the incomplete migration first.");
+    const previousProposal = target(root, `.lumine-migrations/${m.migrationId}/proposal.json`);
+    if (!existsSync(previousProposal)) throw new Error("Conflicting active roots: migration identity has no recovery proposal.");
+    const previous = readJson(previousProposal) as Proposal;
+    if (previous.targetRoot !== root || previous.proposalId !== m.migrationId || sign(previous) !== previous.integrity) throw new Error("Conflicting active roots: migration identity mismatch.");
   }
-  for (const [target, metadata] of Object.entries(previous.files ?? {})) {
-    if (sources.has(target) || [".harness/project.json", ".harness/managed.json", "AGENTS.md", "ARCHITECTURE.md"].includes(target)) continue;
-    if (metadata?.source !== "lumine-harness") continue;
-    const targetFile = path.join(inspect.targetRoot, target);
-    if (!existsSync(targetFile)) continue;
-    const currentHash = statSync(targetFile).isFile() ? fileHash(targetFile) : null;
-    writeSet.push({
-      path: target,
-      action: currentHash === metadata.hash ? "delete-managed" : "conflict",
-      currentHash,
-      previousHash: metadata.hash,
-      reason: "no-longer-selected-or-enabled"
+  const locale = options.locale ?? current.locale ?? "en";
+  if (!["zh-CN", "en"].includes(locale))
+    throw new Error("locale must be zh-CN or en");
+  const adapters =
+    options.adapters === undefined
+      ? (current.selectedAdapters ?? [])
+      : options.adapters === "none"
+        ? []
+        : [...new Set(options.adapters.split(",").filter(Boolean))];
+  if (adapters.some((x: string) => !PRODUCTS.includes(x)))
+    throw new Error("Unknown adapter");
+  const proposalId = randomUUID();
+  const project: Config = convertLegacyProject(
+    current,
+    inspect.childRepositories,
+  );
+  Object.assign(project, {
+    schemaVersion: 2,
+    workflowVersion: 2,
+    locale,
+    topology: inspect.topology,
+    selectedAdapters: adapters,
+  });
+  if (options.modules)
+    project.modules = options.modules
+      .split(",")
+      .filter((x) => x !== "generated");
+  project.wiki ??= {
+    root: "docs/repo-wiki",
+    watchScopes: project.repositories.map((r: any) => ({
+      repoId: r.id,
+      path: ".",
+    })),
+    maxCards: 6,
+    maxContextChars: 12000,
+  };
+  const previousFile = path.join(root, ".lumine/managed.json");
+  const previous = existsSync(previousFile)
+    ? (readJson(previousFile).files ?? {})
+    : legacy.managed;
+  const operations: Operation[] = [];
+  const retirementWarnings: string[] = [];
+  const add = (
+    rel: string,
+    body: Uint8Array,
+    source?: string,
+    mode = 0o644,
+    force = false,
+  ) => {
+    const before = fingerprint(target(root, rel));
+    const after = hash(body);
+    let action: Operation["action"] = "write";
+    if (before && before !== after && !force) {
+      if (previous[rel]?.hash === before) action = "write";
+      else if (
+        rel.startsWith("docs/") ||
+        rel === ".gitignore" ||
+        ["AGENTS.md", "ARCHITECTURE.md"].includes(rel) ||
+        rel.startsWith(".agents/skills/")
+      )
+        action = "preserve";
+      else action = "conflict";
+    }
+    operations.push({
+      path: rel,
+      action,
+      before,
+      after,
+      content: Buffer.from(body).toString("base64"),
+      mode,
+      source,
+      sourceHash: source ? (fingerprint(source) ?? undefined) : undefined,
+    });
+  };
+  for (const [rel, f] of sourceMap(locale, adapters)) {
+    if (options.sourceSelfUse && (rel.startsWith(".agents/skills/") || rel.startsWith(".lumine/"))) continue;
+    if (!existsSync(f)) throw new Error("Missing distribution asset: " + rel);
+    let body = readFileSync(f);
+    if (rel === "AGENTS.md" || rel === "ARCHITECTURE.md") {
+      body = Buffer.from(
+        renderRootTemplate(body.toString(), root, project, inspect, locale),
+      );
+    }
+    add(rel, body, f, rel.endsWith("/cli") ? 0o755 : 0o644);
+  }
+  if (options.sourceSelfUse) add(".lumine/cli", Buffer.from('#!/usr/bin/env bash\nset -euo pipefail\nLUMINE_SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"\nexec "$LUMINE_SOURCE_ROOT/skills/lumine-harness/assets/harness/cli" "$@"\n'), undefined, 0o755, true);
+  const overrides = options.overrides ?? {};
+  if (overrides[".lumine/project.json"]) {
+    const custom = JSON.parse(
+      Buffer.from(overrides[".lumine/project.json"], "base64").toString(),
+    );
+    if (custom.locale !== locale || custom.schemaVersion !== 2)
+      throw new Error(
+        "Config override must match proposal language and version",
+      );
+    Object.assign(project, custom);
+    project.selectedAdapters = adapters;
+  }
+  for (const [rel, content] of Object.entries(overrides)) {
+    if (
+      [
+        ".lumine/project.json",
+        ".lumine/root.json",
+        ".lumine/managed.json",
+      ].includes(rel)
+    )
+      continue;
+    const i = operations.findIndex((o) => o.path === rel);
+    const body = Buffer.from(content, "base64");
+    const source = i >= 0 && operations[i].after === hash(body) ? operations[i].source : undefined;
+    if (i >= 0) operations.splice(i, 1);
+    add(rel, body, source, 0o644, true);
+  }
+  const ignoreFile = path.join(root, ".gitignore"),
+    ignore = existsSync(ignoreFile) ? readFileSync(ignoreFile, "utf8") : "";
+  const patterns = [".lumine/local/", ".lumine-migrations/"];
+  const updated =
+    ignore +
+    (ignore && !ignore.endsWith("\n") ? "\n" : "") +
+    patterns
+      .filter((p) => !ignore.split("\n").includes(p))
+      .map((p) => p + "\n")
+      .join("");
+  add(".gitignore", Buffer.from(updated), undefined, 0o644, true);
+  add(
+    ".lumine/project.json",
+    Buffer.from(json(project)),
+    undefined,
+    0o644,
+    true,
+  );
+  const oldMarker = existsSync(path.join(root, ".lumine/root.json"))
+    ? readJson(path.join(root, ".lumine/root.json"))
+    : {};
+  const marker = {
+    ...oldMarker,
+    schemaVersion: 2,
+    kind: "lumine-root",
+    projectId: oldMarker.projectId ?? randomUUID(),
+    distributionVersion: "2.0.0",
+    instructions: "AGENTS.md",
+    skills: options.sourceSelfUse
+      ? "skills/lumine-harness/assets/skills"
+      : ".agents/skills",
+    ...(options.sourceSelfUse ? { runtime: "skills/lumine-harness/assets/harness" } : {}),
+    migrationId: proposalId,
+    migrationStatus: "applied",
+  };
+  add(".lumine/root.json", Buffer.from(json(marker)), undefined, 0o644, true);
+  for (const [rel, body] of convertLegacySessions(root)) {
+    if (!existsSync(target(root, rel))) add(rel, Buffer.from(body));
+  }
+  for (const rel of legacyRetirements(root, options.reviewedRetirements)) {
+    if (operations.some((o) => o.path === rel)) continue;
+    operations.push({
+      path: rel,
+      action: "delete",
+      before: fingerprint(target(root, rel)),
+      after: null,
     });
   }
-  for (const target of ["AGENTS.md", "ARCHITECTURE.md"]) {
-    if (sources.has(target)) continue;
-    const file = path.join(inspect.targetRoot, target);
-    writeSet.push({ path: target, action: existsSync(file) ? "preserve-project" : "create-project-template", currentHash: existsSync(file) ? fileHash(file) : null });
-  }
-  const projectFile = path.join(inspect.targetRoot, ".harness", "project.json");
-  const projectCurrentHash = existsSync(projectFile) ? fileHash(projectFile) : null;
-  const projectPreviousHash = previous.files?.[".harness/project.json"]?.hash;
-  writeSet.push({
-    path: ".harness/project.json",
-    action: !projectCurrentHash ? "generate-config" : "update-config",
-    currentHash: projectCurrentHash,
-    previousHash: projectPreviousHash ?? null,
-    projectModified: Boolean(projectPreviousHash && projectPreviousHash !== projectCurrentHash)
-  });
-  writeSet.push({ path: ".harness/managed.json", action: existsSync(path.join(inspect.targetRoot, ".harness", "managed.json")) ? "update-manifest" : "generate-manifest" });
-  const trackedPaths = writeSet.map((item) => item.path).sort();
-  const payload: Proposal = {
-    schemaVersion: 1,
-    proposalId: randomUUID(),
-    mode: options.mode ?? "adopt",
-    createdAt: new Date().toISOString(),
-    targetRoot: inspect.targetRoot,
-    inspect,
-    selectedAdapters,
-    modules,
-    writeSet,
-    targetFingerprint: targetFingerprint(inspect.targetRoot, inspect, trackedPaths),
-    backupRequired: writeSet.some((item) => ["update-managed", "update-config", "update-manifest", "delete-managed"].includes(item.action)) || !inspect.hasGit,
-    integrity: ""
-  };
-  payload.integrity = hash(JSON.stringify({ ...payload, integrity: undefined }));
-  return payload;
-}
-
-function verifyProposal(proposal: Proposal): void {
-  const expected = hash(JSON.stringify({ ...proposal, integrity: undefined }));
-  if (proposal.integrity !== expected) throw new Error("Proposal integrity check failed.");
-  if (!existsSync(proposal.targetRoot)) throw new Error("Proposal target no longer exists.");
-  const tracked = proposal.writeSet.map((item) => item.path).sort();
-  const current = targetFingerprint(proposal.targetRoot, inspectTarget(proposal.targetRoot), tracked);
-  if (current !== proposal.targetFingerprint) throw new Error("Target changed after Proposal creation. Generate and review a new Proposal.");
-  const conflicts = proposal.writeSet.filter((item) => item.action === "conflict");
-  if (conflicts.length) throw new Error(`Proposal has unresolved conflicts: ${conflicts.map((item) => item.path).join(", ")}`);
-  const sources = sourceMap(proposal.inspect, proposal.selectedAdapters, proposal.modules);
-  const changedSources = proposal.writeSet.filter((item) => {
-    const source = sources.get(item.path);
-    return source && item.sourceHash && fileHash(source) !== item.sourceHash;
-  });
-  if (changedSources.length) throw new Error(`Lumine Harness source changed after Proposal creation: ${changedSources.map((item) => item.path).join(", ")}. Generate a new Proposal.`);
-}
-
-function renderProjectTemplate(name: string, inspect: TargetInspection): string {
-  const source = readFileSync(path.join(SKILL_ROOT, "assets", "root", name), "utf8");
-  const projectName = path.basename(inspect.targetRoot);
-  return source
-    .replaceAll("{{project_name}}", projectName)
-    .replaceAll("{{target_root}}", ".")
-    .replaceAll("{{topology}}", inspect.topology)
-    .replaceAll("{{implementation_surface}}", `当前工程形态为 ${inspect.topology}，实现入口以工程地图和模块文档为准。`)
-    .replaceAll("{{implementation_surfaces}}", inspect.childRepositories.join(", ") || ".")
-    .replaceAll("{{repo_rules_entry}}", "AGENTS.md、ARCHITECTURE.md、README.md 与模块级文档")
-    .replaceAll("{{directory_map}}", inspect.childRepositories.map((item) => `- \`${item}\`：关联仓库，具体规则以仓库内入口文档为准。`).join("\n") || "- `.`：当前工程根。")
-    .replaceAll("{{fact_index_targets}}", "- `AGENTS.md`\n- `ARCHITECTURE.md`\n- `.agents/skills/`\n- `.harness/`\n- `docs/`")
-    .replaceAll("{{tech_signals}}", `backend=${Number(inspect.signals.backend)}, frontend=${Number(inspect.signals.frontend)}, db=${Number(inspect.signals.database)}`)
-    .replaceAll(/{{[a-z_]+}}/g, "TODO: inspect and document this project-specific value.");
-}
-
-function backupFiles(root: string, pathsToBackup: string[]): string | null {
-  if (!pathsToBackup.length) return null;
-  const dir = path.join(root, ".harness", "local", "harness-backup", new Date().toISOString().replace(/[:.]/g, "-"));
-  for (const rel of pathsToBackup) {
-    const source = path.join(root, rel);
-    if (!existsSync(source) || !statSync(source).isFile()) continue;
-    const target = path.join(dir, rel);
-    mkdirSync(path.dirname(target), { recursive: true });
-    copyFileSync(source, target);
-  }
-  return dir;
-}
-
-function pruneEmptyParents(root: string, start: string): void {
-  let current = start;
-  while (current.startsWith(`${root}${path.sep}`) && current !== root) {
-    if ([".harness", ".agents", "docs"].includes(path.basename(current))) return;
-    if (!existsSync(current) || readdirSync(current).length) return;
-    rmdirSync(current);
-    current = path.dirname(current);
-  }
-}
-
-export function applyProposal(proposalFile: string): Record<string, unknown> {
-  const proposal = readJson<Proposal>(path.resolve(proposalFile));
-  verifyProposal(proposal);
-  const root = proposal.targetRoot;
-  const sources = sourceMap(proposal.inspect, proposal.selectedAdapters, proposal.modules);
-  const backupDir = backupFiles(root, proposal.writeSet.filter((item) => ["update-managed", "update-config", "update-manifest", "delete-managed"].includes(item.action)).map((item) => item.path));
-  const files: Record<string, ManagedFile> = {};
-  for (const item of proposal.writeSet) {
-    if (["generate-config", "update-config", "generate-manifest", "update-manifest"].includes(item.action)) continue;
-    if (item.action === "delete-managed") {
-      const target = path.join(root, item.path);
-      rmSync(target, { force: true });
-      pruneEmptyParents(root, path.dirname(target));
+  for (const [adapter, entry] of Object.entries(ROOT_ADAPTER_ENTRIES)) {
+    const rel = "." + entry;
+    if (adapters.includes(adapter) || operations.some((o) => o.path === rel))
       continue;
-    }
-    if (["preserve-project", "unchanged"].includes(item.action)) {
-      const file = path.join(root, item.path);
-      if (existsSync(file) && statSync(file).isFile() && item.action === "unchanged") files[item.path] = { hash: fileHash(file), source: "lumine-harness" };
-      continue;
-    }
-    const source = sources.get(item.path);
-    const target = path.join(root, item.path);
-    mkdirSync(path.dirname(target), { recursive: true });
-    if (item.action === "create-project-template") writeFileSync(target, renderProjectTemplate(path.basename(item.path), proposal.inspect), "utf8");
-    else if (source) copyFileSync(source, target);
-    else throw new Error(`No source for planned file: ${item.path}`);
-    files[item.path] = { hash: fileHash(target), source: "lumine-harness" };
+    const meta = previous[rel];
+    const wasSelected = Array.isArray(current.selectedAdapters) && current.selectedAdapters.includes(adapter);
+    if (!wasSelected && meta?.source !== "lumine-harness") continue;
+    const before = fingerprint(target(root, rel));
+    if (!before) continue;
+    const ownedAndUnchanged = meta?.source === "lumine-harness" && meta.hash === before;
+    operations.push({ path: rel, action: ownedAndUnchanged ? "delete" : "conflict", before, after: null });
+    if (!ownedAndUnchanged) retirementWarnings.push(locale === "zh-CN"
+      ? `取消选择 ${adapter} 时保留 ${rel}：文件已修改或缺少安装器所有权记录。请通过已审阅的提案覆盖指定最终内容，仅移除 Lumine 入口并保留其他设置。`
+      : `Deselecting ${adapter} preserves ${rel}: the file was modified or has no installer ownership record. Supply a reviewed proposal override containing the final configuration, removing only the Lumine entry and preserving other settings.`);
   }
-  const projectFile = path.join(root, ".harness", "project.json");
-  const existingProject = existsSync(projectFile) ? readJson<ProjectConfig>(projectFile) : {};
-  const project = {
-    ...existingProject,
-    schemaVersion: Math.max(Number(existingProject.schemaVersion ?? 1), 1),
-    topology: proposal.inspect.topology,
-    childRepositories: proposal.inspect.childRepositories,
-    modules: proposal.modules,
-    selectedAdapters: proposal.selectedAdapters,
-    generatedTargets: Array.isArray(existingProject.generatedTargets)
-      ? existingProject.generatedTargets
-      : ["workspace-index", "repo-doc-index"],
-    autonomy: {
-      maxContinuationChain: 20,
-      noProgressThreshold: 2,
-      ...(existingProject.autonomy ?? {})
-    },
-    extensions: existingProject.extensions ?? {}
-  };
-  mkdirSync(path.join(root, ".harness"), { recursive: true });
-  writeFileSync(projectFile, `${JSON.stringify(project, null, 2)}\n`, "utf8");
-  files[".harness/project.json"] = { hash: fileHash(projectFile), source: "project-config" };
-  const revision = git(SKILL_ROOT, ["rev-parse", "HEAD"]) || null;
-  const sourceDirty = Boolean(git(SKILL_ROOT, ["status", "--porcelain=v1", "-uall"]));
-  const installedVersion = readJson<{ distributionVersion?: string }>(path.join(SKILL_ROOT, "assets", "harness", "root.json")).distributionVersion ?? "unversioned";
-  const sourceSnapshotHash = hash(JSON.stringify(Object.entries(files).sort(([left], [right]) => left.localeCompare(right))));
+  for (const [rel, meta] of Object.entries(previous) as [string, any][]) {
+    if (
+      operations.some((o) => o.path === rel) ||
+      !rel.startsWith(".lumine/") ||
+      rel.startsWith(".lumine/wiki-state/") ||
+      rel.startsWith(".lumine/tasks/") ||
+      rel.startsWith(".lumine/project-checks/") ||
+      rel.startsWith(".lumine/local/")
+    )
+      continue;
+    const before = fingerprint(target(root, rel));
+    if (before && meta.hash === before)
+      operations.push({ path: rel, action: "delete", before, after: null });
+  }
+  for (const rel of legacyRetirementConflicts(
+    root,
+    options.reviewedRetirements,
+  ))
+    operations.push({
+      path: rel,
+      action: "conflict",
+      before: fingerprint(target(root, rel)),
+      after: null,
+    });
+  const transition = legacyTransition(
+    root,
+    adapters,
+    options.reviewedLegacyFiles,
+  );
+  for (const [rel, body] of Object.entries(transition.bridges))
+    add(
+      rel,
+      Buffer.from(body),
+      undefined,
+      rel.endsWith("/cli") ? 0o755 : 0o644,
+      true,
+    );
   const managed = {
-    schemaVersion: 1,
-    installedAt: new Date().toISOString(),
-    installedVersion,
-    proposalId: proposal.proposalId,
-    sourceRevision: revision,
-    sourceState: sourceDirty ? "working-tree" : "clean",
-    sourceSnapshotHash,
-    files
+    schemaVersion: 2,
+    files: Object.fromEntries(
+      operations
+        .filter(
+          (o) =>
+            o.action === "write" &&
+            (!!o.source ||
+              o.path === ".lumine/project.json" ||
+              o.path === ".lumine/root.json") &&
+            !o.path.startsWith(".lumine/tasks/") &&
+            !o.path.startsWith(".lumine/wiki-state/") &&
+            !o.path.startsWith(".lumine/local/"),
+        )
+        .map((o) => [o.path, { hash: o.after, source: "lumine-harness" }]),
+    ),
   };
-  writeFileSync(path.join(root, ".harness", "managed.json"), `${JSON.stringify(managed, null, 2)}\n`, "utf8");
-  return { status: "applied", mode: proposal.mode, proposalId: proposal.proposalId, targetRoot: root, backupDir, selectedAdapters: proposal.selectedAdapters, modules: proposal.modules };
-}
-
-function argument<T extends string | null>(args: string[], name: string, fallback: T): string | T {
-  const index = args.indexOf(name);
-  return index >= 0 ? args[index + 1] : fallback;
-}
-
-function printEnv(inspect: TargetInspection): string {
-  const values = {
-    TARGET_ROOT: inspect.targetRoot,
-    TOPOLOGY: inspect.topology,
-    HAS_GIT: Number(inspect.hasGit),
-    CHILD_REPOS: inspect.childRepositories.join(",") || "none",
-    BACKEND_SIGNAL: Number(inspect.signals.backend),
-    FRONTEND_SIGNAL: Number(inspect.signals.frontend),
-    NODE_PROJECT_SIGNAL: Number(inspect.signals.nodeProject),
-    LIBRARY_OR_CLI_SIGNAL: Number(inspect.signals.libraryOrCli),
-    DB_SIGNAL: Number(inspect.signals.database),
-    AI_WORKFLOW_SURFACES: inspect.aiWorkflowSurfaces.join(" ") || "none"
+  add(
+    ".lumine/managed.json",
+    Buffer.from(json(managed)),
+    undefined,
+    0o644,
+    true,
+  );
+  const p: Proposal = {
+    schemaVersion: 2,
+    legacy: transition,
+    proposalId,
+    targetRoot: root,
+    mode: options.mode ?? (legacy.exists ? "migrate" : "adopt"),
+    locale,
+    createdAt: new Date().toISOString(),
+    project,
+    inspect,
+    operations,
+    integrity: "",
+    warnings: [
+      ...(legacy.exists
+        ? [
+            locale === "zh-CN" ? "历史文档保留，项目专有约束通过已审阅内容转换。迁移完成前需要刷新宿主并核实新入口的实际调用。" : "Historical documents are preserved; project-specific workflow and Skill constraints require reviewed conversion. Host configuration must be refreshed before finalization.",
+          ]
+        : []),
+      ...retirementWarnings,
+    ],
   };
-  return Object.entries(values).map(([key, value]) => `${key}=${value}`).join("\n");
+  p.integrity = sign(p);
+  return p;
 }
+function recoveryDir(p: Proposal) {
+  return target(p.targetRoot, ".lumine-migrations/" + p.proposalId);
+}
+function verify(p: Proposal, checkSources = true) {
+  if (p.schemaVersion !== 2 || sign(p) !== p.integrity)
+    throw new Error("Proposal integrity mismatch");
+  if (realpathSync(p.targetRoot) !== p.targetRoot)
+    throw new Error("Project identity changed");
+  for (const op of p.operations) {
+    target(p.targetRoot, op.path);
+    if (op.content && hash(Buffer.from(op.content, "base64")) !== op.after)
+      throw new Error("Invalid operation content");
+    if (checkSources && op.source && fingerprint(op.source) !== op.sourceHash)
+      throw new Error("Distribution changed: " + op.path);
+  }
+}
+interface Journal {
+  proposalId: string;
+  status: string;
+  applied: string[];
+  backups: Record<string, { content: string; mode: number } | null>;
+  hostEvidence?: unknown;
+  appliedAt?: string;
+  finalized?: Record<string, string>;
+}
+export function applyProposal(
+  proposalFile: string,
+  options: {
+    failAfter?: number;
+    failAfterWrite?: number;
+    failAfterIgnore?: boolean;
+  } = {},
+) {
+  const p = JSON.parse(readFileSync(proposalFile, "utf8")) as Proposal;
+  verify(p);
+  if (p.operations.some((o) => o.action === "conflict"))
+    throw new Error(
+      "Proposal contains conflicts; supply reviewed overrides before applying.",
+    );
+  const dir = recoveryDir(p),
+    jf = path.join(dir, "journal.json");
+  const journal: Journal = existsSync(jf)
+    ? (readJson(jf) as Journal)
+    : {
+        proposalId: p.proposalId,
+        status: "applying",
+        applied: [],
+        backups: {},
+      };
+  if (journal.status === "complete")
+    return { status: "complete", proposalId: p.proposalId, backupDir: dir };
+  // Validate all affected files before writing; tolerate only original or precisely applied content.
+  for (const op of p.operations) {
+    if (op.action === "preserve") continue;
+    const current = fingerprint(target(p.targetRoot, op.path));
+    if (current !== op.before && current !== op.after)
+      throw new Error("Target changed: " + op.path);
+  }
 
-async function main(): Promise<void> {
-  const args = process.argv.slice(2);
-  const command = args.shift();
+  // Persist the original ignore rules before mutation; no project source bytes are saved until recovery is ignored.
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  chmodSync(dir, 0o700);
+  const ignored = p.operations.find((o) => o.path === ".gitignore");
+  if (ignored?.content && !(".gitignore" in journal.backups)) {
+    const original = target(p.targetRoot, ".gitignore");
+    journal.backups[".gitignore"] = ignored.before
+      ? {
+          content: readFileSync(original).toString("base64"),
+          mode: lstatSync(original).mode & 0o777,
+        }
+      : null;
+    atomic(jf, Buffer.from(json(journal)), 0o600);
+  }
+  if (
+    ignored?.content &&
+    fingerprint(target(p.targetRoot, ".gitignore")) === ignored.before
+  ) {
+    atomic(
+      target(p.targetRoot, ".gitignore"),
+      Buffer.from(ignored.content, "base64"),
+    );
+    if (options.failAfterIgnore)
+      throw new Error("Injected interruption after ignore write");
+    journal.applied.push(".gitignore");
+    atomic(jf, Buffer.from(json(journal)), 0o600);
+  }
+  atomic(path.join(dir, "proposal.json"), Buffer.from(json(p)), 0o600);
+  for (const op of p.operations) {
+    if (op.action === "preserve") continue;
+    const file = target(p.targetRoot, op.path);
+    if (!(op.path in journal.backups)) {
+      journal.backups[op.path] = existsSync(file)
+        ? {
+            content: readFileSync(file).toString("base64"),
+            mode: lstatSync(file).mode & 0o777,
+          }
+        : null;
+    }
+  }
+  atomic(jf, Buffer.from(json(journal)), 0o600);
+  if (p.legacy) backupLegacy(p.targetRoot, dir, p.legacy.before);
+  let count = 0;
+  for (const op of p.operations) {
+    if (op.action === "preserve") continue;
+    const file = target(p.targetRoot, op.path);
+    if (fingerprint(file) !== op.after) {
+      if (op.action === "delete") rmSync(file);
+      else atomic(file, Buffer.from(op.content!, "base64"), op.mode);
+    }
+    if (
+      options.failAfterWrite !== undefined &&
+      count + 1 === options.failAfterWrite
+    )
+      throw new Error("Injected interruption after target write");
+    if (!journal.applied.includes(op.path)) journal.applied.push(op.path);
+    atomic(jf, Buffer.from(json(journal)), 0o600);
+    count++;
+    if (options.failAfter !== undefined && count === options.failAfter)
+      throw new Error("Injected migration interruption");
+  }
+  pruneRetiredSkillDirectories(p.targetRoot);
+  journal.appliedAt ??= new Date().toISOString();
+  journal.status = p.project.selectedAdapters.length
+    ? "awaiting_host_verification"
+    : "applied";
+  atomic(jf, Buffer.from(json(journal)), 0o600);
+  return {
+    status: journal.status,
+    proposalId: p.proposalId,
+    backupDir: dir,
+    preserved: p.operations
+      .filter((o) => o.action === "preserve")
+      .map((o) => o.path),
+  };
+}
+export function rollbackProposal(proposalFile: string) {
+  const p = JSON.parse(readFileSync(proposalFile, "utf8")) as Proposal;
+  verify(p, false);
+  const dir = recoveryDir(p),
+    jf = path.join(dir, "journal.json"),
+    j = readJson(jf) as Journal;
+  const conflicts: string[] = [];
+  for (const op of [...p.operations].reverse()) {
+    if (!(op.path in j.backups)) continue;
+    const f = target(p.targetRoot, op.path),
+      current = fingerprint(f);
+    if (current === op.before) continue;
+    // Finalization intentionally removed these files; restoreLegacy validates
+    // their original backups below. Missing files are not later user edits here.
+    if (current === null && p.legacy?.bridges[op.path] &&
+        (j.status === "complete" || j.status === "finalizing")) continue;
+    if (current !== op.after && current !== j.finalized?.[op.path]) {
+      conflicts.push(op.path);
+      continue;
+    }
+    const b = j.backups[op.path];
+    if (b) {
+      let body = Buffer.from(b.content, "base64");
+      if (hash(body) !== op.before) {
+        conflicts.push(op.path);
+        continue;
+      }
+      if (
+        op.path === ".gitignore" &&
+        !body.toString().split("\n").includes(".lumine-migrations/")
+      )
+        body = Buffer.from(body.toString() + "\n.lumine-migrations/\n");
+      atomic(f, body, b.mode);
+    } else if (op.path === ".gitignore")
+      atomic(f, Buffer.from(".lumine-migrations/\n"));
+    else if (existsSync(f)) rmSync(f);
+  }
+  if (p.legacy)
+    conflicts.push(
+      ...restoreLegacy(p.targetRoot, dir, p.legacy.before, p.legacy.bridges),
+    );
+  j.status = conflicts.length ? "rollback_conflicts" : "rolled_back";
+  atomic(jf, Buffer.from(json(j)), 0o600);
+  return { status: j.status, conflicts };
+}
+export function finalizeProposal(proposalFile: string, evidenceFile?: string) {
+  const p = JSON.parse(readFileSync(proposalFile, "utf8")) as Proposal;
+  verify(p, false);
+  const dir = recoveryDir(p),
+    jf = path.join(dir, "journal.json"),
+    j = readJson(jf) as Journal;
+  if (j.status === "complete")
+    return { status: "complete", proposalId: p.proposalId };
+  if (p.project.selectedAdapters.length) {
+    if (!evidenceFile)
+      throw new Error("Real host evidence is required for selected adapters");
+    const evidence = readJson(evidenceFile);
+    for (const adapter of p.project.selectedAdapters) {
+      const e = evidence[adapter];
+      if (!e?.sessionId || !e?.observedAt || !e?.artifact)
+        throw new Error("Missing host evidence: " + adapter);
+      const observedAt = Date.parse(e.observedAt);
+      const appliedAt = Date.parse(j.appliedAt ?? "");
+      if (!Number.isFinite(observedAt) || !Number.isFinite(appliedAt) ||
+          observedAt < appliedAt || observedAt > Date.now() + 60000)
+        throw new Error("Host evidence must be observed after this proposal was applied");
+      const artifact = target(p.targetRoot, e.artifact);
+      if (!existsSync(artifact)) throw new Error("Host evidence file missing");
+      const payload = readJson(artifact);
+      if (
+        payload.product !== adapter ||
+        payload.sessionId !== e.sessionId ||
+        payload.schemaVersion !== 2 ||
+        payload.harnessRoot !== p.targetRoot
+      )
+        throw new Error("Host evidence does not match project/session");
+    }
+    j.hostEvidence = evidence;
+  }
+  for (const op of p.operations) {
+    if (
+      op.action === "preserve" ||
+      (!op.source &&
+        !op.path.startsWith(".lumine/") &&
+        !p.legacy?.bridges[op.path])
+    )
+      continue;
+    const actual = fingerprint(target(p.targetRoot, op.path));
+    if (
+      actual !== op.after &&
+      actual !== j.finalized?.[op.path] &&
+      !(
+        j.status === "finalizing" &&
+        p.legacy?.bridges[op.path] &&
+        actual === null
+      )
+    )
+      throw new Error("Finalization input changed: " + op.path);
+  }
+  j.status = "finalizing";
+  atomic(jf, Buffer.from(json(j)), 0o600);
+  if (p.legacy)
+    finishLegacy(
+      p.targetRoot,
+      dir,
+      p.legacy.before,
+      p.legacy.bridges,
+      p.legacy.protectedPaths,
+    );
+  const markerFile = target(p.targetRoot, ".lumine/root.json");
+  const marker = { ...readJson(markerFile), migrationStatus: "complete" };
+  const markerBody = Buffer.from(json(marker));
+  const managedFile = target(p.targetRoot, ".lumine/managed.json");
+  const managed = readJson(managedFile);
+  managed.files[".lumine/root.json"].hash = hash(markerBody);
+  const managedBody = Buffer.from(json(managed));
+  j.finalized = {
+    ".lumine/root.json": hash(markerBody),
+    ".lumine/managed.json": hash(managedBody),
+  };
+  atomic(jf, Buffer.from(json(j)), 0o600);
+  atomic(markerFile, markerBody);
+  atomic(managedFile, managedBody);
+  j.status = "complete";
+  atomic(jf, Buffer.from(json(j)), 0o600);
+  return { status: "complete", proposalId: p.proposalId };
+}
+function arg(args: string[], name: string, fallback?: string) {
+  const i = args.indexOf(name);
+  return i < 0 ? fallback : args[i + 1];
+}
+async function main() {
+  const a = process.argv.slice(2),
+    command = a.shift();
   if (command === "inspect") {
-    const result = inspectTarget(args[0]);
-    process.stdout.write(`${args.includes("--format=env") ? printEnv(result) : JSON.stringify(result, null, 2)}\n`);
+    const v = inspectTarget(a[0]);
+    if (a.includes("--format=env"))
+      process.stdout.write(
+        Object.entries({
+          TARGET_ROOT: v.targetRoot,
+          TOPOLOGY: v.topology,
+          HAS_GIT: Number(v.hasGit),
+          CHILD_REPOS: v.childRepositories.join(",") || "none",
+          BACKEND_SIGNAL: Number(v.signals.backend),
+          FRONTEND_SIGNAL: Number(v.signals.frontend),
+          NODE_PROJECT_SIGNAL: Number(v.signals.nodeProject),
+          LIBRARY_OR_CLI_SIGNAL: Number(v.signals.libraryOrCli),
+          DB_SIGNAL: Number(v.signals.database),
+          AI_WORKFLOW_SURFACES: v.aiWorkflowSurfaces.join(" "),
+        })
+          .map(([k, v]) => k + "=" + v)
+          .join("\n") + "\n",
+      );
+    else process.stdout.write(json(v));
     return;
   }
-  if (command === "proposal" || (command === "upgrade" && args[0] === "--plan")) {
-    const target = command === "proposal" ? args[0] : args[1];
-    if (!target) throw new Error("A target path is required.");
-    const current = existsSync(path.join(target, ".harness", "project.json")) ? readJson<ProjectConfig>(path.join(target, ".harness", "project.json")) : null;
-    const proposal = createProposal(target, {
-      mode: command === "proposal" ? "adopt" : "upgrade",
-      adapters: argument(args, "--adapters", current?.selectedAdapters?.join(",") ?? "none"),
-      modules: argument(args, "--modules", current?.modules?.join(",") ?? "auto")
+  if (command === "proposal" || (command === "upgrade" && a[0] === "--plan")) {
+    const p = createProposal(command === "proposal" ? a[0] : a[1], {
+      locale: arg(a, "--locale") as Locale | undefined,
+      adapters: arg(a, "--adapters"),
+      modules: arg(a, "--modules"),
+      mode: command === "upgrade" ? "upgrade" : "adopt",
+      overrides: arg(a, "--overrides")
+        ? readJson(arg(a, "--overrides")!)
+        : undefined,
+      sourceSelfUse: a.includes("--source-self-use"),
+      reviewedRetirements: arg(a, "--reviewed-retirements")
+        ? JSON.parse(readFileSync(arg(a, "--reviewed-retirements")!, "utf8"))
+        : undefined,
+      reviewedLegacyFiles: arg(a, "--reviewed-legacy-files")
+        ? JSON.parse(readFileSync(arg(a, "--reviewed-legacy-files")!, "utf8"))
+        : undefined,
     });
-    const output = argument(args, "--output", null);
-    if (output) { mkdirSync(path.dirname(path.resolve(output)), { recursive: true }); writeFileSync(path.resolve(output), `${JSON.stringify(proposal, null, 2)}\n`, "utf8"); }
-    process.stdout.write(`${JSON.stringify(proposal, null, 2)}\n`);
+    const output = arg(a, "--output");
+    if (output) {
+      mkdirSync(path.dirname(path.resolve(output)), { recursive: true });
+      atomic(path.resolve(output), Buffer.from(json(p)), 0o600);
+    }
+    process.stdout.write(
+      json({ ...p, operations: p.operations.map(({ content, ...op }) => op) }),
+    );
     return;
   }
-  if (command === "adopt" || (command === "upgrade" && args[0] === "--apply")) {
-    const proposalFile = argument(args, "--proposal", null);
-    if (!proposalFile) throw new Error("A reviewed --proposal <file> is required.");
-    process.stdout.write(`${JSON.stringify(applyProposal(proposalFile), null, 2)}\n`);
+  const proposal = arg(a, "--proposal");
+  if (proposal) {
+    if (
+      command === "adopt" ||
+      (command === "upgrade" && a[0] === "--apply") ||
+      command === "resume"
+    )
+      process.stdout.write(json(applyProposal(proposal)));
+    else if (command === "rollback")
+      process.stdout.write(json(rollbackProposal(proposal)));
+    else if (command === "finalize")
+      process.stdout.write(
+        json(finalizeProposal(proposal, arg(a, "--host-evidence"))),
+      );
+    else throw new Error("Unknown command");
     return;
   }
-  throw new Error("Usage: harness-manager.mjs inspect <target> | proposal <target> [--adapters none|list] [--modules auto|list] [--output file] | adopt --proposal file | upgrade --plan <target> [--output file] | upgrade --apply --proposal file");
+  throw new Error(
+    "Usage: inspect <root> | proposal <root> --locale zh-CN|en --output file | upgrade --plan <root> --output file | adopt --proposal file | resume|rollback|finalize --proposal file",
+  );
 }
-
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  main().catch((error: unknown) => { process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`); process.exitCode = 2; });
-}
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+)
+  main().catch((e) => {
+    const args = process.argv.slice(2);
+    let locale = arg(args, "--locale") ?? "en";
+    try { const proposalFile = arg(args, "--proposal"); if (proposalFile) locale = readJson(proposalFile).locale ?? locale; } catch {}
+    const detail = e instanceof Error ? e.message : String(e);
+    const guidance = locale === "zh-CN" ? "维护操作未完成。请保留提案与恢复日志，核对以下原因；不要强制覆盖已变化的文件：" : "Maintenance did not complete. Keep the proposal and recovery journal; review this cause before retrying:";
+    process.stderr.write(guidance + "\n" + detail + "\n");
+    process.exitCode = 2;
+  });

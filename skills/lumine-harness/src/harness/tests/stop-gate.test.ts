@@ -12,8 +12,8 @@ import type { HarnessHookInput, HarnessProduct, SessionState } from "../core/con
 
 function tempHarness() {
   const root = mkdtempSync(path.join(os.tmpdir(), "harness-stop-test-"));
-  mkdirSync(path.join(root, ".harness"), { recursive: true });
-  writeFileSync(path.join(root, ".harness", "root.json"), '{"schemaVersion":1,"kind":"harness-root"}\n');
+  mkdirSync(path.join(root, ".lumine"), { recursive: true });
+  writeFileSync(path.join(root, ".lumine", "root.json"), '{"schemaVersion":2,"kind":"lumine-root"}\n');
   return root;
 }
 

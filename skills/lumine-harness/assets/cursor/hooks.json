@@ -1,8 +1,24 @@
 {
   "version": 1,
   "hooks": {
-    "sessionStart": [{ "command": "node .harness/adapters/cursor/hooks/session-start.mjs", "timeout": 30 }],
-    "afterAgentResponse": [{ "command": "node .harness/adapters/cursor/hooks/after-agent-response.mjs", "timeout": 10 }],
-    "stop": [{ "command": "node .harness/adapters/cursor/hooks/stop.mjs", "timeout": 120, "loop_limit": 20 }]
+    "sessionStart": [
+      {
+        "command": "node -e 'const fs=require(\"node:fs\"),p=require(\"node:path\"),cp=require(\"node:child_process\");let r=process.cwd();while(!fs.existsSync(p.join(r,\".lumine/root.json\"))&&p.dirname(r)!==r)r=p.dirname(r);if(!fs.existsSync(p.join(r,\".lumine/root.json\"))){console.error(\"Lumine root not found\");process.exit(2)}const m=JSON.parse(fs.readFileSync(p.join(r,\".lumine/root.json\"),\"utf8\"));const rt=m.runtime||\".lumine\";if(p.isAbsolute(rt)||rt.split(/[\\\\/]/).includes(\"..\")){console.error(\"Invalid runtime path\");process.exit(2)}const x=cp.spawnSync(process.execPath,[p.join(r,rt,\"adapters/cursor/hooks/session-start.mjs\"),...[]],{stdio:\"inherit\"});if(x.error){console.error(x.error.message);process.exit(1)}process.exit(x.status??1)'",
+        "timeout": 30
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "node -e 'const fs=require(\"node:fs\"),p=require(\"node:path\"),cp=require(\"node:child_process\");let r=process.cwd();while(!fs.existsSync(p.join(r,\".lumine/root.json\"))&&p.dirname(r)!==r)r=p.dirname(r);if(!fs.existsSync(p.join(r,\".lumine/root.json\"))){console.error(\"Lumine root not found\");process.exit(2)}const m=JSON.parse(fs.readFileSync(p.join(r,\".lumine/root.json\"),\"utf8\"));const rt=m.runtime||\".lumine\";if(p.isAbsolute(rt)||rt.split(/[\\\\/]/).includes(\"..\")){console.error(\"Invalid runtime path\");process.exit(2)}const x=cp.spawnSync(process.execPath,[p.join(r,rt,\"adapters/cursor/hooks/after-agent-response.mjs\"),...[]],{stdio:\"inherit\"});if(x.error){console.error(x.error.message);process.exit(1)}process.exit(x.status??1)'",
+        "timeout": 10
+      }
+    ],
+    "stop": [
+      {
+        "command": "node -e 'const fs=require(\"node:fs\"),p=require(\"node:path\"),cp=require(\"node:child_process\");let r=process.cwd();while(!fs.existsSync(p.join(r,\".lumine/root.json\"))&&p.dirname(r)!==r)r=p.dirname(r);if(!fs.existsSync(p.join(r,\".lumine/root.json\"))){console.error(\"Lumine root not found\");process.exit(2)}const m=JSON.parse(fs.readFileSync(p.join(r,\".lumine/root.json\"),\"utf8\"));const rt=m.runtime||\".lumine\";if(p.isAbsolute(rt)||rt.split(/[\\\\/]/).includes(\"..\")){console.error(\"Invalid runtime path\");process.exit(2)}const x=cp.spawnSync(process.execPath,[p.join(r,rt,\"adapters/cursor/hooks/stop.mjs\"),...[]],{stdio:\"inherit\"});if(x.error){console.error(x.error.message);process.exit(1)}process.exit(x.status??1)'",
+        "timeout": 120,
+        "loop_limit": 20
+      }
+    ]
   }
 }

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+LUMINE_SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec "$LUMINE_SOURCE_ROOT/skills/lumine-harness/assets/harness/cli" "$@"

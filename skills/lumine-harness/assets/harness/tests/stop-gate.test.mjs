@@ -5,17 +5,17 @@ import { normalizeHookInput } from "../core/hook-io.mjs";
 import { evaluateStopPolicy } from "../core/stop-policy.mjs";
 import { continuationDeliveryFor } from "../core/continuation-delivery.mjs";
 import { decideStopHookResponse } from "../adapters/codex/hooks/lib/stop-gate.mjs";
+import path from "node:path";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
-import path from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 
 //#region skills/lumine-harness/src/harness/tests/stop-gate.test.ts
 function tempHarness() {
 	const root = mkdtempSync(path.join(os.tmpdir(), "harness-stop-test-"));
-	mkdirSync(path.join(root, ".harness"), { recursive: true });
-	writeFileSync(path.join(root, ".harness", "root.json"), "{\"schemaVersion\":1,\"kind\":\"harness-root\"}\n");
+	mkdirSync(path.join(root, ".lumine"), { recursive: true });
+	writeFileSync(path.join(root, ".lumine", "root.json"), "{\"schemaVersion\":2,\"kind\":\"lumine-root\"}\n");
 	return root;
 }
 function requireSessionState(root, product, sessionId) {

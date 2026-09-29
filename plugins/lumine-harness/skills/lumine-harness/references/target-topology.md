@@ -1,36 +1,9 @@
-# Target Topology
+# 目标形态与范围
 
-拓扑识别同时记录 Agent 产品配置面：`.codex/hooks.json`、`.qoder/settings.json`、`.trae/hooks.json`、`~/.kimi-code/config.toml` 的存在信号、`.cursor/hooks.json`、`.opencode/plugins/`、`.codebuddy/settings.json` 与 CodeBuddy memory、ZCode Plugin 运行证据、DeepSeek Harness profile/bundle 信号。这些信号只用于迁移提案，不表示对应产品已经读取或执行。
+单仓、独立前端、后端、全栈、库／CLI 和多仓采用相同核心合同。形态用于选取相关模块，不用于强制文档数量。不能仅因 package.json 存在就启用前端设计或浏览器任务。
 
-首次采用工具只把 topology 当内部识别结果，不要求用户手写进 draft/spec/plan。
+检查实际 Git 边界、应用入口、构建清单、路由／数据入口、已有 AGENTS 与共享 Skill、宿主配置。宿主配置文件只说明候选接入面，不证明加载或执行成功。
 
-## Profiles
+多仓先登记稳定仓库 ID、相对位置和可写边界；知识来源按仓库身份解析。共同父目录可以不是 Git 仓库。单仓按实际模块组织知识，不生成虚构子仓。
 
-- `workspace-with-child-repos`：根目录主要协调多个子仓或应用；存在直接子目录 `.git`、多个 package/app 根、或根级只承载 docs/config/harness。
-- `single-fullstack`：单个业务仓同时包含后端和前端/移动端。
-- `backend-only`：只有服务端、SQL、API 或后端 worker。
-- `frontend-only`：只有 Web、移动端、组件库或前端应用。
-- `library-or-cli`：Node.js 等通用库或命令行工具，不应仅因存在 `package.json` 就启用前端、设计和浏览器模块。
-- `unknown-traditional`：没有清晰技术栈或入口，但仍需要 harness 文档和检查骨架。
-
-## Signals
-
-- Workspace：直接子目录 `.git`、`pnpm-workspace.yaml`、`turbo.json`、`apps/`、`packages/`、多个顶级服务/端目录。
-- Backend：`pom.xml`、`build.gradle`、`go.mod`、`pyproject.toml`、`requirements.txt`、`src/main`、`controllers`、`routes`、`migrations`、`sql`。
-- Frontend：`package.json`、`vite.config.*`、`next.config.*`、`nuxt.config.*`、`src/views`、`src/pages`、`src/router`、`components`。
-- DB/API：`.sql`、migration 文件、OpenAPI/Swagger、Controller/router 注解、client api 目录。
-- AI workflow conflict：已有 `AGENTS.md`、`CLAUDE.md`、`.agents/skills`、`.codex/hooks*`、`.codex/agents`、`.claude/skills`、`docs/tasks`。
-
-## Routing Output
-
-Inspect 阶段输出必须包含：
-
-- `TOPOLOGY`
-- `HAS_GIT`
-- `IMPLEMENTATION_SURFACES`
-- `AI_WORKFLOW_SURFACES`
-- `DOCS_CONTRACT_PRESENT`
-- `TECH_SIGNALS`
-- `NOT_APPLICABLE_CHECKS`
-
-Workspace profile 要列出主要子仓或 app；single profile 要列出主要模块。
+初始提案说明采用根、实现面、现有规则、技术信号、选中 Adapter、语言与不适用能力。只读仓、独立 Git 和项目自有业务约束必须保留。

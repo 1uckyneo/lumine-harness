@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 2,
+  "kind": "lumine-root",
+  "projectId": "a392df2c-e0f5-46d1-ab66-fa1107e3d106",
+  "distributionVersion": "2.0.0",
+  "instructions": "AGENTS.md",
+  "skills": "skills/lumine-harness/assets/skills",
+  "runtime": "skills/lumine-harness/assets/harness",
+  "migrationId": "4becfce1-175a-4074-9075-1dde32289526",
+  "migrationStatus": "complete"
+}

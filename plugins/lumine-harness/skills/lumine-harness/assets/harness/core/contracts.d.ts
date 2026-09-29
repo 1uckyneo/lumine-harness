@@ -79,6 +79,7 @@ export interface SharedSkill {
   file: string;
   relativeSource: string;
   hash: string;
+  keywords?: string[];
 }
 
 export interface SkillCatalogDiagnostic {
@@ -93,12 +94,14 @@ export interface ExpectedSkill {
   reason: string | null;
   read: boolean;
   readAt?: string | null;
+  contentHash?: string;
 }
 
 export interface UsedSkill {
   name: string;
   source: string;
   readAt: string;
+  contentHash?: string;
 }
 
 export interface SessionState extends UnknownRecord {
@@ -137,12 +140,18 @@ export interface SessionState extends UnknownRecord {
   lastProgressAt?: string | null;
   lastContinuationProgressRevision?: number | null;
   noProgressCount?: number;
+  taskId?: string | null;
+  taskUserTurnRevision?: number;
+  requestedActivity?: "plan" | "implement" | "verify" | "diagnose" | "knowledge" | "design" | "check" | null;
   expectedPhase?: string | null;
   expectedSkill?: string | null;
   expectedSkillPath?: string | null;
   expectedSkillRead?: boolean;
   expectedSkillReadAt?: string | null;
   expectedSkills?: ExpectedSkill[];
+  selectedSkills?: string[];
+  skillCandidates?: Array<{ name: string; path: string; reason: string }>;
+  skillSelectionDiagnostics?: Array<{ name: string; code: "unknown-skill" }>;
   usedSkills?: UsedSkill[];
 }
 

@@ -53,15 +53,15 @@ const ROOT = resolveSkillAssetsRoot(import.meta.url);
 const SOURCE_ASSET_MODE = path.basename(ROOT) === "assets";
 
 function sourcePath(relative: string): string {
-  if (relative.startsWith(".harness/")) return path.join(HARNESS_DIR, relative.slice(".harness/".length));
+  if (relative.startsWith(".lumine/")) return path.join(HARNESS_DIR, relative.slice(".lumine/".length));
   if (relative.startsWith(".agents/skills/")) return path.join(ROOT, "skills", relative.slice(".agents/skills/".length));
   return path.join(ROOT, relative.replace(/^\./, ""));
 }
 
 function tempHarness(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "harness-adapter-test-"));
-  mkdirSync(path.join(root, ".harness"), { recursive: true });
-  writeFileSync(path.join(root, ".harness", "root.json"), '{"schemaVersion":1,"kind":"harness-root"}\n');
+  mkdirSync(path.join(root, ".lumine"), { recursive: true });
+  writeFileSync(path.join(root, ".lumine", "root.json"), '{"schemaVersion":2,"kind":"lumine-root"}\n');
   return root;
 }
 
@@ -132,31 +132,31 @@ test("ZCode applies its three-cycle host limit without limiting later user-autho
 
 test("Qoder blocks mutation until the routed public Skill was read", () => {
   const root = tempHarness();
-  const skill = writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
+  const skill = writeSharedSkill(root, "lumine-run", "Run an approved Exec Plan");
   const securitySkill = writeSharedSkill(root, "security-audit", "Audit authentication and authorization");
   const common = { session_id: "qoder-route", cwd: root };
   try {
-    const prompt = runHook(".harness/adapters/qoder/hooks/prompt-submit.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "使用 $security-audit 并授权 lumine-harness-run 进入实施" });
+    const prompt = runHook(".lumine/adapters/qoder/hooks/prompt-submit.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "使用 $security-audit 并授权 lumine-run 进入实施" });
     assert.equal(prompt.status, 0, prompt.stderr);
-    assert.match(prompt.stdout, /lumine-harness-run\/SKILL\.md/);
+    assert.match(prompt.stdout, /lumine-run\/SKILL\.md/);
     assert.match(prompt.stdout, /security-audit\/SKILL\.md/);
-    const blocked = runHook(".harness/adapters/qoder/hooks/tool-before.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    const blocked = runHook(".lumine/adapters/qoder/hooks/tool-before.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.match(blocked.stdout, /permissionDecision":"deny/);
-    runHook(".harness/adapters/qoder/hooks/tool-after.mjs", {
+    runHook(".lumine/adapters/qoder/hooks/tool-after.mjs", {
       ...common,
       hook_event_name: "PostToolUse",
       tool_name: "Read",
       tool_input: { file_path: path.relative(root, skill) }
     });
-    const stillBlocked = runHook(".harness/adapters/qoder/hooks/tool-before.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    const stillBlocked = runHook(".lumine/adapters/qoder/hooks/tool-before.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.match(stillBlocked.stdout, /security-audit/);
-    runHook(".harness/adapters/qoder/hooks/tool-after.mjs", {
+    runHook(".lumine/adapters/qoder/hooks/tool-after.mjs", {
       ...common,
       hook_event_name: "PostToolUse",
       tool_name: "Read",
       tool_input: { file_path: path.relative(root, securitySkill) }
     });
-    const allowed = runHook(".harness/adapters/qoder/hooks/tool-before.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    const allowed = runHook(".lumine/adapters/qoder/hooks/tool-before.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
@@ -178,42 +178,42 @@ test("one malformed shared Skill does not hide valid Skills", () => {
 
 test("CodeBuddy gates Harness and explicitly requested shared Skills through canonical reads", () => {
   const root = tempHarness();
-  const runSkill = writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
+  const runSkill = writeSharedSkill(root, "lumine-run", "Run an approved Exec Plan");
   const securitySkill = writeSharedSkill(root, "security-audit", "Audit authentication and authorization");
   const common = { session_id: "codebuddy-route", cwd: root };
   try {
     const probe = beginVerificationRun(root, "codebuddy", { hostVersion: "test-host" });
-    const start = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
+    const start = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
     assert.equal(start.status, 0, start.stderr);
-    assert.match(start.stdout, /\.\/\.harness\/cli skills search/);
-    const prompt = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", {
+    assert.match(start.stdout, /\.\/\.lumine\/cli skills search/);
+    const prompt = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", {
       ...common,
       hook_event_name: "UserPromptSubmit",
-      prompt: "使用 $security-audit 并授权 lumine-harness-run 进入实施"
+      prompt: "使用 $security-audit 并授权 lumine-run 进入实施"
     });
-    assert.match(prompt.stdout, /lumine-harness-run\/SKILL\.md/);
+    assert.match(prompt.stdout, /lumine-run\/SKILL\.md/);
     assert.match(prompt.stdout, /security-audit\/SKILL\.md/);
 
-    const firstBlock = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    const firstBlock = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.match(firstBlock.stdout, /permissionDecision":"deny/);
-    runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { file_path: runSkill } });
-    const secondBlock = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { file_path: runSkill } });
+    const secondBlock = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.match(secondBlock.stdout, /security-audit/);
-    runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { file_path: securitySkill } });
-    const allowed = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { file_path: securitySkill } });
+    const allowed = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
 
     setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "codebuddy", sessionId: common.session_id });
-    const stop = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: false });
+    const stop = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: false });
     assert.match(stop.stdout, /"continue":false/);
-    const duplicateStop = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: true });
+    const duplicateStop = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: true });
     assert.equal(duplicateStop.stdout, "");
     setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "codebuddy", sessionId: common.session_id });
-    const nextRevision = runHook(".harness/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: true });
+    const nextRevision = runHook(".lumine/adapters/codebuddy/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", stop_hook_active: true });
     assert.match(nextRevision.stdout, /"continue":false/);
     const verificationRunId = probe.verificationRunId;
     assert.ok(verificationRunId);
-    const evidence = path.join(root, ".harness", "runtime", "probes", verificationRunId, "events.jsonl");
+    const evidence = path.join(root, ".lumine", "local", "runtime", "probes", verificationRunId, "events.jsonl");
     assert.equal(existsSync(evidence), true);
     assert.doesNotMatch(readFileSync(evidence, "utf8"), /使用 \$security-audit/);
   } finally { rmSync(root, { recursive: true, force: true }); }
@@ -221,56 +221,56 @@ test("CodeBuddy gates Harness and explicitly requested shared Skills through can
 
 test("ZCode Hook-only Plugin routes the shared Skill and records runtime evidence", () => {
   const root = tempHarness();
-  const skill = writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
+  const skill = writeSharedSkill(root, "lumine-run", "Run an approved Exec Plan");
   const securitySkill = writeSharedSkill(root, "security-audit", "Audit authentication and authorization");
   const common = { session_id: "zcode-route", cwd: root };
   try {
     const probe = beginVerificationRun(root, "zcode", { hostVersion: "test-host" });
-    const start = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
+    const start = runHook(".lumine/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
     assert.equal(start.status, 0, start.stderr);
-    assert.match(start.stdout, /Workspace harness context/);
-    const prompt = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "使用 $security-audit 并授权 lumine-harness-run 进入实施" });
-    assert.match(prompt.stdout, /lumine-harness-run\/SKILL\.md/);
+    assert.match(start.stdout, /Lumine project context/);
+    const prompt = runHook(".lumine/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "使用 $security-audit 并授权 lumine-run 进入实施" });
+    assert.match(prompt.stdout, /lumine-run\/SKILL\.md/);
     assert.match(prompt.stdout, /security-audit\/SKILL\.md/);
-    const blocked = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    const blocked = runHook(".lumine/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.match(blocked.stdout, /permissionDecision":"deny/);
-    runHook(".harness/adapters/zcode/hooks/dispatch.mjs", {
+    runHook(".lumine/adapters/zcode/hooks/dispatch.mjs", {
       ...common,
       hook_event_name: "PostToolUse",
       tool_name: "Read",
       tool_input: { file_path: path.relative(root, skill) }
     });
-    const stillBlocked = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    const stillBlocked = runHook(".lumine/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.match(stillBlocked.stdout, /security-audit/);
-    runHook(".harness/adapters/zcode/hooks/dispatch.mjs", {
+    runHook(".lumine/adapters/zcode/hooks/dispatch.mjs", {
       ...common,
       hook_event_name: "PostToolUse",
       tool_name: "Read",
       tool_input: { file_path: path.relative(root, securitySkill) }
     });
-    const allowed = runHook(".harness/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
+    const allowed = runHook(".lumine/adapters/zcode/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
     const verificationRunId = probe.verificationRunId;
     assert.ok(verificationRunId);
-    assert.equal(existsSync(path.join(root, ".harness", "runtime", "probes", verificationRunId, "events.jsonl")), true);
+    assert.equal(existsSync(path.join(root, ".lumine", "local", "runtime", "probes", verificationRunId, "events.jsonl")), true);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
 test("DeepSeek Harness bridge verifies native Skill evidence before mutation", () => {
   const root = tempHarness();
-  writeSharedSkill(root, "lumine-harness-run", "Run an approved Exec Plan");
+  writeSharedSkill(root, "lumine-run", "Run an approved Exec Plan");
   const common = { session_id: "dsh-route", cwd: root };
   try {
-    runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
-    const prompt = runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "授权 lumine-harness-run 进入实施" });
-    assert.match(prompt.stdout, /lumine-harness-run/);
-    const blocked = runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "bash", tool_input: { command: "npm test" } });
+    runHook(".lumine/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "SessionStart", source: "startup" });
+    const prompt = runHook(".lumine/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "UserPromptSubmit", prompt: "授权 lumine-run 进入实施" });
+    assert.match(prompt.stdout, /lumine-run/);
+    const blocked = runHook(".lumine/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "bash", tool_input: { command: "npm test" } });
     assert.match(blocked.stdout, /permissionDecision":"deny/);
-    runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "skill", tool_response: "Loaded skill metadata: name: lumine-harness-run" });
-    const allowed = runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "bash", tool_input: { command: "npm test" } });
+    runHook(".lumine/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PostToolUse", tool_name: "skill", tool_response: "Loaded skill metadata: name: lumine-run" });
+    const allowed = runHook(".lumine/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "PreToolUse", tool_name: "bash", tool_input: { command: "npm test" } });
     assert.equal(allowed.stdout, "");
     setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "deepseek-harness", sessionId: common.session_id });
-    const stop = runHook(".harness/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", last_assistant_message: null, stop_hook_active: false });
+    const stop = runHook(".lumine/adapters/deepseek-harness/hooks/dispatch.mjs", { ...common, hook_event_name: "Stop", last_assistant_message: null, stop_hook_active: false });
     assert.match(stop.stdout, /decision":"block/);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
@@ -279,12 +279,12 @@ test("Cursor emits one followup_message per continuation status revision", () =>
   const root = tempHarness();
   const common = { session_id: "cursor-continuation", cwd: root };
   try {
-    const start = runHook(".harness/adapters/cursor/hooks/session-start.mjs", common);
+    const start = runHook(".lumine/adapters/cursor/hooks/session-start.mjs", common);
     assert.equal(start.status, 0, start.stderr);
     setCliWorkStatus("continue_autonomously", { root, cwd: root, product: "cursor", sessionId: common.session_id });
-    const first = runHook(".harness/adapters/cursor/hooks/stop.mjs", { ...common, status: "completed" });
+    const first = runHook(".lumine/adapters/cursor/hooks/stop.mjs", { ...common, status: "completed" });
     assert.match(first.stdout, /followup_message/);
-    const duplicate = runHook(".harness/adapters/cursor/hooks/stop.mjs", { ...common, status: "completed", loop_count: 1 });
+    const duplicate = runHook(".lumine/adapters/cursor/hooks/stop.mjs", { ...common, status: "completed", loop_count: 1 });
     assert.equal(duplicate.stdout, "");
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
@@ -329,7 +329,7 @@ test("repository keeps one canonical Skill source and capability boundaries rema
   for (const relative of [
     ".qoder/skills",
     ".codebuddy/skills",
-    ".harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/skills",
+    ".lumine/adapters/zcode/marketplace/plugins/lumine-harness-adapter/skills",
     ".trae/skills",
     ".kimi-code/skills",
     ".qoder/rules",
@@ -342,7 +342,7 @@ test("repository keeps one canonical Skill source and capability boundaries rema
   ]) {
     assert.equal(existsSync(sourcePath(relative)), false, relative);
   }
-  const manifest = JSON.parse(readFileSync(sourcePath(".harness/adapter-capabilities.json"), "utf8")) as CapabilityManifestFixture;
+  const manifest = JSON.parse(readFileSync(sourcePath(".lumine/adapter-capabilities.json"), "utf8")) as CapabilityManifestFixture;
   const capabilityNames = [
     "project_instructions",
     "session_context",
@@ -382,7 +382,7 @@ test("repository keeps one canonical Skill source and capability boundaries rema
   assert.equal(manifest.products.trae.continuation.maxConsecutive, 20);
   assert.equal(manifest.products["deepseek-harness"].repositoryTestedBridgeVersion, "0.1.0-rc.7");
   assert.equal("verifiedBridgeVersion" in manifest.products["deepseek-harness"], false);
-  assert.doesNotMatch(readFileSync(sourcePath(".harness/adapters/deepseek-harness/bundle/cordis.patch.yml"), "utf8"), /deepseek-v4|^\s*model:/m);
+  assert.doesNotMatch(readFileSync(sourcePath(".lumine/adapters/deepseek-harness/bundle/cordis.patch.yml"), "utf8"), /deepseek-v4|^\s*model:/m);
   const cursorConfig = JSON.parse(readFileSync(sourcePath(".cursor/hooks.json"), "utf8")) as HookConfigFixture;
   const traeConfig = JSON.parse(readFileSync(sourcePath(".trae/hooks.json"), "utf8")) as HookConfigFixture;
   assert.equal(cursorConfig.hooks.stop?.[0]?.loop_limit, 20);
@@ -396,8 +396,8 @@ test("repository keeps one canonical Skill source and capability boundaries rema
 });
 
 test("skills inspect CLI formats a single Skill descriptor", () => {
-  const output = JSON.parse(formatSkillResult({ name: "lumine-harness-run", file: "/private/path/SKILL.md" })) as Record<string, unknown>;
-  assert.equal(output.name, "lumine-harness-run");
+  const output = JSON.parse(formatSkillResult({ name: "lumine-run", file: "/private/path/SKILL.md" })) as Record<string, unknown>;
+  assert.equal(output.name, "lumine-run");
   assert.equal("file" in output, false);
 });
 

@@ -1,50 +1,23 @@
-# Migration Policy
+# 迁移与恢复策略
 
-Lumine Harness 的采用与升级都必须先检查、再提案、最后按批准范围写入。已有冲突 AI workflow 可以迁移，但不能以“目标有 Git”为理由覆盖尚未提交或不可恢复的内容。
+## 范围和前置状态
 
-## 写入前
+审计 tracked、staged、untracked、嵌套 Git 与工作树现状。提案固定目标身份、来源版本、语言、写入动作、前后基线及备份。已有授权覆盖提案时连续执行；批准字段不能替代授权。写入前发现未纳入的修改或新冲突时保护现场，重新评估该部分，不 stash、reset 或覆盖。
 
-- 先审计 tracked、staged、untracked、嵌套 Git 和 worktree 状态。
-- Migration Proposal 列出精确 write set、冲突、备份方案和唯一 Proposal ID；没有经用户确认的 ID 不得写入。
-- 与现有工作树修改重叠时默认暂停，不自动合并、stash、reset 或覆盖。
-- Git 无法恢复的未跟踪文件和非 Git 目标中被替换的内容，先备份到 `.harness/local/harness-backup/<timestamp>/`。
-- Adopt 过程中发现提案外冲突时停止并重新提案。
+## 项目内容
 
-## AGENTS.md
+项目 AGENTS 保留有效安全、业务、只读和 Git 约束，整理为短入口。更新当前 Spec／Plan，历史、证据与真实批准不重写为新状态。中文重命名保留旧路径及章节转向，无法映射的历史内容继续可读。语言永久切换经迁移更新受管理资源和新内容默认值，不批量翻译人工及历史文档。
 
-- 目标形态是“上下文地图 + 实现入口速查 + 事实索引目标 + 快速路由 + harness workflow + skills/parallel workers + 硬规则 + 状态约定”。
-- `AGENTS.md` 只做短入口、导航和硬规则；不要写成百科。
-- `ARCHITECTURE.md` 只做架构地图，包含仓库形态、目录地图、实现路径、业务域、运行面和架构不变量；不要放“上下文入口”。
-- 不使用旧式包裹块。
-- 旧内容中仍有效的项目事实、业务硬规则、启动命令、关键目录说明要迁移进新结构。
-- 旧 AI 流程、旧 draft/spec/plan 口径、旧强加载顺序、与新 harness 冲突的规则要删除或改写。
+项目业务 Skills 保留；公共日常入口只发现四个新规范 Skill。兼容映射由迁移工具维护，不向新 Skill 填入历史别名和操作说明。原读取记录不证明读过新规则。
 
-## Skills / Harness / Adapters
+## 可恢复写入
 
-- 项目 Harness Skills 以 `lumine-harness-*` 新模板为准；旧无前缀 `harness-*` 必须迁出公共 Skill 目录。
-- 旧 workspace 前缀 skill、旧 draft planner lane、旧 implementation worker lane、旧 verifier lane 替换为通用 worker coordination。
-- 非冲突的项目业务 skills 可以保留，并在 AGENTS 地图中索引。
-- `.harness/` 承载 root marker、公共 Core、CLI、checks、generated、tests 和全部产品薄 Adapter 脚本。
-- `.codex/` 只保留 `hooks.json`；不创建 `.codex/agents/`、`.codex/hooks/` 或 `.codex/tests/` 作为 harness 必备资产。
-- `AGENTS.md` 和 `.agents/skills` 是唯一公共内容真源；禁止产品 Rules、Skill 正文副本和产品级 Skill 投影。不能原生发现 `.agents/skills` 的宿主由 Adapter 按需路由真实文件。
-- 根据用户明确选择生成 `.codex/hooks.json`、`.qoder/settings.json`、`.trae/hooks.json`、`.cursor/hooks.json`、`.opencode/plugins/harness.mjs` 或 `.codebuddy/settings.json`；ZCode 与 DeepSeek Harness 的分发资产位于 `.harness/adapters/`，仅在被选择时报告人工安装步骤。
-- Kimi Code 的 `~/.kimi-code/config.toml` 是用户环境配置，普通 Adopt 只报告安装命令，必须另行授权后才执行。
+每个项目按预检、暂存、应用、验证、确认完成推进。写入前保存恢复所需内容，采用原子替换并记录动作；恢复入口和日志不能依赖正被替换的 Runtime。备份与恢复日志放入明确受保护的位置，不能当作可清理缓存。
 
-## Product Surfaces
+续跑只接受预期旧状态或已应用状态，第三种内容视为外部修改。回滚仅恢复仍匹配本次输出的文件，保护用户后续工作。跨仓逐项记录，不假定原子事务；验证完成后才标记迁移版本完成。
 
-- `CLAUDE.md`、`.claude/skills`、`.claude/docs` 默认作为索引目标，不改写。
-- Qoder Hook 能力按具体产品形态和版本复核，不能长期硬编码“没有 SessionStart”；没有真实事件证据时保持 runtime pending。
-- Trae 的项目指令、共享 Skills 与 Hooks 设置由 Doctor 报告；Cursor 只有在产品将项目标为受限、导致项目 Hook 不执行时，才提示用户信任当前项目。
-- OpenCode 当前只交付部分兼容；`session.idle` 只能用于结束后审计。
-- ZCode 项目级 Hook 当前不执行，不能生成 `.zcode/config.json` 冒充已安装；必须让用户在 ZCode 中安装本地 Marketplace Plugin。
-- CodeBuddy 公共 Skill 使用 Adapter 路由，不生成 `.codebuddy/skills`。产品端仍需通过 `/hooks` 审核仓库配置；若 `CODEBUDDY.md` 或 `.codebuddy/CODEBUDDY.md` 存在但没有导入根 `AGENTS.md`，Doctor 必须报错而不是假定回退生效。
-- DeepSeek Harness 使用原生 AGENTS/Skills 和官方 Codex Hook bridge；安装 profile bundle 属于用户环境操作，必须单独确认，并锁定经过验证的宿主/bridge 版本组合。
+`.lumine/wiki-state/` 是项目知识资产，Runtime 升级不得覆盖或淘汰。`.lumine/local/` 中的旧私有资料、迁移备份与唯一恢复内容不能因目录名而删除。新旧运行根身份冲突要报告，不混合可写状态；兼容入口只转发到已确认的新核心。
 
-## Fail Closed
+## 宿主与外部操作
 
-以下情况暂停并报告一个明确问题：
-
-- 目标没有 git，且备份目录无法创建。
-- 旧 AGENTS 含有业务安全/合规硬规则，但无法判断如何迁移。
-- 现有 docs 中 specs/plans 与新 contract 同名但语义冲突，且自动迁移会丢失内容。
-- hooks 或 scripts 涉及外部秘密、生产部署或破坏性操作，无法判断是否安全替换。
+只安装选中 Adapter，遵守宿主对用户配置、项目授权和插件安装的要求。源码仓、普通 Skill 与 Plugin 分发共用规范内容，不能形成产品级规则副本。未有真实 Hook 或读取证据时只报告静态就绪；首次采用不自动提交、发布或改用户全局配置。

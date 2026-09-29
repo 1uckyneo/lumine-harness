@@ -1,0 +1,26 @@
+---
+name: lumine-run
+description: Implement or resume authorized work, recover execution context, verify results, and diagnose issues; supports verification without repair and closes out with evidence appropriate to the current request.
+---
+
+# Implementation, recovery, and verification
+
+<!-- LH-RUN-01 -->
+Read AGENTS.md, applicable implementation rules, the existing Spec/Plan, and current authorization. Confirm the actual implementation repository and existing changes. Use lumine-knowledge as needed for new goals, scope changes, and recovery, then verify relevant source. Do not infer actions from isolated words such as check or run.
+
+<!-- LH-RUN-02 -->
+Identify the requested outcome:
+- **Implement or repair:** change only the authorized scope; follow the Exec Plan and maintain current progress, decisions, and the next action.
+- **Verify or diagnose only:** run applicable checks or reproduce the issue; report outcomes, confidence in causes, and coverage limits. Failure does not authorize repair. Evidence writes must also fit the request; when no file changes are allowed, return a report only.
+
+<!-- LH-RUN-03 -->
+Use lumine-plan to resolve necessary planning gaps for complex features. Continue already authorized work without new phase approvals. A qualifying local repair need not create a persistent Spec/Plan but still needs a goal, boundaries, and verification. Record technical adjustments in the Plan; use lumine-plan to assess acceptance and authorization impacts of product-contract changes. Use lumine-design for new visual choices without repeating approved design work.
+
+<!-- LH-RUN-04 -->
+Verify behavior as well as structure. Record actions, outcomes, time, code/environment scope, and evidence for applicable acceptance items. Distinguish tests, real operation, deployment, and user acceptance. Runtime checks do not replace behavioral judgment, and a pass statement is not evidence. Put detailed records in docs/validation/; keep summaries and links in the Plan.
+
+<!-- LH-RUN-05 -->
+Synchronize affected knowledge with lumine-knowledge. Required knowledge work within this task must be completed or reported as incomplete; unrelated stale pages do not block the task. A diagnostic task can be done with failing findings: done means the requested check and report are complete, not that the inspected system was repaired. Follow project WORK_STATUS conventions.
+
+<!-- LH-RUN-06 -->
+Parallel writers need exclusive file ownership, inputs, acceptance, and stopping conditions. Integrate serially and verify runtime behavior after relevant changes are integrated. Preserve repository, read-only business, and publication boundaries; implementation authorization does not imply permission to commit, push, deploy, or perform other external actions.

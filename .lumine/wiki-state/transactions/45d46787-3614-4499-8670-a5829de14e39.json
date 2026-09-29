@@ -1,0 +1,61 @@
+{
+  "id": "45d46787-3614-4499-8670-a5829de14e39",
+  "status": "complete",
+  "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+  "previousRevision": "731e1e361b56ec4dd89ad7bd77cee1e2eab9f0fa4e51dd8d38ac640f1670e00b",
+  "content": "---\nid: \"lumine-adoption\"\ntitle: \"首次采用、升级与迁移恢复\"\nsummary: \"安装提案锁定语言、文件内容与输入指纹；独立迁移工具通过备份和逐项日志恢复中断，保护应用后的人工修改。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\ntags: [\"adoption\", \"migration recovery\", \"upgrade\", \"迁移\", \"初始化\"]\naliases: [\"adoption\", \"migration recovery\", \"upgrade\", \"迁移\", \"初始化\"]\nrepositories: [\"project\"]\nsources: [{\"id\": \"manager\", \"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\", \"kind\": \"source\"}, {\"id\": \"legacy\", \"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/migration/legacy.ts\", \"kind\": \"source\"}, {\"id\": \"tests\", \"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/harness/tests/adoption-manager.test.ts\", \"kind\": \"source\"}]\nrelations: [\"lumine-architecture\", \"lumine-task-check\"]\ndiagrams: [{\"id\": \"migration\", \"title\": \"提案到收口的状态\", \"caption\": \"宿主切换确认是事实要求，不能从测试夹具推导。\", \"sources\": [\"manager\", \"legacy\"]}]\nwatchScopes: [{\"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\"}, {\"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/migration/legacy.ts\"}, {\"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/harness/tests/adoption-manager.test.ts\"}]\n---\n\n# 首次采用、升级与迁移恢复\n\n## 提案先固定什么\n\n采用或升级先检查项目身份、仓库边界、现有配置与受管理文件。语言按显式选择、项目配置、非交互英文默认的顺序确定。提案包括创建、替换、保留、冲突和删除操作，以及来源和目标指纹；应用阶段不重新猜语言或静默重算提案。\n\n新项目的日常 Runtime 只认识当前协议。旧格式转换逻辑在独立 `migration/` 包中，由维护入口调用。转换器保留有效范围、授权依据、进度和证据身份，清除失效的旧技能读取及阶段等待状态。它不会修改聊天历史，也不会把未知批准补写为已批准。\n\n```mermaid\nstateDiagram-v2\n  [*] --> 预检\n  预检 --> 提案\n  提案 --> 应用: 输入指纹一致\n  应用 --> 恢复: 写入中断\n  恢复 --> 应用: 原状态或已应用状态\n  应用 --> 待宿主验证\n  待宿主验证 --> 清理: 实际调用新入口\n  清理 --> 完成\n  应用 --> 回滚: 显式恢复操作\n  回滚 --> 人工处理: 文件已被后续修改\n```\n\n## 为什么备份在 Runtime 之外\n\n恢复资料位于项目的 `.lumine-migrations/`，由忽略规则保护，权限限制为本机使用。这样 Runtime 被替换或旧目录被清理后，恢复入口和唯一备份仍在。迁移器逐项检查目标是否等于提案旧内容或本次输出；第三种状态表示外部修改，不直接覆盖。\n\n私有目录、worktree、符号链接与未分类内容受到保护，并阻止自动清理；明确迁移时分别核验身份和文件内容。普通 Runtime 文件才进入自动备份清理，且只删除已确认、已备份而未变化的文件。回滚同样不会覆盖用户在迁移之后写入的内容。\n\n## 升级保护和真实宿主边界\n\nWiki 正文、持久状态、任务记录和项目检查扩展是项目资产，不能按 Runtime 文件淘汰规则清理。模板或技能存在人工修改时，维护工具给出保留或冲突，由明确的合并内容进入新提案。\n\n旧宿主可能缓存旧 Hook 路径，因此迁移期间可以保留短转发入口。宿主刷新并产生新入口调用证据后才清理它们。没有宿主证据时状态仍为待验证；证据时间必须晚于本次提案应用，不能复用旧升级的会话记录。实际是否刷新入口还要核对宿主事件，不能只靠人工填写通过状态。迁移不承诺跨仓原子完成。\n\n## 修改时注意\n\n恢复操作的幂等性、删除后续跑、回滚冲突和选定语言必须同时验证。改变受管文件策略要检查项目资产排除范围；只检查新目录出现会漏掉旧入口仍活跃的问题。源码测试覆盖逻辑故障注入，但真实宿主是否已切换仍需当前会话证据。\n\n## 取消选用宿主\n\n安装提案以所选 Adapter 决定项目入口。取消选用时，只有前一受管清单证明归安装器所有、且当前内容指纹未变化的入口文件才会退出；宿主目录和其他用户文件继续保留。共享配置已修改或所有权不明时报告冲突，由已审阅的最终配置保留用户设置。源仓的社区 Adapter 规范实现不受项目选择影响。\n\n目录迁移与宿主能力认证分别判断：已有旧 Hook 缓存的项目需要实际切换证据；首次建立源仓自用入口时，真实会话中的 CLI 运行可证明该入口可用，却不能替代独立 Hook 和自动续跑验收。\n",
+  "baseline": {
+    "schemaVersion": 2,
+    "id": "lumine-adoption",
+    "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+    "generation": 3,
+    "generatedMarkdown": "---\nid: \"lumine-adoption\"\ntitle: \"首次采用、升级与迁移恢复\"\nsummary: \"安装提案锁定语言、文件内容与输入指纹；独立迁移工具通过备份和逐项日志恢复中断，保护应用后的人工修改。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\ntags: [\"adoption\", \"migration recovery\", \"upgrade\", \"迁移\", \"初始化\"]\naliases: [\"adoption\", \"migration recovery\", \"upgrade\", \"迁移\", \"初始化\"]\nrepositories: [\"project\"]\nsources: [{\"id\": \"manager\", \"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\", \"kind\": \"source\"}, {\"id\": \"legacy\", \"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/migration/legacy.ts\", \"kind\": \"source\"}, {\"id\": \"tests\", \"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/harness/tests/adoption-manager.test.ts\", \"kind\": \"source\"}]\nrelations: [\"lumine-architecture\", \"lumine-task-check\"]\ndiagrams: [{\"id\": \"migration\", \"title\": \"提案到收口的状态\", \"caption\": \"宿主切换确认是事实要求，不能从测试夹具推导。\", \"sources\": [\"manager\", \"legacy\"]}]\nwatchScopes: [{\"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\"}, {\"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/migration/legacy.ts\"}, {\"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/harness/tests/adoption-manager.test.ts\"}]\n---\n\n# 首次采用、升级与迁移恢复\n\n## 提案先固定什么\n\n采用或升级先检查项目身份、仓库边界、现有配置与受管理文件。语言按显式选择、项目配置、非交互英文默认的顺序确定。提案包括创建、替换、保留、冲突和删除操作，以及来源和目标指纹；应用阶段不重新猜语言或静默重算提案。\n\n新项目的日常 Runtime 只认识当前协议。旧格式转换逻辑在独立 `migration/` 包中，由维护入口调用。转换器保留有效范围、授权依据、进度和证据身份，清除失效的旧技能读取及阶段等待状态。它不会修改聊天历史，也不会把未知批准补写为已批准。\n\n```mermaid\nstateDiagram-v2\n  [*] --> 预检\n  预检 --> 提案\n  提案 --> 应用: 输入指纹一致\n  应用 --> 恢复: 写入中断\n  恢复 --> 应用: 原状态或已应用状态\n  应用 --> 待宿主验证\n  待宿主验证 --> 清理: 实际调用新入口\n  清理 --> 完成\n  应用 --> 回滚: 显式恢复操作\n  回滚 --> 人工处理: 文件已被后续修改\n```\n\n## 为什么备份在 Runtime 之外\n\n恢复资料位于项目的 `.lumine-migrations/`，由忽略规则保护，权限限制为本机使用。这样 Runtime 被替换或旧目录被清理后，恢复入口和唯一备份仍在。迁移器逐项检查目标是否等于提案旧内容或本次输出；第三种状态表示外部修改，不直接覆盖。\n\n私有目录、worktree、符号链接与未分类内容受到保护，并阻止自动清理；明确迁移时分别核验身份和文件内容。普通 Runtime 文件才进入自动备份清理，且只删除已确认、已备份而未变化的文件。回滚同样不会覆盖用户在迁移之后写入的内容。\n\n## 升级保护和真实宿主边界\n\nWiki 正文、持久状态、任务记录和项目检查扩展是项目资产，不能按 Runtime 文件淘汰规则清理。模板或技能存在人工修改时，维护工具给出保留或冲突，由明确的合并内容进入新提案。\n\n旧宿主可能缓存旧 Hook 路径，因此迁移期间可以保留短转发入口。宿主刷新并产生新入口调用证据后才清理它们。没有宿主证据时状态仍为待验证；证据时间必须晚于本次提案应用，不能复用旧升级的会话记录。实际是否刷新入口还要核对宿主事件，不能只靠人工填写通过状态。迁移不承诺跨仓原子完成。\n\n## 修改时注意\n\n恢复操作的幂等性、删除后续跑、回滚冲突和选定语言必须同时验证。改变受管文件策略要检查项目资产排除范围；只检查新目录出现会漏掉旧入口仍活跃的问题。源码测试覆盖逻辑故障注入，但真实宿主是否已切换仍需当前会话证据。\n\n## 取消选用宿主\n\n安装提案以所选 Adapter 决定项目入口。取消选用时，只有前一受管清单证明归安装器所有、且当前内容指纹未变化的入口文件才会退出；宿主目录和其他用户文件继续保留。共享配置已修改或所有权不明时报告冲突，由已审阅的最终配置保留用户设置。源仓的社区 Adapter 规范实现不受项目选择影响。\n\n目录迁移与宿主能力认证分别判断：已有旧 Hook 缓存的项目需要实际切换证据；首次建立源仓自用入口时，真实会话中的 CLI 运行可证明该入口可用，却不能替代独立 Hook 和自动续跑验收。\n",
+    "appliedRevision": "992efbb8f335ffceaf1513925c5f97b0f8442148b9bf87f27d0d3b1168e7f94f",
+    "sources": {
+      "fingerprints": {
+        "project:skills/lumine-harness/src/scripts/harness-manager.ts": "1dc646263878f15aaa78d79be0b75b1466a5616a2d646b066a673a34429f399f",
+        "project:skills/lumine-harness/src/migration/legacy.ts": "f2489ee7c946beda60aa7b6bbcb8fbdef7ebe1537dde39ef61403139866d1d55",
+        "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "2566133f5742486e69f8496a9a7c81277a0314dc0464a557b165d62cc6829190"
+      },
+      "scopeFingerprints": {
+        "project:skills/lumine-harness/src/scripts/harness-manager.ts": "fccbb183e842ee57f1805557440aa80761a0f82b20935f292cc6f59f984693d0",
+        "project:skills/lumine-harness/src/migration/legacy.ts": "56d61f6f74e7d59606c227f8693d12f76016d57f38b1050fd00c9cd4b08c4ef5",
+        "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "272d0dec536c241d899c2eca0f068ded2447ff0065a86a0672df493cc874904a"
+      },
+      "files": {
+        "project:skills/lumine-harness/src/scripts/harness-manager.ts": "1dc646263878f15aaa78d79be0b75b1466a5616a2d646b066a673a34429f399f",
+        "project:skills/lumine-harness/src/migration/legacy.ts": "f2489ee7c946beda60aa7b6bbcb8fbdef7ebe1537dde39ef61403139866d1d55",
+        "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "2566133f5742486e69f8496a9a7c81277a0314dc0464a557b165d62cc6829190"
+      },
+      "missing": []
+    },
+    "updatedAt": "2026-09-29T04:09:18.449Z"
+  },
+  "previousBaseline": {
+    "schemaVersion": 2,
+    "id": "lumine-adoption",
+    "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+    "generation": 2,
+    "generatedMarkdown": "---\nid: \"lumine-adoption\"\ntitle: \"首次采用、升级与迁移恢复\"\nsummary: \"安装提案锁定语言、文件内容与输入指纹；独立迁移工具通过备份和逐项日志恢复中断，保护应用后的人工修改。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\ntags: [\"adoption\", \"migration recovery\", \"upgrade\", \"迁移\", \"初始化\"]\naliases: [\"adoption\", \"migration recovery\", \"upgrade\", \"迁移\", \"初始化\"]\nrepositories: [\"project\"]\nsources: [{\"id\": \"manager\", \"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\", \"kind\": \"source\"}, {\"id\": \"legacy\", \"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/migration/legacy.ts\", \"kind\": \"source\"}, {\"id\": \"tests\", \"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/harness/tests/adoption-manager.test.ts\", \"kind\": \"source\"}]\nrelations: [\"lumine-architecture\", \"lumine-task-check\"]\ndiagrams: [{\"id\": \"migration\", \"title\": \"提案到收口的状态\", \"caption\": \"宿主切换确认是事实要求，不能从测试夹具推导。\", \"sources\": [\"manager\", \"legacy\"]}]\nwatchScopes: [{\"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\"}, {\"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/migration/legacy.ts\"}, {\"repoId\": \"project\", \"path\": \"skills/lumine-harness/src/harness/tests/adoption-manager.test.ts\"}]\n---\n\n# 首次采用、升级与迁移恢复\n\n## 提案先固定什么\n\n采用或升级先检查项目身份、仓库边界、现有配置与受管理文件。语言按显式选择、项目配置、非交互英文默认的顺序确定。提案包括创建、替换、保留、冲突和删除操作，以及来源和目标指纹；应用阶段不重新猜语言或静默重算提案。\n\n新项目的日常 Runtime 只认识当前协议。旧格式转换逻辑在独立 `migration/` 包中，由维护入口调用。转换器保留有效范围、授权依据、进度和证据身份，清除失效的旧技能读取及阶段等待状态。它不会修改聊天历史，也不会把未知批准补写为已批准。\n\n```mermaid\nstateDiagram-v2\n  [*] --> 预检\n  预检 --> 提案\n  提案 --> 应用: 输入指纹一致\n  应用 --> 恢复: 写入中断\n  恢复 --> 应用: 原状态或已应用状态\n  应用 --> 待宿主验证\n  待宿主验证 --> 清理: 实际调用新入口\n  清理 --> 完成\n  应用 --> 回滚: 显式恢复操作\n  回滚 --> 人工处理: 文件已被后续修改\n```\n\n## 为什么备份在 Runtime 之外\n\n恢复资料位于项目的 `.lumine-migrations/`，由忽略规则保护，权限限制为本机使用。这样 Runtime 被替换或旧目录被清理后，恢复入口和唯一备份仍在。迁移器逐项检查目标是否等于提案旧内容或本次输出；第三种状态表示外部修改，不直接覆盖。\n\n私有目录、worktree、符号链接与未分类内容受到保护，并阻止自动清理；明确迁移时分别核验身份和文件内容。普通 Runtime 文件才进入自动备份清理，且只删除已确认、已备份而未变化的文件。回滚同样不会覆盖用户在迁移之后写入的内容。\n\n## 升级保护和真实宿主边界\n\nWiki 正文、持久状态、任务记录和项目检查扩展是项目资产，不能按 Runtime 文件淘汰规则清理。模板或技能存在人工修改时，维护工具给出保留或冲突，由明确的合并内容进入新提案。\n\n旧宿主可能缓存旧 Hook 路径，因此迁移期间可以保留短转发入口。宿主刷新并产生新入口调用证据后才清理它们。没有宿主证据时状态仍为待验证；证据时间必须晚于本次提案应用，不能复用旧升级的会话记录。实际是否刷新入口还要核对宿主事件，不能只靠人工填写通过状态。迁移不承诺跨仓原子完成。\n\n## 修改时注意\n\n恢复操作的幂等性、删除后续跑、回滚冲突和选定语言必须同时验证。改变受管文件策略要检查项目资产排除范围；只检查新目录出现会漏掉旧入口仍活跃的问题。源码测试覆盖逻辑故障注入，但真实宿主是否已切换仍需当前会话证据。\n",
+    "appliedRevision": "731e1e361b56ec4dd89ad7bd77cee1e2eab9f0fa4e51dd8d38ac640f1670e00b",
+    "sources": {
+      "fingerprints": {
+        "project:skills/lumine-harness/src/scripts/harness-manager.ts": "bb41516c9793dcedac571e4b94d724e0c1b4cfdc892b75c2722d1c121cf61c1f",
+        "project:skills/lumine-harness/src/migration/legacy.ts": "f2489ee7c946beda60aa7b6bbcb8fbdef7ebe1537dde39ef61403139866d1d55",
+        "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "e4a9edf26800e8da1491cc43c739207229187851d687debf7353e09a162902f4"
+      },
+      "scopeFingerprints": {
+        "project:skills/lumine-harness/src/scripts/harness-manager.ts": "7d88625c2b0d0db8d92547e26fe9c320b39fabacf36d4bf79d8518de869e19cc",
+        "project:skills/lumine-harness/src/migration/legacy.ts": "56d61f6f74e7d59606c227f8693d12f76016d57f38b1050fd00c9cd4b08c4ef5",
+        "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "daa23a4f7dd835e963ee202d1a652f7c4e4457e6acdbb305fa4854fea218fcd2"
+      },
+      "files": {
+        "project:skills/lumine-harness/src/scripts/harness-manager.ts": "bb41516c9793dcedac571e4b94d724e0c1b4cfdc892b75c2722d1c121cf61c1f",
+        "project:skills/lumine-harness/src/migration/legacy.ts": "f2489ee7c946beda60aa7b6bbcb8fbdef7ebe1537dde39ef61403139866d1d55",
+        "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "e4a9edf26800e8da1491cc43c739207229187851d687debf7353e09a162902f4"
+      },
+      "missing": []
+    },
+    "updatedAt": "2026-09-28T12:07:03.443Z"
+  }
+}

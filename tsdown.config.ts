@@ -24,12 +24,14 @@ export default defineConfig({
   entry: [
     ...collectTypeScriptEntries(path.join(sourceRoot, "harness")),
     path.join(sourceRoot, "opencode/plugins/harness.ts"),
-    path.join(sourceRoot, "scripts/harness-manager.ts")
+    path.join(sourceRoot, "scripts/harness-manager.ts"),
+    ...collectTypeScriptEntries(path.join(sourceRoot, "migration"))
   ],
   root: sourceRoot,
   outDir,
   format: ["esm"],
   platform: "node",
+  deps: { neverBundle: ["yaml", "ignore"] },
   target: "node18",
   unbundle: true,
   clean: true,

@@ -1,33 +1,31 @@
-# Workflow Artifacts
+# 工作资料如何分工
 
-本文件解释 harness 中每个产物“为什么存在、谁读取、什么时候通过”。
+Lumine 让目标、技术方案、已有知识和实际证据各有一处可信记录。用户提出自然语言目标，Agent 按授权连续推进，不需要逐个调用阶段。
 
-## 总体规则
+| 资料 | 回答的问题 | 维护方式 |
+| --- | --- | --- |
+| Product Spec | 为谁解决什么问题，行为与范围是什么，怎样验收？ | 产品方案原位迭代；先概览，再场景、规则和稳定 AC。 |
+| Exec Plan | 这次怎样实现，现在到哪里，下一步是什么？ | 引用适用 Spec／AC，维护当前技术方案、进度和证据摘要。 |
+| Repo Wiki | 系统目前如何运转，为什么这样设计，有哪些限制？ | 引用源码与决定；一份 Markdown 正文与 Mermaid 文本供人和 Agent 使用。 |
+| Validation | 实际做了什么，结果是什么，能证明到哪一步？ | 保留日期、操作、代码／环境适用范围与原始证据，不改写历史结论。 |
 
-- 每个产物都应该回答一个明确问题；回答不了就不应该成为 gate。
-- Gate 只拦真正会造成返工或错误实施的点，例如需要设计确认的页面未确认、draft 仍有关键决策、验证结果未写回 active plan。
-- `generated` 和截图都是导航或验证记录，不是业务事实源；业务事实仍以源码、运行态、测试和用户确认结果为准。
+功能通常经过 Spec → 必要设计 → Plan → 实施验证 → 相关知识更新。只讨论产品方案不要求技术 Plan；简单修复按行为合同和决策需求判断，不按文件数判断。已有授权继续有效；真实未决选择才需要讨论。
 
-## Draft
+## 日常能力
 
-`docs/drafts/<slug>.md` 解决“当前到底要做什么、哪些还没想清楚”。Draft 阶段可以多轮讨论业务，也可以讨论页面设计方向，但不生成正式设计产物。
+- `lumine-plan`：产品和技术规划及语义审阅。
+- `lumine-run`：实施、恢复、验证和诊断；只验证不自动修复。
+- `lumine-knowledge`：定位、检索和维护知识。
+- `lumine-design`：具体视觉和交互选择。
 
-## Design Gate
+`./.lumine/cli` 提供确定性检查，不能替代上述语义判断。诊断收口可以报告失败，不代表需要自动修复。
 
-本节只在项目启用 Design 模块时生成。需要设计确认的页面产物只能在 draft 确认后生成，并且必须早于 product spec / active exec plan。
+## 关联、语言与历史
 
-- `docs/design-docs/<slug>/DESIGN.md`：设计说明、prototype mode、`prototypes[]` 原型索引、截图清单和 gate 状态。
-- `prototypes/*.html`：页面设计稿预览和视觉确认材料；单页面也是 `prototypes[]` 中只有一个页面项。
-- `visual-directions/`：当前可用图像生成能力产出的视觉方向探索，只用于 image/hybrid；能力不可用时退化为 HTML 原型或记录人工步骤。
-- `screenshots/`：人工确认材料；按页面 id 分目录存放。
-- `component-maps/*.md`：原型到真实组件、API、状态和权限的 handoff；单页和多页都按页面 id 拆分。
-- `handoff/*.md`：给实现 agent / 开发者读的设计到实现说明；属于模型生成的实现上下文，不是用户批准源。
-- `handoff/*.design.json`：给大模型读的结构化上下文；必须有 `meta.authority: implementation_context`、reviewStatus、sourceRefs 和 deviationPolicy，业务字段按页面需要扩展或留空。
+文档、验收、章节和图使用稳定身份；中文／英文可读文件名与身份分开。Spec 的一项变化只复核引用该项的 Plan，内容指纹不代表批准。历史证据继续适用于原基线。
 
-## Spec / Plan
+项目语言控制新内容默认值，已有文档保持自己的语言。先呈现当前结论，再给技术细节与历史；省略不适用章节，完整日志通过链接访问。设计材料按需要选择，不复制固定附件套件。
 
-Product spec 回答“做什么和做到什么程度”；active exec plan 回答“按什么顺序做、在哪里做、怎么证明做完”。
+## 知识与实现
 
-## Run / Verification
-
-设计确认截图保留在 `docs/design-docs/<slug>/screenshots/`。实施后的浏览器截图、DOM snapshot、console/network log、SQL 日志和接口返回 JSON 放入 `docs/validation/<slug>/<YYYY-MM-DD>/`。Run closeout 把测试命令、结果摘要、证据路径、未覆盖风险和 generated refresh/review 写回 active plan。
+Plan 中的拟议方案不能提前变成 Wiki 当前事实。实施后只整理受影响的稳定知识。工程规约解释必须引用权威规则，不能更改行动边界；源码、实测与部署范围分别说明。

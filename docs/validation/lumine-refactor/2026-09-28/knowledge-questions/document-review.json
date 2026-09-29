@@ -1,0 +1,142 @@
+{
+  "observedAt": "2026-09-28T11:58:24.438933+00:00",
+  "documents": [
+    {
+      "path": "docs/product-specs/Go API 迁移产品方案.md",
+      "sha256": "b0fa67316af8591ac9977ad69c9c118711997d958a5849945ecd841863e37817"
+    },
+    {
+      "path": "docs/exec-plans/active/Go API 迁移执行计划.md",
+      "sha256": "499be50401d2a5dcd590672405b0d4bb3b75649a36a7c495ab49a21339c9d53c"
+    },
+    {
+      "path": "docs/exec-plans/active/硅基记者模板对齐.md",
+      "sha256": "e2619698f9f5037d757caf8964d980570d4d564e5f196b21284aa676b4ae2ae8"
+    }
+  ],
+  "readability": {
+    "goal": "passed",
+    "currentProgress": "passed",
+    "nextStep": "passed",
+    "unverifiedScope": "passed",
+    "validConstraints": "passed-after-correction"
+  },
+  "findings": [
+    {
+      "id": "D1",
+      "severity": "requires-document-correction",
+      "title": "媒体登录态地址不持久化与独立下载边界",
+      "evidence": [
+        "docs/product-specs/go-api-migration.md:13",
+        "docs/exec-plans/active/go-api-migration.md:20"
+      ],
+      "missing": "新 Spec AC-anchor 与 Plan 媒体段落需保留带 Token 地址不写回任务/历史、预览失败不禁用下载。"
+    },
+    {
+      "id": "D2",
+      "severity": "requires-document-correction",
+      "title": "图片编辑与普通附件、提交重试边界",
+      "evidence": [
+        "docs/product-specs/go-api-migration.md:29",
+        "docs/product-specs/go-api-migration.md:47",
+        "docs/product-specs/go-api-migration.md:61"
+      ],
+      "missing": "编辑仅单图，普通附件不连带限单图，超量不静默丢弃，提交失败不自动换流程重提。"
+    },
+    {
+      "id": "D3",
+      "severity": "requires-document-correction",
+      "title": "当前详情路由和可用入口选择",
+      "evidence": [
+        "docs/product-specs/go-api-migration.md:67"
+      ],
+      "missing": "保留 Knowledge records/conversationId、Chat/Reporter/Translate conversationId、Anchor records/taskId 的不同形式，不限制记录 ID 格式；默认首页/新建选择实际获权的正常入口。"
+    },
+    {
+      "id": "D4",
+      "severity": "requires-document-correction",
+      "title": "记者分类重置行为",
+      "evidence": [
+        "docs/exec-plans/active/silicon-reporter-template-parity.md:99",
+        "docs/exec-plans/active/silicon-reporter-template-parity.md:126"
+      ],
+      "missing": "首次默认写消息且两侧为空；切分类与重复点击同类都清空两侧、填写顺序和校验，保留锁定状态，不缓存各分类草稿。"
+    },
+    {
+      "id": "D5",
+      "severity": "requires-document-correction",
+      "title": "持续接口、历史及轮询边界",
+      "evidence": [
+        "docs/product-specs/go-api-migration.md:105",
+        "docs/product-specs/go-api-migration.md:145",
+        "docs/product-specs/go-api-migration.md:161"
+      ],
+      "missing": "Go 会话 ID 不进入旧接口、失败不回退旧后端；历史只保留各页已有操作，校对/工具箱/实时互动不新增历史；主播保留本人任务/task_id，不用管理员接口。每页 12 条与主播串行 5 秒、连续失败 3 次暂停、30 分钟暂停且不改任务状态的现有合同需在 Plan 保留或明确引用。"
+    }
+  ],
+  "notes": [
+    "Old role configurations, superseded routes, Generated gates and historical publication authorization must not be restored as current requirements.",
+    "Reporter field JSON, radio behavior, empty defaults and length values remain in the linked canonical API contract; no duplicate schema needed.",
+    "Knowledge independent appKey and scopes, read-only detail, actual retrieval not yet accepted, backend-only 40-second audio limit are retained correctly."
+  ],
+  "finalRecheck": {
+    "observedAt": "2026-09-28T11:59:22.491175+00:00",
+    "result": "passed",
+    "documents": [
+      {
+        "path": "docs/product-specs/Go API 迁移产品方案.md",
+        "sha256": "b0fa67316af8591ac9977ad69c9c118711997d958a5849945ecd841863e37817"
+      },
+      {
+        "path": "docs/exec-plans/active/Go API 迁移执行计划.md",
+        "sha256": "499be50401d2a5dcd590672405b0d4bb3b75649a36a7c495ab49a21339c9d53c"
+      },
+      {
+        "path": "docs/exec-plans/active/硅基记者模板对齐.md",
+        "sha256": "e2619698f9f5037d757caf8964d980570d4d564e5f196b21284aa676b4ae2ae8"
+      }
+    ],
+    "resolvedFindings": [
+      {
+        "id": "D1",
+        "resolution": "Restored in canonical Product Spec; Exec Plan includes implementation-specific details where necessary.",
+        "references": [
+          "docs/product-specs/Go API 迁移产品方案.md:58",
+          "docs/exec-plans/active/Go API 迁移执行计划.md:26"
+        ]
+      },
+      {
+        "id": "D2",
+        "resolution": "Restored in canonical Product Spec; Exec Plan includes implementation-specific details where necessary.",
+        "references": [
+          "docs/product-specs/Go API 迁移产品方案.md:42",
+          "docs/exec-plans/active/Go API 迁移执行计划.md:24"
+        ]
+      },
+      {
+        "id": "D3",
+        "resolution": "Restored in canonical Product Spec; Exec Plan includes implementation-specific details where necessary.",
+        "references": [
+          "docs/product-specs/Go API 迁移产品方案.md:38"
+        ]
+      },
+      {
+        "id": "D4",
+        "resolution": "Restored in canonical Product Spec; Exec Plan includes implementation-specific details where necessary.",
+        "references": [
+          "docs/product-specs/Go API 迁移产品方案.md:50"
+        ]
+      },
+      {
+        "id": "D5",
+        "resolution": "Restored in canonical Product Spec; Exec Plan includes implementation-specific details where necessary.",
+        "references": [
+          "docs/product-specs/Go API 迁移产品方案.md:58",
+          "docs/product-specs/Go API 迁移产品方案.md:64"
+        ]
+      }
+    ],
+    "remainingFindings": [],
+    "scope": "All five evidenced migration omissions were corrected. This is document continuity and readability acceptance, not business implementation or deployment acceptance."
+  }
+}

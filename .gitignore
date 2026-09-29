@@ -3,4 +3,7 @@ node_modules/
 .cache/
 tmp/
 *.log
+!docs/validation/**/*.log
 
+.lumine/local/
+.lumine-migrations/

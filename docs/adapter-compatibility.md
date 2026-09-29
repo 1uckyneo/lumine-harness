@@ -1,6 +1,6 @@
 # Using Lumine Harness with Different Coding Agents
 
-This guide is for projects that have already adopted Lumine Harness. The Harness root is the project directory that contains `.harness/root.json` and `.harness/cli`. If those files do not exist yet, follow the adoption steps in the [README](../README.md) first.
+This guide is for projects that have already adopted Lumine Harness. The Harness root is the project directory that contains `.lumine/root.json` and `.lumine/cli`. If those files do not exist yet, follow the adoption steps in the [README](../README.md) first.
 
 The table describes each product's setup path and the Adapter provided by the Lumine Harness repository. It does not claim that your current local session has already been verified.
 
@@ -11,12 +11,12 @@ The table describes each product's setup path and the Adapter provided by the Lu
 | Codex | Use it directly after project adoption | Start a new session from the Harness root | Discovers `.agents/skills` natively; project Hooks provide session entry, completion checks, and continuation |
 | Cursor | Use it directly after project adoption | Start a new session from the Harness root; trust the project only if Cursor explicitly marks it as restricted | Discovers `.agents/skills` natively; unfinished work continues through a new follow-up turn |
 | Trae | Use it after one-time setup | Enable `AGENTS.md` under Settings > Rules > Import Settings, enable the `.agents` Skill directory under Settings > Skills and Commands > Import Settings, and enable project Hooks under Settings > Hooks; then start a new session | Discovers `.agents/skills` natively after setup |
-| Kimi Code | Use it after one-time installation | Run `./.harness/cli adapter install kimi`, reload Kimi Code, and start a new session from the Harness root | Discovers `.agents/skills` natively; Hooks fail open, so high-risk actions still need independent approval |
+| Kimi Code | Use it after one-time installation | Run `./.lumine/cli adapter install kimi`, reload Kimi Code, and start a new session from the Harness root | Discovers `.agents/skills` natively; Hooks fail open, so high-risk actions still need independent approval |
 | Qoder | Use it directly after project adoption | Start a new session from the Harness root; naming the Skill explicitly is more reliable for critical phases | Skills do not appear in Qoder's native list; the Adapter locates the canonical file and requires the Agent to read it |
 | CodeBuddy | Use it after approving project Hooks | Run `/hooks` in CodeBuddy, review the current project's Hook changes, and start a new session | Skills do not appear in CodeBuddy's native list; the Adapter locates the canonical file and requires the Agent to read it |
-| ZCode | Use it after enabling the local Plugin | Run `./.harness/cli adapter install zcode`, add the returned directory as a local ZCode Marketplace, install and enable `lumine-harness-adapter`, and start a new session | Skills do not appear in ZCode's native list; automatic continuation is limited to three consecutive turns |
+| ZCode | Use it after enabling the local Plugin | Run `./.lumine/cli adapter install zcode`, add the returned directory as a local ZCode Marketplace, install and enable `lumine-harness-adapter`, and start a new session | Skills do not appear in ZCode's native list; automatic continuation is limited to three consecutive turns |
 | OpenCode | Use the core workflow directly | Start a new session from the Harness root | Discovers `.agents/skills` natively; there is no equivalent Stop Gate, so a person starts the next turn when more work is needed |
-| DeepSeek Harness | Try it after profile setup | Run `./.harness/cli adapter install deepseek-harness`, authorize the profile change, run the returned `dsh plugin` command, and start a new session | Developer preview; do not use it as the only gate for high-risk actions |
+| DeepSeek Harness | Try it after profile setup | Run `./.lumine/cli adapter install deepseek-harness`, authorize the profile change, run the returned `dsh plugin` command, and start a new session | Developer preview; do not use it as the only gate for high-risk actions |
 
 Every project Skill body lives only under `.agents/skills/`. Products that support this directory discover it directly. For Qoder, CodeBuddy, and ZCode, the Adapter maps an explicit Skill name or Harness phase to the canonical file, requires the Agent to read it, and checks the read event when the host exposes one. The Adapter neither copies Skill bodies nor reads them on the model's behalf.
 
@@ -56,12 +56,12 @@ This check is read-only. It does not change business code or project documents.
 If the result says that it cannot identify the current Agent:
 
 1. confirm that this is a new session started from the Harness root;
-2. if identification still fails, ask the Agent to run `./.harness/cli adapter check <product>`, replacing `<product>` with the current product ID;
+2. if identification still fails, ask the Agent to run `./.lumine/cli adapter check <product>`, replacing `<product>` with the current product ID;
 3. remember that an explicit product check confirms project configuration and known limitations, not that the current session actually ran its Hooks.
 
 When the result says you can start, give the Agent the first real requirement. If setup is still incomplete, follow the returned steps and check again in a new session.
 
-Skill discovery and Hook capabilities change the automation path, not the project workflow of Draft, optional Design, Product Spec, Exec Plan, Run, and Validation.
+Skill discovery and Hooks affect automation, not the responsibilities of Spec, Plan, Wiki, and evidence. The four everyday capabilities are lumine-plan, lumine-run, lumine-knowledge, and lumine-design; checks are Runtime tools. Verification-only tasks may finish with failing findings without automatically becoming repairs.
 
 Most users can stop here. If you maintain an Adapter or need to investigate a product protocol, see [Adapter diagnostics and release checks](adapter-verification.md).
 
@@ -76,3 +76,7 @@ Most users can stop here. If you maintain an Adapter or need to investigate a pr
 - [ZCode Skills](https://zcode.z.ai/en/docs/skill) and [ZCode Hooks](https://zcode.z.ai/en/docs/hooks)
 - [CodeBuddy Skills](https://www.codebuddy.ai/docs/cli/skills) and [CodeBuddy Hooks](https://www.codebuddy.ai/docs/cli/hooks)
 - [DeepSeek Harness Skills](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/skills.md) and [Codex Hook bridge](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/hooks/hooks-codex/README.md)
+
+## Verification scope for this refactor
+
+The new entry points and CLI are exercised in an actual Codex session. Projects install only their selected Adapters. Trae and other community Adapters retain protocol and distribution regression coverage; their applications have not each been tested live. Completing a project migration does not certify every host lifecycle capability. Skill-read events, independent sessions, and automatic continuation remain unverified when not observed. Deselecting an Adapter retires only unchanged managed configuration, while preserving community implementations and user settings.

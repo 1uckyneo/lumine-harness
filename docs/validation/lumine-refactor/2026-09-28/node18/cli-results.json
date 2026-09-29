@@ -1,0 +1,90 @@
+[
+  {
+    "name": "node-version",
+    "cwd": ".",
+    "command": "<validation-temp>/node-v18.20.8-darwin-arm64/bin/node --version",
+    "status": 0,
+    "stdout": "v18.20.8\n",
+    "stderr": ""
+  },
+  {
+    "name": "cli-help",
+    "cwd": ".",
+    "command": "bash <fixture>/.lumine/cli help",
+    "status": 0,
+    "stdout": "Lumine：check 检查 | wiki 知识 | task 任务和文档 | skills 技能 | adapter 宿主适配 | work-status 工作状态\n知识：wiki scan / query / show / update / serve / check；项目健康：check health\n",
+    "stderr": ""
+  },
+  {
+    "name": "project-health",
+    "cwd": ".",
+    "command": "bash <fixture>/.lumine/cli check health --json",
+    "status": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"scope\": \"health\",\n  \"issues\": [],\n  \"evidenceLevel\": \"repository_checked\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "cold-query-zh",
+    "cwd": ".",
+    "command": "bash <fixture>/.lumine/cli wiki query 登录 --json",
+    "status": 0,
+    "stdout": "{\n  \"query\": \"登录\",\n  \"cards\": [\n    {\n      \"id\": \"login-flow\",\n      \"title\": \"登录与会话\",\n      \"summary\": \"登录建立会话，并将会话交给页面使用。\",\n      \"type\": \"architecture\",\n      \"status\": \"current\",\n      \"collection\": \"wiki\",\n      \"locale\": \"zh-CN\",\n      \"path\": \"docs/repo-wiki/登录与会话.md\",\n      \"revision\": \"014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4\",\n      \"freshness\": \"unverified\",\n      \"repositories\": [\n        \"app\"\n      ],\n      \"tags\": [\n        \"login\",\n        \"session\",\n        \"登录\"\n      ],\n      \"sources\": [\n        {\n          \"id\": \"login-source\",\n          \"repoId\": \"app\",\n          \"path\": \"src/login.ts\",\n          \"startLine\": 1,\n          \"endLine\": 1\n        }\n      ],\n      \"relations\": [],\n      \"diagramIds\": [\n        \"login-sequence\"\n      ],\n      \"diagramTypes\": [\n        \"sequenceDiagram\"\n      ],\n      \"reason\": \"登录\"\n    }\n  ],\n  \"total\": 1,\n  \"contextChars\": 530\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "cold-query-en",
+    "cwd": ".",
+    "command": "bash <fixture>/.lumine/cli wiki query authentication --json",
+    "status": 0,
+    "stdout": "{\n  \"query\": \"authentication\",\n  \"cards\": [\n    {\n      \"id\": \"login-flow\",\n      \"title\": \"登录与会话\",\n      \"summary\": \"登录建立会话，并将会话交给页面使用。\",\n      \"type\": \"architecture\",\n      \"status\": \"current\",\n      \"collection\": \"wiki\",\n      \"locale\": \"zh-CN\",\n      \"path\": \"docs/repo-wiki/登录与会话.md\",\n      \"revision\": \"014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4\",\n      \"freshness\": \"unverified\",\n      \"repositories\": [\n        \"app\"\n      ],\n      \"tags\": [\n        \"login\",\n        \"session\",\n        \"登录\"\n      ],\n      \"sources\": [\n        {\n          \"id\": \"login-source\",\n          \"repoId\": \"app\",\n          \"path\": \"src/login.ts\",\n          \"startLine\": 1,\n          \"endLine\": 1\n        }\n      ],\n      \"relations\": [],\n      \"diagramIds\": [\n        \"login-sequence\"\n      ],\n      \"diagramTypes\": [\n        \"sequenceDiagram\"\n      ],\n      \"reason\": \"authentication\"\n    }\n  ],\n  \"total\": 1,\n  \"contextChars\": 542\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "nested-child-query",
+    "cwd": "app/src",
+    "command": "bash <fixture>/.lumine/cli wiki query session --json",
+    "status": 0,
+    "stdout": "{\n  \"query\": \"session\",\n  \"cards\": [\n    {\n      \"id\": \"login-flow\",\n      \"title\": \"登录与会话\",\n      \"summary\": \"登录建立会话，并将会话交给页面使用。\",\n      \"type\": \"architecture\",\n      \"status\": \"current\",\n      \"collection\": \"wiki\",\n      \"locale\": \"zh-CN\",\n      \"path\": \"docs/repo-wiki/登录与会话.md\",\n      \"revision\": \"014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4\",\n      \"freshness\": \"unverified\",\n      \"repositories\": [\n        \"app\"\n      ],\n      \"tags\": [\n        \"login\",\n        \"session\",\n        \"登录\"\n      ],\n      \"sources\": [\n        {\n          \"id\": \"login-source\",\n          \"repoId\": \"app\",\n          \"path\": \"src/login.ts\",\n          \"startLine\": 1,\n          \"endLine\": 1\n        }\n      ],\n      \"relations\": [],\n      \"diagramIds\": [\n        \"login-sequence\"\n      ],\n      \"diagramTypes\": [\n        \"sequenceDiagram\"\n      ],\n      \"reason\": \"session\"\n    }\n  ],\n  \"total\": 1,\n  \"contextChars\": 535\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "show-by-id",
+    "cwd": "app",
+    "command": "bash <fixture>/.lumine/cli wiki show login-flow --json",
+    "status": 0,
+    "stdout": "{\n  \"id\": \"login-flow\",\n  \"title\": \"登录与会话\",\n  \"summary\": \"登录建立会话，并将会话交给页面使用。\",\n  \"type\": \"architecture\",\n  \"status\": \"current\",\n  \"locale\": \"zh-CN\",\n  \"tags\": [\n    \"login\",\n    \"session\",\n    \"登录\"\n  ],\n  \"aliases\": [\n    \"authentication\",\n    \"login\",\n    \"session\"\n  ],\n  \"repositories\": [\n    \"app\"\n  ],\n  \"relations\": [],\n  \"sources\": [\n    {\n      \"id\": \"login-source\",\n      \"repoId\": \"app\",\n      \"path\": \"src/login.ts\",\n      \"startLine\": 1,\n      \"endLine\": 1\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"login-sequence\",\n      \"title\": \"登录流程\",\n      \"caption\": \"登录提交后建立会话；静态源码不证明服务已部署。\",\n      \"sources\": [\n        \"login-source\"\n      ],\n      \"code\": \"sequenceDiagram\\n  用户->>服务: 登录\\n  服务-->>用户: 会话\"\n    }\n  ],\n  \"watchScopes\": [],\n  \"path\": \"docs/repo-wiki/登录与会话.md\",\n  \"collection\": \"wiki\",\n  \"body\": \"\\n# 登录与会话\\n\\n登录创建会话。该知识描述本地源码机制，不代表部署或用户验收。\\n\\n```mermaid\\nsequenceDiagram\\n  用户->>服务: 登录\\n  服务-->>用户: 会话\\n```\\n\\n## 来源与限制\\n\\n可从来源区查看 src/login.ts，现有正文无需模型调用即可读取。\\n\",\n  \"markdown\": \"---\\nid: login-flow\\ntitle: 登录与会话\\nsummary: 登录建立会话，并将会话交给页面使用。\\ntype: architecture\\nstatus: current\\nlocale: zh-CN\\ntags: [login, session, 登录]\\naliases: [authentication, login, session]\\nrepositories: [app]\\nsources:\\n  - id: login-source\\n    repoId: app\\n    path: src/login.ts\\n    startLine: 1\\n    endLine: 1\\ndiagrams:\\n  - id: login-sequence\\n    title: 登录流程\\n    caption: 登录提交后建立会话；静态源码不证明服务已部署。\\n    sources: [login-source]\\n---\\n\\n# 登录与会话\\n\\n登录创建会话。该知识描述本地源码机制，不代表部署或用户验收。\\n\\n```mermaid\\nsequenceDiagram\\n  用户->>服务: 登录\\n  服务-->>用户: 会话\\n```\\n\\n## 来源与限制\\n\\n可从来源区查看 src/login.ts，现有正文无需模型调用即可读取。\\n\",\n  \"revision\": \"014a191789af99a7916b0160ebe2e75ff6213b51b8c065685e472cd70fbde4c4\",\n  \"freshness\": \"unverified\",\n  \"issues\": []\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "wiki-check",
+    "cwd": ".",
+    "command": "bash <fixture>/.lumine/cli wiki check --json",
+    "status": 0,
+    "stdout": "{\n  \"status\": \"passed\",\n  \"issues\": [\n    {\n      \"code\": \"KNOWLEDGE_UNVERIFIED\",\n      \"severity\": \"warning\",\n      \"document\": \"login-flow\",\n      \"message\": \"使用前请依据当前来源核实正文。\"\n    }\n  ],\n  \"verified\": [\n    \"login-flow\"\n  ],\n  \"notVerified\": [\n    \"semantic accuracy\",\n    \"runtime behavior\",\n    \"human acceptance\"\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-from-child",
+    "cwd": ".",
+    "command": "<validation-temp>/node-v18.20.8-darwin-arm64/bin/node --input-type=module -e import {findHarnessRoot} from './.lumine/core/root-resolver.mjs'; const found=findHarnessRoot('./app/src'); console.log(JSON.stringify({rootFound:found===process.cwd(),rootIsGit:false}));",
+    "status": 0,
+    "stdout": "{\"rootFound\":true,\"rootIsGit\":false}\n",
+    "stderr": ""
+  },
+  {
+    "name": "runtime-isolation-probe",
+    "cwd": ".",
+    "command": "<validation-temp>/node-v18.20.8-darwin-arm64/bin/node <validation-temp>/probe-environment.cjs",
+    "status": 0,
+    "stdout": "{\"readBlocked\":true,\"code\":\"EPERM\",\"kind\":\"harness-source\"}\n{\"readBlocked\":true,\"code\":\"EPERM\",\"kind\":\"development-dependency\"}\n",
+    "stderr": ""
+  },
+  {
+    "name": "network-isolation-probe",
+    "cwd": ".",
+    "command": "<validation-temp>/node-v18.20.8-darwin-arm64/bin/node <validation-temp>/probe-network.cjs",
+    "status": 0,
+    "stdout": "{\"outboundDenied\":true,\"code\":\"EPERM\"}\n",
+    "stderr": ""
+  }
+]

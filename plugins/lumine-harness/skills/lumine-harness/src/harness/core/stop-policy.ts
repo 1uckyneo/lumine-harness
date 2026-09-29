@@ -1,7 +1,6 @@
-import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
+import { loadProjectConfig } from "./project-config.ts";
+import { checkSessionCompletion } from "./task-contract.ts";
 import { countWorkStatus, deriveStatusEmissionId, extractWorkStatus, readFreshStateStatus, readSessionState, recordUserTurn, recordWorkStatus, writeSessionState } from "./work-status.ts";
 import type {
   HarnessHookDecision,
@@ -57,14 +56,7 @@ export function resolveAutonomyPolicy(
   product: HarnessProduct,
   override: Partial<AutonomyPolicy> = {}
 ): AutonomyPolicy {
-  let configured: Partial<AutonomyPolicy> = {};
-  const file = path.join(root, ".harness", "project.json");
-  if (existsSync(file)) {
-    try {
-      const project = JSON.parse(readFileSync(file, "utf8")) as { autonomy?: Partial<AutonomyPolicy> };
-      configured = project.autonomy ?? {};
-    } catch {}
-  }
+  const configured = loadProjectConfig(root).autonomy;
   const requestedMax = positiveInteger(override.maxContinuationChain ?? configured.maxContinuationChain, DEFAULT_AUTONOMY_POLICY.maxContinuationChain);
   const hostMax = HOST_CONTINUATION_LIMITS[product] ?? Number.POSITIVE_INFINITY;
   return {
@@ -92,11 +84,6 @@ function decision(
 
 function continuationRequestId(input: HarnessSessionInput, revision: number): string {
   return createHash("sha256").update(`${input.product}\0${input.sessionId}\0${revision}`).digest("hex");
-}
-
-function defaultRunCheck(root: string): StopCheckResult {
-  const result = spawnSync(process.execPath, [path.join(root, ".harness", "check.mjs"), "all"], { cwd: root, encoding: "utf8" });
-  return { ok: result.status === 0, output: `${result.stdout || ""}${result.stderr || ""}`.trim() };
 }
 
 function resolveStatus(input: RuntimeHookInput, root: string): { status: WorkStatus | null; reason: "message" | "state"; state?: SessionState | null } {
@@ -186,7 +173,8 @@ export function evaluateStopPolicy(input: RuntimeHookInput, options: StopPolicyO
     return decision("request_continuation", { workStatus: status, workStatusRevision, continuationRequestId: requestId, shouldDeliver: true, message });
   }
   if (status !== "done") return decision("pause_for_human", { workStatus: status, workStatusRevision, message: PAUSE_MESSAGES[status as PauseWorkStatus] });
-  const check = (options.runCheck ?? defaultRunCheck)(root);
+  const diagnostic = ["plan", "verify", "diagnose", "check"].includes(state.requestedActivity ?? "");
+  const check = diagnostic ? { ok: true } : options.runCheck ? options.runCheck(root) : checkSessionCompletion(root, state);
   if (!check.ok) return decision("reject_completion", { workStatus: status, workStatusRevision, message: check.output || "Harness checks failed." });
   return decision("finish", { workStatus: status, workStatusRevision });
 }

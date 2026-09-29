@@ -1,41 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
+LUMINE_RUNTIME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 case "${1:-}" in
-  check)
-    shift
-    exec node "$ROOT/check.mjs" "$@"
-    ;;
-  generated)
-    shift
-    exec node "$ROOT/generated.mjs" "$@"
-    ;;
-  adapter)
-    exec node "$ROOT/adapter-cli.mjs" adapter "${@:2}"
-    ;;
-  skills)
-    exec node "$ROOT/adapter-cli.mjs" skills "${@:2}"
-    ;;
-  work-status)
-    exec node "$ROOT/adapter-cli.mjs" work-status "${@:2}"
-    ;;
-  *)
-    {
-      echo "Usage:"
-      echo "  ./.harness/cli check <docs|draft|design|plan|architecture|taste|stale-docs|adapters|all> [slug]"
-      echo "  ./.harness/cli generated refresh <target|all>"
-      echo "  ./.harness/cli adapter check <current|product> [--details] [--json]"
-      echo "  ./.harness/cli adapter status <current|selected|product> [--details] [--json]"
-      echo "  ./.harness/cli adapter list"
-      echo "  ./.harness/cli adapter doctor <product|selected|all> [--json]  # 检查安装、工程配置和仍需完成的设置"
-      echo "  ./.harness/cli adapter verify <product|selected|all> [--json]  # 汇总真实 Agent 会话产生的运行证据"
-      echo "  ./.harness/cli adapter verify <product> --begin --host-version <version>"
-      echo "  ./.harness/cli adapter <install|uninstall> <kimi|zcode|deepseek-harness>"
-      echo "  ./.harness/cli skills <list|search|inspect> [query|name]"
-      echo "  ./.harness/cli work-status <status> --product <product> --session-id <id>"
-    } >&2
-    exit 2
-    ;;
+ check) shift; exec node "$LUMINE_RUNTIME/check.mjs" "$@" ;;
+ wiki) shift; exec node "$LUMINE_RUNTIME/wiki.mjs" "$@" ;;
+ task) shift; exec node "$LUMINE_RUNTIME/core/task-cli.mjs" "$@" ;;
+ adapter|skills|work-status) exec node "$LUMINE_RUNTIME/adapter-cli.mjs" "$@" ;;
+ help|--help|-h|"")
+  LUMINE_LOCALE="$(node -e 'try { const fs=require("node:fs"),p=require("node:path");let r=process.cwd();while(!fs.existsSync(p.join(r,".lumine/project.json"))&&p.dirname(r)!==r)r=p.dirname(r);const f=fs.existsSync(p.join(r,".lumine/project.json"))?p.join(r,".lumine/project.json"):process.argv[1];process.stdout.write(JSON.parse(fs.readFileSync(f,"utf8")).locale||"en") } catch {}' "$LUMINE_RUNTIME/project.json")"
+  if [[ "$LUMINE_LOCALE" == "zh-CN" ]]; then
+   echo "Lumine：check 检查 | wiki 知识 | task 任务和文档 | skills 技能 | adapter 宿主适配 | work-status 工作状态"
+   echo "知识：wiki scan / query / show / update / serve / check；项目健康：check health"
+  else
+   echo "Lumine: check | wiki scan/query/show/update/serve/check | task | skills | adapter | work-status"
+   echo "Project health: check health. Use each command's help for its options."
+  fi ;;
+ *) echo "Unknown command / 未知命令: $1" >&2; exit 2 ;;
 esac

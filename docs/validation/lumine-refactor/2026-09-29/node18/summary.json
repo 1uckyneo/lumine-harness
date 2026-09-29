@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "observedAt": "2026-09-29T04:07:52.606253+00:00",
+  "nodeVersion": "18.20.8",
+  "checks": 8,
+  "networkOutboundDenied": true,
+  "sourceAndNodeModulesReadDenied": true,
+  "archiveRestorationPreservesText": true
+}

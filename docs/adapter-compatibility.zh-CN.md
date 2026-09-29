@@ -1,6 +1,6 @@
 # 在不同 Agent 中使用 Lumine Harness
 
-本文适用于已经完成 Lumine Harness 项目接入的工程。Harness 根目录是包含 `.harness/root.json` 和 `.harness/cli` 的工程目录；如果还没有这些文件，请先返回[中文 README](../README.zh-CN.md)完成接入。
+本文适用于已经完成 Lumine Harness 项目接入的工程。Harness 根目录是包含 `.lumine/root.json` 和 `.lumine/cli` 的工程目录；如果还没有这些文件，请先返回[中文 README](../README.zh-CN.md)完成接入。
 
 下面列出的是各产品的接入方式和 Lumine Harness 仓库已经提供的 Adapter，不代表你本机的当前会话已经验证通过。
 
@@ -11,14 +11,14 @@
 | Codex | 项目接入后直接使用 | 从 Harness 根目录开启新会话 | 原生发现 `.agents/skills`；项目 Hook 负责会话入口、结束检查和继续处理 |
 | Cursor | 项目接入后直接使用 | 从 Harness 根目录开启新会话；只有 Cursor 明确提示工程受限时才按提示信任工程 | 原生发现 `.agents/skills`；未完成任务通过新一轮消息继续 |
 | Trae | 完成一次设置后使用 | 在“设置 > 规则 > 导入设置”启用 `AGENTS.md`，在“设置 > 技能与命令 > 导入设置”启用 `.agents` 技能目录，并在“设置 > Hooks”启用项目 Hook，然后开启新会话 | 设置完成后原生发现 `.agents/skills` |
-| Kimi Code | 安装一次后使用 | 运行 `./.harness/cli adapter install kimi`，重新加载 Kimi Code，再从 Harness 根目录开启新会话 | 原生发现 `.agents/skills`；Hook 失败时默认放行，高风险操作仍需独立确认 |
-| Qoder | 项目接入后直接使用 | 从 Harness 根目录开启新会话；关键阶段明确说出 Skill 名称会更稳定 | Skill 不进入 Qoder 原生列表；Adapter 定位真实文件并要求 Agent 读取 |
+| Kimi Code | 安装一次后使用 | 运行 `./.lumine/cli adapter install kimi`，重新加载 Kimi Code，再从 Harness 根目录开启新会话 | 原生发现 `.agents/skills`；Hook 失败时默认放行，高风险操作仍需独立确认 |
+| Qoder | 项目接入后直接使用 | 从 Harness 根目录开启新会话；明确说出所需能力或 Skill 名称可帮助定位 | Skill 不进入 Qoder 原生列表；Adapter 定位真实文件并要求 Agent 读取 |
 | CodeBuddy | 确认项目 Hook 后使用 | 在 CodeBuddy 对话中运行 `/hooks`，审核当前项目的 Hook 变更，再开启新会话 | Skill 不进入 CodeBuddy 原生列表；Adapter 定位真实文件并要求 Agent 读取 |
-| ZCode | 启用本地 Plugin 后使用 | 运行 `./.harness/cli adapter install zcode`，把返回目录加入 ZCode 本地 Marketplace，安装并启用 `lumine-harness-adapter`，再开启新会话 | Skill 不进入 ZCode 原生列表；最多连续自动继续 3 次 |
+| ZCode | 启用本地 Plugin 后使用 | 运行 `./.lumine/cli adapter install zcode`，把返回目录加入 ZCode 本地 Marketplace，安装并启用 `lumine-harness-adapter`，再开启新会话 | Skill 不进入 ZCode 原生列表；最多连续自动继续 3 次 |
 | OpenCode | 核心流程可以直接使用 | 从 Harness 根目录开启新会话 | 原生发现 `.agents/skills`；没有对等 Stop Gate，任务需要继续时由人发起下一轮 |
-| DeepSeek Harness | 完成配置后试用 | 运行 `./.harness/cli adapter install deepseek-harness`，授权修改用户 profile，执行命令返回的 `dsh plugin` 安装指令，再开启新会话 | 当前属于开发预览，不应作为高风险操作的唯一门禁 |
+| DeepSeek Harness | 完成配置后试用 | 运行 `./.lumine/cli adapter install deepseek-harness`，授权修改用户 profile，执行命令返回的 `dsh plugin` 安装指令，再开启新会话 | 当前属于开发预览，不应作为高风险操作的唯一门禁 |
 
-所有项目 Skill 的正文只保存在 `.agents/skills/`。支持该目录的产品会直接发现它；Qoder、CodeBuddy 和 ZCode 的 Adapter 会根据明确的 Skill 名称或 Harness 阶段定位真实文件，要求 Agent 读取，并在宿主提供相应事件时检查是否已经读取。Adapter 不会复制 Skill 正文，也不会代替模型阅读文件。
+所有项目 Skill 的正文只保存在 `.agents/skills/`。支持该目录的产品会直接发现它；Qoder、CodeBuddy 和 ZCode 的 Adapter 会根据明确的 Skill 名称或所需能力定位真实文件，要求 Agent 读取，并在宿主提供相应事件时检查是否已经读取。Adapter 不会复制 Skill 正文，也不会代替模型阅读文件。
 
 ## 最关键的 Hook 差异：结束前能不能先检查
 
@@ -26,7 +26,7 @@
 
 这些差异不是把 `.codex` 改成另一个目录名就能解决。不同 Agent 的 Hook 没有统一协议：配置位置、事件名称、触发时机和返回值都可能不同；有的 Hook 可以阻断当前动作并向 Agent 反馈，有的只能在动作结束后收到通知；失败时也可能分别采用默认阻断或默认放行。Lumine Harness 的 Adapter 可以把已有协议转换为统一的 Harness 语义，但不能补出宿主本身没有提供的生命周期能力。
 
-Stop Gate 在本轮真正结束前执行。它可以读取 `WORK_STATUS`、运行 Harness Check，并据此允许结束、要求继续，或把需要决策、凭据和人工操作的事项交还给人。结束后的日志或通知事件不能替代它。
+Stop Gate 在本轮真正结束前执行。它可以读取 `WORK_STATUS`、检查当前任务与请求模式，并据此允许结束、要求继续，或把需要决策、凭据和人工操作的事项交还给人。结束后的日志或通知事件不能替代它。
 
 | 情况 | Agent | 对使用者的影响 |
 | --- | --- | --- |
@@ -56,12 +56,12 @@ OpenCode 的 `session.idle` 发生在 Agent 已经进入空闲状态以后。Lum
 如果结果显示“无法识别当前 Agent”：
 
 1. 确认当前会话是从 Harness 根目录新开的；
-2. 仍无法识别时，让 Agent 运行 `./.harness/cli adapter check <product>`，把 `<product>` 换成当前产品标识；
+2. 仍无法识别时，让 Agent 运行 `./.lumine/cli adapter check <product>`，把 `<product>` 换成当前产品标识；
 3. 显式产品检查只能确认工程配置和已知限制，不能证明本次会话已经实际触发 Hook。
 
 显示“可以开始”后，就可以提出第一项真实需求。显示仍有设置未完成时，按结果完成设置，再开启新会话复查。
 
-Skill 发现方式和 Hook 能力改变的是自动化方式，不改变 Draft、按需 Design、Product Spec、Exec Plan、Run 和 Validation 的项目流程。
+Skill 发现方式和 Hook 能力改变自动化方式，不改变 Spec、Plan、Wiki 与证据的职责。四个日常能力是 lumine-plan、lumine-run、lumine-knowledge、lumine-design；检查属于 Runtime。只验证任务可以报告失败后完成，不会因此自动转为修复。
 
 普通使用者到这里就足够了。只有维护 Adapter 或排查产品协议时，才需要阅读 [Adapter 调试与发布检查](adapter-verification.zh-CN.md)。
 
@@ -76,3 +76,7 @@ Skill 发现方式和 Hook 能力改变的是自动化方式，不改变 Draft�
 - [ZCode Skills](https://zcode.z.ai/en/docs/skill) 与 [ZCode Hooks](https://zcode.z.ai/en/docs/hooks)
 - [CodeBuddy Skills](https://www.codebuddy.ai/docs/cli/skills) 与 [CodeBuddy Hooks](https://www.codebuddy.ai/docs/cli/hooks)
 - [DeepSeek Harness Skills](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/skills.md) 与 [Codex Hook bridge](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/hooks/hooks-codex/README.md)
+
+## 本次验证范围
+
+本次重构在实际使用的 Codex 会话验证新入口和 CLI；项目只安装所选 Adapter。Trae 及其他社区 Adapter 保留协议和分发回归，未逐一进行真实应用验收。单个项目迁移完成不等于该宿主全部生命周期能力已认证；未观测到的 Skill 读取、独立会话和自动续跑应继续报告未实测。取消选用时只退出内容未被人工修改的受管配置，保留社区实现和用户自定义设置。

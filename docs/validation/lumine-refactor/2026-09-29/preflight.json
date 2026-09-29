@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-09-29T04:03:19.639704+00:00",
+  "historicalFileCount": 158,
+  "mismatches": [],
+  "projects": [
+    {
+      "project": "workspace",
+      "previousProposalId": "01ab02fc-dda4-425c-8e64-8bf67aaea205",
+      "codexHookHash": "4b8a98e88a631b245e03a5703cc4252ab6d3af7a1a9918bd66ad04f8a8c09c59",
+      "temporaryBridges": {
+        ".harness/adapters/codex/hooks/session-start.mjs": "5c24b098302fc6a4a4479efd929bb296ae17a10a88cc73f64187b0a99c5dfaf2",
+        ".harness/adapters/codex/hooks/stop-gate.mjs": "70d388381f7f9b281050cb1cfa9d37d3e3c59ddc3d9def5ee336d555af02f094",
+        ".harness/adapters/trae/hooks/session-start.mjs": "f1c8063a162373f9fc76534efb03e1efd0f343affd4df11cb055d7a40074f97a",
+        ".harness/adapters/trae/hooks/stop.mjs": "f3900af637bd80a39a477b2d412e8afa2e4c684ea6912f0f85829771d296a06b",
+        ".harness/cli": "894fcd41014ec360219d7f92dba681ceaf72d2a1e07349cfc960b941a135c700"
+      }
+    },
+    {
+      "project": "source",
+      "previousProposalId": "41c1b2ba-c298-4cb3-9012-e77817484325",
+      "codexHookHash": "4b8a98e88a631b245e03a5703cc4252ab6d3af7a1a9918bd66ad04f8a8c09c59",
+      "temporaryBridges": {}
+    }
+  ]
+}

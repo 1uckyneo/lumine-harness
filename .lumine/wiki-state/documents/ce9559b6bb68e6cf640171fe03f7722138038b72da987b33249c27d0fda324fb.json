@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 2,
+  "id": "lumine-architecture",
+  "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+  "generation": 2,
+  "generatedMarkdown": "---\nid: \"lumine-architecture\"\ntitle: \"Core、Skill、Adapter 与构建分发\"\nsummary: \"公共 Core 维护任务语义，Skill 提供按需判断指导，Adapter 翻译宿主协议；TypeScript 和规范资源通过构建生成安装包。\"\ntype: \"architecture\"\nstatus: \"current\"\nlocale: \"zh-CN\"\ntags: [\"architecture\", \"架构\", \"build distribution\", \"分发\"]\naliases: [\"architecture\", \"架构\", \"build distribution\", \"分发\"]\nrepositories: [\"project\"]\nsources: [{\"id\":\"core\",\"repoId\":\"project\",\"path\":\"skills/lumine-harness/src/harness/core/session-context.ts\",\"kind\":\"source\"},{\"id\":\"routing\",\"repoId\":\"project\",\"path\":\"skills/lumine-harness/src/harness/core/phase-router.ts\",\"kind\":\"source\"},{\"id\":\"build\",\"repoId\":\"project\",\"path\":\"scripts/build-runtime.ts\",\"kind\":\"source\"},{\"id\":\"manifest\",\"repoId\":\"project\",\"path\":\"scripts/runtime-artifacts.ts\",\"kind\":\"source\"},{\"id\":\"reader\",\"repoId\":\"project\",\"path\":\"scripts/build-reader.ts\",\"kind\":\"source\"},{\"id\":\"wrapper\",\"repoId\":\"project\",\"path\":\"scripts/sync-plugin-wrapper.sh\",\"kind\":\"source\"},{\"id\":\"adapter-paths\",\"repoId\":\"project\",\"path\":\"skills/lumine-harness/src/harness/adapter-manager.ts\",\"kind\":\"source\"}]\nrelations: [\"lumine-adoption\", \"lumine-task-check\", \"lumine-wiki\"]\ndiagrams: [{\"id\": \"layers\", \"title\": \"职责和产物关系\", \"caption\": \"箭头表示依赖或生成方向；浏览器绘图与服务端运行分别构建。\", \"sources\": [\"core\", \"build\", \"reader\", \"wrapper\"]}]\nwatchScopes: [{\"repoId\":\"project\",\"path\":\"skills/lumine-harness/src/harness/core/session-context.ts\"},{\"repoId\":\"project\",\"path\":\"skills/lumine-harness/src/harness/core/phase-router.ts\"},{\"repoId\":\"project\",\"path\":\"scripts/build-runtime.ts\"},{\"repoId\":\"project\",\"path\":\"scripts/runtime-artifacts.ts\"},{\"repoId\":\"project\",\"path\":\"scripts/build-reader.ts\"},{\"repoId\":\"project\",\"path\":\"scripts/sync-plugin-wrapper.sh\"},{\"repoId\":\"project\",\"path\":\"skills/lumine-harness/src/harness/adapter-manager.ts\"}]\n---\n\n# Core、Skill、Adapter 与构建分发\n\n## 一次修改怎样进入项目\n\n规范源码位于 `skills/lumine-harness/src/`。维护者修改 TypeScript 后运行 `pnpm runtime:build`，构建程序把服务端文件编译为 Node 18 可运行的 `.mjs`，把阅读器及其 Markdown、Mermaid 和安全清洗依赖打包为本地静态资源。项目安装只复制正式运行资源，不需要维护仓的依赖目录。\n\n四个日常 Skill 是语义指导：需求与方案规划、实施与验证、知识维护、视觉与交互设计。它们引用同一 Runtime，不各自复制检查规则。规范中文资源在 `assets/skills/`，英文资源使用 `.template` 扩展，安装时只选择一种语言成为可发现的 `SKILL.md`。\n\n```mermaid\nflowchart TB\n  S[规范 TypeScript] --> B[Runtime 构建]\n  B --> C[公共 Core 和 CLI]\n  B --> A[产品 Adapter]\n  R[浏览器文本阅读器] --> E[独立浏览器构建]\n  E --> H[本地 HTML 与绘图库]\n  K[所选语言的四个 Skill] --> P[安装项目]\n  C --> P\n  A --> P\n  H --> P\n  P --> W[Markdown 与 Mermaid 知识]\n  N[规范分发资源] --> V[Plugin 同步副本]\n```\n\n## Core 和宿主各管什么\n\nCore 记录显式任务模式，核对已选择 Skill 的读取状态、检查证据和六种工作状态。关键词只提供候选能力，不能决定授权或建立硬门禁。Adapter 接收宿主事件，规范化输入，把 Core 决策转换成该宿主支持的协议。宿主是否执行 Hook、能否自动续跑，是另一个需要实际观测的层次；配置已安装不能证明宿主已经读取。\n\n路由会考虑用户目标和已有上下文。技能名称不能替代实施授权，中文“设计”也可能是技术规划。规划、实施、仅验证和诊断均可调用知识检索，不是互斥阶段。\n\n## 为什么单独构建阅读器\n\nMermaid 的绘图运行在浏览器，服务端只负责文件和文本 API。YAML 与忽略规则解析被打包为服务端 vendor，避免把 Node 版本要求较高的浏览器依赖带入 Node 18 服务端。Reader 的动态 chunk、样式和许可一并纳入清单；静态资源完整性与 Runtime 源码一致性分别检查。\n\nPlugin wrapper 来自同步脚本，是同一规范包的副本。修改副本会在同步时丢失，也可能使两种安装形式行为不同，因此修改入口始终是规范资源。\n\n## 边界与核实入口\n\n本图描述源码职责和构建结构，不描述已发布版本、宿主实测状态或业务部署。阅读器构建成功不能证明所有图都可读；还需要浏览器验收。查看 `build-runtime.ts` 的产物映射、`build-reader.ts` 的 bundle 清单以及 `sync-plugin-wrapper.sh` 的复制范围可复核生成关系。\n\n## 自用与安装项目如何共用入口\n\n项目身份、配置和会话仍保存在项目的 `.lumine/`；Runtime 资源位置由根声明统一解析。安装项目读取自己的 Runtime，源仓自用读取规范构建产物。因此 Adapter 的能力清单、手工安装资源与检查入口也必须使用同一解析器，不能假定资源一定与项目配置同目录。\n",
+  "appliedRevision": "89e70a54b1f7c2e5ff4a7a5f2a23eff5abfdb4f348176b866b996637ed6590af",
+  "sources": {
+    "fingerprints": {
+      "project:skills/lumine-harness/src/harness/core/session-context.ts": "3cfcc11c8118aff7f7ab5f31de3aafe275114ea5649b3b564233d845baac9a92",
+      "project:skills/lumine-harness/src/harness/core/phase-router.ts": "297dc71ca1e41dfa55a8f7847a1a480fd5602388f84fc05596e4f6fab2dbbfeb",
+      "project:scripts/build-runtime.ts": "36718fefca1657b323d898bff5c022539ce078c306e79efefc5e851057a9ba90",
+      "project:scripts/runtime-artifacts.ts": "c3b33fc1ba5ba24010cdb7d5567c08ab92198b74c46f2f384c2b3c8349641d0c",
+      "project:scripts/build-reader.ts": "91e03836584c49079231ce0c81c0a9d596434dd141e36b95f30d94a3e4057f33",
+      "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+      "project:skills/lumine-harness/src/harness/adapter-manager.ts": "b7e4891fbf6e9253aaf07e0544e28ea153c9431b9ae632c8bdf117bfa290201f"
+    },
+    "scopeFingerprints": {
+      "project:skills/lumine-harness/src/harness/core/session-context.ts": "fa7594002866e6d057140938d2b80f78bc68d9541aeae9cc01884fdb92995420",
+      "project:skills/lumine-harness/src/harness/core/phase-router.ts": "e13353bb6b6eddcbc8759d40da398394980421c89b24b3c4b6d8363cfe40910f",
+      "project:scripts/build-runtime.ts": "9c29b203dd48c5c87d799b7b3cde9e07060396500231f2eac871e1e2df836775",
+      "project:scripts/runtime-artifacts.ts": "7c18dd06acd14df7791a30feb55ec041e5a36e693ce811a49c83f47df2e31f18",
+      "project:scripts/build-reader.ts": "db812615e54a084357194f832d176541ff8ffa8581fd7e0a140c9f77f2773c34",
+      "project:scripts/sync-plugin-wrapper.sh": "4726841156286e11e720a90ce23b1df720cdd24ddfa750f8a21f5cceec6c3ed1",
+      "project:skills/lumine-harness/src/harness/adapter-manager.ts": "5e1eda22a983acf5a9e6d4861c1c6633460d9e92693829c3ba4edecf59ec88ed"
+    },
+    "files": {
+      "project:skills/lumine-harness/src/harness/core/session-context.ts": "3cfcc11c8118aff7f7ab5f31de3aafe275114ea5649b3b564233d845baac9a92",
+      "project:skills/lumine-harness/src/harness/core/phase-router.ts": "297dc71ca1e41dfa55a8f7847a1a480fd5602388f84fc05596e4f6fab2dbbfeb",
+      "project:scripts/build-runtime.ts": "36718fefca1657b323d898bff5c022539ce078c306e79efefc5e851057a9ba90",
+      "project:scripts/runtime-artifacts.ts": "c3b33fc1ba5ba24010cdb7d5567c08ab92198b74c46f2f384c2b3c8349641d0c",
+      "project:scripts/build-reader.ts": "91e03836584c49079231ce0c81c0a9d596434dd141e36b95f30d94a3e4057f33",
+      "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+      "project:skills/lumine-harness/src/harness/adapter-manager.ts": "b7e4891fbf6e9253aaf07e0544e28ea153c9431b9ae632c8bdf117bfa290201f"
+    },
+    "missing": []
+  },
+  "updatedAt": "2026-09-29T04:10:23.898Z"
+}

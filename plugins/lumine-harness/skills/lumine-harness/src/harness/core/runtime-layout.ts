@@ -30,7 +30,7 @@ export function resolveHarnessRuntimeRoot(moduleUrl: string): string {
   const start = path.dirname(fileURLToPath(moduleUrl));
   const harnessDirectory = findAncestor(start, (directory) => {
     const name = path.basename(directory);
-    return name === "harness" || name === ".harness";
+    return name === "harness" || name === ".lumine";
   });
   if (!harnessDirectory) throw new Error("Cannot locate the Harness runtime root.");
 

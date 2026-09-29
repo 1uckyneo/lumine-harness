@@ -3,29 +3,59 @@
     "SessionStart": [
       {
         "matcher": "startup|resume|clear|compact",
-        "hooks": [{ "type": "command", "command": "node \"$CODEBUDDY_PROJECT_DIR/.harness/adapters/codebuddy/hooks/dispatch.mjs\"", "timeout": 30 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CODEBUDDY_PROJECT_DIR/.lumine/adapters/codebuddy/hooks/dispatch.mjs\"",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
       {
-        "hooks": [{ "type": "command", "command": "node \"$CODEBUDDY_PROJECT_DIR/.harness/adapters/codebuddy/hooks/dispatch.mjs\"", "timeout": 30 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CODEBUDDY_PROJECT_DIR/.lumine/adapters/codebuddy/hooks/dispatch.mjs\"",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "PreToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
-        "hooks": [{ "type": "command", "command": "node \"$CODEBUDDY_PROJECT_DIR/.harness/adapters/codebuddy/hooks/dispatch.mjs\"", "timeout": 10 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CODEBUDDY_PROJECT_DIR/.lumine/adapters/codebuddy/hooks/dispatch.mjs\"",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Read|Skill",
-        "hooks": [{ "type": "command", "command": "node \"$CODEBUDDY_PROJECT_DIR/.harness/adapters/codebuddy/hooks/dispatch.mjs\"", "timeout": 10 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CODEBUDDY_PROJECT_DIR/.lumine/adapters/codebuddy/hooks/dispatch.mjs\"",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "Stop": [
       {
-        "hooks": [{ "type": "command", "command": "node \"$CODEBUDDY_PROJECT_DIR/.harness/adapters/codebuddy/hooks/dispatch.mjs\"", "timeout": 120 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CODEBUDDY_PROJECT_DIR/.lumine/adapters/codebuddy/hooks/dispatch.mjs\"",
+            "timeout": 120
+          }
+        ]
       }
     ]
   }

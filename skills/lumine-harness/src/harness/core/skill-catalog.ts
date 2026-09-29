@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, realpathSync } from "node:fs";
 import path from "node:path";
+import { canonicalSkillsRoot } from "./root-resolver.ts";
+import { loadProjectConfig } from "./project-config.ts";
 import type { SharedSkill, SkillCatalogDiagnostic, UnknownRecord } from "./contracts.ts";
 
 export interface SkillCatalogInspection {
@@ -64,7 +66,7 @@ function sha256(source: string): string {
 }
 
 export function inspectSharedSkillCatalog(root: string): SkillCatalogInspection {
-  const base = path.join(root, ".agents", "skills");
+  const base = canonicalSkillsRoot(root);
   const candidates: SharedSkill[] = [];
   const diagnostics: SkillCatalogDiagnostic[] = [];
   for (const file of walkSkillFiles(base).sort()) {
@@ -76,7 +78,13 @@ export function inspectSharedSkillCatalog(root: string): SkillCatalogInspection 
       const description = frontmatterField(source, "description");
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) throw new Error(`invalid name: ${name}`);
       if (!description) throw new Error("missing frontmatter description");
-      candidates.push({ name, description, file, relativeSource, hash: sha256(source) });
+      const keywordsText = frontmatterField(source, "keywords");
+      let keywords: string[] = [];
+      if (keywordsText) {
+        try { const parsed = JSON.parse(keywordsText); if (Array.isArray(parsed)) keywords = parsed.filter((item): item is string => typeof item === "string"); }
+        catch { keywords = keywordsText.replace(/^\[|\]$/g, "").split(/[,，]/).map((item) => item.trim().replace(/^[\"\']|[\"\']$/g, "")).filter(Boolean); }
+      }
+      candidates.push({ name, description, file, relativeSource, hash: sha256(source), keywords });
     } catch (error) {
       diagnostics.push({ file: relativeSource, code: "invalid-skill", message: errorMessage(error) });
     }
@@ -107,13 +115,15 @@ export function getSharedSkill(root: string, name: unknown): SharedSkill | null 
 
 function scoreSkill(skill: SharedSkill, terms: readonly string[]): number {
   const name = skill.name.toLowerCase();
-  const description = skill.description.toLowerCase();
+  const description = `${skill.description} ${(skill.keywords ?? []).join(" ")}`.toLowerCase();
   return terms.reduce((score, term) => score + (name === term ? 100 : name.includes(term) ? 20 : description.includes(term) ? 4 : 0), 0);
 }
 
 export function searchSharedSkills(root: string, query: string = "", options: SkillSearchOptions = {}): SharedSkill[] {
   const limit = Math.max(1, Math.min(Number(options.limit ?? 3), 20));
-  const terms = String(query).toLowerCase().match(/[a-z0-9-]+|[\u3400-\u9fff]{2,}/g) ?? [];
+  const normalized = String(query).toLowerCase();
+  const words = Array.from(new Intl.Segmenter("zh", { granularity: "word" }).segment(normalized)).filter((part) => part.isWordLike).map((part) => part.segment);
+  const terms = [...new Set([...(normalized.match(/[a-z0-9-]+/g) ?? []), ...words])];
   if (!terms.length) return discoverSharedSkills(root).slice(0, limit);
   return discoverSharedSkills(root)
     .map((skill) => ({ skill, score: scoreSkill(skill, terms) }))
@@ -125,11 +135,12 @@ export function searchSharedSkills(root: string, query: string = "", options: Sk
 
 export function buildSharedSkillCatalog(root: string, options: SkillSearchOptions = {}): string {
   const skills = options.query ? searchSharedSkills(root, options.query, options) : discoverSharedSkills(root).slice(0, Number(options.limit ?? 3));
-  if (!skills.length) return "No matching project Skills were discovered under .agents/skills.";
+  const zh = loadProjectConfig(root).locale === "zh-CN";
+  if (!skills.length) return zh ? "未找到匹配的项目 Skill；按项目入口核对目标源码。" : "No matching project Skills; use the project entry to inspect source.";
   return [
-    "Relevant project Skills (canonical content is only under .agents/skills):",
+    zh ? "相关项目 Skill（请读取以下规范路径）：" : "Relevant project Skills (canonical paths):",
     ...skills.map((skill) => `- ${skill.name}: ${skill.description} [${skill.relativeSource}]`),
-    "Read the canonical SKILL.md completely before using a Skill."
+    zh ? "使用前完整读取短入口 SKILL.md，再按任务需要读取参考。Skill 选择不构成实施授权。" : "Read the canonical SKILL.md before use; load references as needed. Skill selection does not grant implementation permission."
   ].join("\n");
 }
 

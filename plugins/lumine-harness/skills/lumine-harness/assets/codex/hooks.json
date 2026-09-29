@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .harness/adapters/codex/hooks/session-start.mjs",
+            "command": "node -e 'const fs=require(\"node:fs\"),p=require(\"node:path\"),cp=require(\"node:child_process\");let r=process.cwd();while(!fs.existsSync(p.join(r,\".lumine/root.json\"))&&p.dirname(r)!==r)r=p.dirname(r);if(!fs.existsSync(p.join(r,\".lumine/root.json\"))){console.error(\"Lumine root not found\");process.exit(2)}const m=JSON.parse(fs.readFileSync(p.join(r,\".lumine/root.json\"),\"utf8\"));const rt=m.runtime||\".lumine\";if(p.isAbsolute(rt)||rt.split(/[\\\\/]/).includes(\"..\")){console.error(\"Invalid runtime path\");process.exit(2)}const x=cp.spawnSync(process.execPath,[p.join(r,rt,\"adapters/codex/hooks/session-start.mjs\"),...[]],{stdio:\"inherit\"});if(x.error){console.error(x.error.message);process.exit(1)}process.exit(x.status??1)'",
             "statusMessage": "Loading harness context"
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .harness/adapters/codex/hooks/stop-gate.mjs",
+            "command": "node -e 'const fs=require(\"node:fs\"),p=require(\"node:path\"),cp=require(\"node:child_process\");let r=process.cwd();while(!fs.existsSync(p.join(r,\".lumine/root.json\"))&&p.dirname(r)!==r)r=p.dirname(r);if(!fs.existsSync(p.join(r,\".lumine/root.json\"))){console.error(\"Lumine root not found\");process.exit(2)}const m=JSON.parse(fs.readFileSync(p.join(r,\".lumine/root.json\"),\"utf8\"));const rt=m.runtime||\".lumine\";if(p.isAbsolute(rt)||rt.split(/[\\\\/]/).includes(\"..\")){console.error(\"Invalid runtime path\");process.exit(2)}const x=cp.spawnSync(process.execPath,[p.join(r,rt,\"adapters/codex/hooks/stop-gate.mjs\"),...[]],{stdio:\"inherit\"});if(x.error){console.error(x.error.message);process.exit(1)}process.exit(x.status??1)'",
             "statusMessage": "Checking harness stop gate"
           }
         ]

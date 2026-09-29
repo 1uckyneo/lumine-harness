@@ -91,7 +91,7 @@
           "title": "安装 Kimi Code 用户级 Hooks",
           "steps": [
             "获得修改 Kimi Code 用户配置的授权。",
-            "从 Harness 根目录运行 ./.harness/cli adapter install kimi。",
+            "从 Harness 根目录运行 ./.lumine/cli adapter install kimi。",
             "重新加载 Kimi Code，并从 Harness 根目录开启新会话。"
           ],
           "successSignal": "连接检查能识别 Kimi Code，并观察到会话入口和结束前处理。",
@@ -170,7 +170,7 @@
           "id": "install-zcode-local-plugin",
           "title": "安装并启用 ZCode 本地 Adapter Plugin",
           "steps": [
-            "从 Harness 根目录运行 ./.harness/cli adapter install zcode。",
+            "从 Harness 根目录运行 ./.lumine/cli adapter install zcode。",
             "把命令返回的目录加入 ZCode 本地 Marketplace。",
             "安装并启用 lumine-harness-adapter。",
             "从 Harness 根目录开启新会话。"
@@ -244,7 +244,7 @@
           "id": "install-deepseek-profile-bundle",
           "title": "把 Lumine Harness Adapter 安装到 DeepSeek Harness profile",
           "steps": [
-            "从 Harness 根目录运行 ./.harness/cli adapter install deepseek-harness。",
+            "从 Harness 根目录运行 ./.lumine/cli adapter install deepseek-harness。",
             "获得修改用户 profile 的授权。",
             "按命令返回的 dsh plugin 指令安装到准备使用的 profile。",
             "从 Harness 根目录开启新会话。"

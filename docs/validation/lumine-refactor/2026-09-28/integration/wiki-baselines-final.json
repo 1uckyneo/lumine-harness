@@ -1,0 +1,127 @@
+[
+  {
+    "project": "workspace",
+    "observedAt": "2026-09-28T12:14:43.387Z",
+    "applied": {
+      "status": "already_current"
+    },
+    "checked": {
+      "status": "passed",
+      "issues": [],
+      "verified": [
+        "api-migration-auth-routing",
+        "workspace-system-boundaries",
+        "chat-stream-and-image-recovery",
+        "reporter-template-request-flow"
+      ],
+      "notVerified": [
+        "semantic accuracy",
+        "runtime behavior",
+        "human acceptance"
+      ]
+    },
+    "documents": [
+      {
+        "id": "api-migration-auth-routing",
+        "path": "docs/repo-wiki/API迁移中的登录与动态路由.md",
+        "revision": "9a2d2c96cda61f6885d6f4169a33893e590ecb9b4f2d2de1ad83cf7bce6a0b9d",
+        "freshness": "current"
+      },
+      {
+        "id": "workspace-system-boundaries",
+        "path": "docs/repo-wiki/三仓职责与系统运行边界.md",
+        "revision": "1ef0b59b1a678c738345c33fa68df54abdc75e1d4f8f375ff2b4eab3a61edded",
+        "freshness": "current"
+      },
+      {
+        "id": "chat-stream-and-image-recovery",
+        "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+        "revision": "c944a16bdd813919f67572b8c50e15b4c9f18cfa66375d587703c71e09e4e399",
+        "freshness": "current"
+      },
+      {
+        "id": "reporter-template-request-flow",
+        "path": "docs/repo-wiki/记者四模板与提示词请求.md",
+        "revision": "ed948eef23520626ad7d0b6125f3a0df225245432f7096898db17c440b487421",
+        "freshness": "current"
+      }
+    ]
+  },
+  {
+    "project": "source",
+    "observedAt": "2026-09-28T12:14:43.461Z",
+    "operation": "Review current Markdown and source references, prepare text work packet, apply identical reviewed text to establish recoverable generation baselines",
+    "packetId": "315b7237-2388-48d2-962a-d34ac082e681",
+    "applied": {
+      "packetId": "315b7237-2388-48d2-962a-d34ac082e681",
+      "status": "applied",
+      "results": [
+        {
+          "id": "lumine-task-check",
+          "status": "applied",
+          "reason": "正文与生成基线已一致保存。",
+          "candidatePath": ".lumine/wiki-state/updates/315b7237-2388-48d2-962a-d34ac082e681/candidates/546b363e42b21889472f90c119d705efbbddc4f7b7533ed9d17aabc4972e68f8.md"
+        }
+      ]
+    },
+    "checked": {
+      "status": "passed",
+      "issues": [],
+      "verified": [
+        "lumine-architecture",
+        "lumine-wiki",
+        "lumine-task-check",
+        "lumine-adoption"
+      ],
+      "notVerified": [
+        "semantic accuracy",
+        "runtime behavior",
+        "human acceptance"
+      ]
+    },
+    "unchangedMarkdown": true,
+    "documents": [
+      {
+        "id": "lumine-architecture",
+        "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+        "revision": "750ae7e3a28dbe026680a8f76ff9101170a08c6865b15193de7df4598af7f73d",
+        "freshness": "current",
+        "sourceCount": 6,
+        "diagramIds": [
+          "layers"
+        ]
+      },
+      {
+        "id": "lumine-wiki",
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+        "revision": "36320a7e159603137f8480d3983400b23bded488522bbcf9ba87d25a0f47097e",
+        "freshness": "current",
+        "sourceCount": 6,
+        "diagramIds": [
+          "knowledge",
+          "merge"
+        ]
+      },
+      {
+        "id": "lumine-task-check",
+        "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+        "revision": "e9bf1325a0e8be93786a065e82f21df3cc943863696e039828d7b4fcbd74ffe2",
+        "freshness": "current",
+        "sourceCount": 5,
+        "diagramIds": [
+          "checks"
+        ]
+      },
+      {
+        "id": "lumine-adoption",
+        "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+        "revision": "731e1e361b56ec4dd89ad7bd77cee1e2eab9f0fa4e51dd8d38ac640f1670e00b",
+        "freshness": "current",
+        "sourceCount": 3,
+        "diagramIds": [
+          "migration"
+        ]
+      }
+    ]
+  }
+]

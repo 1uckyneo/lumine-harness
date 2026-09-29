@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { adapterCheck, adapterStatus, doctorAdapter, formatAdapterResult, runAdapterCommand } from "../adapter-manager.ts";
 import { initializeSessionState } from "../core/work-status.ts";
@@ -23,17 +25,20 @@ function writeSkill(root: string, name: string, description: string): void {
   writeFileSync(file, `---\nname: ${name}\ndescription: ${description}\n---\n\n# ${name}\n`, "utf8");
 }
 
-function fixture(selected: HarnessProduct[] = ["qoder"]): string {
+function fixture(selected: HarnessProduct[] = ["qoder"], locale: "zh-CN" | "en" = "zh-CN"): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "lumine-adapter-status-"));
-  writeJson(path.join(root, ".harness", "root.json"), { schemaVersion: 1, kind: "harness-root" });
-  writeJson(path.join(root, ".harness", "project.json"), { schemaVersion: 1, selectedAdapters: selected });
-  writeJson(path.join(root, ".harness", "adapter-capabilities.json"), CAPABILITIES);
+  writeJson(path.join(root, ".lumine", "root.json"), { schemaVersion: 2, kind: "lumine-root" });
+  writeJson(path.join(root, ".lumine", "project.json"), { schemaVersion: 2, selectedAdapters: selected, locale });
+  writeJson(path.join(root, ".lumine", "adapter-capabilities.json"), CAPABILITIES);
   const productFiles: Partial<Record<HarnessProduct, string>> = {
+    codex: path.join(root, ".codex", "hooks.json"),
+    trae: path.join(root, ".trae", "hooks.json"),
+    kimi: path.join(root, ".lumine", "adapters", "kimi", "hooks", "dispatch.mjs"),
     qoder: path.join(root, ".qoder", "settings.json"),
     cursor: path.join(root, ".cursor", "hooks.json"),
     opencode: path.join(root, ".opencode", "plugins", "harness.mjs"),
-    zcode: path.join(root, ".harness", "adapters", "zcode", "marketplace", "marketplace.json"),
-    "deepseek-harness": path.join(root, ".harness", "adapters", "deepseek-harness", "bundle", "package.json")
+    zcode: path.join(root, ".lumine", "adapters", "zcode", "marketplace", "marketplace.json"),
+    "deepseek-harness": path.join(root, ".lumine", "adapters", "deepseek-harness", "bundle", "package.json")
   };
   for (const product of selected) {
     const file = productFiles[product];
@@ -91,7 +96,7 @@ test("adapter status current uses one live pointer and reports ambiguity instead
 test("adapter status current ignores stale runtime pointers", () => {
   const root = fixture();
   try {
-    writeJson(path.join(root, ".harness", "runtime", "current", "qoder.json"), {
+    writeJson(path.join(root, ".lumine", "local", "runtime", "current", "qoder.json"), {
       product: "qoder",
       sessionId: "old-session",
       updatedAt: "2026-01-01T00:00:00.000Z"
@@ -278,7 +283,7 @@ test("adapter check is read-only and leaves probes to explicit verification", ()
     const output = adapterCheck("qoder", { cwd: root });
     assert.equal(output.kind, "adapter_check");
     assert.equal(output.probe, undefined);
-    assert.equal(existsSync(path.join(root, ".harness", "runtime", "probes")), false);
+    assert.equal(existsSync(path.join(root, ".lumine", "local", "runtime", "probes")), false);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -393,4 +398,147 @@ test("runtime skill evidence remains independent from readiness", () => {
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+
+test("English status and doctor translate guidance while preserving machine fields", () => {
+  const products: HarnessProduct[] = ["qoder", "cursor", "opencode", "zcode", "deepseek-harness", "trae", "kimi", "codebuddy", "codex"];
+  const root = fixture(products, "en");
+  try {
+    for (const relative of [".trae/hooks.json", ".lumine/adapters/kimi/hooks/dispatch.mjs", ".codebuddy/settings.json", ".codex/hooks.json"]) writeJson(path.join(root, relative), {});
+    const options = { cwd: root, env: {}, kimiHome: path.join(root, "fake-kimi-home"), cursorRestricted: true, now: 1780000000000, details: true };
+    const english = adapterStatus("selected", options);
+    const chinese = adapterStatus("selected", { ...options, locale: "zh-CN" });
+    assert.equal(english.locale, "en");
+    assert.equal(english.kind, chinese.kind);
+    assert.deepEqual(english.groups, chinese.groups);
+    assert.deepEqual(english.products.map((p) => p.capabilities), chinese.products.map((p) => p.capabilities));
+    assert.deepEqual(english.products.map((p) => p.readiness), chinese.products.map((p) => p.readiness));
+    assert.doesNotMatch(formatAdapterResult(english), /[\u3400-\u9fff]/u);
+    assert.match(formatAdapterResult(english), /Capability details:|Completion signal:/);
+    assert.match(formatAdapterResult(chinese), /能力详情：|完成标志：/);
+    const doctor = runAdapterCommand(["doctor", "all"], options);
+    assert.doesNotMatch(formatAdapterResult(doctor), /[\u3400-\u9fff]/u);
+    assert.match(formatAdapterResult(doctor), /Action:|Completion signal:/);
+    const zcode = doctorAdapter("zcode", options);
+    assert.equal(zcode.setupActions?.[0]?.id, "install-zcode-local-plugin");
+    assert.match(zcode.setupActions?.[0]?.title ?? "", /Install and enable/);
+    const unknown = formatAdapterResult(adapterStatus("current", options));
+    assert.match(unknown, /Current Agent: Not identified/);
+    assert.match(unknown, /Reason: No runtime pointer/);
+    assert.doesNotMatch(unknown, /[\u3400-\u9fff]/u);
+    assert.equal(existsSync(path.join(root, "fake-kimi-home")), false);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("English guidance preserves project-authored text and Unicode paths", () => {
+  const root = fixture(["zcode"], "en");
+  try {
+    const file = path.join(root, ".lumine", "adapter-capabilities.json");
+    const manifest = JSON.parse(readFileSync(file, "utf8"));
+    manifest.products.zcode.limitations.push("项目自定义约束：保留原文");
+    writeJson(file, manifest);
+    const status = adapterStatus("zcode", { cwd: root });
+    assert.ok(status.products[0].limitations.includes("项目自定义约束：保留原文"));
+    const child = path.join(root, "中文路径");
+    mkdirSync(child);
+    assert.ok(doctorAdapter("zcode", { cwd: child }).messages.some((message) => message.includes(child)));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("CLI help, status and doctor follow the selected project locale without installing anything", () => {
+  const root = fixture(["zcode"], "en");
+  const extension = path.extname(fileURLToPath(import.meta.url));
+  const cli = fileURLToPath(new URL(`../adapter-cli${extension}`, import.meta.url));
+  const loader = extension === ".ts" ? ["--import", import.meta.resolve("tsx")] : [];
+  const invoke = (args: string[]) => spawnSync(process.execPath, [...loader, cli, ...args, "--root", root], {
+    cwd: os.tmpdir(), encoding: "utf8", env: { ...process.env, HARNESS_PRODUCT: "", HARNESS_SESSION_ID: "" }
+  });
+  try {
+    for (const args of [["adapter", "help"], ["adapter", "status", "zcode", "--details"], ["adapter", "doctor", "zcode"]]) {
+      const result = invoke(args);
+      assert.equal(result.status, 0, result.stderr);
+      assert.doesNotMatch(result.stdout, /[\u3400-\u9fff]/u);
+      assert.match(result.stdout, /Adapter commands|Readiness:|Completion signal:/);
+    }
+    const json = invoke(["adapter", "status", "zcode", "--json"]);
+    assert.equal(json.status, 0, json.stderr);
+    assert.equal(JSON.parse(json.stdout).products[0].setup.actions[0].id, "install-zcode-local-plugin");
+    writeJson(path.join(root, ".lumine", "project.json"), { schemaVersion: 2, selectedAdapters: ["zcode"], locale: "zh-CN" });
+    for (const args of [["adapter", "--help"], ["adapter", "status", "zcode"], ["adapter", "doctor", "zcode"]]) {
+      const result = invoke(args);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stdout, /命令|结论：|完成标志：/);
+    }
+    assert.equal(existsSync(path.join(root, ".lumine", "local", "runtime")), false);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+
+function sourceSelfUseFixture(selected: HarnessProduct[]): { root: string; runtime: string } {
+  const root = fixture(selected);
+  const runtime = path.join(root, "skills", "lumine-harness", "assets", "harness");
+  mkdirSync(runtime, { recursive: true });
+  renameSync(path.join(root, ".lumine", "adapter-capabilities.json"), path.join(runtime, "adapter-capabilities.json"));
+  if (existsSync(path.join(root, ".lumine", "adapters"))) {
+    renameSync(path.join(root, ".lumine", "adapters"), path.join(runtime, "adapters"));
+  }
+  const skills = path.join(root, "skills", "lumine-harness", "assets", "skills");
+  renameSync(path.join(root, ".agents", "skills"), skills);
+  writeJson(path.join(root, ".lumine", "root.json"), {
+    schemaVersion: 2, kind: "lumine-root", runtime: path.relative(root, runtime), skills: path.relative(root, skills)
+  });
+  return { root, runtime };
+}
+
+for (const layout of ["installed", "source-self-use"] as const) {
+  test(`adapter CLI resolves ${layout} runtime for verify, status and doctor without claiming host evidence`, () => {
+    const products: HarnessProduct[] = ["codex", "trae"];
+    const root = layout === "installed" ? fixture(products) : sourceSelfUseFixture(products).root;
+    const extension = path.extname(fileURLToPath(import.meta.url));
+    const cli = fileURLToPath(new URL(`../adapter-cli${extension}`, import.meta.url));
+    const loader = extension === ".ts" ? ["--import", import.meta.resolve("tsx")] : [];
+    try {
+      for (const product of products) {
+        for (const action of ["verify", "status", "doctor"]) {
+          const result = spawnSync(process.execPath, [...loader, cli, "adapter", action, product, "--json", "--root", root], {
+            cwd: os.tmpdir(), encoding: "utf8", env: { ...process.env, HARNESS_PRODUCT: "", HARNESS_SESSION_ID: "" }
+          });
+          assert.equal(result.status, 0, `${layout}/${action}/${product}: ${result.stderr}`);
+          const output = JSON.parse(result.stdout);
+          assert.equal(output.kind, `adapter_${action}`);
+          if (action === "verify") assert.equal(output.results[0].status, "not_tested");
+          if (action === "status") {
+            assert.equal(output.products[0].product, product);
+            assert.equal(output.products[0].evidence.runtimeStatus, "not_tested");
+          }
+          if (action === "doctor") assert.equal(output.results[0].status, product === "codex" ? "repository_ready" : "needs_manual_app_step");
+        }
+      }
+      assert.equal(existsSync(path.join(root, ".lumine", "local", "runtime")), false);
+      if (layout === "source-self-use") assert.equal(existsSync(path.join(root, ".lumine", "adapter-capabilities.json")), false);
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  });
+}
+
+test("source-self-use manual adapter entries and install instructions use the declared runtime", () => {
+  const { root, runtime } = sourceSelfUseFixture(["kimi", "zcode", "deepseek-harness"]);
+  try {
+    for (const product of ["kimi", "zcode", "deepseek-harness"] as const) {
+      assert.equal(doctorAdapter(product, { cwd: root, kimiHome: path.join(root, "fake-kimi-home") }).status, "needs_manual_app_step");
+    }
+    for (const product of ["zcode", "deepseek-harness"] as const) {
+      const result = runAdapterCommand(["install", product], { cwd: root });
+      assert.ok("results" in result);
+      const install = result.results[0] as { path: string; status: string };
+      assert.equal(install.status, "needs_manual_app_step");
+      assert.equal(install.path, path.join(runtime, "adapters", product, product === "zcode" ? "marketplace" : "bundle"));
+    }
+    const forbiddenSkills = path.join(runtime, "adapters", "zcode", "marketplace", "plugins", "lumine-harness-adapter", "skills");
+    mkdirSync(forbiddenSkills, { recursive: true });
+    const invalid = doctorAdapter("zcode", { cwd: root });
+    assert.equal(invalid.status, "error");
+    assert.ok(invalid.messages.some((message) => message.includes(path.relative(root, forbiddenSkills))));
+    assert.equal(existsSync(path.join(root, "fake-kimi-home")), false);
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });

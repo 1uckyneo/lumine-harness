@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 2,
+  "files": {
+    "docs/templates/DESIGN.md": {
+      "hash": "aff01809d5f164cbbfb6b50ac97e7ceb78fa452ba67c0e6a90db4cc597a3cbdc",
+      "source": "lumine-harness"
+    },
+    "docs/templates/exec-plan.md": {
+      "hash": "60aa39390cda16c03b4ebf5e8bcecd0f44eefc0101610f999d1de8a94f75ffec",
+      "source": "lumine-harness"
+    },
+    "docs/templates/product-spec.md": {
+      "hash": "31fa913841a4dda1a0b9807be5649f135958c879711c1bba32c8532497f11457",
+      "source": "lumine-harness"
+    },
+    "docs/templates/repo-wiki.md": {
+      "hash": "7c52e2c207d23c214ac604c2d923871781fedcd38c1a3242ec58b3f82f977d4b",
+      "source": "lumine-harness"
+    },
+    "docs/FRONTEND.md": {
+      "hash": "2054ae25b91dd491fbc852ce8fc9e879b7d6b7241cd39749526f81f0d5a28fbc",
+      "source": "lumine-harness"
+    },
+    "docs/design-docs/core-beliefs.md": {
+      "hash": "ba9a76b1dd2309fb83437d7422b7ff7afb8a4259a94795d7b9d06ebd2c7f3de6",
+      "source": "lumine-harness"
+    },
+    "docs/design-docs/design-gate.md": {
+      "hash": "2a7b61bd62a8bd6125ff90787efce172ca424a0f8b300356b13ad53718476e3c",
+      "source": "lumine-harness"
+    },
+    "docs/design-docs/index.md": {
+      "hash": "9de857df79ca71cbc24b192d03d5f54659896f85a5d33d027a3aa323f814bb2c",
+      "source": "lumine-harness"
+    },
+    "docs/references/browser-automation/index.md": {
+      "hash": "d5ecfdf35af70ead3efc73a9dda8309805f6a69f7118c56dc75c90e7eac00656",
+      "source": "lumine-harness"
+    },
+    "docs/references/index.md": {
+      "hash": "2930b05dbc74178e1a93085b759224c51932d1f27c65bfa38cf5ea03fde2b6b6",
+      "source": "lumine-harness"
+    },
+    "docs/references/vendor-llms/index.md": {
+      "hash": "618ce9db7f4bed3810207bbf6205831f961cfc8567f843ef0d69013b7210f054",
+      "source": "lumine-harness"
+    },
+    "docs/workflow-artifacts.md": {
+      "hash": "fea7ccada93ff8746e804fde92ca810734cf451f3a665cc57d461ac1c416e238",
+      "source": "lumine-harness"
+    },
+    ".codex/hooks.json": {
+      "hash": "4b8a98e88a631b245e03a5703cc4252ab6d3af7a1a9918bd66ad04f8a8c09c59",
+      "source": "lumine-harness"
+    },
+    ".lumine/project.json": {
+      "hash": "550a2dfb91834e64945a97a9ae57b8337d9ec672dbbedc7d497f6504e932f39f",
+      "source": "lumine-harness"
+    },
+    ".lumine/root.json": {
+      "hash": "738acc402abc673dc43a2acf5b6f1c6649ca36ae9e502e91dfd9ae68855d106c",
+      "source": "lumine-harness"
+    }
+  }
+}

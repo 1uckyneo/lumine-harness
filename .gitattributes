@@ -1,0 +1,7 @@
+# Preserve generated bundles, license text and captured validation bytes.
+skills/lumine-harness/assets/wiki-reader/** linguist-generated=true -whitespace
+plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/** linguist-generated=true -whitespace
+docs/validation/**/*.log -whitespace
+# The compact stylesheet is distributed verbatim; keep validated source bytes.
+skills/lumine-harness/src/browser/styles.css -whitespace
+plugins/lumine-harness/skills/lumine-harness/src/browser/styles.css -whitespace

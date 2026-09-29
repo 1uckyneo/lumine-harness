@@ -9,7 +9,7 @@
 
 ## 仓库地图
 
-- `skills/lumine-harness/`：唯一规范 Agent Skill，包含入口指令、参考资料、模板、公共 Harness Core、项目阶段 Skills 和产品 Adapter。
+- `skills/lumine-harness/`：唯一规范 Agent Skill，包含入口指令、参考资料、模板、公共 Harness Core、四个日常 Skills 和产品 Adapter。
 - `skills/lumine-harness/src/`：Harness Runtime、Adapter、CLI 和运行测试的 TypeScript 唯一源码。
 - `skills/lumine-harness/assets/harness/**/*.mjs`、`skills/lumine-harness/assets/opencode/plugins/harness.mjs`、`skills/lumine-harness/scripts/harness-manager.mjs`：由 TypeScript 构建生成的可分发运行产物，禁止直接编辑。
 - `plugins/lumine-harness/`：Codex Plugin 分发包装；其中的 `skills/lumine-harness/` 由规范 Skill 同步生成，不是第二套实现。
@@ -22,7 +22,7 @@
 
 ## 唯一真源与生成关系
 
-- Skill 行为、参考资料、模板、Harness Core、项目阶段 Skills 和 Adapter 只在 `skills/lumine-harness/` 中维护。
+- Skill 行为、参考资料、模板、Harness Core、四个日常 Skills 和 Adapter 只在 `skills/lumine-harness/` 中维护。
 - Runtime、Adapter、CLI 和运行测试必须修改 `skills/lumine-harness/src/` 下的 TypeScript 源码，再运行 `pnpm runtime:build` 生成 `.mjs`；不得直接修补生成产物。
 - 不要直接修改 `plugins/lumine-harness/skills/lumine-harness/` 下的任何文件；同步脚本会覆盖这些改动。
 - 修改规范 Skill 后必须执行：
@@ -71,7 +71,7 @@ bash scripts/check-repo-sync.sh
 - 产品名称可以出现在 Adapter、官方路径、依赖包名、兼容性说明和真实验证记录中。
 - 生成到目标工程的根 `AGENTS.md` 是 Agent 入口地图，`ARCHITECTURE.md` 是架构地图。
 - 生成到目标工程的 `.agents/skills` 是唯一公共 Skill 内容真源；不要生成产品级 Rules、Skill 正文副本或产品级 Skill 投影。无法原生发现该目录的宿主由 Adapter 按需路由并要求实际读取规范文件。
-- generated 只辅助导航，不能替代源码、测试、运行态验证或 Validation 证据。
+- Repo Wiki 是带来源的现状解释，不能替代源码、测试、运行态验证或 Validation 证据。
 
 ## 首次采用安全边界
 
@@ -79,9 +79,9 @@ bash scripts/check-repo-sync.sh
 - 迁移提案必须列明将创建、替换、保留和备份的文件，以及所选 Adapter 的能力边界。
 - 不修改与 Harness 采用无关的业务代码，不覆盖用户未提交修改。
 - 不自动提交、推送、修改远端、切换分支、stash、reset 或改写 Git 历史。
-- Git 目标依赖 diff 和历史回看迁移变更；非 Git 目标在替换旧 AI workflow 前备份到 `.harness/local/harness-backup/<timestamp>/`。
+- Git 目标依赖 diff 和历史回看迁移变更；Git 与非 Git 目标均通过独立迁移提案和 `.lumine-migrations/` 中的恢复日志保护覆盖操作。
 - Kimi Code 等需要用户级配置的 Adapter 必须单独获得授权，不能在普通 Adopt 中静默修改用户环境。
-- 任何敏感信息、私有路径、Token 或客户数据都不得进入模板、示例、generated 文档或公开材料。
+- 任何敏感信息、私有路径、Token 或客户数据都不得进入模板、示例、Wiki 文档或公开材料。
 
 ## 仓库验证
 
@@ -115,3 +115,14 @@ bash scripts/check-repo-sync.sh
 - 对外发布时必须将同一 `main` 提交和需要发布的 tags 推送到 GitHub 与 Gitee，并核对两边远端 HEAD 一致。
 - 中英文 README 的主安装步骤必须直接展示 GitHub 与 Gitee 两个来源，不得把 Gitee 命令只放在折叠参考区。
 - 收尾时报告修改范围、执行的检查、未验证的产品端步骤和仍需人工完成的事项。
+
+## 本仓自用
+
+- 本仓配置与运行入口在 `.lumine/`，中文优先；`.lumine/cli` 运行构建后的 Runtime。
+- 四个日常 Skill 直接读取 `skills/lumine-harness/assets/skills/lumine-*/SKILL.md`，由 root manifest 的 skills 字段定位，不创建另一套可编辑副本。
+- `docs/product-specs/` 维护产品要求，`docs/exec-plans/active/` 维护实施及证据，`docs/repo-wiki/` 维护源码关联的架构和机制。
+- 产品需求直接在 Spec 内迭代，技术方案和进度放 Plan；已有授权内连续推进，仅诊断不自动修复。
+- 知识只维护 Markdown、Mermaid 与持久文本状态；浏览器阅读和绘图不调用模型。知识查询不自动开始全量改写。
+- `.lumine/wiki-state/`、`.lumine/tasks/`、`.lumine/project-checks/` 是项目资产；`.lumine/local/` 含本机态与受保护私有材料，不能整体当作随意清理的缓存。
+- 初始化维护、日常 Runtime 与阅读器分别构建，旧格式只由独立迁移模块读取。历史资料不进入默认规范发现。
+- 完成状态针对本轮授权范围，配置、自动化测试、实际宿主与人类接受分别报告；收尾只写一条 WORK_STATUS。

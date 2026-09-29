@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { resolveProjectPath } from "./project-config.ts";
 import type {
   HarnessHookInput,
   HarnessProduct,
@@ -96,12 +97,12 @@ export function deriveStatusEmissionId(input: RuntimeSessionInput, state: Partia
 
 export function getSessionStatePath(root: string, product: HarnessProduct, sessionId: string | null): string {
   requireIdentity(product, sessionId);
-  return path.join(root, ".harness", "runtime", "sessions", `${safe(product)}--${safe(sessionId)}.json`);
+  return resolveProjectPath(root, `.lumine/local/runtime/sessions/${safe(product)}--${safe(sessionId)}--${hashRuntimeIdentifier(sessionId)}.json`, "session state");
 }
 
 export function getCurrentSessionPointerPath(root: string, product: HarnessProduct): string {
   if (!product) throw new Error("Harness product is required.");
-  return path.join(root, ".harness", "runtime", "current", `${safe(product)}.json`);
+  return resolveProjectPath(root, `.lumine/local/runtime/current/${safe(product)}.json`, "session pointer");
 }
 
 export function writeCurrentSessionPointer(root: string, product: HarnessProduct, sessionId: string | null): void {
@@ -118,7 +119,7 @@ export function readCurrentSessionPointer(root: string, product: HarnessProduct)
 }
 
 export function listCurrentSessionPointers(root: string): CurrentSessionPointer[] {
-  const dir = path.join(root, ".harness", "runtime", "current");
+  const dir = resolveProjectPath(root, ".lumine/local/runtime/current", "session pointers");
   if (!existsSync(dir)) return [];
   return readdirSync(dir, { withFileTypes: true }).filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
     .map((entry) => {
@@ -195,6 +196,15 @@ export function recordUserTurn(root: string, input: RuntimeSessionInput, options
   if (state.userTurnId === turnId) return state;
   return writeSessionState(root, input.product, input.sessionId, {
     userTurnId: turnId,
+    requestedActivity: null,
+    expectedPhase: null,
+    expectedSkill: null,
+    expectedSkillPath: null,
+    expectedSkillRead: true,
+    expectedSkills: [],
+    selectedSkills: [],
+    skillCandidates: [],
+    skillSelectionDiagnostics: [],
     userTurnRevision: Number(state.userTurnRevision ?? 0) + 1,
     hostTurnRevision: 0,
     workStatus: null,
@@ -288,9 +298,9 @@ export function recordWorkStatus(root: string, input: RuntimeSessionInput, statu
 export function recordUsedSkill(root: string, input: RuntimeSessionInput, skill: SharedSkill): SessionState {
   const state: Partial<SessionState> = readSessionState(root, input.product, input.sessionId) ?? {};
   const usedSkills = Array.isArray(state.usedSkills) ? state.usedSkills : [];
-  const next = usedSkills.some((item) => item.name === skill.name && item.source === skill.relativeSource)
+  const next = usedSkills.some((item) => item.name === skill.name && item.source === skill.relativeSource && item.contentHash === skill.hash)
     ? usedSkills
-    : [...usedSkills, { name: skill.name, source: skill.relativeSource, readAt: new Date().toISOString() }];
+    : [...usedSkills.filter((item) => item.name !== skill.name), { name: skill.name, source: skill.relativeSource, readAt: new Date().toISOString(), contentHash: skill.hash }];
   return writeSessionState(root, input.product, input.sessionId, { usedSkills: next });
 }
 

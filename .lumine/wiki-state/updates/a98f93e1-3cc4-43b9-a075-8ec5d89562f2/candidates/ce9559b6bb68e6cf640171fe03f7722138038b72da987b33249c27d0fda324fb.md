@@ -1,0 +1,58 @@
+---
+id: "lumine-architecture"
+title: "Core、Skill、Adapter 与构建分发"
+summary: "公共 Core 维护任务语义，Skill 提供按需判断指导，Adapter 翻译宿主协议；TypeScript 和规范资源通过构建生成安装包。"
+type: "architecture"
+status: "current"
+locale: "zh-CN"
+tags: ["architecture", "架构", "build distribution", "分发"]
+aliases: ["architecture", "架构", "build distribution", "分发"]
+repositories: ["project"]
+sources: [{"id":"core","repoId":"project","path":"skills/lumine-harness/src/harness/core/session-context.ts","kind":"source"},{"id":"routing","repoId":"project","path":"skills/lumine-harness/src/harness/core/phase-router.ts","kind":"source"},{"id":"build","repoId":"project","path":"scripts/build-runtime.ts","kind":"source"},{"id":"manifest","repoId":"project","path":"scripts/runtime-artifacts.ts","kind":"source"},{"id":"reader","repoId":"project","path":"scripts/build-reader.ts","kind":"source"},{"id":"wrapper","repoId":"project","path":"scripts/sync-plugin-wrapper.sh","kind":"source"},{"id":"adapter-paths","repoId":"project","path":"skills/lumine-harness/src/harness/adapter-manager.ts","kind":"source"}]
+relations: ["lumine-adoption", "lumine-task-check", "lumine-wiki"]
+diagrams: [{"id": "layers", "title": "职责和产物关系", "caption": "箭头表示依赖或生成方向；浏览器绘图与服务端运行分别构建。", "sources": ["core", "build", "reader", "wrapper"]}]
+watchScopes: [{"repoId":"project","path":"skills/lumine-harness/src/harness/core/session-context.ts"},{"repoId":"project","path":"skills/lumine-harness/src/harness/core/phase-router.ts"},{"repoId":"project","path":"scripts/build-runtime.ts"},{"repoId":"project","path":"scripts/runtime-artifacts.ts"},{"repoId":"project","path":"scripts/build-reader.ts"},{"repoId":"project","path":"scripts/sync-plugin-wrapper.sh"},{"repoId":"project","path":"skills/lumine-harness/src/harness/adapter-manager.ts"}]
+---
+
+# Core、Skill、Adapter 与构建分发
+
+## 一次修改怎样进入项目
+
+规范源码位于 `skills/lumine-harness/src/`。维护者修改 TypeScript 后运行 `pnpm runtime:build`，构建程序把服务端文件编译为 Node 18 可运行的 `.mjs`，把阅读器及其 Markdown、Mermaid 和安全清洗依赖打包为本地静态资源。项目安装只复制正式运行资源，不需要维护仓的依赖目录。
+
+四个日常 Skill 是语义指导：需求与方案规划、实施与验证、知识维护、视觉与交互设计。它们引用同一 Runtime，不各自复制检查规则。规范中文资源在 `assets/skills/`，英文资源使用 `.template` 扩展，安装时只选择一种语言成为可发现的 `SKILL.md`。
+
+```mermaid
+flowchart TB
+  S[规范 TypeScript] --> B[Runtime 构建]
+  B --> C[公共 Core 和 CLI]
+  B --> A[产品 Adapter]
+  R[浏览器文本阅读器] --> E[独立浏览器构建]
+  E --> H[本地 HTML 与绘图库]
+  K[所选语言的四个 Skill] --> P[安装项目]
+  C --> P
+  A --> P
+  H --> P
+  P --> W[Markdown 与 Mermaid 知识]
+  N[规范分发资源] --> V[Plugin 同步副本]
+```
+
+## Core 和宿主各管什么
+
+Core 记录显式任务模式，核对已选择 Skill 的读取状态、检查证据和六种工作状态。关键词只提供候选能力，不能决定授权或建立硬门禁。Adapter 接收宿主事件，规范化输入，把 Core 决策转换成该宿主支持的协议。宿主是否执行 Hook、能否自动续跑，是另一个需要实际观测的层次；配置已安装不能证明宿主已经读取。
+
+路由会考虑用户目标和已有上下文。技能名称不能替代实施授权，中文“设计”也可能是技术规划。规划、实施、仅验证和诊断均可调用知识检索，不是互斥阶段。
+
+## 为什么单独构建阅读器
+
+Mermaid 的绘图运行在浏览器，服务端只负责文件和文本 API。YAML 与忽略规则解析被打包为服务端 vendor，避免把 Node 版本要求较高的浏览器依赖带入 Node 18 服务端。Reader 的动态 chunk、样式和许可一并纳入清单；静态资源完整性与 Runtime 源码一致性分别检查。
+
+Plugin wrapper 来自同步脚本，是同一规范包的副本。修改副本会在同步时丢失，也可能使两种安装形式行为不同，因此修改入口始终是规范资源。
+
+## 边界与核实入口
+
+本图描述源码职责和构建结构，不描述已发布版本、宿主实测状态或业务部署。阅读器构建成功不能证明所有图都可读；还需要浏览器验收。查看 `build-runtime.ts` 的产物映射、`build-reader.ts` 的 bundle 清单以及 `sync-plugin-wrapper.sh` 的复制范围可复核生成关系。
+
+## 自用与安装项目如何共用入口
+
+项目身份、配置和会话仍保存在项目的 `.lumine/`；Runtime 资源位置由根声明统一解析。安装项目读取自己的 Runtime，源仓自用读取规范构建产物。因此 Adapter 的能力清单、手工安装资源与检查入口也必须使用同一解析器，不能假定资源一定与项目配置同目录。

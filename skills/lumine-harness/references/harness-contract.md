@@ -1,115 +1,27 @@
-# Harness Contract
+# 项目合同
 
-## 最小核心
+## 公共入口与存储
 
-目标工程采用后的最小核心是：
+- `.lumine/root.json` 标识项目根；`.lumine/project.json` 管理语言、仓库、能力和知识配置。
+- `.agents/skills/` 只分发 `lumine-plan`、`lumine-run`、`lumine-knowledge`、`lumine-design` 四个日常规范入口。初始化维护入口仍为 `lumine-harness`。
+- `AGENTS.md` 是规则与地图，`ARCHITECTURE.md` 是架构概览。强制规则不能只靠知识检索发现。
+- Spec 默认 `docs/product-specs/`，Plan 默认 `docs/exec-plans/active/`，历史执行计划位于 `completed/`，证据位于 `docs/validation/`。
+- 知识正文默认 `docs/repo-wiki/`，配置只指定一个权威根。`.lumine/wiki-state/` 保存持久维护状态；`.lumine/local/wiki/` 只保存可重建缓存／本机态。
 
-```text
-AGENTS.md
-ARCHITECTURE.md
-docs/
-  drafts/
-  product-specs/
-  exec-plans/
-    active/
-    completed/
-  validation/
-  generated/
-  workflow-artifacts.md
-.agents/skills/lumine-harness-*/
-.harness/
-  root.json
-  project.json
-  managed.json
-  adapter-capabilities.json
-  cli
-  core/
-  check.mjs
-  generated.mjs
-  tests/
-  adapters/
-```
+## 身份与语言
 
-`project.json` 保存项目拓扑、启用模块、selected adapters 和 generated targets。`managed.json` 保存规范版本、受管文件和哈希，用于安全升级；它不能把项目自己维护的 AGENTS、ARCHITECTURE、阶段 Skill 或业务 Docs 当作可盲目覆盖的生成物。
+Spec／Plan 使用 `id` 和类型；Wiki 单元按知识接口保存稳定 ID。标题、文件名和稳定身份分开；可读名称允许中文与空格。AC 使用显式 `AC-001` 类编号，图和重要章节有稳定引用。CLI 通过 ID、路径或无歧义名称解析，不猜测同名目标。
 
-## 可选模块
+项目语言为 `zh-CN` 或 `en`，在提案和指纹前确定。新正文遵循默认语言，已有文档保持自身语言；切换界面或临时答复语言不翻译正文。语言资源必须语义一致，协议字段、状态值和 Skill 技术名不翻译。
 
-Inspect 和 Migration Proposal 必须按项目事实选择模块，不能给所有目标生成固定全家桶：
+## 工作与证据
 
-- `design`：`docs/design-docs/` 和 Design Gate。
-- `frontend`：`docs/FRONTEND.md` 与 UI 文案、页面 taste 检查。
-- `browser`：浏览器自动化参考和浏览器 Validation 约定。
-- `database`：数据库、migration、schema generated targets 与证据约定。
-- `mobile`：移动端实现面、平台验证和相关导航。
-- `workers`：parallel worker task packet 和协调规则；只有宿主或工作方式支持时启用。
+规划可以只产出 Spec；完整功能通常使用 Spec＋Plan。技术方案由 Plan 维护，实施后的稳定知识进入 Wiki，未实现目标不覆盖现状。四个 Skill 由意图与授权调度，不要求用户逐项调用，不因阶段切换重审批。只验证模式不修复。
 
-未启用模块的文件不应生成，对应 Check 和 generated target 返回 `not applicable`。
+Runtime 承担可确定的检查，四个能力承担各自语义评审。完成依据对应当前请求、验收子集、内容基线与真实操作，测试、运行、部署和用户接受分别表达。任务记录位于 `.lumine/tasks/`，绑定当前会话和模式；详情参见[检查与证据](runtime-checks.md)。
 
-## Workflow
+状态保持 `done`、`continue_autonomously`、`needs_user_decision`、`needs_credentials`、`needs_manual_app_step`、`blocked_external`。诊断 done 可以包含失败发现。只有明确包含在本任务内的知识同步才能影响该任务完成。
 
-```text
-Draft 多轮收敛
-→ 人工确认
-→ 按需 Design / Prototype
-→ 人工确认
-→ Product Spec
-→ Exec Plan
-→ 人工授权 Run
-→ 实现、测试、修复
-→ Validation closeout
-→ completed
-```
+## 知识表达
 
-用户侧提示词保持自然语言：
-
-- `这个 Draft 需要优化。你看我还需要交代什么上下文？`
-- `这个 Draft 可以进入下一步；先判断是否需要设计，不要直接实施。`
-- `请生成 Product Spec 和 Active Exec Plan，先不要实施。`
-- `计划确认，开始 Run。`
-
-## Design Gate
-
-Design 只在模块启用且任务需要设计确认时使用：
-
-- 内部 `ui_impact`：`L0 | L1 | L2`。
-- 内部 `prototype_mode`：`html | image | hybrid`。
-- 用户不需要输入内部字段。
-- 正式设计产物必须位于 Draft 确认之后、Product Spec / Exec Plan 之前。
-- 进入实现需要 approved `DESIGN.md`、`prototypes[]` 和相应 handoff；图片探索不能直接成为实现批准源。
-
-## Shared Instructions And Skills
-
-- 根 `AGENTS.md` 是宿主中立的工程入口，不包含产品兼容矩阵。
-- `.agents/skills` 是唯一 Skill 内容真源。
-- 不生成产品 Rules、Skill 正文副本或产品级 Skill 投影。
-- 无法原生发现 `.agents/skills` 的宿主由 Adapter 按需路由真实 `SKILL.md`；显式 Skill 和 Harness 阶段为确定性路由，普通自然语言发现为 `best-effort`。
-- Draft、Design、Product Spec / Exec Plan、Run、Generated、Check 和 Navigate 开始前必须实际读取对应 Skill。
-- `.harness/root.json` 决定 Harness 根；不能使用最近的 Git 根代替。
-
-## Adapter Capability
-
-产品协议不写入目标 `AGENTS.md`。Capability Manifest 对项目指令、会话上下文、Skill 发现与读取、写前门禁、停止门禁、自动续跑、状态矩阵和会话隔离分别记录结果与证据等级。
-
-- 结果：`passed | needs_setup | not_tested | not_observable | not_applicable | failed`。
-- 证据等级：`official_declared | repository_checked | runtime_observed | behavior_verified`。
-
-`doctor` 只判断静态配置、安装和人工步骤；`verify` 观察真实会话事件，但自动事件聚合最高只能得到 `runtime_observed`。`behavior_verified` 必须来自维护者对真实产品、版本和探针结果的复核。OpenCode 缺少完整 Stop Gate 时只把自动续跑标为不可用，不把整个产品显示为不兼容；DeepSeek Harness 等不稳定协议继续清楚标记为试用支持。
-
-## Status
-
-收尾或暂停只输出一条：
-
-- `WORK_STATUS: done`
-- `WORK_STATUS: continue_autonomously`
-- `WORK_STATUS: needs_user_decision`
-- `WORK_STATUS: needs_credentials`
-- `WORK_STATUS: needs_manual_app_step`
-- `WORK_STATUS: blocked_external`
-
-状态只表达任务事实。宿主需要的命令由 Adapter 动态注入，不写入目标 `AGENTS.md`。
-
-`continue_autonomously` 与宿主传输分离：每个新的状态发射可以请求一次续跑，同一助手响应或 Hook 重试不能重复请求。新用户输入重置连续自治链；默认上限为 20，连续两轮可观测无进展时暂停，宿主更低限制优先。
-
-## Validation
-
-运行证据写入 `docs/validation/<slug>/<YYYY-MM-DD>/`。Active Exec Plan 保存验证摘要、命令、结果、未覆盖风险和证据链接，不承载大量证据文件。generated 只辅助导航，不能替代源码、测试、运行态或用户确认。
+Markdown 与 Mermaid 文本是一份内容真源，卡片为 HTML DOM。模型仅处理文本，图在浏览器即时渲染；不生成图片、缩略图或视觉模型输入。图解释实际机制并关联来源，文字阅读和文本复制／导出始终可用。

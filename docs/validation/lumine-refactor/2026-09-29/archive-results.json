@@ -1,0 +1,44 @@
+[
+  {
+    "project": "workspace",
+    "observedAt": "2026-09-29T04:17:40.168212+00:00",
+    "archive": {
+      "operationId": "89bb3128-66ae-4550-b979-302029ed6323",
+      "documentId": "lumine-refactor-v2",
+      "from": "docs/exec-plans/active/Lumine 一次性重构.md",
+      "to": "docs/exec-plans/completed/Lumine 一次性重构.md",
+      "status": "complete"
+    },
+    "stableId": "lumine-refactor-v2",
+    "status": "completed",
+    "file": "docs/exec-plans/completed/Lumine 一次性重构.md",
+    "taskCheck": {
+      "ok": true,
+      "issues": [],
+      "taskId": "lumine-refactor-v2",
+      "mode": "implement",
+      "output": ""
+    }
+  },
+  {
+    "project": "source",
+    "observedAt": "2026-09-29T04:17:40.373400+00:00",
+    "archive": {
+      "operationId": "5a802dc0-552b-452b-b768-3132f7b85025",
+      "documentId": "lumine-source-refactor-plan",
+      "from": "docs/exec-plans/active/Lumine 一次性重构.md",
+      "to": "docs/exec-plans/completed/Lumine 一次性重构.md",
+      "status": "complete"
+    },
+    "stableId": "lumine-source-refactor-plan",
+    "status": "completed",
+    "file": "docs/exec-plans/completed/Lumine 一次性重构.md",
+    "taskCheck": {
+      "ok": true,
+      "issues": [],
+      "taskId": "lumine-refactor-v2",
+      "mode": "implement",
+      "output": ""
+    }
+  }
+]

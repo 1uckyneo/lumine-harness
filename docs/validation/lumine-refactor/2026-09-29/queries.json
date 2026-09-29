@@ -1,0 +1,3750 @@
+{
+  "observedAt": "2026-09-29T04:12:06.516Z",
+  "operation": "After migration finalization, query the 12 previously reviewed real questions against current installed text knowledge.",
+  "results": [
+    {
+      "case": "P1",
+      "question": "父仓、Vue 客户端和 Go 后端各自负责什么？",
+      "expectedIds": [
+        "workspace-system-boundaries"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "父仓、Vue 客户端和 Go 后端各自负责什么？",
+        "cards": [
+          {
+            "id": "workspace-system-boundaries",
+            "title": "三仓职责与系统运行边界",
+            "summary": "从父级工作区、Vue 客户端和 Go 重构仓的关系出发，区分产品实现、管理端、协作资料与真实运行证据。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/三仓职责与系统运行边界.md",
+            "revision": "1ef0b59b1a678c738345c33fa68df54abdc75e1d4f8f375ff2b4eab3a61edded",
+            "freshness": "current",
+            "repositories": [
+              "project",
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "架构",
+              "三仓",
+              "运行边界",
+              "证据"
+            ],
+            "sources": [
+              {
+                "id": "workspace-boundary",
+                "repoId": "project",
+                "path": ".gitignore",
+                "kind": "source"
+              },
+              {
+                "id": "client-bootstrap",
+                "repoId": "ai-conv-plus",
+                "path": "src/main.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client-auth",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "backend-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/initialize/router.go",
+                "kind": "source"
+              },
+              {
+                "id": "admin-bootstrap",
+                "repoId": "gin-vue-admin",
+                "path": "web/src/main.js",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "2026-09-23 的限定样本，不是当前部署证明"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "2026-09-24 的客户端联调，后台往返尚未完整验收"
+              }
+            ],
+            "relations": [
+              "api-migration-auth-routing",
+              "chat-stream-and-image-recovery",
+              "reporter-template-request-flow"
+            ],
+            "diagramIds": [
+              "repository-map",
+              "evidence-boundary"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "父仓, vue, 客户端和, 客户, 户端, 端和, go, 后端, 各自, 什么"
+          },
+          {
+            "id": "api-migration-auth-routing",
+            "title": "API迁移中的登录与动态路由",
+            "summary": "解释新会话如何建立、服务端菜单如何变成受控页面，以及账号切换和异步失败为何必须撤销旧权限状态。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/API迁移中的登录与动态路由.md",
+            "revision": "9a2d2c96cda61f6885d6f4169a33893e590ecb9b4f2d2de1ad83cf7bce6a0b9d",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "API迁移",
+              "登录",
+              "菜单",
+              "动态路由",
+              "权限"
+            ],
+            "sources": [
+              {
+                "id": "session",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/session.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/client.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/menu.ts",
+                "kind": "source"
+              },
+              {
+                "id": "permission",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-store",
+                "repoId": "ai-conv-plus",
+                "path": "src/store/router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "route-builder",
+                "repoId": "ai-conv-plus",
+                "path": "src/utils/asyncRouter.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server-menu",
+                "repoId": "gin-vue-admin",
+                "path": "server/api/v1/system/sys_menu.go",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "chat-stream-and-image-recovery"
+            ],
+            "diagramIds": [
+              "permission-bootstrap",
+              "session-isolation"
+            ],
+            "diagramTypes": [
+              "sequenceDiagram",
+              "flowchart"
+            ],
+            "reason": "vue, 客户, 户端, go, 后端"
+          },
+          {
+            "id": "chat-stream-and-image-recovery",
+            "title": "聊天流式输出与图片任务恢复",
+            "summary": "说明文字 SSE、识图附件与生成图片的不同请求链，以及按会话、消息和任务精确恢复、取消确认与迟到响应隔离。",
+            "type": "technical-solution",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+            "revision": "c944a16bdd813919f67572b8c50e15b4c9f18cfa66375d587703c71e09e4e399",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "聊天",
+              "SSE",
+              "图片",
+              "恢复",
+              "取消"
+            ],
+            "sources": [
+              {
+                "id": "chat-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/ChatPage.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "text-sse",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/sse.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/draw.ts",
+                "kind": "source"
+              },
+              {
+                "id": "image-tasks",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/useChatImageTasks.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm_draw/router/comfy.go",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "已验证正常生成与历史恢复样本，未实测真实取消竞态"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "request-paths",
+              "recovery-path",
+              "cancellation-path"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "vue, 客户, 户端, go, 后端"
+          },
+          {
+            "id": "reporter-template-request-flow",
+            "title": "记者四模板与提示词请求",
+            "summary": "从四类写作模板、字段校验和提示词拼接，追踪到保留手改文本的发送、锁定与历史续写流程。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/记者四模板与提示词请求.md",
+            "revision": "ed948eef23520626ad7d0b6125f3a0df225245432f7096898db17c440b487421",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "硅基记者",
+              "写作模板",
+              "表单",
+              "提示词",
+              "校验"
+            ],
+            "sources": [
+              {
+                "id": "template-parser",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/writingTemplates.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-form",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/textPrompts.vue",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/index.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-model",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/model/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-service",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/service/writing_template_service.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/router/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "客户端真实成功链路与隔离测试，未完成管理端保存及幂等导入验收"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "template-to-prompt",
+              "accepted-send"
+            ],
+            "diagramTypes": [
+              "flowchart",
+              "sequenceDiagram"
+            ],
+            "reason": "vue, 客户, 户端, go"
+          }
+        ],
+        "total": 4,
+        "contextChars": 5798
+      }
+    },
+    {
+      "case": "P2",
+      "question": "How do login menu permissions become dynamic routes?",
+      "expectedIds": [
+        "api-migration-auth-routing"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "How do login menu permissions become dynamic routes?",
+        "cards": [
+          {
+            "id": "api-migration-auth-routing",
+            "title": "API迁移中的登录与动态路由",
+            "summary": "解释新会话如何建立、服务端菜单如何变成受控页面，以及账号切换和异步失败为何必须撤销旧权限状态。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/API迁移中的登录与动态路由.md",
+            "revision": "9a2d2c96cda61f6885d6f4169a33893e590ecb9b4f2d2de1ad83cf7bce6a0b9d",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "API迁移",
+              "登录",
+              "菜单",
+              "动态路由",
+              "权限"
+            ],
+            "sources": [
+              {
+                "id": "session",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/session.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/client.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/menu.ts",
+                "kind": "source"
+              },
+              {
+                "id": "permission",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-store",
+                "repoId": "ai-conv-plus",
+                "path": "src/store/router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "route-builder",
+                "repoId": "ai-conv-plus",
+                "path": "src/utils/asyncRouter.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server-menu",
+                "repoId": "gin-vue-admin",
+                "path": "server/api/v1/system/sys_menu.go",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "chat-stream-and-image-recovery"
+            ],
+            "diagramIds": [
+              "permission-bootstrap",
+              "session-isolation"
+            ],
+            "diagramTypes": [
+              "sequenceDiagram",
+              "flowchart"
+            ],
+            "reason": "menu, permissions, dynamic"
+          },
+          {
+            "id": "workspace-system-boundaries",
+            "title": "三仓职责与系统运行边界",
+            "summary": "从父级工作区、Vue 客户端和 Go 重构仓的关系出发，区分产品实现、管理端、协作资料与真实运行证据。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/三仓职责与系统运行边界.md",
+            "revision": "1ef0b59b1a678c738345c33fa68df54abdc75e1d4f8f375ff2b4eab3a61edded",
+            "freshness": "current",
+            "repositories": [
+              "project",
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "架构",
+              "三仓",
+              "运行边界",
+              "证据"
+            ],
+            "sources": [
+              {
+                "id": "workspace-boundary",
+                "repoId": "project",
+                "path": ".gitignore",
+                "kind": "source"
+              },
+              {
+                "id": "client-bootstrap",
+                "repoId": "ai-conv-plus",
+                "path": "src/main.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client-auth",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "backend-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/initialize/router.go",
+                "kind": "source"
+              },
+              {
+                "id": "admin-bootstrap",
+                "repoId": "gin-vue-admin",
+                "path": "web/src/main.js",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "2026-09-23 的限定样本，不是当前部署证明"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "2026-09-24 的客户端联调，后台往返尚未完整验收"
+              }
+            ],
+            "relations": [
+              "api-migration-auth-routing",
+              "chat-stream-and-image-recovery",
+              "reporter-template-request-flow"
+            ],
+            "diagramIds": [
+              "repository-map",
+              "evidence-boundary"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "do"
+          },
+          {
+            "id": "chat-stream-and-image-recovery",
+            "title": "聊天流式输出与图片任务恢复",
+            "summary": "说明文字 SSE、识图附件与生成图片的不同请求链，以及按会话、消息和任务精确恢复、取消确认与迟到响应隔离。",
+            "type": "technical-solution",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+            "revision": "c944a16bdd813919f67572b8c50e15b4c9f18cfa66375d587703c71e09e4e399",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "聊天",
+              "SSE",
+              "图片",
+              "恢复",
+              "取消"
+            ],
+            "sources": [
+              {
+                "id": "chat-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/ChatPage.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "text-sse",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/sse.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/draw.ts",
+                "kind": "source"
+              },
+              {
+                "id": "image-tasks",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/useChatImageTasks.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm_draw/router/comfy.go",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "已验证正常生成与历史恢复样本，未实测真实取消竞态"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "request-paths",
+              "recovery-path",
+              "cancellation-path"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "do"
+          },
+          {
+            "id": "reporter-template-request-flow",
+            "title": "记者四模板与提示词请求",
+            "summary": "从四类写作模板、字段校验和提示词拼接，追踪到保留手改文本的发送、锁定与历史续写流程。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/记者四模板与提示词请求.md",
+            "revision": "ed948eef23520626ad7d0b6125f3a0df225245432f7096898db17c440b487421",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "硅基记者",
+              "写作模板",
+              "表单",
+              "提示词",
+              "校验"
+            ],
+            "sources": [
+              {
+                "id": "template-parser",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/writingTemplates.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-form",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/textPrompts.vue",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/index.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-model",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/model/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-service",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/service/writing_template_service.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/router/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "客户端真实成功链路与隔离测试，未完成管理端保存及幂等导入验收"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "template-to-prompt",
+              "accepted-send"
+            ],
+            "diagramTypes": [
+              "flowchart",
+              "sequenceDiagram"
+            ],
+            "reason": "do"
+          }
+        ],
+        "total": 4,
+        "contextChars": 5736
+      }
+    },
+    {
+      "case": "P3",
+      "question": "图片任务取消失败或连接中断后，怎样精确恢复原消息？",
+      "expectedIds": [
+        "chat-stream-and-image-recovery"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "图片任务取消失败或连接中断后，怎样精确恢复原消息？",
+        "cards": [
+          {
+            "id": "chat-stream-and-image-recovery",
+            "title": "聊天流式输出与图片任务恢复",
+            "summary": "说明文字 SSE、识图附件与生成图片的不同请求链，以及按会话、消息和任务精确恢复、取消确认与迟到响应隔离。",
+            "type": "technical-solution",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+            "revision": "c944a16bdd813919f67572b8c50e15b4c9f18cfa66375d587703c71e09e4e399",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "聊天",
+              "SSE",
+              "图片",
+              "恢复",
+              "取消"
+            ],
+            "sources": [
+              {
+                "id": "chat-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/ChatPage.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "text-sse",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/sse.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/draw.ts",
+                "kind": "source"
+              },
+              {
+                "id": "image-tasks",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/useChatImageTasks.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm_draw/router/comfy.go",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "已验证正常生成与历史恢复样本，未实测真实取消竞态"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "request-paths",
+              "recovery-path",
+              "cancellation-path"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "图片, 片任, 任务, 取消, 消失, 失败, 败或, 连接, 接中, 中断, 怎样, 精确, 确恢, 恢复, 复原, 原消, 消息"
+          },
+          {
+            "id": "reporter-template-request-flow",
+            "title": "记者四模板与提示词请求",
+            "summary": "从四类写作模板、字段校验和提示词拼接，追踪到保留手改文本的发送、锁定与历史续写流程。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/记者四模板与提示词请求.md",
+            "revision": "ed948eef23520626ad7d0b6125f3a0df225245432f7096898db17c440b487421",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "硅基记者",
+              "写作模板",
+              "表单",
+              "提示词",
+              "校验"
+            ],
+            "sources": [
+              {
+                "id": "template-parser",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/writingTemplates.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-form",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/textPrompts.vue",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/index.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-model",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/model/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-service",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/service/writing_template_service.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/router/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "客户端真实成功链路与隔离测试，未完成管理端保存及幂等导入验收"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "template-to-prompt",
+              "accepted-send"
+            ],
+            "diagramTypes": [
+              "flowchart",
+              "sequenceDiagram"
+            ],
+            "reason": "取消, 消失, 失败, 败或, 怎样, 恢复, 消息"
+          },
+          {
+            "id": "workspace-system-boundaries",
+            "title": "三仓职责与系统运行边界",
+            "summary": "从父级工作区、Vue 客户端和 Go 重构仓的关系出发，区分产品实现、管理端、协作资料与真实运行证据。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/三仓职责与系统运行边界.md",
+            "revision": "1ef0b59b1a678c738345c33fa68df54abdc75e1d4f8f375ff2b4eab3a61edded",
+            "freshness": "current",
+            "repositories": [
+              "project",
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "架构",
+              "三仓",
+              "运行边界",
+              "证据"
+            ],
+            "sources": [
+              {
+                "id": "workspace-boundary",
+                "repoId": "project",
+                "path": ".gitignore",
+                "kind": "source"
+              },
+              {
+                "id": "client-bootstrap",
+                "repoId": "ai-conv-plus",
+                "path": "src/main.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client-auth",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "backend-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/initialize/router.go",
+                "kind": "source"
+              },
+              {
+                "id": "admin-bootstrap",
+                "repoId": "gin-vue-admin",
+                "path": "web/src/main.js",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "2026-09-23 的限定样本，不是当前部署证明"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "2026-09-24 的客户端联调，后台往返尚未完整验收"
+              }
+            ],
+            "relations": [
+              "api-migration-auth-routing",
+              "chat-stream-and-image-recovery",
+              "reporter-template-request-flow"
+            ],
+            "diagramIds": [
+              "repository-map",
+              "evidence-boundary"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "图片, 片任, 任务, 取消, 恢复"
+          },
+          {
+            "id": "api-migration-auth-routing",
+            "title": "API迁移中的登录与动态路由",
+            "summary": "解释新会话如何建立、服务端菜单如何变成受控页面，以及账号切换和异步失败为何必须撤销旧权限状态。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/API迁移中的登录与动态路由.md",
+            "revision": "9a2d2c96cda61f6885d6f4169a33893e590ecb9b4f2d2de1ad83cf7bce6a0b9d",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "API迁移",
+              "登录",
+              "菜单",
+              "动态路由",
+              "权限"
+            ],
+            "sources": [
+              {
+                "id": "session",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/session.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/client.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/menu.ts",
+                "kind": "source"
+              },
+              {
+                "id": "permission",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-store",
+                "repoId": "ai-conv-plus",
+                "path": "src/store/router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "route-builder",
+                "repoId": "ai-conv-plus",
+                "path": "src/utils/asyncRouter.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server-menu",
+                "repoId": "gin-vue-admin",
+                "path": "server/api/v1/system/sys_menu.go",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "chat-stream-and-image-recovery"
+            ],
+            "diagramIds": [
+              "permission-bootstrap",
+              "session-isolation"
+            ],
+            "diagramTypes": [
+              "sequenceDiagram",
+              "flowchart"
+            ],
+            "reason": "取消, 失败, 恢复"
+          }
+        ],
+        "total": 4,
+        "contextChars": 5824
+      }
+    },
+    {
+      "case": "P4",
+      "question": "How do reporter templates preserve edited writing prompts and validate fields?",
+      "expectedIds": [
+        "reporter-template-request-flow"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "How do reporter templates preserve edited writing prompts and validate fields?",
+        "cards": [
+          {
+            "id": "reporter-template-request-flow",
+            "title": "记者四模板与提示词请求",
+            "summary": "从四类写作模板、字段校验和提示词拼接，追踪到保留手改文本的发送、锁定与历史续写流程。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/记者四模板与提示词请求.md",
+            "revision": "ed948eef23520626ad7d0b6125f3a0df225245432f7096898db17c440b487421",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "硅基记者",
+              "写作模板",
+              "表单",
+              "提示词",
+              "校验"
+            ],
+            "sources": [
+              {
+                "id": "template-parser",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/writingTemplates.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-form",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/textPrompts.vue",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/index.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-model",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/model/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-service",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/service/writing_template_service.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/router/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "客户端真实成功链路与隔离测试，未完成管理端保存及幂等导入验收"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "template-to-prompt",
+              "accepted-send"
+            ],
+            "diagramTypes": [
+              "flowchart",
+              "sequenceDiagram"
+            ],
+            "reason": "do, reporter, templates, writing, prompts, and"
+          },
+          {
+            "id": "workspace-system-boundaries",
+            "title": "三仓职责与系统运行边界",
+            "summary": "从父级工作区、Vue 客户端和 Go 重构仓的关系出发，区分产品实现、管理端、协作资料与真实运行证据。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/三仓职责与系统运行边界.md",
+            "revision": "1ef0b59b1a678c738345c33fa68df54abdc75e1d4f8f375ff2b4eab3a61edded",
+            "freshness": "current",
+            "repositories": [
+              "project",
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "架构",
+              "三仓",
+              "运行边界",
+              "证据"
+            ],
+            "sources": [
+              {
+                "id": "workspace-boundary",
+                "repoId": "project",
+                "path": ".gitignore",
+                "kind": "source"
+              },
+              {
+                "id": "client-bootstrap",
+                "repoId": "ai-conv-plus",
+                "path": "src/main.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client-auth",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "backend-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/initialize/router.go",
+                "kind": "source"
+              },
+              {
+                "id": "admin-bootstrap",
+                "repoId": "gin-vue-admin",
+                "path": "web/src/main.js",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "2026-09-23 的限定样本，不是当前部署证明"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "2026-09-24 的客户端联调，后台往返尚未完整验收"
+              }
+            ],
+            "relations": [
+              "api-migration-auth-routing",
+              "chat-stream-and-image-recovery",
+              "reporter-template-request-flow"
+            ],
+            "diagramIds": [
+              "repository-map",
+              "evidence-boundary"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "do, reporter, and"
+          },
+          {
+            "id": "api-migration-auth-routing",
+            "title": "API迁移中的登录与动态路由",
+            "summary": "解释新会话如何建立、服务端菜单如何变成受控页面，以及账号切换和异步失败为何必须撤销旧权限状态。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/API迁移中的登录与动态路由.md",
+            "revision": "9a2d2c96cda61f6885d6f4169a33893e590ecb9b4f2d2de1ad83cf7bce6a0b9d",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "API迁移",
+              "登录",
+              "菜单",
+              "动态路由",
+              "权限"
+            ],
+            "sources": [
+              {
+                "id": "session",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/session.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/client.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/menu.ts",
+                "kind": "source"
+              },
+              {
+                "id": "permission",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-store",
+                "repoId": "ai-conv-plus",
+                "path": "src/store/router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "route-builder",
+                "repoId": "ai-conv-plus",
+                "path": "src/utils/asyncRouter.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server-menu",
+                "repoId": "gin-vue-admin",
+                "path": "server/api/v1/system/sys_menu.go",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "chat-stream-and-image-recovery"
+            ],
+            "diagramIds": [
+              "permission-bootstrap",
+              "session-isolation"
+            ],
+            "diagramTypes": [
+              "sequenceDiagram",
+              "flowchart"
+            ],
+            "reason": "and"
+          },
+          {
+            "id": "chat-stream-and-image-recovery",
+            "title": "聊天流式输出与图片任务恢复",
+            "summary": "说明文字 SSE、识图附件与生成图片的不同请求链，以及按会话、消息和任务精确恢复、取消确认与迟到响应隔离。",
+            "type": "technical-solution",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+            "revision": "c944a16bdd813919f67572b8c50e15b4c9f18cfa66375d587703c71e09e4e399",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "聊天",
+              "SSE",
+              "图片",
+              "恢复",
+              "取消"
+            ],
+            "sources": [
+              {
+                "id": "chat-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/ChatPage.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "text-sse",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/sse.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/draw.ts",
+                "kind": "source"
+              },
+              {
+                "id": "image-tasks",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/useChatImageTasks.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm_draw/router/comfy.go",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "已验证正常生成与历史恢复样本，未实测真实取消竞态"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "request-paths",
+              "recovery-path",
+              "cancellation-path"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "do"
+          }
+        ],
+        "total": 4,
+        "contextChars": 5772
+      }
+    },
+    {
+      "case": "P5",
+      "question": "API 菜单组件加载失败时会不会清空全部授权路由？",
+      "expectedIds": [
+        "api-migration-auth-routing"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "API 菜单组件加载失败时会不会清空全部授权路由？",
+        "cards": [
+          {
+            "id": "api-migration-auth-routing",
+            "title": "API迁移中的登录与动态路由",
+            "summary": "解释新会话如何建立、服务端菜单如何变成受控页面，以及账号切换和异步失败为何必须撤销旧权限状态。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/API迁移中的登录与动态路由.md",
+            "revision": "9a2d2c96cda61f6885d6f4169a33893e590ecb9b4f2d2de1ad83cf7bce6a0b9d",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "API迁移",
+              "登录",
+              "菜单",
+              "动态路由",
+              "权限"
+            ],
+            "sources": [
+              {
+                "id": "session",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/session.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/client.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/menu.ts",
+                "kind": "source"
+              },
+              {
+                "id": "permission",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-store",
+                "repoId": "ai-conv-plus",
+                "path": "src/store/router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "route-builder",
+                "repoId": "ai-conv-plus",
+                "path": "src/utils/asyncRouter.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server-menu",
+                "repoId": "gin-vue-admin",
+                "path": "server/api/v1/system/sys_menu.go",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "chat-stream-and-image-recovery"
+            ],
+            "diagramIds": [
+              "permission-bootstrap",
+              "session-isolation"
+            ],
+            "diagramTypes": [
+              "sequenceDiagram",
+              "flowchart"
+            ],
+            "reason": "api, 菜单, 组件, 加载, 失败, 不会, 授权, 路由"
+          },
+          {
+            "id": "reporter-template-request-flow",
+            "title": "记者四模板与提示词请求",
+            "summary": "从四类写作模板、字段校验和提示词拼接，追踪到保留手改文本的发送、锁定与历史续写流程。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/记者四模板与提示词请求.md",
+            "revision": "ed948eef23520626ad7d0b6125f3a0df225245432f7096898db17c440b487421",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "硅基记者",
+              "写作模板",
+              "表单",
+              "提示词",
+              "校验"
+            ],
+            "sources": [
+              {
+                "id": "template-parser",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/writingTemplates.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-form",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/textPrompts.vue",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/index.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-model",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/model/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-service",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/service/writing_template_service.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/router/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "客户端真实成功链路与隔离测试，未完成管理端保存及幂等导入验收"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "template-to-prompt",
+              "accepted-send"
+            ],
+            "diagramTypes": [
+              "flowchart",
+              "sequenceDiagram"
+            ],
+            "reason": "api, 加载, 失败, 败时, 不会, 清空"
+          },
+          {
+            "id": "workspace-system-boundaries",
+            "title": "三仓职责与系统运行边界",
+            "summary": "从父级工作区、Vue 客户端和 Go 重构仓的关系出发，区分产品实现、管理端、协作资料与真实运行证据。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/三仓职责与系统运行边界.md",
+            "revision": "1ef0b59b1a678c738345c33fa68df54abdc75e1d4f8f375ff2b4eab3a61edded",
+            "freshness": "current",
+            "repositories": [
+              "project",
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "架构",
+              "三仓",
+              "运行边界",
+              "证据"
+            ],
+            "sources": [
+              {
+                "id": "workspace-boundary",
+                "repoId": "project",
+                "path": ".gitignore",
+                "kind": "source"
+              },
+              {
+                "id": "client-bootstrap",
+                "repoId": "ai-conv-plus",
+                "path": "src/main.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client-auth",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "backend-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/initialize/router.go",
+                "kind": "source"
+              },
+              {
+                "id": "admin-bootstrap",
+                "repoId": "gin-vue-admin",
+                "path": "web/src/main.js",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "2026-09-23 的限定样本，不是当前部署证明"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "2026-09-24 的客户端联调，后台往返尚未完整验收"
+              }
+            ],
+            "relations": [
+              "api-migration-auth-routing",
+              "chat-stream-and-image-recovery",
+              "reporter-template-request-flow"
+            ],
+            "diagramIds": [
+              "repository-map",
+              "evidence-boundary"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "api, 菜单, 组件, 全部, 路由"
+          },
+          {
+            "id": "chat-stream-and-image-recovery",
+            "title": "聊天流式输出与图片任务恢复",
+            "summary": "说明文字 SSE、识图附件与生成图片的不同请求链，以及按会话、消息和任务精确恢复、取消确认与迟到响应隔离。",
+            "type": "technical-solution",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+            "revision": "c944a16bdd813919f67572b8c50e15b4c9f18cfa66375d587703c71e09e4e399",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "聊天",
+              "SSE",
+              "图片",
+              "恢复",
+              "取消"
+            ],
+            "sources": [
+              {
+                "id": "chat-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/ChatPage.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "text-sse",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/sse.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/draw.ts",
+                "kind": "source"
+              },
+              {
+                "id": "image-tasks",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/useChatImageTasks.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm_draw/router/comfy.go",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "已验证正常生成与历史恢复样本，未实测真实取消竞态"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "request-paths",
+              "recovery-path",
+              "cancellation-path"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "api, 失败, 不会, 会清, 全部"
+          }
+        ],
+        "total": 4,
+        "contextChars": 5796
+      }
+    },
+    {
+      "case": "P6",
+      "question": "Does an SSE source implementation prove production deployment or a real cancellation race?",
+      "expectedIds": [
+        "chat-stream-and-image-recovery",
+        "workspace-system-boundaries"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "Does an SSE source implementation prove production deployment or a real cancellation race?",
+        "cards": [
+          {
+            "id": "chat-stream-and-image-recovery",
+            "title": "聊天流式输出与图片任务恢复",
+            "summary": "说明文字 SSE、识图附件与生成图片的不同请求链，以及按会话、消息和任务精确恢复、取消确认与迟到响应隔离。",
+            "type": "technical-solution",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+            "revision": "c944a16bdd813919f67572b8c50e15b4c9f18cfa66375d587703c71e09e4e399",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "聊天",
+              "SSE",
+              "图片",
+              "恢复",
+              "取消"
+            ],
+            "sources": [
+              {
+                "id": "chat-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/ChatPage.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "text-sse",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/sse.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/draw.ts",
+                "kind": "source"
+              },
+              {
+                "id": "image-tasks",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/Chat/useChatImageTasks.ts",
+                "kind": "source"
+              },
+              {
+                "id": "draw-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm_draw/router/comfy.go",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "已验证正常生成与历史恢复样本，未实测真实取消竞态"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "request-paths",
+              "recovery-path",
+              "cancellation-path"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "an, sse, or, a, cancellation"
+          },
+          {
+            "id": "workspace-system-boundaries",
+            "title": "三仓职责与系统运行边界",
+            "summary": "从父级工作区、Vue 客户端和 Go 重构仓的关系出发，区分产品实现、管理端、协作资料与真实运行证据。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/三仓职责与系统运行边界.md",
+            "revision": "1ef0b59b1a678c738345c33fa68df54abdc75e1d4f8f375ff2b4eab3a61edded",
+            "freshness": "current",
+            "repositories": [
+              "project",
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "架构",
+              "三仓",
+              "运行边界",
+              "证据"
+            ],
+            "sources": [
+              {
+                "id": "workspace-boundary",
+                "repoId": "project",
+                "path": ".gitignore",
+                "kind": "source"
+              },
+              {
+                "id": "client-bootstrap",
+                "repoId": "ai-conv-plus",
+                "path": "src/main.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client-auth",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "backend-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/initialize/router.go",
+                "kind": "source"
+              },
+              {
+                "id": "admin-bootstrap",
+                "repoId": "gin-vue-admin",
+                "path": "web/src/main.js",
+                "kind": "source"
+              },
+              {
+                "id": "image-validation",
+                "repoId": "project",
+                "path": "docs/validation/go-api-migration/2026-09-23/AI对话图片SSE客户端验证.md",
+                "kind": "runtime",
+                "note": "2026-09-23 的限定样本，不是当前部署证明"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "2026-09-24 的客户端联调，后台往返尚未完整验收"
+              }
+            ],
+            "relations": [
+              "api-migration-auth-routing",
+              "chat-stream-and-image-recovery",
+              "reporter-template-request-flow"
+            ],
+            "diagramIds": [
+              "repository-map",
+              "evidence-boundary"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "an, sse, or, a"
+          },
+          {
+            "id": "reporter-template-request-flow",
+            "title": "记者四模板与提示词请求",
+            "summary": "从四类写作模板、字段校验和提示词拼接，追踪到保留手改文本的发送、锁定与历史续写流程。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/记者四模板与提示词请求.md",
+            "revision": "ed948eef23520626ad7d0b6125f3a0df225245432f7096898db17c440b487421",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin",
+              "project"
+            ],
+            "tags": [
+              "硅基记者",
+              "写作模板",
+              "表单",
+              "提示词",
+              "校验"
+            ],
+            "sources": [
+              {
+                "id": "template-parser",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/writingTemplates.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-form",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/textPrompts.vue",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-page",
+                "repoId": "ai-conv-plus",
+                "path": "src/views/siliconBasedReporter/index.vue",
+                "kind": "source"
+              },
+              {
+                "id": "chat-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/lm.ts",
+                "kind": "source"
+              },
+              {
+                "id": "template-model",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/model/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-service",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/service/writing_template_service.go",
+                "kind": "source"
+              },
+              {
+                "id": "template-router",
+                "repoId": "gin-vue-admin",
+                "path": "server/plugin/lm-chat/router/writing_template.go",
+                "kind": "source"
+              },
+              {
+                "id": "reporter-validation",
+                "repoId": "project",
+                "path": "docs/validation/silicon-reporter-template-parity/2026-09-24/README.md",
+                "kind": "runtime",
+                "note": "客户端真实成功链路与隔离测试，未完成管理端保存及幂等导入验收"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "api-migration-auth-routing"
+            ],
+            "diagramIds": [
+              "template-to-prompt",
+              "accepted-send"
+            ],
+            "diagramTypes": [
+              "flowchart",
+              "sequenceDiagram"
+            ],
+            "reason": "an, sse, or, a"
+          },
+          {
+            "id": "api-migration-auth-routing",
+            "title": "API迁移中的登录与动态路由",
+            "summary": "解释新会话如何建立、服务端菜单如何变成受控页面，以及账号切换和异步失败为何必须撤销旧权限状态。",
+            "type": "business-flow",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/API迁移中的登录与动态路由.md",
+            "revision": "9a2d2c96cda61f6885d6f4169a33893e590ecb9b4f2d2de1ad83cf7bce6a0b9d",
+            "freshness": "current",
+            "repositories": [
+              "ai-conv-plus",
+              "gin-vue-admin"
+            ],
+            "tags": [
+              "API迁移",
+              "登录",
+              "菜单",
+              "动态路由",
+              "权限"
+            ],
+            "sources": [
+              {
+                "id": "session",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/session.ts",
+                "kind": "source"
+              },
+              {
+                "id": "client",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/client.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-api",
+                "repoId": "ai-conv-plus",
+                "path": "src/api-v2/menu.ts",
+                "kind": "source"
+              },
+              {
+                "id": "permission",
+                "repoId": "ai-conv-plus",
+                "path": "src/permission.ts",
+                "kind": "source"
+              },
+              {
+                "id": "menu-store",
+                "repoId": "ai-conv-plus",
+                "path": "src/store/router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "route-builder",
+                "repoId": "ai-conv-plus",
+                "path": "src/utils/asyncRouter.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server-menu",
+                "repoId": "gin-vue-admin",
+                "path": "server/api/v1/system/sys_menu.go",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "workspace-system-boundaries",
+              "chat-stream-and-image-recovery"
+            ],
+            "diagramIds": [
+              "permission-bootstrap",
+              "session-isolation"
+            ],
+            "diagramTypes": [
+              "sequenceDiagram",
+              "flowchart"
+            ],
+            "reason": "an, sse, or, a"
+          }
+        ],
+        "total": 4,
+        "contextChars": 5774
+      }
+    },
+    {
+      "case": "L1",
+      "question": "Core、Skill、Adapter 的职责与构建分发怎样分开？",
+      "expectedIds": [
+        "lumine-architecture"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "Core、Skill、Adapter 的职责与构建分发怎样分开？",
+        "cards": [
+          {
+            "id": "lumine-architecture",
+            "title": "Core、Skill、Adapter 与构建分发",
+            "summary": "公共 Core 维护任务语义，Skill 提供按需判断指导，Adapter 翻译宿主协议；TypeScript 和规范资源通过构建生成安装包。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+            "revision": "89e70a54b1f7c2e5ff4a7a5f2a23eff5abfdb4f348176b866b996637ed6590af",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "architecture",
+              "架构",
+              "build distribution",
+              "分发"
+            ],
+            "sources": [
+              {
+                "id": "core",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+                "kind": "source"
+              },
+              {
+                "id": "routing",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "build",
+                "repoId": "project",
+                "path": "scripts/build-runtime.ts",
+                "kind": "source"
+              },
+              {
+                "id": "manifest",
+                "repoId": "project",
+                "path": "scripts/runtime-artifacts.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "scripts/build-reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "wrapper",
+                "repoId": "project",
+                "path": "scripts/sync-plugin-wrapper.sh",
+                "kind": "source"
+              },
+              {
+                "id": "adapter-paths",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-adoption",
+              "lumine-task-check",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "layers"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "core, skill, adapter, 职责, 与构, 构建, 建分, 分发, 怎样"
+          },
+          {
+            "id": "lumine-task-check",
+            "title": "任务检查、停止状态与继续条件",
+            "summary": "检查绑定当前任务、验收和实际证据；仅验证或诊断可以报告失败后结束，不因全项目问题强制扩大修复范围。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+            "revision": "b89570a4d23f24f9dac5fa129355e6d0167e26dec7c0416689d74ef0378d50ec",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "task verification",
+              "stop policy",
+              "diagnosis",
+              "检查",
+              "继续执行"
+            ],
+            "sources": [
+              {
+                "id": "task",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+                "kind": "source"
+              },
+              {
+                "id": "stop",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "checks",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/check.ts",
+                "kind": "source"
+              },
+              {
+                "id": "docs",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/documents.ts",
+                "kind": "source"
+              },
+              {
+                "id": "cli",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+                "kind": "source"
+              },
+              {
+                "id": "lifecycle",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/document-operations.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "checks"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "core, skill, adapter, 怎样, 分开"
+          },
+          {
+            "id": "lumine-adoption",
+            "title": "首次采用、升级与迁移恢复",
+            "summary": "安装提案锁定语言、文件内容与输入指纹；独立迁移工具通过备份和逐项日志恢复中断，保护应用后的人工修改。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+            "revision": "992efbb8f335ffceaf1513925c5f97b0f8442148b9bf87f27d0d3b1168e7f94f",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "adoption",
+              "migration recovery",
+              "upgrade",
+              "迁移",
+              "初始化"
+            ],
+            "sources": [
+              {
+                "id": "manager",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+                "kind": "source"
+              },
+              {
+                "id": "legacy",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/migration/legacy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "tests",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/tests/adoption-manager.test.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "migration"
+            ],
+            "diagramTypes": [
+              "stateDiagram-v2"
+            ],
+            "reason": "skill, adapter"
+          },
+          {
+            "id": "lumine-wiki",
+            "title": "Wiki 扫描、检索、增量更新与阅读",
+            "summary": "同一 Markdown 和 Mermaid 为人提供 HTML 阅读，为 Agent 提供预算受控的文本；来源漂移、人工修改和冲突保存在持久状态中。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+            "revision": "36320a7e159603137f8480d3983400b23bded488522bbcf9ba87d25a0f47097e",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "repo wiki",
+              "knowledge search",
+              "three way merge",
+              "知识库",
+              "检索",
+              "卡片"
+            ],
+            "sources": [
+              {
+                "id": "engine",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+                "kind": "source"
+              },
+              {
+                "id": "files",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+                "kind": "source"
+              },
+              {
+                "id": "merge",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/merge.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/browser/reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "documents",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "knowledge",
+              "merge"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "skill"
+          }
+        ],
+        "total": 4,
+        "contextChars": 4777
+      }
+    },
+    {
+      "case": "L2",
+      "question": "How does adoption upgrade migration recovery protect manual changes?",
+      "expectedIds": [
+        "lumine-adoption"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "How does adoption upgrade migration recovery protect manual changes?",
+        "cards": [
+          {
+            "id": "lumine-adoption",
+            "title": "首次采用、升级与迁移恢复",
+            "summary": "安装提案锁定语言、文件内容与输入指纹；独立迁移工具通过备份和逐项日志恢复中断，保护应用后的人工修改。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+            "revision": "992efbb8f335ffceaf1513925c5f97b0f8442148b9bf87f27d0d3b1168e7f94f",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "adoption",
+              "migration recovery",
+              "upgrade",
+              "迁移",
+              "初始化"
+            ],
+            "sources": [
+              {
+                "id": "manager",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+                "kind": "source"
+              },
+              {
+                "id": "legacy",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/migration/legacy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "tests",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/tests/adoption-manager.test.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "migration"
+            ],
+            "diagramTypes": [
+              "stateDiagram-v2"
+            ],
+            "reason": "adoption, upgrade, migration, recovery"
+          },
+          {
+            "id": "lumine-architecture",
+            "title": "Core、Skill、Adapter 与构建分发",
+            "summary": "公共 Core 维护任务语义，Skill 提供按需判断指导，Adapter 翻译宿主协议；TypeScript 和规范资源通过构建生成安装包。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+            "revision": "89e70a54b1f7c2e5ff4a7a5f2a23eff5abfdb4f348176b866b996637ed6590af",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "architecture",
+              "架构",
+              "build distribution",
+              "分发"
+            ],
+            "sources": [
+              {
+                "id": "core",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+                "kind": "source"
+              },
+              {
+                "id": "routing",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "build",
+                "repoId": "project",
+                "path": "scripts/build-runtime.ts",
+                "kind": "source"
+              },
+              {
+                "id": "manifest",
+                "repoId": "project",
+                "path": "scripts/runtime-artifacts.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "scripts/build-reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "wrapper",
+                "repoId": "project",
+                "path": "scripts/sync-plugin-wrapper.sh",
+                "kind": "source"
+              },
+              {
+                "id": "adapter-paths",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-adoption",
+              "lumine-task-check",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "layers"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "adoption"
+          },
+          {
+            "id": "lumine-task-check",
+            "title": "任务检查、停止状态与继续条件",
+            "summary": "检查绑定当前任务、验收和实际证据；仅验证或诊断可以报告失败后结束，不因全项目问题强制扩大修复范围。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+            "revision": "b89570a4d23f24f9dac5fa129355e6d0167e26dec7c0416689d74ef0378d50ec",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "task verification",
+              "stop policy",
+              "diagnosis",
+              "检查",
+              "继续执行"
+            ],
+            "sources": [
+              {
+                "id": "task",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+                "kind": "source"
+              },
+              {
+                "id": "stop",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "checks",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/check.ts",
+                "kind": "source"
+              },
+              {
+                "id": "docs",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/documents.ts",
+                "kind": "source"
+              },
+              {
+                "id": "cli",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+                "kind": "source"
+              },
+              {
+                "id": "lifecycle",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/document-operations.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "checks"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "manual"
+          }
+        ],
+        "total": 3,
+        "contextChars": 3484
+      }
+    },
+    {
+      "case": "L3",
+      "question": "仅验证或诊断失败，可以结束任务还是必须自动修复？",
+      "expectedIds": [
+        "lumine-task-check"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "仅验证或诊断失败，可以结束任务还是必须自动修复？",
+        "cards": [
+          {
+            "id": "lumine-task-check",
+            "title": "任务检查、停止状态与继续条件",
+            "summary": "检查绑定当前任务、验收和实际证据；仅验证或诊断可以报告失败后结束，不因全项目问题强制扩大修复范围。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+            "revision": "b89570a4d23f24f9dac5fa129355e6d0167e26dec7c0416689d74ef0378d50ec",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "task verification",
+              "stop policy",
+              "diagnosis",
+              "检查",
+              "继续执行"
+            ],
+            "sources": [
+              {
+                "id": "task",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+                "kind": "source"
+              },
+              {
+                "id": "stop",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "checks",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/check.ts",
+                "kind": "source"
+              },
+              {
+                "id": "docs",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/documents.ts",
+                "kind": "source"
+              },
+              {
+                "id": "cli",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+                "kind": "source"
+              },
+              {
+                "id": "lifecycle",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/document-operations.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "checks"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "仅验, 验证, 证或, 或诊, 诊断, 断失, 失败, 可以, 结束, 任务, 自动, 修复"
+          },
+          {
+            "id": "lumine-architecture",
+            "title": "Core、Skill、Adapter 与构建分发",
+            "summary": "公共 Core 维护任务语义，Skill 提供按需判断指导，Adapter 翻译宿主协议；TypeScript 和规范资源通过构建生成安装包。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+            "revision": "89e70a54b1f7c2e5ff4a7a5f2a23eff5abfdb4f348176b866b996637ed6590af",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "architecture",
+              "架构",
+              "build distribution",
+              "分发"
+            ],
+            "sources": [
+              {
+                "id": "core",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+                "kind": "source"
+              },
+              {
+                "id": "routing",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "build",
+                "repoId": "project",
+                "path": "scripts/build-runtime.ts",
+                "kind": "source"
+              },
+              {
+                "id": "manifest",
+                "repoId": "project",
+                "path": "scripts/runtime-artifacts.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "scripts/build-reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "wrapper",
+                "repoId": "project",
+                "path": "scripts/sync-plugin-wrapper.sh",
+                "kind": "source"
+              },
+              {
+                "id": "adapter-paths",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-adoption",
+              "lumine-task-check",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "layers"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "仅验, 验证, 诊断, 任务, 必须, 自动"
+          },
+          {
+            "id": "lumine-adoption",
+            "title": "首次采用、升级与迁移恢复",
+            "summary": "安装提案锁定语言、文件内容与输入指纹；独立迁移工具通过备份和逐项日志恢复中断，保护应用后的人工修改。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+            "revision": "992efbb8f335ffceaf1513925c5f97b0f8442148b9bf87f27d0d3b1168e7f94f",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "adoption",
+              "migration recovery",
+              "upgrade",
+              "迁移",
+              "初始化"
+            ],
+            "sources": [
+              {
+                "id": "manager",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+                "kind": "source"
+              },
+              {
+                "id": "legacy",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/migration/legacy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "tests",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/tests/adoption-manager.test.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "migration"
+            ],
+            "diagramTypes": [
+              "stateDiagram-v2"
+            ],
+            "reason": "验证, 可以, 任务, 必须, 自动"
+          },
+          {
+            "id": "lumine-wiki",
+            "title": "Wiki 扫描、检索、增量更新与阅读",
+            "summary": "同一 Markdown 和 Mermaid 为人提供 HTML 阅读，为 Agent 提供预算受控的文本；来源漂移、人工修改和冲突保存在持久状态中。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+            "revision": "36320a7e159603137f8480d3983400b23bded488522bbcf9ba87d25a0f47097e",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "repo wiki",
+              "knowledge search",
+              "three way merge",
+              "知识库",
+              "检索",
+              "卡片"
+            ],
+            "sources": [
+              {
+                "id": "engine",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+                "kind": "source"
+              },
+              {
+                "id": "files",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+                "kind": "source"
+              },
+              {
+                "id": "merge",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/merge.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/browser/reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "documents",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "knowledge",
+              "merge"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "验证, 失败, 可以, 自动"
+          }
+        ],
+        "total": 4,
+        "contextChars": 4786
+      }
+    },
+    {
+      "case": "L4",
+      "question": "How does repo wiki knowledge search use three way merge without images?",
+      "expectedIds": [
+        "lumine-wiki"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "How does repo wiki knowledge search use three way merge without images?",
+        "cards": [
+          {
+            "id": "lumine-wiki",
+            "title": "Wiki 扫描、检索、增量更新与阅读",
+            "summary": "同一 Markdown 和 Mermaid 为人提供 HTML 阅读，为 Agent 提供预算受控的文本；来源漂移、人工修改和冲突保存在持久状态中。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+            "revision": "36320a7e159603137f8480d3983400b23bded488522bbcf9ba87d25a0f47097e",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "repo wiki",
+              "knowledge search",
+              "three way merge",
+              "知识库",
+              "检索",
+              "卡片"
+            ],
+            "sources": [
+              {
+                "id": "engine",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+                "kind": "source"
+              },
+              {
+                "id": "files",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+                "kind": "source"
+              },
+              {
+                "id": "merge",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/merge.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/browser/reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "documents",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "knowledge",
+              "merge"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "repo, wiki, knowledge, search, three, way, merge"
+          },
+          {
+            "id": "lumine-task-check",
+            "title": "任务检查、停止状态与继续条件",
+            "summary": "检查绑定当前任务、验收和实际证据；仅验证或诊断可以报告失败后结束，不因全项目问题强制扩大修复范围。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+            "revision": "b89570a4d23f24f9dac5fa129355e6d0167e26dec7c0416689d74ef0378d50ec",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "task verification",
+              "stop policy",
+              "diagnosis",
+              "检查",
+              "继续执行"
+            ],
+            "sources": [
+              {
+                "id": "task",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+                "kind": "source"
+              },
+              {
+                "id": "stop",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "checks",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/check.ts",
+                "kind": "source"
+              },
+              {
+                "id": "docs",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/documents.ts",
+                "kind": "source"
+              },
+              {
+                "id": "cli",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+                "kind": "source"
+              },
+              {
+                "id": "lifecycle",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/document-operations.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "checks"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "wiki, use"
+          },
+          {
+            "id": "lumine-architecture",
+            "title": "Core、Skill、Adapter 与构建分发",
+            "summary": "公共 Core 维护任务语义，Skill 提供按需判断指导，Adapter 翻译宿主协议；TypeScript 和规范资源通过构建生成安装包。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+            "revision": "89e70a54b1f7c2e5ff4a7a5f2a23eff5abfdb4f348176b866b996637ed6590af",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "architecture",
+              "架构",
+              "build distribution",
+              "分发"
+            ],
+            "sources": [
+              {
+                "id": "core",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+                "kind": "source"
+              },
+              {
+                "id": "routing",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "build",
+                "repoId": "project",
+                "path": "scripts/build-runtime.ts",
+                "kind": "source"
+              },
+              {
+                "id": "manifest",
+                "repoId": "project",
+                "path": "scripts/runtime-artifacts.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "scripts/build-reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "wrapper",
+                "repoId": "project",
+                "path": "scripts/sync-plugin-wrapper.sh",
+                "kind": "source"
+              },
+              {
+                "id": "adapter-paths",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-adoption",
+              "lumine-task-check",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "layers"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "wiki"
+          },
+          {
+            "id": "lumine-adoption",
+            "title": "首次采用、升级与迁移恢复",
+            "summary": "安装提案锁定语言、文件内容与输入指纹；独立迁移工具通过备份和逐项日志恢复中断，保护应用后的人工修改。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+            "revision": "992efbb8f335ffceaf1513925c5f97b0f8442148b9bf87f27d0d3b1168e7f94f",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "adoption",
+              "migration recovery",
+              "upgrade",
+              "迁移",
+              "初始化"
+            ],
+            "sources": [
+              {
+                "id": "manager",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+                "kind": "source"
+              },
+              {
+                "id": "legacy",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/migration/legacy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "tests",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/tests/adoption-manager.test.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "migration"
+            ],
+            "diagramTypes": [
+              "stateDiagram-v2"
+            ],
+            "reason": "wiki"
+          }
+        ],
+        "total": 4,
+        "contextChars": 4751
+      }
+    },
+    {
+      "case": "L5",
+      "question": "删除知识缓存以后，正文与人工冲突基线还能恢复吗？",
+      "expectedIds": [
+        "lumine-wiki"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "删除知识缓存以后，正文与人工冲突基线还能恢复吗？",
+        "cards": [
+          {
+            "id": "lumine-wiki",
+            "title": "Wiki 扫描、检索、增量更新与阅读",
+            "summary": "同一 Markdown 和 Mermaid 为人提供 HTML 阅读，为 Agent 提供预算受控的文本；来源漂移、人工修改和冲突保存在持久状态中。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+            "revision": "36320a7e159603137f8480d3983400b23bded488522bbcf9ba87d25a0f47097e",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "repo wiki",
+              "knowledge search",
+              "three way merge",
+              "知识库",
+              "检索",
+              "卡片"
+            ],
+            "sources": [
+              {
+                "id": "engine",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+                "kind": "source"
+              },
+              {
+                "id": "files",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+                "kind": "source"
+              },
+              {
+                "id": "merge",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/merge.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/browser/reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "documents",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "knowledge",
+              "merge"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "删除, 知识, 缓存, 正文, 人工, 冲突, 基线"
+          },
+          {
+            "id": "lumine-adoption",
+            "title": "首次采用、升级与迁移恢复",
+            "summary": "安装提案锁定语言、文件内容与输入指纹；独立迁移工具通过备份和逐项日志恢复中断，保护应用后的人工修改。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+            "revision": "992efbb8f335ffceaf1513925c5f97b0f8442148b9bf87f27d0d3b1168e7f94f",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "adoption",
+              "migration recovery",
+              "upgrade",
+              "迁移",
+              "初始化"
+            ],
+            "sources": [
+              {
+                "id": "manager",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+                "kind": "source"
+              },
+              {
+                "id": "legacy",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/migration/legacy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "tests",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/tests/adoption-manager.test.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "migration"
+            ],
+            "diagramTypes": [
+              "stateDiagram-v2"
+            ],
+            "reason": "删除, 缓存, 正文, 人工, 冲突, 恢复"
+          },
+          {
+            "id": "lumine-task-check",
+            "title": "任务检查、停止状态与继续条件",
+            "summary": "检查绑定当前任务、验收和实际证据；仅验证或诊断可以报告失败后结束，不因全项目问题强制扩大修复范围。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+            "revision": "b89570a4d23f24f9dac5fa129355e6d0167e26dec7c0416689d74ef0378d50ec",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "task verification",
+              "stop policy",
+              "diagnosis",
+              "检查",
+              "继续执行"
+            ],
+            "sources": [
+              {
+                "id": "task",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+                "kind": "source"
+              },
+              {
+                "id": "stop",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "checks",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/check.ts",
+                "kind": "source"
+              },
+              {
+                "id": "docs",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/documents.ts",
+                "kind": "source"
+              },
+              {
+                "id": "cli",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+                "kind": "source"
+              },
+              {
+                "id": "lifecycle",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/document-operations.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "checks"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "知识, 人工, 冲突, 基线, 恢复"
+          },
+          {
+            "id": "lumine-architecture",
+            "title": "Core、Skill、Adapter 与构建分发",
+            "summary": "公共 Core 维护任务语义，Skill 提供按需判断指导，Adapter 翻译宿主协议；TypeScript 和规范资源通过构建生成安装包。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+            "revision": "89e70a54b1f7c2e5ff4a7a5f2a23eff5abfdb4f348176b866b996637ed6590af",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "architecture",
+              "架构",
+              "build distribution",
+              "分发"
+            ],
+            "sources": [
+              {
+                "id": "core",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+                "kind": "source"
+              },
+              {
+                "id": "routing",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "build",
+                "repoId": "project",
+                "path": "scripts/build-runtime.ts",
+                "kind": "source"
+              },
+              {
+                "id": "manifest",
+                "repoId": "project",
+                "path": "scripts/runtime-artifacts.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "scripts/build-reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "wrapper",
+                "repoId": "project",
+                "path": "scripts/sync-plugin-wrapper.sh",
+                "kind": "source"
+              },
+              {
+                "id": "adapter-paths",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-adoption",
+              "lumine-task-check",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "layers"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "知识"
+          }
+        ],
+        "total": 4,
+        "contextChars": 4754
+      }
+    },
+    {
+      "case": "L6",
+      "question": "What evidence does task verification and stop policy require before done?",
+      "expectedIds": [
+        "lumine-task-check"
+      ],
+      "exitCode": 0,
+      "result": {
+        "query": "What evidence does task verification and stop policy require before done?",
+        "cards": [
+          {
+            "id": "lumine-task-check",
+            "title": "任务检查、停止状态与继续条件",
+            "summary": "检查绑定当前任务、验收和实际证据；仅验证或诊断可以报告失败后结束，不因全项目问题强制扩大修复范围。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+            "revision": "b89570a4d23f24f9dac5fa129355e6d0167e26dec7c0416689d74ef0378d50ec",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "task verification",
+              "stop policy",
+              "diagnosis",
+              "检查",
+              "继续执行"
+            ],
+            "sources": [
+              {
+                "id": "task",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+                "kind": "source"
+              },
+              {
+                "id": "stop",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "checks",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/check.ts",
+                "kind": "source"
+              },
+              {
+                "id": "docs",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/documents.ts",
+                "kind": "source"
+              },
+              {
+                "id": "cli",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+                "kind": "source"
+              },
+              {
+                "id": "lifecycle",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/document-operations.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "checks"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "task, verification, stop, policy, done"
+          },
+          {
+            "id": "lumine-architecture",
+            "title": "Core、Skill、Adapter 与构建分发",
+            "summary": "公共 Core 维护任务语义，Skill 提供按需判断指导，Adapter 翻译宿主协议；TypeScript 和规范资源通过构建生成安装包。",
+            "type": "architecture",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+            "revision": "89e70a54b1f7c2e5ff4a7a5f2a23eff5abfdb4f348176b866b996637ed6590af",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "architecture",
+              "架构",
+              "build distribution",
+              "分发"
+            ],
+            "sources": [
+              {
+                "id": "core",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+                "kind": "source"
+              },
+              {
+                "id": "routing",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
+                "kind": "source"
+              },
+              {
+                "id": "build",
+                "repoId": "project",
+                "path": "scripts/build-runtime.ts",
+                "kind": "source"
+              },
+              {
+                "id": "manifest",
+                "repoId": "project",
+                "path": "scripts/runtime-artifacts.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "scripts/build-reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "wrapper",
+                "repoId": "project",
+                "path": "scripts/sync-plugin-wrapper.sh",
+                "kind": "source"
+              },
+              {
+                "id": "adapter-paths",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-adoption",
+              "lumine-task-check",
+              "lumine-wiki"
+            ],
+            "diagramIds": [
+              "layers"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "task"
+          },
+          {
+            "id": "lumine-wiki",
+            "title": "Wiki 扫描、检索、增量更新与阅读",
+            "summary": "同一 Markdown 和 Mermaid 为人提供 HTML 阅读，为 Agent 提供预算受控的文本；来源漂移、人工修改和冲突保存在持久状态中。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+            "revision": "36320a7e159603137f8480d3983400b23bded488522bbcf9ba87d25a0f47097e",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "repo wiki",
+              "knowledge search",
+              "three way merge",
+              "知识库",
+              "检索",
+              "卡片"
+            ],
+            "sources": [
+              {
+                "id": "engine",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+                "kind": "source"
+              },
+              {
+                "id": "files",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+                "kind": "source"
+              },
+              {
+                "id": "merge",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/merge.ts",
+                "kind": "source"
+              },
+              {
+                "id": "server",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+                "kind": "source"
+              },
+              {
+                "id": "reader",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/browser/reader.ts",
+                "kind": "source"
+              },
+              {
+                "id": "documents",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "knowledge",
+              "merge"
+            ],
+            "diagramTypes": [
+              "flowchart"
+            ],
+            "reason": "task"
+          },
+          {
+            "id": "lumine-adoption",
+            "title": "首次采用、升级与迁移恢复",
+            "summary": "安装提案锁定语言、文件内容与输入指纹；独立迁移工具通过备份和逐项日志恢复中断，保护应用后的人工修改。",
+            "type": "mechanism",
+            "status": "current",
+            "collection": "wiki",
+            "locale": "zh-CN",
+            "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+            "revision": "992efbb8f335ffceaf1513925c5f97b0f8442148b9bf87f27d0d3b1168e7f94f",
+            "freshness": "current",
+            "repositories": [
+              "project"
+            ],
+            "tags": [
+              "adoption",
+              "migration recovery",
+              "upgrade",
+              "迁移",
+              "初始化"
+            ],
+            "sources": [
+              {
+                "id": "manager",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+                "kind": "source"
+              },
+              {
+                "id": "legacy",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/migration/legacy.ts",
+                "kind": "source"
+              },
+              {
+                "id": "tests",
+                "repoId": "project",
+                "path": "skills/lumine-harness/src/harness/tests/adoption-manager.test.ts",
+                "kind": "source"
+              }
+            ],
+            "relations": [
+              "lumine-architecture",
+              "lumine-task-check"
+            ],
+            "diagramIds": [
+              "migration"
+            ],
+            "diagramTypes": [
+              "stateDiagram-v2"
+            ],
+            "reason": "task"
+          }
+        ],
+        "total": 4,
+        "contextChars": 4736
+      }
+    }
+  ]
+}

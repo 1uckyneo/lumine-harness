@@ -1,0 +1,24 @@
+---
+name: lumine-knowledge
+description: Locate repositories and implementation entry points, query and verify project knowledge, and build or incrementally maintain Repo Wiki using Markdown, Mermaid text, and source evidence without generating card images.
+---
+
+# Project knowledge
+
+<!-- LH-KNOWLEDGE-01 -->
+Read the constraints and map in AGENTS.md, then use the confirmed Harness root and .lumine/project.json configuration. The default Wiki root is docs/repo-wiki/; configuration is authoritative. The nearest Git root is not necessarily a multi-repository Harness root. Retrieval never replaces mandatory project rules.
+
+<!-- LH-KNOWLEDGE-02 -->
+For queries, start with ./.lumine/cli wiki query or show and inspect scope, provenance, and freshness. Return to source when knowledge is missing, stale, or contradictory. Expand relevant pages as needed; default to at most six cards with a total context budget. Use synonyms or query reformulation for Chinese, English, and code identifiers. A lookup does not require generating a complete Wiki.
+
+<!-- LH-KNOWLEDGE-03 -->
+For maintenance, read [Knowledge maintenance](references/maintenance.md). Use wiki scan to detect changes and wiki update to prepare work packages and apply semantic results; follow command help for exact arguments. The CLI supplies deterministic mechanisms; the active Agent interprets and verifies content. Do not claim background semantic updates when no Agent is active.
+
+<!-- LH-KNOWLEDGE-04 -->
+Body text, summaries, Mermaid text, and sources form one shared content set for people and Agents. Cards use HTML DOM; diagrams render on demand in the browser. Scanning, generation, updates, queries, and review use text only: no image generation, screenshot recognition, vision models, card images, thumbnail files, or rendered SVG in model input. Copy and export Markdown or Mermaid text. Dedicated browser UI verification is separate from the knowledge pipeline.
+
+<!-- LH-KNOWLEDGE-05 -->
+Semantic review verifies actual sources and material relationships. Wiki describes known implementation, Spec describes intended behavior, and Plan describes the current technical change. Do not turn an unimplemented proposal into current knowledge. Engineering conventions explain and cite authoritative rules; label inferred design rationale and distinguish source implementation from deployment or observed behavior.
+
+<!-- LH-KNOWLEDGE-06 -->
+Organize each topic as answer, mechanism and diagrams, tradeoffs and limits, then sources. Give diagrams stable identities, reading guidance, and evidence. Split complex topics instead of presenting file lists or dense graphs as explanations. Mermaid within the body is the sole diagram source; keep summaries, relations, and freshness consistent when it changes. Preserve human edits, useful candidates, and conflicts. Rebuilding a cache does not mean asking a model to regenerate unique content.
