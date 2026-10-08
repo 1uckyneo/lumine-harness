@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-30T06:45:21.030023+00:00",
+  "scope": "Read-only independent review of adopting parent upgrade and captured protected asset baselines; no parent writes, builds, Hooks, or finalization.",
+  "proposalId": "c7561a48-f399-4e44-ae2e-824603cd80fc",
+  "counts": {
+    "write": 200,
+    "preserve": 8
+  },
+  "operationPostHashesMatchProposal": true,
+  "changedCapturedParentFiles": [
+    ".lumine/adapter-manager.mjs",
+    ".lumine/managed.json",
+    ".lumine/cli",
+    ".lumine/adapter-cli.mjs",
+    ".lumine/check.mjs",
+    ".lumine/wiki.mjs",
+    ".lumine/root.json",
+    ".lumine/core/task-cli.mjs",
+    ".lumine/core/verification.mjs",
+    ".lumine/wiki/documents.mjs",
+    ".lumine/wiki/validation-documents.mjs",
+    ".lumine/wiki/index.mjs",
+    ".lumine/wiki/server.mjs",
+    ".lumine/adapters/codex/hooks/session-start.mjs",
+    ".lumine/adapters/codex/hooks/stop-gate.mjs",
+    ".agents/skills/lumine-knowledge/references/reader.md"
+  ],
+  "unreviewedCapturedParentChanges": [],
+  "noProtectedWriteOperations": true,
+  "protectedGroups": {
+    "wikiMarkdown": {
+      "files": 29,
+      "beforeSha256": "7eeac82d66dd3ce8adf6a05b9899f4515471d463a4dedc179bd6d07878910c7f",
+      "afterSha256": "7eeac82d66dd3ce8adf6a05b9899f4515471d463a4dedc179bd6d07878910c7f",
+      "changedPaths": [],
+      "fileSetUnchanged": true
+    },
+    "wikiState": {
+      "files": 373,
+      "beforeSha256": "22f1fb4c73eb48ca650546bd62d9f25287e763491a3e045f36d2cc75d598bc67",
+      "afterSha256": "22f1fb4c73eb48ca650546bd62d9f25287e763491a3e045f36d2cc75d598bc67",
+      "changedPaths": [],
+      "fileSetUnchanged": true
+    },
+    "tasks": {
+      "files": 6,
+      "beforeSha256": "a5f8e892ae204685c27ba8a3a6a724b23d77f8364f37ef1f0fac1357ec5dc6dd",
+      "afterSha256": "a5f8e892ae204685c27ba8a3a6a724b23d77f8364f37ef1f0fac1357ec5dc6dd",
+      "changedPaths": [],
+      "fileSetUnchanged": true
+    },
+    "projectChecks": {
+      "files": 1,
+      "beforeSha256": "173bfc9c2e133f1bb9370e1478537028d1c74e23b8a16339a6d12d8210109e08",
+      "afterSha256": "173bfc9c2e133f1bb9370e1478537028d1c74e23b8a16339a6d12d8210109e08",
+      "changedPaths": [],
+      "fileSetUnchanged": true
+    }
+  },
+  "children": {
+    "ai-conv-plus": {
+      "trackedFiles": 163,
+      "beforeSha256": "265f11d30f54287ad4d3b01769012333cc4aa9ebab84828c8db22f9a25e7b284",
+      "afterSha256": "265f11d30f54287ad4d3b01769012333cc4aa9ebab84828c8db22f9a25e7b284",
+      "changedPaths": [],
+      "gitStatusUnchanged": true,
+      "gitStatusClean": true,
+      "runtimeConfigRefs": [
+        "package-lock.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "runtimeConfigHashesUnchanged": true
+    },
+    "gin-vue-admin": {
+      "trackedFiles": 1579,
+      "beforeSha256": "d09f27b080f4e11f305cecaa018e104a9910c21b98c6a365f14acb7c6a721b1a",
+      "afterSha256": "d09f27b080f4e11f305cecaa018e104a9910c21b98c6a365f14acb7c6a721b1a",
+      "changedPaths": [],
+      "gitStatusUnchanged": true,
+      "gitStatusClean": true,
+      "runtimeConfigRefs": [
+        "server/go.mod",
+        "server/go.sum",
+        "web/package.json"
+      ],
+      "runtimeConfigHashesUnchanged": true
+    }
+  },
+  "parentBusinessNodeFilesCurrentlyAbsent": [
+    "package.json",
+    ".nvmrc",
+    ".node-version",
+    "pnpm-lock.yaml",
+    "package-lock.json"
+  ],
+  "hostVerification": {
+    "selectedAdapters": [
+      "codex"
+    ],
+    "rootMigrationStatus": "applied",
+    "journalStatus": "awaiting_host_verification",
+    "hostEvidenceSubmitted": false,
+    "finalized": false,
+    "actualHostVerifiedForThisProposal": false
+  },
+  "pendingSourceUpdates": [
+    {
+      "path": ".lumine/core/node-bootstrap.mjs",
+      "reason": "Final realpath normalization in Node bootstrap was built after this proposal. Installed file matches the applied proposal; update through a new protected proposal.",
+      "installedSha256": "b15eae5e7db120e28d813d4ff65c4b5132932df098e4802ef8fcd016babb1605",
+      "finalSourceSha256": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605"
+    }
+  ],
+  "limitations": [
+    "The baseline excludes private .lumine/local material; protection here verifies no proposal writes there, not byte equality of all local files.",
+    "No actual Hook execution, host acceptance, or physical offline condition is produced by this review."
+  ],
+  "passed": true
+}

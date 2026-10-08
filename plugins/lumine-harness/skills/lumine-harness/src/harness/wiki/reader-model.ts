@@ -1,6 +1,10 @@
 import type { CoverageMap, CoverageTopic, Section } from './types.ts';
 
 export type TopicNode = { topic: CoverageTopic; children: TopicNode[] };
+/** A missing project ID cannot prove that a refreshed service is still the same project. */
+export function shouldResetProject(previousLoaded: boolean, previousProject: string | null, nextProject: string | null): boolean {
+  return previousLoaded ? previousProject !== nextProject || nextProject === null : previousProject !== null && previousProject !== nextProject;
+}
 export function splitReference(reference: string): { id: string; fragment: string } {
   const index = reference.indexOf('#');
   return index < 0 ? { id: reference, fragment: '' } : { id: reference.slice(0, index), fragment: reference.slice(index + 1) };

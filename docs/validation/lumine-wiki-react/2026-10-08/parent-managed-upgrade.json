@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-08T04:07:33.049474+00:00",
+  "proposalId": "8c2059a8-f42b-4fb0-9425-13e7f86452db",
+  "operationCounts": {
+    "write": 200,
+    "preserve": 8
+  },
+  "changedWritePaths": [
+    ".lumine/wiki-reader/manifest.json",
+    ".lumine/wiki-reader/styles.css",
+    ".lumine/root.json",
+    ".lumine/managed.json"
+  ],
+  "writePostHashesAllMatch": true,
+  "protectedFileCount": 431,
+  "protectedFilesUnchanged": true,
+  "childGitFingerprintsUnchanged": true,
+  "probeAndHistoricalEventsPreserved": true,
+  "rootMigrationStatus": "applied",
+  "recoveryRetainedAt": ".lumine/local/wiki-desktop-fix/2026-10-08/",
+  "finalized": false,
+  "note": "Only managed styles.css and manifest content changed; root/managed bookkeeping updated by installer. No Hook invoked, no business source or Node configuration changed."
+}

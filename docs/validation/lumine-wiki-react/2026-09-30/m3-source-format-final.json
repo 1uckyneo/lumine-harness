@@ -1,0 +1,31 @@
+{
+  "project": "lumine-harness",
+  "checkedAt": "2026-09-30",
+  "documents": 8,
+  "structuredFormat": 8,
+  "initialBatch": 5,
+  "readerPage": {
+    "id": "lumine-wiki-reader",
+    "converted": true,
+    "comparison": "Parsed body, headings, diagrams, relations, source references and watch scopes matched the M0 backup before the later semantic revision."
+  },
+  "finalBatch": [
+    {
+      "id": "lumine-architecture",
+      "transaction": "wiki-format-524b3c4f-d416-4459-85f3-1b7d8d910aa5",
+      "parsedModelUnchanged": true,
+      "generatedBodyUnchanged": true,
+      "observationAndReviewTimesUnchangedWithinTransaction": true
+    },
+    {
+      "id": "lumine-task-check",
+      "transaction": "wiki-format-a1f31457-e330-403f-8c88-ffabfbb88fba",
+      "parsedModelUnchanged": true,
+      "generatedBodyUnchanged": true,
+      "observationAndReviewTimesUnchangedWithinTransaction": true
+    }
+  ],
+  "remainingFormatCandidates": 0,
+  "oldPartialPackets": "Retained with explicit keep-current decisions and byte-identical historical candidates; formatting did not mark their semantic work as applied.",
+  "limits": "The format conversion itself is not a semantic review. Four pages still have source-stale warnings."
+}

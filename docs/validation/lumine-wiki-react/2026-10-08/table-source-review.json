@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T04:05:31.312702+00:00",
+  "kind": "independent-bounded-source-semantic-review",
+  "reviewer": {
+    "kind": "agent",
+    "role": "independent",
+    "authoredCandidate": false,
+    "authoredSourceChange": false
+  },
+  "outcome": "passed",
+  "scope": [
+    "styles.css 表格单元格 min-width:10ch / overflow-wrap:normal / word-break:normal 最小修复",
+    "lumine-wiki-reader 候选中以“代码块和超宽表格”开头的新增段落",
+    "只依据当前源码检查语义对应和桌面范围的可预见副作用；不重跑浏览器或测试"
+  ],
+  "candidate": {
+    "documentId": "lumine-wiki-reader",
+    "inputPacketSha256": "0c1ba8fc37d39194069cad967e4f1001db54c91c234718fc01d1f81020ab6922",
+    "markdownSha256": "1739756bda1fc8fb3a5526a2067e9e6fa16a900fd2ffb6aa5fa429b51b417125",
+    "reviewedParagraphSha256": "4111e1596fae1ea50dabf9cae1cb2877164da7bf472076d14502e5bea10ff8f9",
+    "reviewedParagraph": "代码块和超宽表格在各自区域内横向滚动；正文中的长路径可以换行。表格单元格保留最小可读宽度，长标识符不强行逐字换行，避免为把全部列挤进正文而形成细长的文字列。局部滚动保留完整内容，读者可以按列查阅。"
+  },
+  "sourceRefs": [
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+      "reviewedLines": [
+        22,
+        38,
+        143,
+        144,
+        160,
+        170,
+        171,
+        172,
+        173
+      ]
+    }
+  ],
+  "claimChecks": [
+    {
+      "claim": "代码块和超宽表格在各自区域内横向滚动",
+      "supported": true,
+      "reason": "pre 保留 max-width:100% 和 overflow:auto；table 为 display:block / max-width:100% / overflow-x:auto。document-layout 使用 minmax(0,760px)，document 保留 min-width:0，使局部容器可收缩。"
+    },
+    {
+      "claim": "正文中的长路径可以换行",
+      "supported": true,
+      "reason": "正文 prose 具有 overflow-wrap:anywhere；表格单元格的局部 normal 覆盖不影响普通段落中的长路径。"
+    },
+    {
+      "claim": "表格单元格保留最小可读宽度，长标识符不强行逐字换行",
+      "supported": true,
+      "reason": "th 和 td 声明 min-width:10ch，并以 overflow-wrap:normal / word-break:normal 覆盖 prose 的 anywhere。连续无正常断点的拉丁标识符可以扩大内部表格宽度，交由表格横向滚动；正常空格、连字符等断点仍允许换行。"
+    },
+    {
+      "claim": "局部滚动保留完整内容，读者可以按列查阅",
+      "supported": true,
+      "reason": "表格使用 overflow-x:auto，不采用 hidden、ellipsis 或文本截断；当前改动没有改写表格内容。"
+    }
+  ],
+  "sideEffects": [
+    {
+      "case": "短表格",
+      "assessment": "每列仍至少 10ch，内容很短时会比纯内容宽度更宽；列数多时也可能提前出现横向滚动。这是最小列宽的直接成本，桌面阅读场景可接受，不能宣称所有短表格都完全无需滚动。",
+      "materialDefect": false
+    },
+    {
+      "case": "长标识符、长 URL 与路径在表格内",
+      "assessment": "不再继承 anywhere 的任意字符拆分，长连续内容可能需要较长横向滚动；这符合候选描述。normal 不等于 nowrap，有自然断点或中文内容仍可按正常规则换行。",
+      "materialDefect": false
+    },
+    {
+      "case": "正文与其他布局",
+      "assessment": "覆盖限定在 prose 内的 th、td，未改普通正文、导航、搜索或源代码摘录的换行规则。",
+      "materialDefect": false
+    }
+  ],
+  "findings": [],
+  "limitations": [
+    "这是新增段落及最小 CSS 修复的独立语义审阅，不是整页知识的重新语义验收。",
+    "没有重新执行浏览器、构建或测试，实际桌面表现由独立 Validation 证据负责。",
+    "用户已要求暂不处理窄屏；本审阅不为移动端、200% 缩放或全部浏览器兼容性背书。",
+    "10ch 是布局阈值，不能单凭源码保证所有语言、列数和内容的可读性。",
+    "没有修改源码、Wiki、任务、计划、父仓或候选包。"
+  ]
+}

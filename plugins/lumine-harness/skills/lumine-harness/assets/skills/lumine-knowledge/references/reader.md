@@ -4,7 +4,7 @@
 
 ## 运行前提与项目归属
 
-阅读器和依赖随 Lumine 安装，运行需要 Node.js 18 或更高版本及现代浏览器；无需安装 npm 依赖、连接模型或启动业务服务。使用已确认的 Harness 根，其 `.lumine/cli` 会定位正确 Runtime；不要从业务子仓的最近 Git 根推定项目归属。普通采用项目也可用 `node .lumine/wiki.mjs serve` 绕过 Bash 包装器；源仓自用应使用自己的 `.lumine/cli`。
+阅读器和依赖随 Lumine 安装，运行需要 Node.js 22.x（22.18.0 及以上）或 Node.js 24.x LTS（24.11.0 及以上）及现代浏览器，推荐 Node.js 24 LTS；无需安装 npm 依赖、连接模型或启动业务服务。使用已确认的 Harness 根，其 `.lumine/cli` 会定位正确 Runtime；不要从业务子仓的最近 Git 根推定项目归属。普通采用项目也可用 `node .lumine/wiki.mjs serve` 绕过 Bash 包装器；源仓自用应使用自己的 `.lumine/cli`。
 
 先查看当前会话的进程句柄、启动日志和必要的监听信息。确认服务属于当前 Harness 根后，再决定复用或停止：
 

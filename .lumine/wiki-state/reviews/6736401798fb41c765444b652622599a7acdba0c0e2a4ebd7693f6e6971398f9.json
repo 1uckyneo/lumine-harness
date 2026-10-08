@@ -1,25 +1,22 @@
 {
   "documentId": "lumine-adoption",
-  "revision": "9c38a2f35c9651fd2237526a8a4962f812bf66076a578cae358fa253df01536b",
-  "sourceFingerprint": "8f16f2a3bc88f509bd1faca7ca0c498801122bb9dbf09a7f70c512c50b33db30",
-  "reviewedAt": "2026-09-29T07:41:24.931Z",
+  "revision": "c94b3868035cf44f6dcc47a4cc914d4e048d093449df0a5da31e9f15d39fe0db",
+  "sourceFingerprint": "4348c0fb01b889da5ffeb2216f30245f8c7e6df7dba5e518ed836d860884014f",
+  "reviewedAt": "2026-09-30T07:02:26.264054Z",
   "reviewer": {
     "kind": "agent",
     "role": "independent"
   },
   "outcome": "reviewed",
   "scope": [
-    "语言与提案指纹确定顺序、受管资产和人工修改保护",
-    "写前备份、CAS 续跑/回滚及宿主证据边界",
-    "知识/会话一次性转换保持人工差异、预算与未知投递",
-    "SRC-02：apply/finalize/rollback 共用 Wiki 写锁；apply/finalize 重盘点与提案漂移拒绝"
+    "Node 22.x >=22.18.0 与 Node 24.x >=24.11.0 的精确支持范围及低语法例外",
+    "入口版本拒绝先于事件读取、根查找与实现加载，包括共同生成的静态 Hook 定位器",
+    "迁移恢复工具与日志保留边界，恢复操作不绕过当前工具版本策略",
+    "终端进程与真实 Hook 进程证据区别，以及 Bun 嵌入运行环境的独立验证边界"
   ],
   "findings": [],
   "limitations": [
-    "本 reviewer 未撰写这八篇正文，但参与了 Wiki Runtime 实现；本记录是内容作者之外的语义复核，不宣称对自身 Runtime 的完全独立代码审计。",
-    "结论限定当前工作树与所列机制，不证明部署、真实宿主自动续跑、外部服务或人类接受。",
-    "未重做全部官方宿主协议网页检索或遍历个人会话日志；已有历史宿主陈述未因此升级为本轮真实运行证据。",
-    "浏览器交互由专项验证单独记录，本审阅对阅读器仅核对源码与已执行定向测试。",
-    "未将结构检查或来源哈希一致当作全部正文/全部执行路径语义正确；未列入 scope 的实现细节不在本轮独立审阅保证内。"
+    "未验证真实宿主生命周期与自动续跑。",
+    "本次仅复核 Node 政策、入口顺序、恢复边界与 Bun；不代表全文所有语义已复核。"
   ]
 }

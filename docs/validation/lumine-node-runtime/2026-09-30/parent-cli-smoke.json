@@ -1,0 +1,27 @@
+{
+  "observedAt": "2026-09-30T06:57:35.435149+00:00",
+  "scope": "Actual CLI processes in the adopting parent; no Hook or host event is generated.",
+  "protectedFiles": 409,
+  "protectedHashesUnchanged": true,
+  "records": [
+    {
+      "version": "22.18.0",
+      "operation": "adopting parent Wiki query",
+      "exitCode": 0,
+      "jsonResultObserved": true
+    },
+    {
+      "version": "24.11.0",
+      "operation": "adopting parent Wiki query",
+      "exitCode": 0,
+      "jsonResultObserved": true
+    },
+    {
+      "version": "18.20.8",
+      "operation": "adopting parent direct Wiki preflight rejection",
+      "exitCode": 2,
+      "code": "UNSUPPORTED_NODE_RUNTIME"
+    }
+  ],
+  "actualHostVerified": false
+}

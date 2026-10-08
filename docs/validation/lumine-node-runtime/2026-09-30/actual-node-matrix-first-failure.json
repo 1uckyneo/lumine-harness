@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-30T06:13:50.140861+00:00",
+  "scope": "Disposable fixtures only; no production target, business repository, or actual host session is changed.",
+  "limitations": [
+    "Loopback HTTP and static assets are tested here; browser rendering and Mermaid interaction require separate evidence.",
+    "Hook invocations test rejection before operations, not real host lifecycle delivery.",
+    "No physically disconnected network or real host acceptance is claimed.",
+    "Adapter-none finalization is valid fixture maintenance and supplies no host evidence."
+  ],
+  "runtimes": {
+    "22.18.0": {
+      "version": "v22.18.0",
+      "executableSha256": "9187ad22c98cea5b635a79db52fa32ab3f6aa9d41e3abf5da71437cfef1ca9de",
+      "architecture": "darwin-arm64"
+    },
+    "24.11.0": {
+      "version": "v24.11.0",
+      "executableSha256": "8d66cad090d087ed8fac66d8f7248c8a9a55454680232a6d109f609aa2decf89",
+      "architecture": "darwin-arm64"
+    },
+    "24-current": {
+      "version": "v24.14.0",
+      "executableSha256": "9e831e9b13aa47c5e5eaa3904d232aa527124e8abba7ca5d72b67b46cfb10ae8",
+      "architecture": "darwin-arm64"
+    },
+    "18.20.8": {
+      "version": "v18.20.8",
+      "executableSha256": "fb9c2dce92bdaaa9b844ee65e647cc55542776c3f0e1fccf104f6b52484496a2",
+      "architecture": "darwin-arm64"
+    },
+    "20.19.0": {
+      "version": "v20.19.0",
+      "executableSha256": "cbf52a4f3ef29aece8ca875e79fcaf7e0d9a1a1941737a499ed267d13880ddd2",
+      "architecture": "darwin-arm64"
+    },
+    "22.17.0": {
+      "version": "v22.17.0",
+      "executableSha256": "7bf25453c4280d0c4b8501144e419dd9597eeddd5804c4f4ab571d3286489547",
+      "architecture": "darwin-arm64"
+    }
+  },
+  "baselines": {
+    "skills/lumine-harness/assets/harness/core/node-runtime.mjs": "9c0643ecf080a2676b65fba85cde2c7b9143d51297552d71eb14542717950783",
+    "skills/lumine-harness/assets/harness/core/node-bootstrap.mjs": "b15eae5e7db120e28d813d4ff65c4b5132932df098e4802ef8fcd016babb1605",
+    "skills/lumine-harness/scripts/harness-manager.mjs": "fe196c1b483740da0b9d5fd85ada14b5738ab1394c8330719b51c4612061ec94",
+    "skills/lumine-harness/assets/harness/cli": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5",
+    "skills/lumine-harness/assets/wiki-reader/reader.js": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+    "skills/lumine-harness/assets/wiki-reader/manifest.json": "ea807052f23bf0f35fa75aab6e971a28621e06b0aafa381b0d8f01cf9bba3c77"
+  },
+  "operations": [
+    {
+      "name": "22.18.0-skill-nongit-inspect",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "<temporary>/lumine-node-runtime-matrix/node-v22.18.0-darwin-arm64/bin/node",
+        "<validation-fixtures>/packages/skill/scripts/harness-manager.mjs",
+        "inspect",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "expectedReturnCode": 0,
+      "beforeSha256": "aa551373025a222fb1059d728c6601058620396cfe4ae58ec83a0f551a276796",
+      "afterSha256": "aa551373025a222fb1059d728c6601058620396cfe4ae58ec83a0f551a276796",
+      "changedPaths": []
+    }
+  ],
+  "installations": [],
+  "failures": [
+    "Expecting value: line 1 column 1 (char 0)"
+  ],
+  "passed": false,
+  "noServersLeftRunning": true,
+  "operationsCount": 1
+}

@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { parse as parseYaml } from 'yaml';
+import { isMap, isPair, isSeq, parse as parseYaml, parseDocument as parseYamlDocument } from 'yaml';
 import { containedPath, hash, readJson, slash, wikiConfig } from './files.ts';
 import { parseSections } from './sections.ts';
 import { resolveAliasReference } from './references.ts';
@@ -10,15 +10,63 @@ import type { Baseline, CheckIssue, Collection, Diagram, KnowledgeDocument, Know
 const strings = (value: unknown): string[] => Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 const text = (value: unknown, fallback = ''): string => typeof value === 'string' ? value : fallback;
 const SAFE_ID = /^[\p{L}\p{N}][\p{L}\p{N}_.:-]{0,159}$/u;
+const FRONT_FIELDS = ['id', 'title', 'summary', 'type', 'status', 'locale'] as const;
+const TAIL_MARKER = '\n<!-- lumine-wiki-metadata:v1\n';
+const TAIL_PATTERN = /\n<!-- lumine-wiki-metadata:v1\r?\n([\s\S]*?)\r?\n-->(?:\r?\n)?$/;
 export function assertId(id: string): string { if (!SAFE_ID.test(id)) throw new Error('DOCUMENT_ID_INVALID'); return id; }
 export function stateFile(root: string, id: string): string { return containedPath(root, `.lumine/wiki-state/documents/${hash(assertId(id))}.json`, false); }
 export function baselineFor(root: string, id: string): Baseline | null { return visibleJson<Baseline | null>(root, statePath('documents', assertId(id)), null); }
+function documentParts(markdown: string, collection: Collection): { value: Record<string, unknown>; body: string; structured: boolean } {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(markdown);
+  const front = match ? parseYaml(match[1], { maxAliasCount: 0, uniqueKeys: true }) as Record<string, unknown> : {};
+  if (!front || typeof front !== 'object' || Array.isArray(front)) throw new Error('DOCUMENT_METADATA_INVALID');
+  let body = match ? markdown.slice(match[0].length) : markdown;
+  if (collection !== 'wiki') return { value: front, body, structured: false };
+  const tail = TAIL_PATTERN.exec(body);
+  if (!tail) {
+    if (body.includes(TAIL_MARKER)) throw new Error('DOCUMENT_TRAILING_METADATA_INVALID');
+    return { value: front, body, structured: false };
+  }
+  let appendix: unknown;
+  try { appendix = JSON.parse(tail[1]); } catch { throw new Error('DOCUMENT_TRAILING_METADATA_INVALID'); }
+  if (!appendix || typeof appendix !== 'object' || Array.isArray(appendix)) throw new Error('DOCUMENT_TRAILING_METADATA_INVALID');
+  const detail = appendix as Record<string, unknown>;
+  if (Object.keys(detail).some((key) => Object.hasOwn(front, key) || FRONT_FIELDS.includes(key as typeof FRONT_FIELDS[number]))) throw new Error('DOCUMENT_METADATA_DUPLICATE');
+  body = body.slice(0, tail.index);
+  return { value: { ...front, ...detail }, body, structured: true };
+}
+export function isStructuredWikiDocument(markdown: string): boolean { return TAIL_PATTERN.test(markdown); }
+function frontmatterHasComments(markdown: string): boolean {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(markdown);
+  if (!match) return false;
+  const document = parseYamlDocument(match[1], { uniqueKeys: true });
+  const hasComment = (node: unknown): boolean => {
+    if (!node || typeof node !== 'object') return false;
+    if (('commentBefore' in node && typeof node.commentBefore === 'string') || ('comment' in node && typeof node.comment === 'string')) return true;
+    if (isPair(node)) return hasComment(node.key) || hasComment(node.value);
+    if (isMap(node) || isSeq(node)) return node.items.some(hasComment);
+    return false;
+  };
+  return typeof document.commentBefore === 'string' || typeof document.comment === 'string' || hasComment(document.contents);
+}
+/** Moves detailed declarations to a hidden, editable appendix without changing the explanation body. */
+export function formatWikiDocument(markdown: string, relative: string): string {
+  if (markdown.length > 2_000_000) throw new Error('DOCUMENT_TOO_LARGE');
+  const original = parseDocument(markdown, relative, 'wiki');
+  const { value, body, structured } = documentParts(markdown, 'wiki');
+  if (structured) return markdown;
+  if (frontmatterHasComments(markdown)) throw new Error('DOCUMENT_FRONTMATTER_COMMENTS_PRESENT');
+  const header = FRONT_FIELDS.filter((key) => Object.hasOwn(value, key)).map((key) => `${key}: ${JSON.stringify(value[key])}`).join('\n');
+  const detail = Object.fromEntries(Object.entries(value).filter(([key]) => !FRONT_FIELDS.includes(key as typeof FRONT_FIELDS[number])));
+  const formatted = `---\n${header}\n---\n${body}${TAIL_MARKER}${JSON.stringify(detail, null, 2)}\n-->\n`;
+  const converted = parseDocument(formatted, relative, 'wiki');
+  const project = ({ markdown: _markdown, revision: _revision, ...document }: KnowledgeDocument) => document;
+  if (JSON.stringify(project(original)) !== JSON.stringify(project(converted))) throw new Error('DOCUMENT_FORMAT_NOT_LOSSLESS');
+  return formatted;
+}
 export function parseDocument(markdown: string, relative: string, collection: Collection = 'wiki'): KnowledgeDocument {
   if (markdown.length > 2_000_000) throw new Error('DOCUMENT_TOO_LARGE');
-  const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(markdown);
-  const value = match ? parseYaml(match[1], { maxAliasCount: 0, uniqueKeys: true }) as Record<string, unknown> : {};
-  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('DOCUMENT_METADATA_INVALID');
-  const body = match ? markdown.slice(match[0].length) : markdown;
+  const { value, body } = documentParts(markdown, collection);
   const id = text(value.id, collection === 'wiki' ? '' : `${collection}-${hash(relative).slice(0, 16)}`);
   assertId(id);
   const title = text(value.title, /^#\s+(.+)$/m.exec(body)?.[1] ?? path.basename(relative, '.md'));
@@ -85,9 +133,10 @@ export function parseDocument(markdown: string, relative: string, collection: Co
 }
 export function listDocuments(root: string, collections: Collection[] = ['wiki'], options: { includeHistorical?: boolean; issues?: CheckIssue[] } = {}): KnowledgeDocument[] {
   const config = wikiConfig(root), result: KnowledgeDocument[] = [];
-  const roots: Record<Collection, string> = { wiki: config.root, spec: 'docs/product-specs', plan: 'docs/exec-plans' };
+  const roots: Record<Collection, string | null> = { wiki: config.root, spec: 'docs/product-specs', plan: 'docs/exec-plans', validation: null };
   for (const collection of collections) {
     const relativeRoot = roots[collection];
+    if (!relativeRoot) continue; // Validation pages are read only from the explicit allowlist.
     const directory = containedPath(root, relativeRoot, false);
     if (!existsSync(directory)) continue;
     const visit = (directoryPath: string): void => {

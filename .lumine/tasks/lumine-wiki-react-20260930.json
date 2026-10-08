@@ -1,0 +1,393 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-wiki-react-20260930",
+  "mode": "implement",
+  "goal": "完成 Lumine Harness 与 ai-conv-plus-workspace 父仓的 Repo Wiki 知识体系及 React 阅读器改造",
+  "scope": "按 lumine-wiki-react-execution：源仓和目标父仓可写；Vue/Go 子仓只读；不提交、推送、部署或发布",
+  "specRef": "lumine-wiki-product-experience",
+  "planRef": "lumine-wiki-react-execution",
+  "selectedSkills": [
+    "lumine-run",
+    "lumine-knowledge"
+  ],
+  "acceptanceRefs": [
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-001",
+      "baselineHash": "9a2ba6aa04d6de071e7d293360e1a1fea1ace34aeb03a5f23aba3c0a29683a58"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-002",
+      "baselineHash": "b9a35e2847461d51fb75ab87b9ef5ca20bdc637946b87e12ede1f65e701698eb"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-003",
+      "baselineHash": "9733d2fa5822449452454f227f289a378fe70b911485a77f8cf0a8567b6cdf10"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-004",
+      "baselineHash": "dbfd07cb65ce80e05b0e0d732eb1bab2be81b2e576a4b20b3d7012d0fdf7d008"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-005",
+      "baselineHash": "0b3c9e886a3abb246f675cfd6f66a855770fb061f55414ef896a03ac70b3bb29"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-006",
+      "baselineHash": "b21a9cdb6a83743bf45809ea680ebcb01711fc542be54f2058321542ee9a589e"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-007",
+      "baselineHash": "0636d787c0c4df96204943f01eaad9b8beb9ce073259e9889086c114cf62bda4"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-008",
+      "baselineHash": "6ec69b7e7fbaa4f84992eb0825bd5057ff5719d2f9c7819273670a55c94589e3"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-009",
+      "baselineHash": "530f7a691137b70ff30bfc1938bc0ed8b16a4843207dd647ad990e46339ab722"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-010",
+      "baselineHash": "ad3ec3a3feb9e987bdd8ac7ed831a71b2b550c8a36ce183eb3a0b4a6eb1bed03"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-011",
+      "baselineHash": "78de48678e42d657b08e7f492bbfd7d28411ee7008eb178708a039e28ace6ae4"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-012",
+      "baselineHash": "fdc7e2202aed2934be558b5ff37bbc115a2a37a76b3191cd672a0540978e66e1"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-013",
+      "baselineHash": "cea64be04baccb75eb2a7adf673aa18e2408b74f0bb211bbadfdeaba70b7b74a"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-014",
+      "baselineHash": "021bc2219e1b4d56e1a4fc043f8cde1402fbae41597c1f1721243a3bb343d8f5"
+    }
+  ],
+  "evidence": [
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-09-30/旧引用与图解恢复回归.md",
+      "sha256": "6d1524cedb7b1afd2aa7cbe33306884e5c81305110d3b17b4c205e6401f9d6f7",
+      "outcome": "passed",
+      "observedAt": "2026-09-30T05:01:56.117410+00:00",
+      "command": "Source/dist gates and current browser recovery; historical module-404 and mapped-reference runs retained in artifact with original version scopes; actual temporary installer rollback observed",
+      "environment": "Local macOS Chromium; source and temporary Wiki; target parent Node 18.20.8; current layout separately verified",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-common.ts",
+          "sha256": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-diagrams.tsx",
+          "sha256": "69bbe1e49497dad3955cef18c39908bb4dd3d40caedbeb2c4a7de301835a25c6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "038808f71284659f1ebd5dc50c25497984dede2574780201e34265e7418f20dc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/tests/wiki-reader.test.ts",
+          "sha256": "f449b4eecad3965a08fe75b5765ba24f362a75ca5280963cb8111055cdf04143"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/reader-diagram-recovery.test.ts",
+          "sha256": "1541dbff2afc061bcb9e105503feb2f5a6ff24de69497999b39fa2002dc72baf"
+        }
+      ]
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-008",
+      "artifact": "docs/validation/lumine-wiki-react/2026-09-30/搜索、五类图解与无外网冷启动.md",
+      "sha256": "4a609c3a599482dd6ba97e39789da0866e8f8fe8d755f56c6fe1a92b6f302fde",
+      "outcome": "passed",
+      "observedAt": "2026-09-30T05:01:56.117410+00:00",
+      "command": "Real source/parent bilingual Chromium search scopes, filters clearing, zero result, non-Wiki identities and return; parent 20/26→26/26 prior pagination plus CLI budget3cards/10450chars. Original observations and layout-only revision boundary are retained.",
+      "environment": "Local Chromium and parent Node18 CLI; fa56/80ad search versions, final6c8b layout-only upgrade reviewed; fixed sample coverage",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-search.tsx",
+          "sha256": "f5b1c8c4cc71d134d3599e5cb31ea849231f263eaabe4ce9fc4c047f2ae927de"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+          "sha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-09-30/搜索、五类图解与无外网冷启动.md",
+      "sha256": "4a609c3a599482dd6ba97e39789da0866e8f8fe8d755f56c6fe1a92b6f302fde",
+      "outcome": "passed",
+      "observedAt": "2026-09-30T05:01:56.117410+00:00",
+      "command": "Five Mermaid types controls, deep-links, real clipboard grant/deny, local error recovery and14 exports; current formal parent Node18 two diagrams/history/reload. Plugin offline/no-cache coldstart observed on earlier fa56 revision, not final6c8b.",
+      "environment": "Local Chromium; isolated text fixture Node24; formal parent Node18.20.8; request-isolated historical Plugin fixture adapter-none",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-diagrams.tsx",
+          "sha256": "69bbe1e49497dad3955cef18c39908bb4dd3d40caedbeb2c4a7de301835a25c6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-common.ts",
+          "sha256": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-reader.ts",
+          "sha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d"
+        }
+      ]
+    }
+  ],
+  "knowledge": {
+    "required": true,
+    "status": "synchronized",
+    "refs": [
+      "lumine-root-config",
+      "lumine-wiki",
+      "lumine-workflow",
+      "lumine-wiki-reader",
+      "lumine-adoption",
+      "lumine-architecture",
+      "lumine-task-check",
+      ".lumine/wiki-state/coverage.json",
+      ".lumine/wiki-state/source-dispositions.json"
+    ],
+    "sync": {
+      "contractVersion": 2,
+      "assessedAt": "2026-09-30T05:01:56.117410+00:00",
+      "changedSources": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/dispositions.ts",
+          "sha256": "e12248fde0d89c8fa1376bad63212f36a570adb5132338d11fd61b1c37002544"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+          "sha256": "283ae153091aea0eb962add7d31eb6cb126d1de295478b462aa315e0a7d5e874"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-common.ts",
+          "sha256": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-reader.ts",
+          "sha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "45f13ee7bd41d6eca0c2bf75dcb41e41b5f51d917a345353b6df886fd52f8017"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-diagrams.tsx",
+          "sha256": "69bbe1e49497dad3955cef18c39908bb4dd3d40caedbeb2c4a7de301835a25c6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "038808f71284659f1ebd5dc50c25497984dede2574780201e34265e7418f20dc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-search.tsx",
+          "sha256": "f5b1c8c4cc71d134d3599e5cb31ea849231f263eaabe4ce9fc4c047f2ae927de"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/references.ts",
+          "sha256": "9e68c9fb58681c6d03ac2ea5b7308ec2694a125230d954a7452e467b69e18b58"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/document-operations.ts",
+          "sha256": "4b8979a4316be9af2ceaa164dca0e996ddfa9ca7a0ffb23b04e45470665b9f4e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/tests/wiki-reader.test.ts",
+          "sha256": "f449b4eecad3965a08fe75b5765ba24f362a75ca5280963cb8111055cdf04143"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-reader.test.ts",
+          "sha256": "0feb15abdb03c21abadbe8b8dc307ec92d918ee1acf97055af74db6c193ac59f"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/reader-diagram-recovery.test.ts",
+          "sha256": "1541dbff2afc061bcb9e105503feb2f5a6ff24de69497999b39fa2002dc72baf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/index.html",
+          "sha256": "56f92da80a93a5bc14867b4ee6b7db2c1a8bfa1ff3c250a68000b6324189dc7a"
+        }
+      ],
+      "verifiedScope": [
+        "源仓根解析、Wiki 扫描和分类、React 阅读器、任务知识同步合同的现状解释；按当前检出源码核对。",
+        "目标父仓图片任务解释由独立受保护工作包修订并在其验证记录中保存；本记录不主张父仓全部页面语义已核实。",
+        "同端口两项目顺序切换、服务断开重试及项目语言提示；仅当前本机 Chromium 与源码。",
+        "受限存储与剪贴板的源仓及父仓本机 Chromium 路径、旧真实入口在新版父仓 Node 18 服务中的正文和图解加载；旧 chunk 构建与升级顺序经夹具核实。",
+        "旧ID／路径／章节映射与同页片段定位、后退刷新焦点；两类Mermaid资源404双语整页恢复、父仓Node18同路径；独立临时项目实际安装器升级/回滚及重载旧入口恢复，不推定任意历史版本兼容。",
+        "两项目双语浏览器搜索范围、筛选清除、零结果、非Wiki身份及返回；父仓可靠匹配分页和CLI预算样本；AC008只针对本轮样本判据。",
+        "五类代表Mermaid最终6c8b构建交互与14个主动导出、真实权限拒绝、布局稳态及手动滚动释放；正式父仓最新Node18两真实图深链/后退刷新，无外部宿主Hook或人类接受结论。",
+        "历史Plugin fa56构建在Node18、无开发依赖与缓存、禁止外部请求条件下冷启动正文/图解/搜索；adapter-none和请求隔离不等于真实父仓Hook或物理断网。",
+        "源仓七篇相关Wiki当前，另有Adapter旧页面来源变动警告；父仓29篇检查通过但保留未核实/过期各一项，非全库语义保证。"
+      ],
+      "decisions": [
+        {
+          "ref": "lumine-root-config",
+          "action": "revised",
+          "sha256": "e105e76836aceddcbd5443d3ac74f8824c9b4dfde2b73d4fa52cba265b2d1289",
+          "reason": "本轮受保护修订按当前源码说明实现及适用边界；阅读器含复制、非Wiki身份与异步布局定位修订，见相关Validation。"
+        },
+        {
+          "ref": "lumine-wiki",
+          "action": "revised",
+          "sha256": "99d964c9554cbab0356b455cb1b1e6a2426e03d9c300d2cd42a5fbd2eca4a3a6",
+          "reason": "本轮受保护修订按当前源码说明实现及适用边界；阅读器含复制、非Wiki身份与异步布局定位修订，见相关Validation。"
+        },
+        {
+          "ref": "lumine-workflow",
+          "action": "revised",
+          "sha256": "eba8f1b88753a089b7e5ba227407e0b2a59b2fac1eab8a172bb343c609558ca2",
+          "reason": "本轮受保护修订按当前源码说明实现及适用边界；阅读器含复制、非Wiki身份与异步布局定位修订，见相关Validation。"
+        },
+        {
+          "ref": "lumine-wiki-reader",
+          "action": "revised",
+          "sha256": "29a5ca0e658609126c5effbb72c31c300d47ed0ab5164dfcb2fcaba038eefa90",
+          "reason": "本轮受保护修订按当前源码说明实现及适用边界；阅读器含复制、非Wiki身份与异步布局定位修订，见相关Validation。"
+        },
+        {
+          "ref": "lumine-adoption",
+          "action": "revised",
+          "sha256": "3048a2ce537ff89f2d215931263403fbbff7da4a1c9e0df115bfc014cfb2e8a5",
+          "reason": "本轮受保护修订按当前源码说明实现及适用边界；阅读器含复制、非Wiki身份与异步布局定位修订，见相关Validation。"
+        },
+        {
+          "ref": "lumine-architecture",
+          "action": "revised",
+          "sha256": "0986f7a8c5094a4fdb31e12bc87d28f061b9c52c546565f79822cf2bfb287585",
+          "reason": "本轮受保护修订按当前源码说明实现及适用边界；阅读器含复制、非Wiki身份与异步布局定位修订，见相关Validation。"
+        },
+        {
+          "ref": "lumine-task-check",
+          "action": "revised",
+          "sha256": "875acf4d3755a8ea34400f4f552e6874c9c71dbd3ae4579fdf39968fa9f8e6e8",
+          "reason": "本轮受保护修订按当前源码说明实现及适用边界；阅读器含复制、非Wiki身份与异步布局定位修订，见相关Validation。"
+        },
+        {
+          "ref": ".lumine/wiki-state/coverage.json",
+          "action": "revised",
+          "sha256": "f0ed60fc472c775690397a2427d2eba94b2a94def0e8941a0207c1931514289d",
+          "reason": "替换已删除的旧reader路径，登记真实browser目录和构建/恢复专项测试范围；受保护工作包fc174658应用。"
+        },
+        {
+          "ref": ".lumine/wiki-state/source-dispositions.json",
+          "action": "created",
+          "sha256": "a55868953a4e5230a9bcbab1bbc54ce6d71f65498f0f9e961c4190f9fcfe0a6e",
+          "reason": "按最新阅读器知识版本、主题范围及文件指纹分类三个未引用辅助文件；来源改变后应重新判断。"
+        }
+      ]
+    }
+  },
+  "summary": "本轮授权实施与增量修复已落盘；九项知识处置与限定证据记录，AC008样本判据通过，其他13项AC未整体通过。全局Node支持基线已按用户确认的独立执行计划实施，规范Runtime、公开说明和父仓受管增量已更新，新增版本矩阵及知识同步由lumine-node-runtime-run-20260930独立Run任务承载。本任务原evidence、knowledge和来源指纹保留历史身份，不刷新成Node改造后的审核，也不把原Node18证据计为新基线通过。父仓正式升级仍待应用后的真实宿主Hook及实际Node记录后finalize；人类理解、长期价值、完整边界及正式部署仍未验证。 2026-10-08用户明确产品为桌面阅读器，窄屏/移动不在支持及交付目标；仅更新AC009已确认基线，旧evidence与knowledge哈希不改写。新桌面补验和局部表格修复由独立任务承载。"
+}

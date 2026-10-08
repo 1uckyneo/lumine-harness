@@ -2,14 +2,28 @@ import { createServer, type Server, type ServerResponse } from 'node:http';
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { resolveHarnessRuntimeRoot } from '../core/runtime-layout.ts';
+import { loadProjectConfig } from '../core/project-config.ts';
 import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConfig } from './files.ts';
-import { inspectKnowledge, mapKnowledge, queryKnowledge, relatedKnowledge, showKnowledge } from './engine.ts';
+import { inspectKnowledge, mapKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from './engine.ts';
+import { searchKnowledgePage } from './search.ts';
+import { isRegisteredValidationDocumentId, registeredValidationDocuments, showRegisteredValidation } from './validation-documents.ts';
 import { baselineFor } from './documents.ts';
 import { parseSections } from './sections.ts';
 import type { Collection, Freshness } from './types.ts';
 
 const MIME: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.woff2': 'font/woff2' };
 function json(response: ServerResponse, status: number, body: unknown): void { response.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); response.end(JSON.stringify(body)); }
+interface SearchCursor { version: 1; fingerprint: string; offset: number }
+function decodeSearchCursor(value: string): SearchCursor {
+  if (value.length > 1024 || !/^[A-Za-z0-9_-]+$/.test(value)) throw new Error('SEARCH_CURSOR_INVALID');
+  let parsed: unknown;
+  try { parsed = JSON.parse(Buffer.from(value, 'base64url').toString('utf8')); }
+  catch { throw new Error('SEARCH_CURSOR_INVALID'); }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('SEARCH_CURSOR_INVALID');
+  const cursor = parsed as Partial<SearchCursor>;
+  if (cursor.version !== 1 || typeof cursor.fingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(cursor.fingerprint) || !Number.isSafeInteger(cursor.offset) || cursor.offset! < 1) throw new Error('SEARCH_CURSOR_INVALID');
+  return cursor as SearchCursor;
+}
 function readerAssets(): string {
   const runtime = resolveHarnessRuntimeRoot(import.meta.url);
   const candidates = [path.join(runtime, 'wiki-reader'), path.join(runtime, '..', 'wiki-reader')];
@@ -18,7 +32,9 @@ function readerAssets(): string {
   return found;
 }
 export async function serveWiki(root: string, options: { port?: number; assetsRoot?: string } = {}): Promise<{ server: Server; url: string; close: () => Promise<void> }> {
-  const assets = options.assetsRoot ?? readerAssets(), config = wikiConfig(root);
+  const assets = options.assetsRoot ?? readerAssets(), config = wikiConfig(root), project = loadProjectConfig(root);
+  const marker = JSON.parse(readFileSync(containedPath(root, '.lumine/root.json'), 'utf8')) as { projectId?: unknown };
+  const projectId = typeof marker.projectId === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,119}$/.test(marker.projectId) ? marker.projectId : null;
   let origin = '';
   const server = createServer((request, response) => {
     response.setHeader('x-content-type-options', 'nosniff');
@@ -30,19 +46,51 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
     try {
       if ((request.url?.length ?? 0) > 8192) throw new Error('REQUEST_TOO_LONG');
       const url = new URL(request.url ?? '/', origin);
-      if (url.pathname === '/api/config') { json(response, 200, { locale: config.locale, repositories: config.repositories.map((repo) => ({ id: repo.id })), maxCards: config.maxCards }); return; }
+      if (url.pathname === '/api/config') { json(response, 200, { locale: config.locale, projectId, displayName: project.displayName ?? null, repositories: config.repositories.map((repo) => ({ id: repo.id })), maxCards: config.maxCards }); return; }
       if (url.pathname === '/api/catalog') {
-        const { documents, issues } = inspectKnowledge(root, ['wiki', 'spec', 'plan']);
-        json(response, 200, { issues, documents: documents.map(({ markdown: _markdown, body: _body, diagrams, sections, ...document }) => ({ ...document, sections: sections.map(({ body: _sectionBody, ...section }) => section), diagrams: diagrams.map(({ code: _code, ...diagram }) => diagram) })) }); return;
+        const primary = inspectKnowledge(root, ['wiki', 'spec', 'plan']), validation = registeredValidationDocuments(root);
+        json(response, 200, { issues: [...primary.issues, ...validation.issues], documents: [...primary.documents, ...validation.documents].map(({ markdown: _markdown, body: _body, diagrams, sections, ...document }) => ({ ...document, sections: sections.map(({ body: _sectionBody, ...section }) => section), diagrams: diagrams.map(({ code: _code, ...diagram }) => diagram) })) }); return;
       }
       if (url.pathname === '/api/map') { json(response, 200, mapKnowledge(root)); return; }
-      if (url.pathname === '/api/related') { json(response, 200, relatedKnowledge(root, url.searchParams.get('id') ?? '')); return; }
+      if (url.pathname === '/api/related') {
+        const id = url.searchParams.get('id') ?? '';
+        json(response, 200, isRegisteredValidationDocumentId(root, id) ? { id: showRegisteredValidation(root, id).id, relations: [] } : relatedKnowledge(root, id)); return;
+      }
       if (url.pathname === '/api/query') {
         const collection = url.searchParams.get('collection') ?? 'wiki';
         if (!['wiki', 'spec', 'plan'].includes(collection)) throw new Error('COLLECTION_INVALID');
         json(response, 200, queryKnowledge(root, url.searchParams.get('q') ?? '', { limit: Math.min(30, Math.max(1, Number(url.searchParams.get('limit')) || 6)), collection: collection as Collection, repoId: url.searchParams.get('repo') ?? undefined, type: url.searchParams.get('type') ?? undefined, freshness: url.searchParams.get('freshness') as Freshness | null ?? undefined })); return;
       }
-      if (url.pathname === '/api/document') { json(response, 200, showKnowledge(root, url.searchParams.get('id') ?? '')); return; }
+      if (url.pathname === '/api/search') {
+        const query = url.searchParams.get('q') ?? '', scope = url.searchParams.get('scope') ?? 'wiki';
+        if (!['wiki', 'all'].includes(scope)) throw new Error('SEARCH_SCOPE_INVALID');
+        const rawLimit = url.searchParams.get('limit');
+        const limit = rawLimit === null ? 20 : Number(rawLimit);
+        if (!Number.isSafeInteger(limit) || limit < 1 || limit > 30) throw new Error('SEARCH_PAGE_INVALID');
+        const repo = url.searchParams.get('repo') ?? '', type = url.searchParams.get('type') ?? '', freshness = url.searchParams.get('freshness') ?? '';
+        if (freshness && !['current', 'stale', 'unverified', 'missing-source', 'conflict'].includes(freshness)) throw new Error('SEARCH_FILTER_INVALID');
+        if (repo && !config.repositories.some((item) => item.id === repo)) throw new Error('SEARCH_FILTER_INVALID');
+        const primary = inspectKnowledge(root, scope === 'all' ? ['wiki', 'spec', 'plan'] : ['wiki']);
+        const validation = scope === 'all' ? registeredValidationDocuments(root) : { documents: [], issues: [] };
+        const documents = [...primary.documents, ...validation.documents]
+          .filter((document) => (!repo || document.repositories.includes(repo)) && (!type || document.type === type) && (!freshness || document.freshness === freshness));
+        const fingerprint = hash(JSON.stringify({ query, scope, repo, type, freshness, documents: documents.map((document) => [document.id, document.path, document.revision, document.freshness]) }));
+        const rawCursor = url.searchParams.get('cursor');
+        const cursor = rawCursor ? decodeSearchCursor(rawCursor) : null;
+        if (cursor && cursor.fingerprint !== fingerprint) throw new Error('SEARCH_CURSOR_STALE');
+        const offset = cursor?.offset ?? 0;
+        const result = searchKnowledgePage(documents, query, limit, offset);
+        const nextCursor = result.hasMore ? Buffer.from(JSON.stringify({ version: 1, fingerprint, offset: offset + result.cards.length } satisfies SearchCursor)).toString('base64url') : null;
+        json(response, 200, { ...result, nextCursor, issues: [...primary.issues, ...validation.issues] }); return;
+      }
+      if (url.pathname === '/api/document') {
+        const full = url.searchParams.get('full') === '1';
+        const requested = url.searchParams.get('id') ?? '', requestedFragment = full ? url.searchParams.get('fragment') ?? '' : '';
+        const reference = `${requested}${requestedFragment ? `#${requestedFragment}` : ''}`;
+        const resolved = resolveKnowledgeReference(root, reference), [id, fragment] = resolved.split('#');
+        const document = isRegisteredValidationDocumentId(root, id) ? showRegisteredValidation(root, id) : showKnowledge(root, full ? id : reference);
+        json(response, 200, { ...document, canonicalReference: `${document.id}${fragment ? `#${fragment}` : ''}` }); return;
+      }
       if (url.pathname === '/api/reference') {
         const allowed = [config.root, 'docs/product-specs', 'docs/exec-plans', 'docs/validation'];
         const permittedFile = (relative: string): string => {
@@ -55,7 +103,8 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
         };
         const from = url.searchParams.get('from') ?? '', target = url.searchParams.get('target') ?? '';
         let fromPath: string;
-        if (from.startsWith('docs/validation/') && from.endsWith('.md')) { permittedFile(from); fromPath = from; }
+        if (isRegisteredValidationDocumentId(root, from)) fromPath = showRegisteredValidation(root, from).path;
+        else if (from.startsWith('docs/validation/') && from.endsWith('.md')) { permittedFile(from); fromPath = from; }
         else fromPath = showKnowledge(root, from).path;
         if (target.startsWith('source:')) {
           const document = showKnowledge(root, from), source = document.sources.find((item) => item.id === target.slice(7));
@@ -116,7 +165,7 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
       const code = error instanceof Error ? error.message : 'REQUEST_FAILED';
       // Never expose absolute host paths or filesystem stacks through the browser.
       const safe = /^[A-Z0-9_:-]+$/.test(code) ? code : 'REQUEST_FAILED';
-      json(response, /NOT_FOUND|NOT_IN_DOCUMENT/.test(safe) ? 404 : 400, { code: safe });
+      json(response, /NOT_FOUND|NOT_IN_DOCUMENT|NOT_REGISTERED/.test(safe) ? 404 : 400, { code: safe });
     }
   });
   await new Promise<void>((resolve, reject) => { server.once('error', reject); server.listen(options.port ?? 4318, '127.0.0.1', () => { const address = server.address(); if (!address || typeof address === 'string') { reject(new Error('SERVER_ADDRESS_INVALID')); return; } origin = `http://127.0.0.1:${address.port}`; resolve(); }); });

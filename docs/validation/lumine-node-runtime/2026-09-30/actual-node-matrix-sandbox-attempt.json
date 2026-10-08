@@ -1,0 +1,2251 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-30T06:21:39.823577+00:00",
+  "scope": "Disposable fixtures only; no production target, business repository, or actual host session is changed.",
+  "limitations": [
+    "Loopback HTTP and static assets are tested here; browser rendering and Mermaid interaction require separate evidence.",
+    "Hook invocations test rejection before operations, not real host lifecycle delivery.",
+    "No physically disconnected network or real host acceptance is claimed.",
+    "Adapter-none finalization is valid fixture maintenance and supplies no host evidence.",
+    "Knowledge protection uses an already normalized Wiki fixture; initial legacy normalization is not retested as a Node invariant."
+  ],
+  "runtimes": {
+    "22.18.0": {
+      "version": "v22.18.0",
+      "executableSha256": "9187ad22c98cea5b635a79db52fa32ab3f6aa9d41e3abf5da71437cfef1ca9de",
+      "platform": "darwin",
+      "architecture": "arm64"
+    },
+    "24.11.0": {
+      "version": "v24.11.0",
+      "executableSha256": "8d66cad090d087ed8fac66d8f7248c8a9a55454680232a6d109f609aa2decf89",
+      "platform": "darwin",
+      "architecture": "arm64"
+    },
+    "24-current": {
+      "version": "v24.14.0",
+      "executableSha256": "9e831e9b13aa47c5e5eaa3904d232aa527124e8abba7ca5d72b67b46cfb10ae8",
+      "platform": "darwin",
+      "architecture": "arm64"
+    },
+    "18.20.8": {
+      "version": "v18.20.8",
+      "executableSha256": "fb9c2dce92bdaaa9b844ee65e647cc55542776c3f0e1fccf104f6b52484496a2",
+      "platform": "darwin",
+      "architecture": "arm64"
+    },
+    "20.19.0": {
+      "version": "v20.19.0",
+      "executableSha256": "cbf52a4f3ef29aece8ca875e79fcaf7e0d9a1a1941737a499ed267d13880ddd2",
+      "platform": "darwin",
+      "architecture": "arm64"
+    },
+    "22.17.0": {
+      "version": "v22.17.0",
+      "executableSha256": "7bf25453c4280d0c4b8501144e419dd9597eeddd5804c4f4ab571d3286489547",
+      "platform": "darwin",
+      "architecture": "arm64"
+    }
+  },
+  "baselines": {
+    "skills/lumine-harness/assets/harness/core/node-runtime.mjs": "9c0643ecf080a2676b65fba85cde2c7b9143d51297552d71eb14542717950783",
+    "skills/lumine-harness/assets/harness/core/node-bootstrap.mjs": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605",
+    "skills/lumine-harness/scripts/harness-manager.mjs": "fe196c1b483740da0b9d5fd85ada14b5738ab1394c8330719b51c4612061ec94",
+    "skills/lumine-harness/assets/harness/cli": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5",
+    "skills/lumine-harness/assets/wiki-reader/reader.js": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+    "skills/lumine-harness/assets/wiki-reader/manifest.json": "ea807052f23bf0f35fa75aab6e971a28621e06b0aafa381b0d8f01cf9bba3c77"
+  },
+  "operations": [
+    {
+      "name": "22.18.0-skill-nongit-inspect",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "<temporary>/lumine-node-runtime-matrix/node-v22.18.0-darwin-arm64/bin/node",
+        "<validation-fixtures>/packages/skill/scripts/harness-manager.mjs",
+        "inspect",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": {
+        "schemaVersion": 2,
+        "targetRoot": "/private<validation-fixtures>/targets/22.18.0-skill-nongit",
+        "childRepositories": [],
+        "hasGit": false,
+        "gitStatus": "",
+        "topology": "library-or-cli",
+        "signals": {
+          "backend": false,
+          "frontend": false,
+          "nodeProject": true,
+          "database": false,
+          "libraryOrCli": true
+        },
+        "aiWorkflowSurfaces": []
+      },
+      "stderr": "",
+      "expectedReturnCode": 0,
+      "beforeSha256": "a6d2d007174b07c3d0a0ea6a32683046de3ef69faaeffd3db3315d9e14d6d5bc",
+      "afterSha256": "a6d2d007174b07c3d0a0ea6a32683046de3ef69faaeffd3db3315d9e14d6d5bc",
+      "changedPaths": []
+    },
+    {
+      "name": "22.18.0-skill-nongit-proposal",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "<temporary>/lumine-node-runtime-matrix/node-v22.18.0-darwin-arm64/bin/node",
+        "<validation-fixtures>/packages/skill/scripts/harness-manager.mjs",
+        "proposal",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit",
+        "--locale",
+        "zh-CN",
+        "--adapters",
+        "none",
+        "--output",
+        "<validation-fixtures>/proposals/22.18.0-skill-nongit.json"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": {
+        "schemaVersion": 2,
+        "legacy": {
+          "before": {},
+          "bridges": {},
+          "protectedPaths": []
+        },
+        "proposalId": "106b84f4-f96f-46d0-9cef-b4c25e5dc97e",
+        "targetRoot": "/private<validation-fixtures>/targets/22.18.0-skill-nongit",
+        "mode": "adopt",
+        "locale": "zh-CN",
+        "createdAt": "2026-09-30T06:21:40.430Z",
+        "project": {
+          "modules": [
+            "workflow"
+          ],
+          "repositories": [
+            {
+              "id": "project",
+              "path": "."
+            }
+          ],
+          "autonomy": {
+            "maxContinuationChain": 20,
+            "noProgressThreshold": 2
+          },
+          "extensions": {},
+          "schemaVersion": 2,
+          "workflowVersion": 2,
+          "locale": "zh-CN",
+          "topology": "library-or-cli",
+          "selectedAdapters": [],
+          "wiki": {
+            "root": "docs/repo-wiki",
+            "watchScopes": [
+              {
+                "repoId": "project",
+                "path": "."
+              }
+            ],
+            "maxCards": 6,
+            "maxContextChars": 12000
+          }
+        },
+        "inspect": {
+          "schemaVersion": 2,
+          "targetRoot": "/private<validation-fixtures>/targets/22.18.0-skill-nongit",
+          "childRepositories": [],
+          "hasGit": false,
+          "gitStatus": "",
+          "topology": "library-or-cli",
+          "signals": {
+            "backend": false,
+            "frontend": false,
+            "nodeProject": true,
+            "database": false,
+            "libraryOrCli": true
+          },
+          "aiWorkflowSurfaces": []
+        },
+        "operations": [
+          {
+            "path": ".lumine/.gitignore",
+            "action": "write",
+            "before": null,
+            "after": "7adc7c607837b9c53533a5d21bec55b653e9fc4788e22b9361381d639a7071fe",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/.gitignore",
+            "sourceHash": "7adc7c607837b9c53533a5d21bec55b653e9fc4788e22b9361381d639a7071fe"
+          },
+          {
+            "path": ".lumine/THIRD-PARTY-LICENSES.txt",
+            "action": "write",
+            "before": null,
+            "after": "5a718a278e0b179c1fdc5fc854606c8ddb2ea40533e011b58c64b933ee1d65de",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/THIRD-PARTY-LICENSES.txt",
+            "sourceHash": "5a718a278e0b179c1fdc5fc854606c8ddb2ea40533e011b58c64b933ee1d65de"
+          },
+          {
+            "path": ".lumine/adapter-capabilities.json",
+            "action": "write",
+            "before": null,
+            "after": "de2882a5c6a85e0c0b90e653ddf22b7ac508cb829497b88ee5a2fccb7e82d966",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/adapter-capabilities.json",
+            "sourceHash": "de2882a5c6a85e0c0b90e653ddf22b7ac508cb829497b88ee5a2fccb7e82d966"
+          },
+          {
+            "path": ".lumine/adapter-cli-main.mjs",
+            "action": "write",
+            "before": null,
+            "after": "e6f0e6e353d07e535e520da0ac268c5bb051aa399ab3d197986e6253863a9dba",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/adapter-cli-main.mjs",
+            "sourceHash": "e6f0e6e353d07e535e520da0ac268c5bb051aa399ab3d197986e6253863a9dba"
+          },
+          {
+            "path": ".lumine/adapter-cli.mjs",
+            "action": "write",
+            "before": null,
+            "after": "7977fe8c530a44aa051278cfafd32b63511f2f8164f1431588ab87c77d4734fc",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/adapter-cli.mjs",
+            "sourceHash": "7977fe8c530a44aa051278cfafd32b63511f2f8164f1431588ab87c77d4734fc"
+          },
+          {
+            "path": ".lumine/adapter-manager.mjs",
+            "action": "write",
+            "before": null,
+            "after": "3af7e110a5f1760eb53d3ada16852f1a75bd15de2e2db7110b87a68b1428cd7d",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/adapter-manager.mjs",
+            "sourceHash": "3af7e110a5f1760eb53d3ada16852f1a75bd15de2e2db7110b87a68b1428cd7d"
+          },
+          {
+            "path": ".lumine/adapters/hook-bootstrap.mjs",
+            "action": "write",
+            "before": null,
+            "after": "5d8bb5eb0ce715bf6e5bf64c18de0d1a94d444351a69421784d429e939519598",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/adapters/hook-bootstrap.mjs",
+            "sourceHash": "5d8bb5eb0ce715bf6e5bf64c18de0d1a94d444351a69421784d429e939519598"
+          },
+          {
+            "path": ".lumine/check-main.mjs",
+            "action": "write",
+            "before": null,
+            "after": "f323488005cb98805cff821c3b489db60dce4935f7e908550e71cb943372c04b",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/check-main.mjs",
+            "sourceHash": "f323488005cb98805cff821c3b489db60dce4935f7e908550e71cb943372c04b"
+          },
+          {
+            "path": ".lumine/check.mjs",
+            "action": "write",
+            "before": null,
+            "after": "95cc45c1e23e539010310411597c8bdb42113c2646b9ca3345de13378a1b34eb",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/check.mjs",
+            "sourceHash": "95cc45c1e23e539010310411597c8bdb42113c2646b9ca3345de13378a1b34eb"
+          },
+          {
+            "path": ".lumine/cli",
+            "action": "write",
+            "before": null,
+            "after": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5",
+            "mode": 493,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/cli",
+            "sourceHash": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+          },
+          {
+            "path": ".lumine/core/continuation-delivery.mjs",
+            "action": "write",
+            "before": null,
+            "after": "c7012618f911cf4653046b6f5e31627d1706b3cd8f0614a4b1df43c83d97d183",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/continuation-delivery.mjs",
+            "sourceHash": "c7012618f911cf4653046b6f5e31627d1706b3cd8f0614a4b1df43c83d97d183"
+          },
+          {
+            "path": ".lumine/core/contracts.d.ts",
+            "action": "write",
+            "before": null,
+            "after": "45466669d901cb8f18aeaac5ce717e3dff0e393ebcf4795c53349d5e2901ed84",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/contracts.d.ts",
+            "sourceHash": "45466669d901cb8f18aeaac5ce717e3dff0e393ebcf4795c53349d5e2901ed84"
+          },
+          {
+            "path": ".lumine/core/document-operations.mjs",
+            "action": "write",
+            "before": null,
+            "after": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/document-operations.mjs",
+            "sourceHash": "ce8010ca48cb1b5e94e808c736b777410c90f143f37f978acc9a6b3a792d5f4a"
+          },
+          {
+            "path": ".lumine/core/documents.mjs",
+            "action": "write",
+            "before": null,
+            "after": "c83c4856bdf500ee001022c22246baf8b04ebd6ec44d8f5ef643263ae3511b02",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/documents.mjs",
+            "sourceHash": "c83c4856bdf500ee001022c22246baf8b04ebd6ec44d8f5ef643263ae3511b02"
+          },
+          {
+            "path": ".lumine/core/hook-io.mjs",
+            "action": "write",
+            "before": null,
+            "after": "bea55b69f99030f3fe58686f88b1f85d79343daa5994053d4659c1635bf48606",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/hook-io.mjs",
+            "sourceHash": "bea55b69f99030f3fe58686f88b1f85d79343daa5994053d4659c1635bf48606"
+          },
+          {
+            "path": ".lumine/core/messages.mjs",
+            "action": "write",
+            "before": null,
+            "after": "deb66eafc213ba3d1187f39ac56825e8064f72cbf2a4dba39b4af8bbd1f36125",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/messages.mjs",
+            "sourceHash": "deb66eafc213ba3d1187f39ac56825e8064f72cbf2a4dba39b4af8bbd1f36125"
+          },
+          {
+            "path": ".lumine/core/node-bootstrap.mjs",
+            "action": "write",
+            "before": null,
+            "after": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/node-bootstrap.mjs",
+            "sourceHash": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605"
+          },
+          {
+            "path": ".lumine/core/node-runtime.mjs",
+            "action": "write",
+            "before": null,
+            "after": "9c0643ecf080a2676b65fba85cde2c7b9143d51297552d71eb14542717950783",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/node-runtime.mjs",
+            "sourceHash": "9c0643ecf080a2676b65fba85cde2c7b9143d51297552d71eb14542717950783"
+          },
+          {
+            "path": ".lumine/core/phase-router.mjs",
+            "action": "write",
+            "before": null,
+            "after": "ad8ff998b441e89db2f1d908597b72e14001e7c76b56763b283730671b7d4de4",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/phase-router.mjs",
+            "sourceHash": "ad8ff998b441e89db2f1d908597b72e14001e7c76b56763b283730671b7d4de4"
+          },
+          {
+            "path": ".lumine/core/project-checks.mjs",
+            "action": "write",
+            "before": null,
+            "after": "238e839308eaf640b4ce35071fd3f358d4c6ddf2bb3f7bf02ed67577e18fd3a1",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/project-checks.mjs",
+            "sourceHash": "238e839308eaf640b4ce35071fd3f358d4c6ddf2bb3f7bf02ed67577e18fd3a1"
+          },
+          {
+            "path": ".lumine/core/project-config.mjs",
+            "action": "write",
+            "before": null,
+            "after": "6af821e17ae700f02e6fc1c49120b16885f25baf43730abf6c0999a7674da207",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/project-config.mjs",
+            "sourceHash": "6af821e17ae700f02e6fc1c49120b16885f25baf43730abf6c0999a7674da207"
+          },
+          {
+            "path": ".lumine/core/root-resolver.mjs",
+            "action": "write",
+            "before": null,
+            "after": "0554b57acdf84751532c6a76be7e39ffd961cc8dd9e41d5fdb91f7d52c76adf1",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/root-resolver.mjs",
+            "sourceHash": "0554b57acdf84751532c6a76be7e39ffd961cc8dd9e41d5fdb91f7d52c76adf1"
+          },
+          {
+            "path": ".lumine/core/runtime-environment.mjs",
+            "action": "write",
+            "before": null,
+            "after": "55e13b17cf5e5f0f1fe237803ffa11e0d99d92928c45884a9631ae01c6538b52",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/runtime-environment.mjs",
+            "sourceHash": "55e13b17cf5e5f0f1fe237803ffa11e0d99d92928c45884a9631ae01c6538b52"
+          },
+          {
+            "path": ".lumine/core/runtime-layout.mjs",
+            "action": "write",
+            "before": null,
+            "after": "357df710138059db1555c3d32160d31c476120b925b573b9a9e87aff615df007",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/runtime-layout.mjs",
+            "sourceHash": "357df710138059db1555c3d32160d31c476120b925b573b9a9e87aff615df007"
+          },
+          {
+            "path": ".lumine/core/session-context.mjs",
+            "action": "write",
+            "before": null,
+            "after": "5883aa2ac18b64effa929b0d0ec5ac1a405e03d17c6657928d5cb6aeb6be51ca",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/session-context.mjs",
+            "sourceHash": "5883aa2ac18b64effa929b0d0ec5ac1a405e03d17c6657928d5cb6aeb6be51ca"
+          },
+          {
+            "path": ".lumine/core/skill-catalog.mjs",
+            "action": "write",
+            "before": null,
+            "after": "11dd06dfb9d3a584fb6b76bb8e1371ca2426b7988d600df7517ac14f2206f625",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/skill-catalog.mjs",
+            "sourceHash": "11dd06dfb9d3a584fb6b76bb8e1371ca2426b7988d600df7517ac14f2206f625"
+          },
+          {
+            "path": ".lumine/core/stop-policy.mjs",
+            "action": "write",
+            "before": null,
+            "after": "91b2fcfd056d2a9fe657c1eabe23ed0e5b81aedc325f8158aa1b8850a2121e33",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/stop-policy.mjs",
+            "sourceHash": "91b2fcfd056d2a9fe657c1eabe23ed0e5b81aedc325f8158aa1b8850a2121e33"
+          },
+          {
+            "path": ".lumine/core/task-cli-main.mjs",
+            "action": "write",
+            "before": null,
+            "after": "5b4673a88b4ac326720c35b4f3f799b9d9511869b241f430931e62ab15f99766",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/task-cli-main.mjs",
+            "sourceHash": "5b4673a88b4ac326720c35b4f3f799b9d9511869b241f430931e62ab15f99766"
+          },
+          {
+            "path": ".lumine/core/task-cli.mjs",
+            "action": "write",
+            "before": null,
+            "after": "fdc6eba82ec8e89ac614c3931811219985270a88fb39a1f1b2eee948de56c797",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/task-cli.mjs",
+            "sourceHash": "fdc6eba82ec8e89ac614c3931811219985270a88fb39a1f1b2eee948de56c797"
+          },
+          {
+            "path": ".lumine/core/task-contract.mjs",
+            "action": "write",
+            "before": null,
+            "after": "95686f57b3b8fee4063835a9cf9056391248465db1c19186d06c4d088ccad617",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/task-contract.mjs",
+            "sourceHash": "95686f57b3b8fee4063835a9cf9056391248465db1c19186d06c4d088ccad617"
+          },
+          {
+            "path": ".lumine/core/verification.mjs",
+            "action": "write",
+            "before": null,
+            "after": "4fceb34f0ec98a75f38f79b65d450cf67cd682d2d444104f4c01eb95918e7e2f",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/verification.mjs",
+            "sourceHash": "4fceb34f0ec98a75f38f79b65d450cf67cd682d2d444104f4c01eb95918e7e2f"
+          },
+          {
+            "path": ".lumine/core/work-status.mjs",
+            "action": "write",
+            "before": null,
+            "after": "ccca2195582e2f589f30b17fc0856a4f8c31c3dfefeff32e46744a27b8a2a50f",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/core/work-status.mjs",
+            "sourceHash": "ccca2195582e2f589f30b17fc0856a4f8c31c3dfefeff32e46744a27b8a2a50f"
+          },
+          {
+            "path": ".lumine/vendor/ignore.mjs",
+            "action": "write",
+            "before": null,
+            "after": "9e40aa96157a2edd0fc177a5a5beae18200b2acb28f80ddf90acf7b540133e9c",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/vendor/ignore.mjs",
+            "sourceHash": "9e40aa96157a2edd0fc177a5a5beae18200b2acb28f80ddf90acf7b540133e9c"
+          },
+          {
+            "path": ".lumine/vendor/yaml.mjs",
+            "action": "write",
+            "before": null,
+            "after": "cd2e7b1ca787353be6631406198ceeee2841c4db5609814301056a49f64362e3",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/vendor/yaml.mjs",
+            "sourceHash": "cd2e7b1ca787353be6631406198ceeee2841c4db5609814301056a49f64362e3"
+          },
+          {
+            "path": ".lumine/wiki-main.mjs",
+            "action": "write",
+            "before": null,
+            "after": "5a61ffc6f7aaaacd5bc007d946e2aa074b3edda79dc5657330a609aff059017d",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki-main.mjs",
+            "sourceHash": "5a61ffc6f7aaaacd5bc007d946e2aa074b3edda79dc5657330a609aff059017d"
+          },
+          {
+            "path": ".lumine/wiki.mjs",
+            "action": "write",
+            "before": null,
+            "after": "75b283db26d0e5b38071ac64dad99a7d22a8d087199e27cf99e9ceff840a0b0b",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki.mjs",
+            "sourceHash": "75b283db26d0e5b38071ac64dad99a7d22a8d087199e27cf99e9ceff840a0b0b"
+          },
+          {
+            "path": ".lumine/wiki/coverage.mjs",
+            "action": "write",
+            "before": null,
+            "after": "e677ba230385b73135f2df379c328c047812790b0d13d1908771b9fbd841227a",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/coverage.mjs",
+            "sourceHash": "e677ba230385b73135f2df379c328c047812790b0d13d1908771b9fbd841227a"
+          },
+          {
+            "path": ".lumine/wiki/dispositions.mjs",
+            "action": "write",
+            "before": null,
+            "after": "bd992d1e786ace4b20d49b2994ae2c26935137a5409bf5b70e3a038a106e676c",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/dispositions.mjs",
+            "sourceHash": "bd992d1e786ace4b20d49b2994ae2c26935137a5409bf5b70e3a038a106e676c"
+          },
+          {
+            "path": ".lumine/wiki/documents.mjs",
+            "action": "write",
+            "before": null,
+            "after": "f6a882e0d70fe06ce61e94b9a864b523a68f396f80a9f77c283a87936dda06a9",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/documents.mjs",
+            "sourceHash": "f6a882e0d70fe06ce61e94b9a864b523a68f396f80a9f77c283a87936dda06a9"
+          },
+          {
+            "path": ".lumine/wiki/engine.mjs",
+            "action": "write",
+            "before": null,
+            "after": "fc175994cb5bc94ec40c0f13a39f2c9602b735e60d818101b0536d690aaa1672",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/engine.mjs",
+            "sourceHash": "fc175994cb5bc94ec40c0f13a39f2c9602b735e60d818101b0536d690aaa1672"
+          },
+          {
+            "path": ".lumine/wiki/files.mjs",
+            "action": "write",
+            "before": null,
+            "after": "d7e73152ebd19992652be79ad63788062acb50e36036aca39fb302c1faebee84",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/files.mjs",
+            "sourceHash": "d7e73152ebd19992652be79ad63788062acb50e36036aca39fb302c1faebee84"
+          },
+          {
+            "path": ".lumine/wiki/format-migration.mjs",
+            "action": "write",
+            "before": null,
+            "after": "4b548a645c4ada491e9e8b76224d529bfdbfcd8bf4778f794460dd46f56f8764",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/format-migration.mjs",
+            "sourceHash": "4b548a645c4ada491e9e8b76224d529bfdbfcd8bf4778f794460dd46f56f8764"
+          },
+          {
+            "path": ".lumine/wiki/index.mjs",
+            "action": "write",
+            "before": null,
+            "after": "9d69520f50b766294d67d8c3bf2c8901c3b05e99e08146612a9de921cb719090",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/index.mjs",
+            "sourceHash": "9d69520f50b766294d67d8c3bf2c8901c3b05e99e08146612a9de921cb719090"
+          },
+          {
+            "path": ".lumine/wiki/map-markdown.mjs",
+            "action": "write",
+            "before": null,
+            "after": "5b5c090db407eaf97ef31766e6fe56d14025440716d990a8ecb7737000d147ca",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/map-markdown.mjs",
+            "sourceHash": "5b5c090db407eaf97ef31766e6fe56d14025440716d990a8ecb7737000d147ca"
+          },
+          {
+            "path": ".lumine/wiki/merge.mjs",
+            "action": "write",
+            "before": null,
+            "after": "35cefa9329a7a2160404f0aa45f274dc4cc726892319659d52207b6e2412737f",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/merge.mjs",
+            "sourceHash": "35cefa9329a7a2160404f0aa45f274dc4cc726892319659d52207b6e2412737f"
+          },
+          {
+            "path": ".lumine/wiki/messages.mjs",
+            "action": "write",
+            "before": null,
+            "after": "5532c12051d26f4558a9c999266d50fd298c9dfc02cec3fb46cb7009fa80cd13",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/messages.mjs",
+            "sourceHash": "5532c12051d26f4558a9c999266d50fd298c9dfc02cec3fb46cb7009fa80cd13"
+          },
+          {
+            "path": ".lumine/wiki/reader-model.mjs",
+            "action": "write",
+            "before": null,
+            "after": "fc089bc0f507a0a672b82cd2c0095f8861ab19bc96afa76435f7f4c7e6b6482b",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/reader-model.mjs",
+            "sourceHash": "fc089bc0f507a0a672b82cd2c0095f8861ab19bc96afa76435f7f4c7e6b6482b"
+          },
+          {
+            "path": ".lumine/wiki/references.mjs",
+            "action": "write",
+            "before": null,
+            "after": "f365d7407d27721e1e856a56ffceabe3413d2c357c920054dfabcd20d663172e",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/references.mjs",
+            "sourceHash": "f365d7407d27721e1e856a56ffceabe3413d2c357c920054dfabcd20d663172e"
+          },
+          {
+            "path": ".lumine/wiki/search.mjs",
+            "action": "write",
+            "before": null,
+            "after": "43d08a92b3102402f167a69808e490a7d0d8c0739aa9941752e4dc61389cf3fd",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/search.mjs",
+            "sourceHash": "43d08a92b3102402f167a69808e490a7d0d8c0739aa9941752e4dc61389cf3fd"
+          },
+          {
+            "path": ".lumine/wiki/sections.mjs",
+            "action": "write",
+            "before": null,
+            "after": "dc7fe5a49f5870a8617f7baa6cd4ed7b0d5f801794f6d021e0fde7f5474801d7",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/sections.mjs",
+            "sourceHash": "dc7fe5a49f5870a8617f7baa6cd4ed7b0d5f801794f6d021e0fde7f5474801d7"
+          },
+          {
+            "path": ".lumine/wiki/server.mjs",
+            "action": "write",
+            "before": null,
+            "after": "a1af446c8fa0b7523cb9816f4a288e0334b57ba63b97e88ed4ea92a05b070f6b",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/server.mjs",
+            "sourceHash": "a1af446c8fa0b7523cb9816f4a288e0334b57ba63b97e88ed4ea92a05b070f6b"
+          },
+          {
+            "path": ".lumine/wiki/transactions.mjs",
+            "action": "write",
+            "before": null,
+            "after": "2598a85feae07e3a6ef91fbf7f9fa0bd72fda73bde65d902a10c437897aa6f70",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/transactions.mjs",
+            "sourceHash": "2598a85feae07e3a6ef91fbf7f9fa0bd72fda73bde65d902a10c437897aa6f70"
+          },
+          {
+            "path": ".lumine/wiki/types.mjs",
+            "action": "write",
+            "before": null,
+            "after": "0f95483a0d4fae46275754b6d4813d2c67a977c8451f205642c60e41fe1ba845",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/types.mjs",
+            "sourceHash": "0f95483a0d4fae46275754b6d4813d2c67a977c8451f205642c60e41fe1ba845"
+          },
+          {
+            "path": ".lumine/wiki/validation-documents.mjs",
+            "action": "write",
+            "before": null,
+            "after": "7c3d40fcfdd7d7c211f2a35279d49d16d93cd26fcf609cdf2dee193e53bf30cf",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/harness/wiki/validation-documents.mjs",
+            "sourceHash": "7c3d40fcfdd7d7c211f2a35279d49d16d93cd26fcf609cdf2dee193e53bf30cf"
+          },
+          {
+            "path": ".lumine/wiki-reader/THIRD-PARTY-LICENSES.txt",
+            "action": "write",
+            "before": null,
+            "after": "da6018673d32cfb36ed0c61b0175874a22af9193686159ceaa24e488225cfa78",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/THIRD-PARTY-LICENSES.txt",
+            "sourceHash": "da6018673d32cfb36ed0c61b0175874a22af9193686159ceaa24e488225cfa78"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/abnfDiagram-N423BO3Z-I7S2MPMJ.js",
+            "action": "write",
+            "before": null,
+            "after": "af75b60a5a8fb8132b4df3b25ae3c8eb42b51a82b10d6b2016e6ca3dd9e85f82",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/abnfDiagram-N423BO3Z-I7S2MPMJ.js",
+            "sourceHash": "af75b60a5a8fb8132b4df3b25ae3c8eb42b51a82b10d6b2016e6ca3dd9e85f82"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/architecture-7GRP2DOG-SNEBEUMC.js",
+            "action": "write",
+            "before": null,
+            "after": "978ea7106fc62502e79f8e2a92abb05c85bc3ca9ca9bf7a144103e824b5ec3cc",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/architecture-7GRP2DOG-SNEBEUMC.js",
+            "sourceHash": "978ea7106fc62502e79f8e2a92abb05c85bc3ca9ca9bf7a144103e824b5ec3cc"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/architectureDiagram-T3A2C74G-RHCVRE37.js",
+            "action": "write",
+            "before": null,
+            "after": "9ae49af7d43583771f819a74a00704fc1b35c6b6b3b03eaab88301d04ca556d3",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/architectureDiagram-T3A2C74G-RHCVRE37.js",
+            "sourceHash": "9ae49af7d43583771f819a74a00704fc1b35c6b6b3b03eaab88301d04ca556d3"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/blockDiagram-VBNYF7ZC-PNRBTWKO.js",
+            "action": "write",
+            "before": null,
+            "after": "920a4178b8fa6f4e1c89749774ea111b3ae7e7bfef9e14c55ca7034569c81468",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/blockDiagram-VBNYF7ZC-PNRBTWKO.js",
+            "sourceHash": "920a4178b8fa6f4e1c89749774ea111b3ae7e7bfef9e14c55ca7034569c81468"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/c4Diagram-5PPSVZJV-QHBAI2Y3.js",
+            "action": "write",
+            "before": null,
+            "after": "4ba549fcec31dba92c2e43d412adb81264c48f1b00167303f114791f36a04c21",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/c4Diagram-5PPSVZJV-QHBAI2Y3.js",
+            "sourceHash": "4ba549fcec31dba92c2e43d412adb81264c48f1b00167303f114791f36a04c21"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-372HXR2C.js",
+            "action": "write",
+            "before": null,
+            "after": "77301fbf907838ebc1d7338737d2f1d0374eb6d2ca1faf5ed41e8fb344ff7b8a",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-372HXR2C.js",
+            "sourceHash": "77301fbf907838ebc1d7338737d2f1d0374eb6d2ca1faf5ed41e8fb344ff7b8a"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-37A5HA4E.js",
+            "action": "write",
+            "before": null,
+            "after": "a54e15a38e0ec3c7635c574a3d537b56f92ca07aff24c9cec3b060efec79bd31",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-37A5HA4E.js",
+            "sourceHash": "a54e15a38e0ec3c7635c574a3d537b56f92ca07aff24c9cec3b060efec79bd31"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-3UXCYVDA.js",
+            "action": "write",
+            "before": null,
+            "after": "62bace43fcaf539add745e8112ed56567ba59d178cae41e19397633f9baf24bd",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-3UXCYVDA.js",
+            "sourceHash": "62bace43fcaf539add745e8112ed56567ba59d178cae41e19397633f9baf24bd"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-3ZIGILXN.js",
+            "action": "write",
+            "before": null,
+            "after": "c6180307a01496acfadeea8b38e4147fe2649a59861c2adc2f1dda45b828b0e4",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-3ZIGILXN.js",
+            "sourceHash": "c6180307a01496acfadeea8b38e4147fe2649a59861c2adc2f1dda45b828b0e4"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-4AL3YOXJ.js",
+            "action": "write",
+            "before": null,
+            "after": "bcbec1565efcec6fa9389fe330337d509df09bad341827654eb1d01ac5af0445",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-4AL3YOXJ.js",
+            "sourceHash": "bcbec1565efcec6fa9389fe330337d509df09bad341827654eb1d01ac5af0445"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-4LPMS5I3.js",
+            "action": "write",
+            "before": null,
+            "after": "9aaadffb91ef60e26f206452b181caab0f00cabaae5625859b0f0e1e3ba019a2",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-4LPMS5I3.js",
+            "sourceHash": "9aaadffb91ef60e26f206452b181caab0f00cabaae5625859b0f0e1e3ba019a2"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-4PJNGS3V.js",
+            "action": "write",
+            "before": null,
+            "after": "a808a0b9549904d5c6a26f05b50176dbc2bbae52aabb9ef683c11d1f3c6823f6",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-4PJNGS3V.js",
+            "sourceHash": "a808a0b9549904d5c6a26f05b50176dbc2bbae52aabb9ef683c11d1f3c6823f6"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-5ERCSKIE.js",
+            "action": "write",
+            "before": null,
+            "after": "2e47baf2c4d4ad28c22861e9004e5f5c84b4273163bdb1743df59c548e72a904",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-5ERCSKIE.js",
+            "sourceHash": "2e47baf2c4d4ad28c22861e9004e5f5c84b4273163bdb1743df59c548e72a904"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-5OJNVHMS.js",
+            "action": "write",
+            "before": null,
+            "after": "45d537ae7ec0574cec1678157b590e54b477a9fc96a2d7234a15027f855da3ab",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-5OJNVHMS.js",
+            "sourceHash": "45d537ae7ec0574cec1678157b590e54b477a9fc96a2d7234a15027f855da3ab"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-6KU4IOS6.js",
+            "action": "write",
+            "before": null,
+            "after": "6757d9cf3952c5de43c4756b71f78ab6c731dfaf366db67f15656e76dc713c4a",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-6KU4IOS6.js",
+            "sourceHash": "6757d9cf3952c5de43c4756b71f78ab6c731dfaf366db67f15656e76dc713c4a"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-6KU4IOS6.js.LEGAL.txt",
+            "action": "write",
+            "before": null,
+            "after": "d7775cb7e11ff052896456388b072b6c234c4ecf13254e902d1fd0a0a5d7288f",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-6KU4IOS6.js.LEGAL.txt",
+            "sourceHash": "d7775cb7e11ff052896456388b072b6c234c4ecf13254e902d1fd0a0a5d7288f"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-75O2FKZS.js",
+            "action": "write",
+            "before": null,
+            "after": "01a3b6abb25be13fbc66996d3000c37794b98e2c81262b69677e0729ea30b243",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-75O2FKZS.js",
+            "sourceHash": "01a3b6abb25be13fbc66996d3000c37794b98e2c81262b69677e0729ea30b243"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-ACC7BCQK.js",
+            "action": "write",
+            "before": null,
+            "after": "4a184c52e57fb874da4e70e8c4b5536713af38fe078b775b540eb8c3c508d831",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-ACC7BCQK.js",
+            "sourceHash": "4a184c52e57fb874da4e70e8c4b5536713af38fe078b775b540eb8c3c508d831"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-ACC7BCQK.js.LEGAL.txt",
+            "action": "write",
+            "before": null,
+            "after": "6b6975fa54d238102e8167e3b9e0d8a9eb8cbc72ba50dd3211da266c74a02822",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-ACC7BCQK.js.LEGAL.txt",
+            "sourceHash": "6b6975fa54d238102e8167e3b9e0d8a9eb8cbc72ba50dd3211da266c74a02822"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-AIFDXLFL.js",
+            "action": "write",
+            "before": null,
+            "after": "3b45218f0b4241f271104d4911ea29ec93a33d55eb25e6bbff8551d70ae3459d",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-AIFDXLFL.js",
+            "sourceHash": "3b45218f0b4241f271104d4911ea29ec93a33d55eb25e6bbff8551d70ae3459d"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-CNXIQ33Q.js",
+            "action": "write",
+            "before": null,
+            "after": "a7f958d70b9c1736fac5aa28ed31254d43e1e2368a4cde501ab118df8c82dfdb",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-CNXIQ33Q.js",
+            "sourceHash": "a7f958d70b9c1736fac5aa28ed31254d43e1e2368a4cde501ab118df8c82dfdb"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-DB453Z6Q.js",
+            "action": "write",
+            "before": null,
+            "after": "c46566bcf7821c5aeff06c34e83cbe8a41b9f324bc06272a54b54cf8f832bdd1",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-DB453Z6Q.js",
+            "sourceHash": "c46566bcf7821c5aeff06c34e83cbe8a41b9f324bc06272a54b54cf8f832bdd1"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-DEN7TNYX.js",
+            "action": "write",
+            "before": null,
+            "after": "b29c827954b209f72bc3dcf1a20281ac9f168a9356432e2e2e8e8f162efc8111",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-DEN7TNYX.js",
+            "sourceHash": "b29c827954b209f72bc3dcf1a20281ac9f168a9356432e2e2e8e8f162efc8111"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-DIZ42OWK.js",
+            "action": "write",
+            "before": null,
+            "after": "f0417afadead9f796b417d6a16822c5617c5f2ea38292e88d46cc2418e73d4ce",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-DIZ42OWK.js",
+            "sourceHash": "f0417afadead9f796b417d6a16822c5617c5f2ea38292e88d46cc2418e73d4ce"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-EKW6WL37.js",
+            "action": "write",
+            "before": null,
+            "after": "772a5299c808ed059e7be47d6fa1c6c4bca9e630929a29b836d27b2a2beeabd7",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-EKW6WL37.js",
+            "sourceHash": "772a5299c808ed059e7be47d6fa1c6c4bca9e630929a29b836d27b2a2beeabd7"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-F6L7KA3F.js",
+            "action": "write",
+            "before": null,
+            "after": "cfbd06b16510c86af8c1b897927f48e178c0e1ca9d1c9bf11d7343152282a0e4",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-F6L7KA3F.js",
+            "sourceHash": "cfbd06b16510c86af8c1b897927f48e178c0e1ca9d1c9bf11d7343152282a0e4"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-FXIIJKVX.js",
+            "action": "write",
+            "before": null,
+            "after": "76cc3f52bbf9460a099dcf272846394dfcfb20c96dfb955011b5d51e6a3cad39",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-FXIIJKVX.js",
+            "sourceHash": "76cc3f52bbf9460a099dcf272846394dfcfb20c96dfb955011b5d51e6a3cad39"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-G46N24PV.js",
+            "action": "write",
+            "before": null,
+            "after": "c3fb83cd20b041a0e5e4b7964589160c71121a7ad1d14a3c587728d917997441",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-G46N24PV.js",
+            "sourceHash": "c3fb83cd20b041a0e5e4b7964589160c71121a7ad1d14a3c587728d917997441"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-GJGOXJO5.js",
+            "action": "write",
+            "before": null,
+            "after": "7d9d6efcdd55bd9bebb8c6f4c46e92737337b0a8907c4eee43cb87c465951ad6",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-GJGOXJO5.js",
+            "sourceHash": "7d9d6efcdd55bd9bebb8c6f4c46e92737337b0a8907c4eee43cb87c465951ad6"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-HYX5Q5UD.js",
+            "action": "write",
+            "before": null,
+            "after": "a81ab55dd5f3c70a6cf5657b3fcd8d0fcd2983a02d095036061365c3ad503155",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-HYX5Q5UD.js",
+            "sourceHash": "a81ab55dd5f3c70a6cf5657b3fcd8d0fcd2983a02d095036061365c3ad503155"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-HYX5Q5UD.js.LEGAL.txt",
+            "action": "write",
+            "before": null,
+            "after": "9aca14ef8d4b303c6666aa8d58ef291346f64af381a0aa1aecdbf238a06f2931",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-HYX5Q5UD.js.LEGAL.txt",
+            "sourceHash": "9aca14ef8d4b303c6666aa8d58ef291346f64af381a0aa1aecdbf238a06f2931"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-ICOAG7UG.js",
+            "action": "write",
+            "before": null,
+            "after": "fb2d91220aad62704e0fd1970881210065fd038f2296b5b53c7ed3f261edac44",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-ICOAG7UG.js",
+            "sourceHash": "fb2d91220aad62704e0fd1970881210065fd038f2296b5b53c7ed3f261edac44"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-IO6LXN3D.js",
+            "action": "write",
+            "before": null,
+            "after": "68d38f9ea5d4c85a2aac22501974e0c88972e627e1266c624437102597f2a2f4",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-IO6LXN3D.js",
+            "sourceHash": "68d38f9ea5d4c85a2aac22501974e0c88972e627e1266c624437102597f2a2f4"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-IVKHGDOE.js",
+            "action": "write",
+            "before": null,
+            "after": "482e8b56819ebf7065d67a4e54484ec304b2f78c860619d500a703b7f082f2fb",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-IVKHGDOE.js",
+            "sourceHash": "482e8b56819ebf7065d67a4e54484ec304b2f78c860619d500a703b7f082f2fb"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-IZNN5DO5.js",
+            "action": "write",
+            "before": null,
+            "after": "1267c493b5d2c49ab646af22384e2e4c0e2a11d0da544b2e6230cb1f9d6faabe",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-IZNN5DO5.js",
+            "sourceHash": "1267c493b5d2c49ab646af22384e2e4c0e2a11d0da544b2e6230cb1f9d6faabe"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-KULSAXJ3.js",
+            "action": "write",
+            "before": null,
+            "after": "2f428057d6c478550d11b5cbade794a647a21ab05763379d86c9114bf0c82967",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-KULSAXJ3.js",
+            "sourceHash": "2f428057d6c478550d11b5cbade794a647a21ab05763379d86c9114bf0c82967"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-LDPZ6WLC.js",
+            "action": "write",
+            "before": null,
+            "after": "d1936ed1cc5dbbfb77b21c9bbfcf6a5d2dcc6bf5eab3fec385bd6544aad751bb",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-LDPZ6WLC.js",
+            "sourceHash": "d1936ed1cc5dbbfb77b21c9bbfcf6a5d2dcc6bf5eab3fec385bd6544aad751bb"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-LIWMOK7F.js",
+            "action": "write",
+            "before": null,
+            "after": "5b89f4c4cae6e1c61ddac36dbf09488ad0f1430168076e874eb939f76d2dd8bb",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-LIWMOK7F.js",
+            "sourceHash": "5b89f4c4cae6e1c61ddac36dbf09488ad0f1430168076e874eb939f76d2dd8bb"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-LJWSDTLT.js",
+            "action": "write",
+            "before": null,
+            "after": "29b4cab75e9b06a9f44b42d7882eb91e4a55aa942180c6aec88cd7946ecdb04f",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-LJWSDTLT.js",
+            "sourceHash": "29b4cab75e9b06a9f44b42d7882eb91e4a55aa942180c6aec88cd7946ecdb04f"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-MEKUQYLZ.js",
+            "action": "write",
+            "before": null,
+            "after": "2ed596c726ebbd9e33a498c8cdc85b1710f77474c13def36d2f11880e7d60a53",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-MEKUQYLZ.js",
+            "sourceHash": "2ed596c726ebbd9e33a498c8cdc85b1710f77474c13def36d2f11880e7d60a53"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-MIQTORAF.js",
+            "action": "write",
+            "before": null,
+            "after": "5bcd07a55e7cfb2fa4c9d615d05a8a37bf59741fb8ba648d8afb553b1e0a831a",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-MIQTORAF.js",
+            "sourceHash": "5bcd07a55e7cfb2fa4c9d615d05a8a37bf59741fb8ba648d8afb553b1e0a831a"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-NCUBXNYU.js",
+            "action": "write",
+            "before": null,
+            "after": "5af2146f59f354759ce5a8f85447902427253e616ffbe4103a01e1eef8785592",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-NCUBXNYU.js",
+            "sourceHash": "5af2146f59f354759ce5a8f85447902427253e616ffbe4103a01e1eef8785592"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-NV7TQ3PQ.js",
+            "action": "write",
+            "before": null,
+            "after": "126b00596a9bc31dfa0fdc0ee94147e7aa129abb24c13cfec83f207c4442237c",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-NV7TQ3PQ.js",
+            "sourceHash": "126b00596a9bc31dfa0fdc0ee94147e7aa129abb24c13cfec83f207c4442237c"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-OT3T5U35.js",
+            "action": "write",
+            "before": null,
+            "after": "db25c7615162582a9a162279563ba063a43b7823caea8a77f0517f8d2dc5385e",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-OT3T5U35.js",
+            "sourceHash": "db25c7615162582a9a162279563ba063a43b7823caea8a77f0517f8d2dc5385e"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-PQ6DSH24.js",
+            "action": "write",
+            "before": null,
+            "after": "48563a432e36c38c0653ab5c1ddabe3fe08a9cf56d815a4603733ab761b4d1ed",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-PQ6DSH24.js",
+            "sourceHash": "48563a432e36c38c0653ab5c1ddabe3fe08a9cf56d815a4603733ab761b4d1ed"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-PQ6DSH24.js.LEGAL.txt",
+            "action": "write",
+            "before": null,
+            "after": "0cb3cbc88cea100e63e77f6af9ba632395a825286b3517ca6ad6fd8958a8d776",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-PQ6DSH24.js.LEGAL.txt",
+            "sourceHash": "0cb3cbc88cea100e63e77f6af9ba632395a825286b3517ca6ad6fd8958a8d776"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-PRL4AVG3.js",
+            "action": "write",
+            "before": null,
+            "after": "bb000b2d921d75b4caccb97fdbd2847ef97f2c72879414ec1e0ade717f8a3dce",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-PRL4AVG3.js",
+            "sourceHash": "bb000b2d921d75b4caccb97fdbd2847ef97f2c72879414ec1e0ade717f8a3dce"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-QHDNOTBI.js",
+            "action": "write",
+            "before": null,
+            "after": "5a7bc0262953337fd03e5f4f6ebbda641fe3632c64e898f0c262589230b0d61d",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-QHDNOTBI.js",
+            "sourceHash": "5a7bc0262953337fd03e5f4f6ebbda641fe3632c64e898f0c262589230b0d61d"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-S3CGXTRJ.js",
+            "action": "write",
+            "before": null,
+            "after": "38ac25a079c2a6f113030bacd020accdae280f6673024d1f938d874ca849cc72",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-S3CGXTRJ.js",
+            "sourceHash": "38ac25a079c2a6f113030bacd020accdae280f6673024d1f938d874ca849cc72"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-TBV5XTGP.js",
+            "action": "write",
+            "before": null,
+            "after": "77ecef682222158cc014ba4b421cdd3f25c9926e7114a9786f7f572a7b368729",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-TBV5XTGP.js",
+            "sourceHash": "77ecef682222158cc014ba4b421cdd3f25c9926e7114a9786f7f572a7b368729"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-VMNPMWRH.js",
+            "action": "write",
+            "before": null,
+            "after": "7113d88aed8b26abee7c40a5a9709541f8edd8308462a5d03564733117a99a54",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-VMNPMWRH.js",
+            "sourceHash": "7113d88aed8b26abee7c40a5a9709541f8edd8308462a5d03564733117a99a54"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-WQ4ZWICK.js",
+            "action": "write",
+            "before": null,
+            "after": "37679e77bb214f8acc0809f7a2c4ea4fde7b3543e1ce3b4e3369e40d1bbda2e4",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-WQ4ZWICK.js",
+            "sourceHash": "37679e77bb214f8acc0809f7a2c4ea4fde7b3543e1ce3b4e3369e40d1bbda2e4"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-XXUKEYXA.js",
+            "action": "write",
+            "before": null,
+            "after": "97e743d6da2175e18a36c2d0bc1d04a82ff6135bf3272fcbc0b2c454d0b8fe03",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-XXUKEYXA.js",
+            "sourceHash": "97e743d6da2175e18a36c2d0bc1d04a82ff6135bf3272fcbc0b2c454d0b8fe03"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-XXUKEYXA.js.LEGAL.txt",
+            "action": "write",
+            "before": null,
+            "after": "d0f2901db7b267898563abe40d39999e302dc3d1d845f88518f3971e38c355a7",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-XXUKEYXA.js.LEGAL.txt",
+            "sourceHash": "d0f2901db7b267898563abe40d39999e302dc3d1d845f88518f3971e38c355a7"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-XZEE746Q.js",
+            "action": "write",
+            "before": null,
+            "after": "b61311f96afb041a392b565fa62c1af180d1ee73cf88ff4c335534357a9a4aa5",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-XZEE746Q.js",
+            "sourceHash": "b61311f96afb041a392b565fa62c1af180d1ee73cf88ff4c335534357a9a4aa5"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-YEYK5MQC.js",
+            "action": "write",
+            "before": null,
+            "after": "ee2155a23178b84668135f4428847bdad8fec0f119a31f7786e07152226bc043",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-YEYK5MQC.js",
+            "sourceHash": "ee2155a23178b84668135f4428847bdad8fec0f119a31f7786e07152226bc043"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-YLY4D6YG.js",
+            "action": "write",
+            "before": null,
+            "after": "c296d4abeeaa1dd29eda49cef2e28c102def97de1beec9f45f791d1c9be40007",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-YLY4D6YG.js",
+            "sourceHash": "c296d4abeeaa1dd29eda49cef2e28c102def97de1beec9f45f791d1c9be40007"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-YYOVST5G.js",
+            "action": "write",
+            "before": null,
+            "after": "53dbbbb5a0892e6e00d7748eb9763ae819ca4b8ab7f086cb5d8c36dfe6673490",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-YYOVST5G.js",
+            "sourceHash": "53dbbbb5a0892e6e00d7748eb9763ae819ca4b8ab7f086cb5d8c36dfe6673490"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/chunk-ZA5KOOWO.js",
+            "action": "write",
+            "before": null,
+            "after": "904bd2a5a2466b835cbe8ade699fb8264ca64eb8bad8ec1caa3e4d35c3614e38",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/chunk-ZA5KOOWO.js",
+            "sourceHash": "904bd2a5a2466b835cbe8ade699fb8264ca64eb8bad8ec1caa3e4d35c3614e38"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/classDiagram-JCYQIIEL-RMUH5KJK.js",
+            "action": "write",
+            "before": null,
+            "after": "eed188b75ac3db8237756cc598e6a836126245e172947a3b50e55bcc427b79da",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/classDiagram-JCYQIIEL-RMUH5KJK.js",
+            "sourceHash": "eed188b75ac3db8237756cc598e6a836126245e172947a3b50e55bcc427b79da"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/classDiagram-v2-OCEON4UE-4VZNBALC.js",
+            "action": "write",
+            "before": null,
+            "after": "eed188b75ac3db8237756cc598e6a836126245e172947a3b50e55bcc427b79da",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/classDiagram-v2-OCEON4UE-4VZNBALC.js",
+            "sourceHash": "eed188b75ac3db8237756cc598e6a836126245e172947a3b50e55bcc427b79da"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/cose-bilkent-JH36ORCC-VWXMDG3E.js",
+            "action": "write",
+            "before": null,
+            "after": "2c7232cb9288fb22ef28693eec902afab2a187bb4c04834d466c5dc247934ebc",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/cose-bilkent-JH36ORCC-VWXMDG3E.js",
+            "sourceHash": "2c7232cb9288fb22ef28693eec902afab2a187bb4c04834d466c5dc247934ebc"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/cynefin-OW5HDTMX-SYWOO2BR.js",
+            "action": "write",
+            "before": null,
+            "after": "3f8c7b1135e4131a1a59d14d608907cffdee554f19dee57841275284df0fd368",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/cynefin-OW5HDTMX-SYWOO2BR.js",
+            "sourceHash": "3f8c7b1135e4131a1a59d14d608907cffdee554f19dee57841275284df0fd368"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/cynefinDiagram-MW4NZA55-5PBOA6DZ.js",
+            "action": "write",
+            "before": null,
+            "after": "d5753a1ea7b61e1c049a4ffe0aea3f61dcd0a283db8f57ac0161b22048e6a167",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/cynefinDiagram-MW4NZA55-5PBOA6DZ.js",
+            "sourceHash": "d5753a1ea7b61e1c049a4ffe0aea3f61dcd0a283db8f57ac0161b22048e6a167"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/dagre-VZM6K2ZE-Z5ECMMKY.js",
+            "action": "write",
+            "before": null,
+            "after": "f393349ec820b850ee086d94be0de96ab36795713213fc8a4e0226c4bcfa0bbd",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/dagre-VZM6K2ZE-Z5ECMMKY.js",
+            "sourceHash": "f393349ec820b850ee086d94be0de96ab36795713213fc8a4e0226c4bcfa0bbd"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/diagram-7IWD3JNH-2VLYE5K3.js",
+            "action": "write",
+            "before": null,
+            "after": "4d2b963b2395eec18d6880abfb599653d3aad721b3a6ba342d698032580dc8ea",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/diagram-7IWD3JNH-2VLYE5K3.js",
+            "sourceHash": "4d2b963b2395eec18d6880abfb599653d3aad721b3a6ba342d698032580dc8ea"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/diagram-B4RE2ZJO-2UBUADTA.js",
+            "action": "write",
+            "before": null,
+            "after": "3745c0fc5a9a75fda8984aa41c48012db7ad84d8ee4466ebc413144399343d17",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/diagram-B4RE2ZJO-2UBUADTA.js",
+            "sourceHash": "3745c0fc5a9a75fda8984aa41c48012db7ad84d8ee4466ebc413144399343d17"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/diagram-LBJQPF4R-RPK4HYU7.js",
+            "action": "write",
+            "before": null,
+            "after": "bd65bb9bce608e5a2a10c514379829a5216d4becab8dec853236d8de928b655a",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/diagram-LBJQPF4R-RPK4HYU7.js",
+            "sourceHash": "bd65bb9bce608e5a2a10c514379829a5216d4becab8dec853236d8de928b655a"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/diagram-Q27KOJAE-3X7Q3W2L.js",
+            "action": "write",
+            "before": null,
+            "after": "ff116a91e2930fde0a57206c75c215735c6df7d261819131374878ef79fc097d",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/diagram-Q27KOJAE-3X7Q3W2L.js",
+            "sourceHash": "ff116a91e2930fde0a57206c75c215735c6df7d261819131374878ef79fc097d"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/diagram-UB23O5K3-TT5CRYV6.js",
+            "action": "write",
+            "before": null,
+            "after": "e163c562fd6544a899b7728a15d004b9144fb339ebffd22f61b3240e82379c07",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/diagram-UB23O5K3-TT5CRYV6.js",
+            "sourceHash": "e163c562fd6544a899b7728a15d004b9144fb339ebffd22f61b3240e82379c07"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/ebnfDiagram-BXEA7PRR-7LSIM6T5.js",
+            "action": "write",
+            "before": null,
+            "after": "e7236a5abed7f0fc84dad6c6639f5b1c42a32f53f1a1be8fa4463a519ba722fe",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/ebnfDiagram-BXEA7PRR-7LSIM6T5.js",
+            "sourceHash": "e7236a5abed7f0fc84dad6c6639f5b1c42a32f53f1a1be8fa4463a519ba722fe"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/erDiagram-JOGREHBK-B3A3YP63.js",
+            "action": "write",
+            "before": null,
+            "after": "e8d38e8a64844d593efeee948d6a93342b894bc27bbcaae0b5a949def6e271c2",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/erDiagram-JOGREHBK-B3A3YP63.js",
+            "sourceHash": "e8d38e8a64844d593efeee948d6a93342b894bc27bbcaae0b5a949def6e271c2"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/eventmodeling-NTZA5JFV-27WMAKW7.js",
+            "action": "write",
+            "before": null,
+            "after": "8e15510ca1cd5b006e099c90a4dfe28d18f51d9f99651b31a0bdd9609ff393fe",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/eventmodeling-NTZA5JFV-27WMAKW7.js",
+            "sourceHash": "8e15510ca1cd5b006e099c90a4dfe28d18f51d9f99651b31a0bdd9609ff393fe"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/flowDiagram-UKHOOZJN-C5TGSOBS.js",
+            "action": "write",
+            "before": null,
+            "after": "ba9106c484808f71ddfda8137377064220e91587599b6485037ecca1fcf7569b",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/flowDiagram-UKHOOZJN-C5TGSOBS.js",
+            "sourceHash": "ba9106c484808f71ddfda8137377064220e91587599b6485037ecca1fcf7569b"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/ganttDiagram-PKOTCBZU-W5PVABTY.js",
+            "action": "write",
+            "before": null,
+            "after": "59d135bd4ef191f45f021c22518483924ad0f767406dc5802e9e0e251191feeb",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/ganttDiagram-PKOTCBZU-W5PVABTY.js",
+            "sourceHash": "59d135bd4ef191f45f021c22518483924ad0f767406dc5802e9e0e251191feeb"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/gitGraph-4MIJSDKK-J7FOPXNB.js",
+            "action": "write",
+            "before": null,
+            "after": "dfbd5f3610702769ffcdb90e66027d299fb0a33c962e41f5ef5ab9503896ac21",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/gitGraph-4MIJSDKK-J7FOPXNB.js",
+            "sourceHash": "dfbd5f3610702769ffcdb90e66027d299fb0a33c962e41f5ef5ab9503896ac21"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/gitGraphDiagram-DS77QQ5N-7OMNG6X4.js",
+            "action": "write",
+            "before": null,
+            "after": "ccdf80d213d40362890e87c7a8d8c1a37f72bebd88c130198d5275c10d8373bc",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/gitGraphDiagram-DS77QQ5N-7OMNG6X4.js",
+            "sourceHash": "ccdf80d213d40362890e87c7a8d8c1a37f72bebd88c130198d5275c10d8373bc"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/info-A6RAGUB7-EMTIHUDG.js",
+            "action": "write",
+            "before": null,
+            "after": "618421edf0c9987ab082d2fc6d3180f6fc4546ae877b1c2d2ef381f3b28594df",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/info-A6RAGUB7-EMTIHUDG.js",
+            "sourceHash": "618421edf0c9987ab082d2fc6d3180f6fc4546ae877b1c2d2ef381f3b28594df"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/infoDiagram-6WML65LV-RYRK5AS4.js",
+            "action": "write",
+            "before": null,
+            "after": "6c5bdd00176ef864404594fb76853b75bc617b53af40f0e225cdb31b5c31a16c",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/infoDiagram-6WML65LV-RYRK5AS4.js",
+            "sourceHash": "6c5bdd00176ef864404594fb76853b75bc617b53af40f0e225cdb31b5c31a16c"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/ishikawaDiagram-WSZJBQD7-RMCNKJWW.js",
+            "action": "write",
+            "before": null,
+            "after": "c2e9831f2ff4a0c53628929b093be84de447b5aec197940556eccdc6c259ae27",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/ishikawaDiagram-WSZJBQD7-RMCNKJWW.js",
+            "sourceHash": "c2e9831f2ff4a0c53628929b093be84de447b5aec197940556eccdc6c259ae27"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/journeyDiagram-NVQOT4AX-2PJCN43V.js",
+            "action": "write",
+            "before": null,
+            "after": "aea436b45f5386f4220d01e4aed35f4322fb29c40bd5a17359ec221375993fd6",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/journeyDiagram-NVQOT4AX-2PJCN43V.js",
+            "sourceHash": "aea436b45f5386f4220d01e4aed35f4322fb29c40bd5a17359ec221375993fd6"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/kanban-definition-27J2QSJJ-CADDNZBJ.js",
+            "action": "write",
+            "before": null,
+            "after": "1ec6cca07c0fedb116af84cfc9289f65a7ade54af1f4dba904f44672e364395d",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/kanban-definition-27J2QSJJ-CADDNZBJ.js",
+            "sourceHash": "1ec6cca07c0fedb116af84cfc9289f65a7ade54af1f4dba904f44672e364395d"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/katex-A5WYER45.js",
+            "action": "write",
+            "before": null,
+            "after": "d24a416392aeca9ed9f9da6a369e36020c5c6ab3a68f0dfd754a5f852b275774",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/katex-A5WYER45.js",
+            "sourceHash": "d24a416392aeca9ed9f9da6a369e36020c5c6ab3a68f0dfd754a5f852b275774"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/mermaid.core-BKOI5I3D.js",
+            "action": "write",
+            "before": null,
+            "after": "d5949fc45918c783b7484847ea164dfda45e5a0c380d23e4c9e63a0009196971",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/mermaid.core-BKOI5I3D.js",
+            "sourceHash": "d5949fc45918c783b7484847ea164dfda45e5a0c380d23e4c9e63a0009196971"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/mermaid.core-BKOI5I3D.js.LEGAL.txt",
+            "action": "write",
+            "before": null,
+            "after": "108b77c578b750eb21d34748148ce6a0c86e552be7e54ea96a6ffa103ccb9720",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/mermaid.core-BKOI5I3D.js.LEGAL.txt",
+            "sourceHash": "108b77c578b750eb21d34748148ce6a0c86e552be7e54ea96a6ffa103ccb9720"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/mindmap-definition-FAOFIHXS-CI5T5UWR.js",
+            "action": "write",
+            "before": null,
+            "after": "a0bdb4176647d78c9ee99335bda95cc6e8a9e2123f6cd8a7eb23cd4638830c64",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/mindmap-definition-FAOFIHXS-CI5T5UWR.js",
+            "sourceHash": "a0bdb4176647d78c9ee99335bda95cc6e8a9e2123f6cd8a7eb23cd4638830c64"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/packet-AYTQ26CC-TTGCBCI6.js",
+            "action": "write",
+            "before": null,
+            "after": "f62effe7515c7585fd5a28f804fcf6300ed4474262ffdaa7a9238a1495c21549",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/packet-AYTQ26CC-TTGCBCI6.js",
+            "sourceHash": "f62effe7515c7585fd5a28f804fcf6300ed4474262ffdaa7a9238a1495c21549"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/pegDiagram-VL7TDLO6-ZFKJ3V7K.js",
+            "action": "write",
+            "before": null,
+            "after": "0036c6fb9eac18b871cfefa149afef6addbafca28b230c55ebd7df6a9b66cc95",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/pegDiagram-VL7TDLO6-ZFKJ3V7K.js",
+            "sourceHash": "0036c6fb9eac18b871cfefa149afef6addbafca28b230c55ebd7df6a9b66cc95"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/pie-WAS4IAKB-W3KQACHS.js",
+            "action": "write",
+            "before": null,
+            "after": "bc34858120a43808cc028465708e2b09eaffbec4270ff5f07b65b405bfc2d780",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/pie-WAS4IAKB-W3KQACHS.js",
+            "sourceHash": "bc34858120a43808cc028465708e2b09eaffbec4270ff5f07b65b405bfc2d780"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/pieDiagram-7S7Q4E2Y-UFRGD5PA.js",
+            "action": "write",
+            "before": null,
+            "after": "75a4a1ec4261486e41458ca3c73de21170c3b310e2ed88cf903fc4beb2f9e085",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/pieDiagram-7S7Q4E2Y-UFRGD5PA.js",
+            "sourceHash": "75a4a1ec4261486e41458ca3c73de21170c3b310e2ed88cf903fc4beb2f9e085"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/quadrantDiagram-CIZ2JOQS-WH5NRWEM.js",
+            "action": "write",
+            "before": null,
+            "after": "e7806dcbe691461b00c67e2aeb8d87d260f45606671e02742f6375949a8185be",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/quadrantDiagram-CIZ2JOQS-WH5NRWEM.js",
+            "sourceHash": "e7806dcbe691461b00c67e2aeb8d87d260f45606671e02742f6375949a8185be"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/radar-RG4KPBEZ-ESFVDXKC.js",
+            "action": "write",
+            "before": null,
+            "after": "bed4262f97a91e4e0b8a8da047afdf37ac8dbea0d626f03ea0284be6a5f70b05",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/radar-RG4KPBEZ-ESFVDXKC.js",
+            "sourceHash": "bed4262f97a91e4e0b8a8da047afdf37ac8dbea0d626f03ea0284be6a5f70b05"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/railroad-74A4TZTK-AQOHG5VS.js",
+            "action": "write",
+            "before": null,
+            "after": "85d0876a948b9d332bc1cd390616b3b162dc6c95070c47e0fb7999726401028f",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/railroad-74A4TZTK-AQOHG5VS.js",
+            "sourceHash": "85d0876a948b9d332bc1cd390616b3b162dc6c95070c47e0fb7999726401028f"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/railroad-abnf-HS5TGJTU-CHUWY3XH.js",
+            "action": "write",
+            "before": null,
+            "after": "08a39abc26ab4c4f451e48f9c4019349081633bd9d5e7017001f76aff64a4a48",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/railroad-abnf-HS5TGJTU-CHUWY3XH.js",
+            "sourceHash": "08a39abc26ab4c4f451e48f9c4019349081633bd9d5e7017001f76aff64a4a48"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/railroad-ebnf-LZEXJU2U-6SII5Y54.js",
+            "action": "write",
+            "before": null,
+            "after": "977b6fb0fb229c4c55d17f40f7ec2fbb7de195acf87215ab587dbca6e4c5de6b",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/railroad-ebnf-LZEXJU2U-6SII5Y54.js",
+            "sourceHash": "977b6fb0fb229c4c55d17f40f7ec2fbb7de195acf87215ab587dbca6e4c5de6b"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/railroad-peg-WCYAUIDC-W7QCYJ7D.js",
+            "action": "write",
+            "before": null,
+            "after": "3ed311be8275116e84385be3492c6b7510991cd766a4f52db19878cb416c9b2d",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/railroad-peg-WCYAUIDC-W7QCYJ7D.js",
+            "sourceHash": "3ed311be8275116e84385be3492c6b7510991cd766a4f52db19878cb416c9b2d"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/railroadDiagram-AXF67PYL-PNVZUSCB.js",
+            "action": "write",
+            "before": null,
+            "after": "72910094a75862ffe4e8f133599e747354d91f209ec69fd1fb5fb383541541f0",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/railroadDiagram-AXF67PYL-PNVZUSCB.js",
+            "sourceHash": "72910094a75862ffe4e8f133599e747354d91f209ec69fd1fb5fb383541541f0"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/requirementDiagram-LRYGKXZP-7MTZ56KW.js",
+            "action": "write",
+            "before": null,
+            "after": "3c8e6b95db302de5913a9af54bd67c22c0bf7718c37ecabe646d9243d7e9ab44",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/requirementDiagram-LRYGKXZP-7MTZ56KW.js",
+            "sourceHash": "3c8e6b95db302de5913a9af54bd67c22c0bf7718c37ecabe646d9243d7e9ab44"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/sankeyDiagram-W5VNT64P-HSIC5FKY.js",
+            "action": "write",
+            "before": null,
+            "after": "2568d2873a7b38b0c1cf8dd40ee76ae244be1e2d35d56d5da5dc2d1234f9a919",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/sankeyDiagram-W5VNT64P-HSIC5FKY.js",
+            "sourceHash": "2568d2873a7b38b0c1cf8dd40ee76ae244be1e2d35d56d5da5dc2d1234f9a919"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/sequenceDiagram-SI44F4Z6-C5B7CY63.js",
+            "action": "write",
+            "before": null,
+            "after": "4298c19c56670020c2aa7427fe3ae1c7fc048a246852410f7a9160fa3b55bd1d",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/sequenceDiagram-SI44F4Z6-C5B7CY63.js",
+            "sourceHash": "4298c19c56670020c2aa7427fe3ae1c7fc048a246852410f7a9160fa3b55bd1d"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/sizeCapture-X5ZJPWSS-PQH5VEOB.js",
+            "action": "write",
+            "before": null,
+            "after": "8fcd1a2de690ed723d308f863236203d6273b726475e520867d4d59840c92cbe",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/sizeCapture-X5ZJPWSS-PQH5VEOB.js",
+            "sourceHash": "8fcd1a2de690ed723d308f863236203d6273b726475e520867d4d59840c92cbe"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/stateDiagram-OKZ733FA-6PBMRZJA.js",
+            "action": "write",
+            "before": null,
+            "after": "ff784754685c425d7ab526adb429aade235143255c801397a132c7c81995fbb1",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/stateDiagram-OKZ733FA-6PBMRZJA.js",
+            "sourceHash": "ff784754685c425d7ab526adb429aade235143255c801397a132c7c81995fbb1"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/stateDiagram-v2-UEYNNEHI-H4LOAAZR.js",
+            "action": "write",
+            "before": null,
+            "after": "6077465347df5ee899308f91bc3156caab38967c9b8b0b82b44c647d046a0659",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/stateDiagram-v2-UEYNNEHI-H4LOAAZR.js",
+            "sourceHash": "6077465347df5ee899308f91bc3156caab38967c9b8b0b82b44c647d046a0659"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/swimlanes-SLNWSIFB-U22BTWEV.js",
+            "action": "write",
+            "before": null,
+            "after": "3c9ec14c01deb0811a755fd06fd1d01c138b8d0790e466eaf18bca83d65ff33f",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/swimlanes-SLNWSIFB-U22BTWEV.js",
+            "sourceHash": "3c9ec14c01deb0811a755fd06fd1d01c138b8d0790e466eaf18bca83d65ff33f"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/swimlanesDiagram-ULZ7WXOC-CYKMMYV6.js",
+            "action": "write",
+            "before": null,
+            "after": "a084608233971fb73913bd8bbde35656d1d4984fd3410f320fde3e2883d324d6",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/swimlanesDiagram-ULZ7WXOC-CYKMMYV6.js",
+            "sourceHash": "a084608233971fb73913bd8bbde35656d1d4984fd3410f320fde3e2883d324d6"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/timeline-definition-Z64GVDOM-CKBWIYDT.js",
+            "action": "write",
+            "before": null,
+            "after": "a7d7ca89b79e6222b01d3524a95fcbb3b4b5941fed8d310dbdc0037eaea75794",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/timeline-definition-Z64GVDOM-CKBWIYDT.js",
+            "sourceHash": "a7d7ca89b79e6222b01d3524a95fcbb3b4b5941fed8d310dbdc0037eaea75794"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/treeView-Q6P3EWNA-LMQ6WIZZ.js",
+            "action": "write",
+            "before": null,
+            "after": "4e8372f22fa440888a8c6d1e95422e4b60aa9ccbeb83084548d2bf2562b8b8b9",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/treeView-Q6P3EWNA-LMQ6WIZZ.js",
+            "sourceHash": "4e8372f22fa440888a8c6d1e95422e4b60aa9ccbeb83084548d2bf2562b8b8b9"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/treemap-WGGIJYW6-RV7DDBW2.js",
+            "action": "write",
+            "before": null,
+            "after": "ef91f2fdd22d624a6d7ba4f25447932bc7d2cde984835916ac1ed9b75cabd528",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/treemap-WGGIJYW6-RV7DDBW2.js",
+            "sourceHash": "ef91f2fdd22d624a6d7ba4f25447932bc7d2cde984835916ac1ed9b75cabd528"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/vennDiagram-T6HMQDX7-QK7OEXB4.js",
+            "action": "write",
+            "before": null,
+            "after": "db7025799d0d3602b1d5ec88a4d27289c9032c6f8dcc1ed9b27c04315c78498f",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/vennDiagram-T6HMQDX7-QK7OEXB4.js",
+            "sourceHash": "db7025799d0d3602b1d5ec88a4d27289c9032c6f8dcc1ed9b27c04315c78498f"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/wardley-WFR3VGLG-BKYSONI2.js",
+            "action": "write",
+            "before": null,
+            "after": "24b9f67296054de2b643901bb1273511a1a948e0c7eaf02b23b56db7008f7df1",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/wardley-WFR3VGLG-BKYSONI2.js",
+            "sourceHash": "24b9f67296054de2b643901bb1273511a1a948e0c7eaf02b23b56db7008f7df1"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/wardleyDiagram-T6FBY63Y-KKUMDRM4.js",
+            "action": "write",
+            "before": null,
+            "after": "494e8193c3af6690f2a003555bb5ed01d382ada87936b214dff6c3f472c315bb",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/wardleyDiagram-T6FBY63Y-KKUMDRM4.js",
+            "sourceHash": "494e8193c3af6690f2a003555bb5ed01d382ada87936b214dff6c3f472c315bb"
+          },
+          {
+            "path": ".lumine/wiki-reader/chunks/xychartDiagram-ELKLHX3M-LYJFFWX4.js",
+            "action": "write",
+            "before": null,
+            "after": "a1cfbf1fc0e1452396632da2f0dad478ce4f655b5ab7a9f41d846365653234d8",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/chunks/xychartDiagram-ELKLHX3M-LYJFFWX4.js",
+            "sourceHash": "a1cfbf1fc0e1452396632da2f0dad478ce4f655b5ab7a9f41d846365653234d8"
+          },
+          {
+            "path": ".lumine/wiki-reader/index.html",
+            "action": "write",
+            "before": null,
+            "after": "56f92da80a93a5bc14867b4ee6b7db2c1a8bfa1ff3c250a68000b6324189dc7a",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/index.html",
+            "sourceHash": "56f92da80a93a5bc14867b4ee6b7db2c1a8bfa1ff3c250a68000b6324189dc7a"
+          },
+          {
+            "path": ".lumine/wiki-reader/manifest.json",
+            "action": "write",
+            "before": null,
+            "after": "ea807052f23bf0f35fa75aab6e971a28621e06b0aafa381b0d8f01cf9bba3c77",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/manifest.json",
+            "sourceHash": "ea807052f23bf0f35fa75aab6e971a28621e06b0aafa381b0d8f01cf9bba3c77"
+          },
+          {
+            "path": ".lumine/wiki-reader/reader.js.LEGAL.txt",
+            "action": "write",
+            "before": null,
+            "after": "7dff61d0cd5b7cff2403db6cf5c586b1218c9e663784caeda7fd06916c997d46",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/reader.js.LEGAL.txt",
+            "sourceHash": "7dff61d0cd5b7cff2403db6cf5c586b1218c9e663784caeda7fd06916c997d46"
+          },
+          {
+            "path": ".lumine/wiki-reader/styles.css",
+            "action": "write",
+            "before": null,
+            "after": "038808f71284659f1ebd5dc50c25497984dede2574780201e34265e7418f20dc",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/styles.css",
+            "sourceHash": "038808f71284659f1ebd5dc50c25497984dede2574780201e34265e7418f20dc"
+          },
+          {
+            "path": ".agents/skills/lumine-design/SKILL.md",
+            "action": "write",
+            "before": null,
+            "after": "8d417b9354458fe4aef74cc9e379ba29102756940bc1f117a6df6c9279bf8a77",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-design/SKILL.md",
+            "sourceHash": "8d417b9354458fe4aef74cc9e379ba29102756940bc1f117a6df6c9279bf8a77"
+          },
+          {
+            "path": ".agents/skills/lumine-knowledge/SKILL.md",
+            "action": "write",
+            "before": null,
+            "after": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-knowledge/SKILL.md",
+            "sourceHash": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2"
+          },
+          {
+            "path": ".agents/skills/lumine-knowledge/references/building.md",
+            "action": "write",
+            "before": null,
+            "after": "e427d320de91b3dd68f9589de0cced4759850f7f4bd7eed9cce216d9d49d3127",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-knowledge/references/building.md",
+            "sourceHash": "e427d320de91b3dd68f9589de0cced4759850f7f4bd7eed9cce216d9d49d3127"
+          },
+          {
+            "path": ".agents/skills/lumine-knowledge/references/investigation.md",
+            "action": "write",
+            "before": null,
+            "after": "061edb12f541b348dd177f2ee440967de20ca92eea76ae064e90859983522952",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-knowledge/references/investigation.md",
+            "sourceHash": "061edb12f541b348dd177f2ee440967de20ca92eea76ae064e90859983522952"
+          },
+          {
+            "path": ".agents/skills/lumine-knowledge/references/maintenance.md",
+            "action": "write",
+            "before": null,
+            "after": "e9d212df96040bc40091a41e8124d903b3477cf7bfeabc7943c004dc0d9135de",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-knowledge/references/maintenance.md",
+            "sourceHash": "e9d212df96040bc40091a41e8124d903b3477cf7bfeabc7943c004dc0d9135de"
+          },
+          {
+            "path": ".agents/skills/lumine-knowledge/references/reader.md",
+            "action": "write",
+            "before": null,
+            "after": "44de7d69e5b4aa4df0b72d2f03e7c1657452c83cd6fceb8d55a2eb243d73b3ab",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-knowledge/references/reader.md",
+            "sourceHash": "44de7d69e5b4aa4df0b72d2f03e7c1657452c83cd6fceb8d55a2eb243d73b3ab"
+          },
+          {
+            "path": ".agents/skills/lumine-plan/SKILL.md",
+            "action": "write",
+            "before": null,
+            "after": "01f8727acbc6b822af75ec5d8b52cdbba38bb607b51dfe4b3ced6a28fa50e37f",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-plan/SKILL.md",
+            "sourceHash": "01f8727acbc6b822af75ec5d8b52cdbba38bb607b51dfe4b3ced6a28fa50e37f"
+          },
+          {
+            "path": ".agents/skills/lumine-plan/references/exec-plan.md",
+            "action": "write",
+            "before": null,
+            "after": "49e52c19249a08531a6ffdaf65ecbbc5c14acbf8932e5e6cc93603937f29bcb4",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-plan/references/exec-plan.md",
+            "sourceHash": "49e52c19249a08531a6ffdaf65ecbbc5c14acbf8932e5e6cc93603937f29bcb4"
+          },
+          {
+            "path": ".agents/skills/lumine-plan/references/product-spec.md",
+            "action": "write",
+            "before": null,
+            "after": "5154e2c3b176a096e2525628ed54b2b950b9cec95606b3ac668197f340f2383c",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-plan/references/product-spec.md",
+            "sourceHash": "5154e2c3b176a096e2525628ed54b2b950b9cec95606b3ac668197f340f2383c"
+          },
+          {
+            "path": ".agents/skills/lumine-plan/references/stage-handoff.md",
+            "action": "write",
+            "before": null,
+            "after": "4ed5e34174e0020d859a5ae1b931ecb50547a7c46be28a22471b72905ec24f6e",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-plan/references/stage-handoff.md",
+            "sourceHash": "4ed5e34174e0020d859a5ae1b931ecb50547a7c46be28a22471b72905ec24f6e"
+          },
+          {
+            "path": ".agents/skills/lumine-run/SKILL.md",
+            "action": "write",
+            "before": null,
+            "after": "3e966c5bf55eb4962d1cf83d0578fcd7d648cd1bda3f09071af038f22e426364",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/skills/lumine-run/SKILL.md",
+            "sourceHash": "3e966c5bf55eb4962d1cf83d0578fcd7d648cd1bda3f09071af038f22e426364"
+          },
+          {
+            "path": "docs/templates/DESIGN.md",
+            "action": "write",
+            "before": null,
+            "after": "aff01809d5f164cbbfb6b50ac97e7ceb78fa452ba67c0e6a90db4cc597a3cbdc",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-templates/DESIGN.md",
+            "sourceHash": "aff01809d5f164cbbfb6b50ac97e7ceb78fa452ba67c0e6a90db4cc597a3cbdc"
+          },
+          {
+            "path": "docs/templates/exec-plan.md",
+            "action": "write",
+            "before": null,
+            "after": "aa01ff233e8a0a7afbc38149bfc5fb5c0539dc8150ea3dde9024866aff89ff98",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-templates/exec-plan.md",
+            "sourceHash": "aa01ff233e8a0a7afbc38149bfc5fb5c0539dc8150ea3dde9024866aff89ff98"
+          },
+          {
+            "path": "docs/templates/product-spec.md",
+            "action": "write",
+            "before": null,
+            "after": "24aaa376e331a15bb333a0b6baa2c0a3421dc980a499c11cef44eee5f57a2130",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-templates/product-spec.md",
+            "sourceHash": "24aaa376e331a15bb333a0b6baa2c0a3421dc980a499c11cef44eee5f57a2130"
+          },
+          {
+            "path": "docs/templates/repo-wiki.md",
+            "action": "write",
+            "before": null,
+            "after": "f3df6df6a9b52444e8cecddaa2c6bf2d2426db1e09d875491e0c141231353788",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-templates/repo-wiki.md",
+            "sourceHash": "f3df6df6a9b52444e8cecddaa2c6bf2d2426db1e09d875491e0c141231353788"
+          },
+          {
+            "path": "docs/FRONTEND.md",
+            "action": "write",
+            "before": null,
+            "after": "2054ae25b91dd491fbc852ce8fc9e879b7d6b7241cd39749526f81f0d5a28fbc",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-seed/FRONTEND.md",
+            "sourceHash": "2054ae25b91dd491fbc852ce8fc9e879b7d6b7241cd39749526f81f0d5a28fbc"
+          },
+          {
+            "path": "docs/design-docs/core-beliefs.md",
+            "action": "write",
+            "before": null,
+            "after": "ba9a76b1dd2309fb83437d7422b7ff7afb8a4259a94795d7b9d06ebd2c7f3de6",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-seed/design-docs/core-beliefs.md",
+            "sourceHash": "ba9a76b1dd2309fb83437d7422b7ff7afb8a4259a94795d7b9d06ebd2c7f3de6"
+          },
+          {
+            "path": "docs/design-docs/design-gate.md",
+            "action": "write",
+            "before": null,
+            "after": "46b2716b42e8725f02a12618c3b22f7c6bf2e67b30963c9599cd247a49eafaaf",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-seed/design-docs/design-gate.md",
+            "sourceHash": "46b2716b42e8725f02a12618c3b22f7c6bf2e67b30963c9599cd247a49eafaaf"
+          },
+          {
+            "path": "docs/design-docs/index.md",
+            "action": "write",
+            "before": null,
+            "after": "9de857df79ca71cbc24b192d03d5f54659896f85a5d33d027a3aa323f814bb2c",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-seed/design-docs/index.md",
+            "sourceHash": "9de857df79ca71cbc24b192d03d5f54659896f85a5d33d027a3aa323f814bb2c"
+          },
+          {
+            "path": "docs/references/browser-automation/index.md",
+            "action": "write",
+            "before": null,
+            "after": "d5ecfdf35af70ead3efc73a9dda8309805f6a69f7118c56dc75c90e7eac00656",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-seed/references/browser-automation/index.md",
+            "sourceHash": "d5ecfdf35af70ead3efc73a9dda8309805f6a69f7118c56dc75c90e7eac00656"
+          },
+          {
+            "path": "docs/references/index.md",
+            "action": "write",
+            "before": null,
+            "after": "2930b05dbc74178e1a93085b759224c51932d1f27c65bfa38cf5ea03fde2b6b6",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-seed/references/index.md",
+            "sourceHash": "2930b05dbc74178e1a93085b759224c51932d1f27c65bfa38cf5ea03fde2b6b6"
+          },
+          {
+            "path": "docs/references/vendor-llms/index.md",
+            "action": "write",
+            "before": null,
+            "after": "618ce9db7f4bed3810207bbf6205831f961cfc8567f843ef0d69013b7210f054",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-seed/references/vendor-llms/index.md",
+            "sourceHash": "618ce9db7f4bed3810207bbf6205831f961cfc8567f843ef0d69013b7210f054"
+          },
+          {
+            "path": "docs/workflow-artifacts.md",
+            "action": "write",
+            "before": null,
+            "after": "3c670f4d76b70b2919696b98eaa3b2423b8bdb2c26fcf7e1b46eda4a73d4bcec",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/docs-seed/workflow-artifacts.md",
+            "sourceHash": "3c670f4d76b70b2919696b98eaa3b2423b8bdb2c26fcf7e1b46eda4a73d4bcec"
+          },
+          {
+            "path": "AGENTS.md",
+            "action": "write",
+            "before": null,
+            "after": "4e31c72a240167bb28702a13219ffa72312addd7f369cad571442a344b675c4b",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/root/AGENTS.md",
+            "sourceHash": "386a4c5b57d9293c910d01220899b54c09f727b53b60ca65cafcb52c0f8fb38c"
+          },
+          {
+            "path": "ARCHITECTURE.md",
+            "action": "write",
+            "before": null,
+            "after": "92476f82475841b4da9ab3d40a79e6019f859a4c8703c3f04618ede7cdb16403",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/root/ARCHITECTURE.md",
+            "sourceHash": "e89cb144827898a785bd2799ebe740c8dcf540cb808c1eb779087fc9945c9d05"
+          },
+          {
+            "path": ".lumine/wiki-reader/reader.js",
+            "action": "write",
+            "before": null,
+            "after": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+            "mode": 420,
+            "source": "/private<validation-fixtures>/packages/skill/assets/wiki-reader/reader.js",
+            "sourceHash": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8"
+          },
+          {
+            "path": ".gitignore",
+            "action": "write",
+            "before": null,
+            "after": "5ed27010ffaf901b1f3d5218405bf313022b42ec1a650e3cdfabaca49fa2ba5c",
+            "mode": 420
+          },
+          {
+            "path": ".lumine/project.json",
+            "action": "write",
+            "before": null,
+            "after": "aea4342e2b1435250b4d63a2c28dc17e92880d6b3e4086df2e73de4c858a48b1",
+            "mode": 420
+          },
+          {
+            "path": ".lumine/root.json",
+            "action": "write",
+            "before": null,
+            "after": "a099f6b654cbadc2457855b1820442cd9a48936e57f19128af0a74ddcf7348d6",
+            "mode": 420
+          },
+          {
+            "path": ".lumine/wiki-state/coverage.json",
+            "action": "write",
+            "before": null,
+            "after": "b39018474cc65ad8a5365d4575c88a709bfe37d188f10cf5be9ecee4b9401bb4",
+            "mode": 420
+          },
+          {
+            "path": ".lumine/wiki-state/format.json",
+            "action": "write",
+            "before": null,
+            "after": "90495c272e098a6a6904dbe90cb1f6454ca16fd5d9ba19cd061456dbefd91d94",
+            "mode": 420
+          },
+          {
+            "path": ".lumine/managed.json",
+            "action": "write",
+            "before": null,
+            "after": "5ebd35b727a1726e32dc3b82642ba913d0d7f28660e92b4e43abc1b46a9425a5",
+            "mode": 420
+          }
+        ],
+        "retainedReaderAssets": {},
+        "integrity": "4296386941edaf973b989452d372fedeb4f686dd2ebabf8935725761774434ab",
+        "warnings": []
+      },
+      "stderr": "",
+      "expectedReturnCode": 0,
+      "beforeSha256": "a6d2d007174b07c3d0a0ea6a32683046de3ef69faaeffd3db3315d9e14d6d5bc",
+      "afterSha256": "a6d2d007174b07c3d0a0ea6a32683046de3ef69faaeffd3db3315d9e14d6d5bc",
+      "changedPaths": []
+    },
+    {
+      "name": "22.18.0-skill-nongit-apply",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "<temporary>/lumine-node-runtime-matrix/node-v22.18.0-darwin-arm64/bin/node",
+        "<validation-fixtures>/packages/skill/scripts/harness-manager.mjs",
+        "adopt",
+        "--proposal",
+        "<validation-fixtures>/proposals/22.18.0-skill-nongit.json"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": {
+        "status": "applied",
+        "proposalId": "106b84f4-f96f-46d0-9cef-b4c25e5dc97e",
+        "backupDir": "/private<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine-migrations/106b84f4-f96f-46d0-9cef-b4c25e5dc97e",
+        "preserved": []
+      },
+      "stderr": "",
+      "expectedReturnCode": 0
+    },
+    {
+      "name": "22.18.0-skill-nongit-direct-check",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "<temporary>/lumine-node-runtime-matrix/node-v22.18.0-darwin-arm64/bin/node",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine/check.mjs",
+        "project",
+        "--json"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": {
+        "ok": true,
+        "scope": "project",
+        "issues": [],
+        "evidenceLevel": "repository_checked"
+      },
+      "stderr": "",
+      "expectedReturnCode": 0
+    },
+    {
+      "name": "22.18.0-skill-nongit-wrapper-check",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "/bin/bash",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine/cli",
+        "check",
+        "project",
+        "--json"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": {
+        "ok": true,
+        "scope": "project",
+        "issues": [],
+        "evidenceLevel": "repository_checked"
+      },
+      "stderr": "",
+      "expectedReturnCode": 0
+    },
+    {
+      "name": "22.18.0-skill-nongit-wrapper-help",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "/bin/bash",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine/cli",
+        "help"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": "Lumine：check 检查 | wiki 知识 | task 任务和文档 | skills 技能 | adapter 宿主适配 | work-status 工作状态\n知识：wiki map / query / show / related / scan / update / check / serve；项目健康：check health\n",
+      "stderr": "",
+      "expectedReturnCode": 0
+    },
+    {
+      "name": "22.18.0-skill-nongit-direct-adapter",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "<temporary>/lumine-node-runtime-matrix/node-v22.18.0-darwin-arm64/bin/node",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine/adapter-cli.mjs",
+        "adapter",
+        "help"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": "Lumine Harness Adapter 命令\n  adapter status <current|selected|product> [--details] [--json]\n  adapter check <current|product> [--details] [--json]\n  adapter doctor <product|selected|all> [--json]\n  adapter list [--json]\n  adapter verify <product> [--begin --host-version <version>] [--json]\n  adapter install <kimi|zcode|deepseek-harness>\n  adapter uninstall <kimi|zcode|deepseek-harness>\n  adapter help\n  work-status <done|continue|blocked> --product <host> --session-id <id> [--reason <text>] [--next-step <text>]\n  work-status --report <json-file|-> --product <host> --session-id <id> [--emission-id <id>] [--expect-turn <revision>] [--json]\n  --root <project-root>\nstatus/check 读取配置与已有证据；doctor 说明设置要求。这些检查不会安装宿主配置或创建探针。\n--details 展开能力证据；--json 保留机器代码，人类标签与指导遵循项目语言。\nverify --begin 会创建验证探针；安装可能涉及需要单独授权的宿主配置修改。\n",
+      "stderr": "",
+      "expectedReturnCode": 0
+    },
+    {
+      "name": "22.18.0-skill-nongit-wrapper-skills",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "/bin/bash",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine/cli",
+        "skills",
+        "list",
+        "--json"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": [
+        {
+          "name": "lumine-design",
+          "description": "探索、制作或评审页面视觉与交互方案，按需要提供可读说明、HTML 原型或设计参考；复用已批准内容，不重复定义产品规则。",
+          "relativeSource": ".agents/skills/lumine-design/SKILL.md",
+          "hash": "8d417b9354458fe4aef74cc9e379ba29102756940bc1f117a6df6c9279bf8a77",
+          "keywords": []
+        },
+        {
+          "name": "lumine-knowledge",
+          "description": "定位实现、查询和维护 Repo Wiki，或打开、启动、重启、停止本地 Wiki 阅读器；知识以 Markdown、Mermaid 文本和来源证据维护，不生成卡片图片。",
+          "relativeSource": ".agents/skills/lumine-knowledge/SKILL.md",
+          "hash": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2",
+          "keywords": []
+        },
+        {
+          "name": "lumine-plan",
+          "description": "澄清需求、编写或评审产品方案与技术执行计划，评估是否可以进入下一步；按产品方案、必要设计、执行计划分别取得阶段确认，不因产出计划自动实施。",
+          "relativeSource": ".agents/skills/lumine-plan/SKILL.md",
+          "hash": "01f8727acbc6b822af75ec5d8b52cdbba38bb607b51dfe4b3ced6a28fa50e37f",
+          "keywords": []
+        },
+        {
+          "name": "lumine-run",
+          "description": "实施或继续已授权工作、恢复执行现场、验证结果与诊断问题；支持只验证不修复，按当前请求范围整理证据和收尾。",
+          "relativeSource": ".agents/skills/lumine-run/SKILL.md",
+          "hash": "3e966c5bf55eb4962d1cf83d0578fcd7d648cd1bda3f09071af038f22e426364",
+          "keywords": []
+        }
+      ],
+      "stderr": "",
+      "expectedReturnCode": 0
+    },
+    {
+      "name": "22.18.0-skill-nongit-direct-task",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "<temporary>/lumine-node-runtime-matrix/node-v22.18.0-darwin-arm64/bin/node",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine/core/task-cli.mjs",
+        "doc-operations",
+        "--json"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": [],
+      "stderr": "",
+      "expectedReturnCode": 0
+    },
+    {
+      "name": "22.18.0-skill-nongit-wrapper-task",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "/bin/bash",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine/cli",
+        "task",
+        "doc-operations",
+        "--json"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": [],
+      "stderr": "",
+      "expectedReturnCode": 0
+    },
+    {
+      "name": "22.18.0-skill-nongit-task-record",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "<temporary>/lumine-node-runtime-matrix/node-v22.18.0-darwin-arm64/bin/node",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine/core/task-cli.mjs",
+        "record",
+        "<validation-fixtures>/task-inputs/22.18.0-skill-nongit.json",
+        "--json"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": {
+        "taskId": "matrix-planning-fixture",
+        "record": ".lumine/tasks/matrix-planning-fixture.json",
+        "sha256": "6100770e615b064bbdec5cc5fce5e8f32bf2c694f51d619fc853410fc81a4735"
+      },
+      "stderr": "",
+      "expectedReturnCode": 0
+    },
+    {
+      "name": "22.18.0-skill-nongit-task-check",
+      "runtime": "22.18.0",
+      "locale": "en",
+      "command": [
+        "/bin/bash",
+        "<validation-fixtures>/targets/22.18.0-skill-nongit/.lumine/cli",
+        "task",
+        "check",
+        "matrix-planning-fixture",
+        "--json"
+      ],
+      "cwd": "<validation-fixtures>/targets/22.18.0-skill-nongit",
+      "returnCode": 0,
+      "stdout": {
+        "ok": true,
+        "issues": [],
+        "taskId": "matrix-planning-fixture",
+        "mode": "plan",
+        "output": ""
+      },
+      "stderr": "",
+      "expectedReturnCode": 0
+    }
+  ],
+  "installations": [],
+  "failures": [
+    "[Errno 1] Operation not permitted"
+  ],
+  "sourceBaselines": {
+    "skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+    "skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+    "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0",
+    "skills/lumine-harness/src/scripts/harness-manager.ts": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62",
+    "skills/lumine-harness/src/scripts/harness-manager-main.ts": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+    "scripts/runtime-artifacts.ts": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4",
+    "tsdown.config.ts": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+  },
+  "distributionBaselines": {
+    "skill": {
+      "assets/harness/core/node-runtime.mjs": "9c0643ecf080a2676b65fba85cde2c7b9143d51297552d71eb14542717950783",
+      "assets/harness/core/node-bootstrap.mjs": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605",
+      "scripts/harness-manager.mjs": "fe196c1b483740da0b9d5fd85ada14b5738ab1394c8330719b51c4612061ec94",
+      "assets/harness/cli": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5",
+      "assets/wiki-reader/reader.js": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8"
+    },
+    "plugin": {
+      "assets/harness/core/node-runtime.mjs": "9c0643ecf080a2676b65fba85cde2c7b9143d51297552d71eb14542717950783",
+      "assets/harness/core/node-bootstrap.mjs": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605",
+      "scripts/harness-manager.mjs": "fe196c1b483740da0b9d5fd85ada14b5738ab1394c8330719b51c4612061ec94",
+      "assets/harness/cli": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5",
+      "assets/wiki-reader/reader.js": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8"
+    }
+  },
+  "passed": false,
+  "noServersLeftRunning": true,
+  "operationsCount": 12
+}

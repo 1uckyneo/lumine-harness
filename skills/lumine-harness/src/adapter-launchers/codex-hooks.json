@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "@lumine-hook:adapters/codex/hooks/session-start.mjs",
+            "statusMessage": "Loading harness context"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "@lumine-hook:adapters/codex/hooks/stop-gate.mjs",
+            "statusMessage": "Checking harness stop gate"
+          }
+        ]
+      }
+    ]
+  }
+}

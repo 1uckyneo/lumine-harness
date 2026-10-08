@@ -22,10 +22,11 @@ function taskRecordPath(root, taskId) {
 function validateTaskShape(value) {
 	if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Task must be an object");
 	const task = value;
-	if (task.schemaVersion !== 2 || !MODES.has(task.mode)) throw new Error("Task schemaVersion or mode is invalid");
+	if (![2, 3].includes(task.schemaVersion) || !MODES.has(task.mode)) throw new Error("Task schemaVersion or mode is invalid");
 	if (typeof task.taskId !== "string" || typeof task.goal !== "string" || !task.goal.trim() || typeof task.scope !== "string" || !task.scope.trim()) throw new Error("Task requires taskId, goal and scope");
 	if (task.selectedSkills !== undefined && (!Array.isArray(task.selectedSkills) || task.selectedSkills.some((name) => typeof name !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)))) throw new Error("selectedSkills must contain actual selected canonical Skill names");
 	if (!Array.isArray(task.acceptanceRefs) || !Array.isArray(task.evidence)) throw new Error("Task requires acceptanceRefs and evidence arrays");
+	if (task.knowledge?.sync && (task.knowledge.sync.contractVersion !== 2 || !Array.isArray(task.knowledge.sync.changedSources) || !Array.isArray(task.knowledge.sync.verifiedScope) || !Array.isArray(task.knowledge.sync.decisions))) throw new Error("Knowledge sync contract is invalid");
 	return task;
 }
 function readTaskRecord(root, taskId) {
@@ -50,9 +51,16 @@ function saveTaskRecord(root, value, expectedHash) {
 			pid: process.pid,
 			startedAt: new Date().toISOString()
 		}));
-		const current = existsSync(file) ? contentHash(readFileSync(file)) : null;
+		const currentBytes = existsSync(file) ? readFileSync(file) : null;
+		const current = currentBytes ? contentHash(currentBytes) : null;
 		if (current && current !== expectedHash) throw new Error("Task record changed or exists; supply --expect with its current sha256 before updating");
 		if (!current && expectedHash) throw new Error("Task record was deleted after reading");
+		if (!currentBytes && task.schemaVersion !== 3) throw new Error("TASK_SCHEMA_V3_REQUIRED: New task records must use schemaVersion 3");
+		if (currentBytes) {
+			const previous = validateTaskShape(JSON.parse(currentBytes.toString("utf8")));
+			if (previous.taskId !== task.taskId) throw new Error("Task filename and identity disagree");
+			if (previous.schemaVersion === 3 && task.schemaVersion !== 3) throw new Error("TASK_SCHEMA_DOWNGRADE_FORBIDDEN");
+		}
 		mkdirSync(path.dirname(file), { recursive: true });
 		writeFileSync(temp, `${JSON.stringify(task, null, 2)}\n`, "utf8");
 		renameSync(temp, file);
@@ -186,8 +194,51 @@ function checkTask(root, taskId, modeOverride) {
 			if (!validEvidence) add("MISSING_IMPLEMENTATION_EVIDENCE", "Implementation completion requires actual validation evidence");
 			for (const key of required) if (!passed.has(key)) add("AC_NOT_VERIFIED", `No current passed evidence for ${key}`);
 			if (!required.size && !task.evidence.some((item) => item.outcome === "passed")) add("NO_PASSED_VALIDATION", "A scoped repair requires at least one passed validation result");
+			if (task.schemaVersion === 3 && !task.knowledge) add("KNOWLEDGE_ASSESSMENT_MISSING", "Current tasks must assess whether knowledge synchronization is required");
 			if (task.knowledge?.required && task.knowledge.status !== "synchronized") add("KNOWLEDGE_PENDING", "Task-related knowledge synchronization is incomplete");
 			if (task.knowledge?.required && !task.knowledge.refs?.length) add("KNOWLEDGE_REFS_MISSING", "Knowledge synchronization needs its document or disposition references");
+			if (task.schemaVersion === 3 && task.knowledge?.required && task.knowledge.status === "synchronized" && !task.knowledge.sync) add("KNOWLEDGE_SYNC_MISSING", "Current synchronized tasks must record the versioned knowledge assessment");
+			if (task.knowledge?.sync && task.knowledge.required && task.knowledge.status === "synchronized") {
+				const sync = task.knowledge.sync;
+				if (!Number.isFinite(Date.parse(sync.assessedAt)) || Date.parse(sync.assessedAt) > Date.now() + 6e4 || !sync.verifiedScope.length || sync.verifiedScope.some((item) => typeof item !== "string" || !item.trim()) || !sync.decisions.length) add("KNOWLEDGE_SYNC_INCOMPLETE", "Knowledge sync requires an assessment time, verified scope and documented decisions");
+				for (const source of sync.changedSources) {
+					const repo = config.repositories.find((item) => item.id === source.repoId);
+					if (!repo) {
+						add("KNOWLEDGE_SOURCE_UNKNOWN", `Unknown knowledge impact repository: ${source.repoId}`);
+						continue;
+					}
+					try {
+						const file = resolveProjectPath(resolveProjectPath(root, repo.path), source.path, "knowledge impact source");
+						if (contentHash(readFileSync(file)) !== source.sha256) add("KNOWLEDGE_SOURCE_CHANGED", `Knowledge impact source changed: ${source.repoId}/${source.path}`);
+					} catch {
+						add("KNOWLEDGE_SOURCE_MISSING", `Knowledge impact source is missing: ${source.repoId}/${source.path}`);
+					}
+				}
+				for (const decision of sync.decisions) {
+					if (!decision || ![
+						"created",
+						"revised",
+						"retained",
+						"deferred"
+					].includes(decision.action) || !decision.reason?.trim() || !/^[a-f0-9]{64}$/.test(decision.sha256)) {
+						add("KNOWLEDGE_DECISION_INVALID", "Knowledge decision needs an action, reason and content hash");
+						continue;
+					}
+					let source;
+					try {
+						source = resolveCurrentDocument(root, decision.ref).source;
+					} catch {
+						try {
+							source = readFileSync(resolveProjectPath(root, decision.ref, "knowledge disposition"), "utf8");
+						} catch {
+							add("KNOWLEDGE_DECISION_MISSING", `Knowledge decision reference is missing: ${decision.ref}`);
+							continue;
+						}
+					}
+					if (contentHash(source) !== decision.sha256) add("KNOWLEDGE_DECISION_CHANGED", `Knowledge decision version changed: ${decision.ref}`);
+					if (!task.knowledge.refs?.includes(decision.ref)) add("KNOWLEDGE_DECISION_UNLINKED", `Knowledge decision is absent from task refs: ${decision.ref}`);
+				}
+			}
 			for (const reference of task.knowledge?.refs ?? []) {
 				try {
 					resolveCurrentDocument(root, reference);

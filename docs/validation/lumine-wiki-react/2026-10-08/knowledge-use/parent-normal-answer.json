@@ -1,0 +1,81 @@
+{
+  "caseId": "parent-image-recovery-change",
+  "arm": "normal",
+  "answer": "本轮只调查，未把门槛改成 5。当前本地源码中的门槛是 3，入口在 ai-conv-plus/src/views/Chat/useChatImageTasks.ts:396-403。\n\n1. 改动条件与计数语义\npoll 每次针对一条原消息完成一轮“任务查询，必要时历史回退”后，只更新一次 failures：queryFailed || !confirmed 时加 1，否则清零（396）。399 行是 failures >= 3 或任务年龄达到 recoveryWindow 时暂停；若仅改变次数，应改为 >= 5，并保留 30 分钟、取消意图优先分支和终态提前退出的语义。暂停仅设 connection=paused、due=Infinity 和提示，不把 server 改为失败（123-127）。已取消/成功在计数之前退出；成功但没有可用图片另行进入可重试暂停，不受这个次数门槛控制（146-158、390-394）。\n“三次”不是只统计 HTTP 查询失败。查询抛错（包括网络、HTTP/业务码、解析异常和单请求 15 秒超时）会置 queryFailed；查询成功但记录被身份或状态过滤、且历史也找不到原消息，则 !confirmed 也累计。两次请求都失败仍只算同一轮一次。任务查询失败后，历史找到仍在处理/失败的原消息，queryFailed 仍为 true，因此本轮仍加 1；若历史已恢复成功图片，终态分支提前退出。相反，两个请求没有异常且找到了原消息，即使原任务状态为 running 或 failed，也会清零。历史匹配行的存在就使 applyHistory 返回 true，并不要求历史已经成功。HTTP 200 空任务列表本身不必然计数，要看历史回退结果（272-306、324-403；draw.ts:234-268；transport.ts:117-132）。SSE 断开本身不直接加 failures，它触发恢复后才按这些轮次计数。\n\n2. 必须一起核对的状态与重置\nmakeTracker 初始化 failures=0、recoveringSince=当前时间，并捕获页面版本、账号会话版本和创建时间；新 start 会 detach 旧 tracker，清空上一轮 aiTask_id/message_id（104-119、210-218）。一次无查询异常的确认会清零 failures；手动 retry 清零 failures 并重置 recoveringSince，但不重置 createdAt（396、477-484）。recover/pause 本身不清零。30 分钟用 Date.now()-task.createdAt 判断，不是从手动重试重新起算；restore 沿用历史 createdAt，任务记录也可更新该时间。超过窗口的手动重试仍能立即查询一次，若没有得到终态便会再次暂停（283、399、462-484）。recoveringSince 仅影响最初每 2 秒、超过一分钟或 server=failed 后每 10 秒的间隔（140-144）。reset 清理计时器、sweep 和全部 tracker/控制器；detach 仅移除当前消息。提高次数不会改变 15 秒单请求超时、60 秒提交流无活动检测或上述窗口。\n\n3. SSE、刷新与取消如何守住原会话原消息\nSSE submitted 必须提供 conversationId/messageId/promptId；draw.ts 会拒绝已有会话不匹配及后续指向其他任务的标识（176-203）。受理时只把真实身份绑定到本条 message。tracker.current 同时核对 anchorId 对应 tracker 实例、图片工作区版本、账号会话版本、消息对象仍在数组中以及当前会话；每次异步查询还保存 operation 版本，取消会递增版本，使旧查询失效（useChatImageTasks.ts:91-96、173-187、349-350、414-428）。任务查询使用原 conversation_id/message_id，已知 aiTask_id 时还要求 promptId 相同；未确认才读原会话历史并按原 row.id 与 conversationId 找行，只回写 task.message，不重建整页消息数组（272-306、355-384）。\n刷新/重新打开详情由 ChatPage.vue:470-490 先清理旧工作区，再从该会话历史构造消息，设置原 message_id/conversation_id，逐条 restore；完整图片历史直接展示，其余可恢复记录创建独立 tracker。切换会话、新建对话、换账号和卸载会重置/递增版本；删除图片 detach，因此迟到事件不会回填新页面或复活删除消息（392-423、425-490、582-594、810-847、165）。这些本地释放操作不调用后端取消。\n普通断流或 60 秒无活动：已有会话和消息身份则恢复；受理前缺少 conversation_id 或 message_id 时直接提示“提交结果待确认，请重新查看历史”，无法精确查询，也不重新提交生成请求。缺 promptId 单独不必然阻断恢复，可先按原会话与消息查出它；若任务索引和原历史均不能确认原消息，则只能继续核对到暂停，不能用别的任务替代。源码也不能保证尚未收到身份的请求一定已持久化。\n主动取消：准备阶段只停止本地准备；提交后无任务 ID 时保留 cancelRequested，等待 submitted 获得 ID；有 ID 则只取消该 prompt。取消过程中忽略进度和图片事件；成功回调本地标记 cancelled、递增 operation、停订阅；失败/15 秒超时清除取消意图、结束旧订阅并恢复真实状态查询（414-460）。历史 status='-1' 同时包含失败与取消，单靠它不能精确判断已取消（301-304）。\n\n4. HTTP 200 的取消响应不能证明取消终态\n后端 javaOk 和 javaFail 都返回 HTTP 200，业务码分别为 0 与 7；前端 cancelDraw 通过 requestApiV2Data 要求 code=0，所以只看 HTTP 200 连业务成功都无法证明（api/result.go:19-35、draw.ts:271-282、transport.ts:117-132）。即使 code=0 也不能证明本次取消赢得终态：Cancel 先读任务，然后通过 claimTaskFinish 条件更新；成功路径可能在这两步间先保存终态。取消的 UPDATE 影响 0 行时 claimed=false、err=nil，Cancel 仍 return nil，API 仍 javaOk（comfy_service.go:543-582；image_history.go:115-159；api/comfy.go:111-122）。这是当前调用链的静态竞态推断。本地前端成功分支仍会标记已取消并停跟踪，不自动复核实际胜出的终态；要确认真实取消，需相同任务的运行态终态证据，不能用本地提示或历史 -1 代替。\n\n5. 验证入口与未回答部分\n直接入口是 image-tasks.test.mjs:252-275：当前断言第 3 次暂停、暂停后不再查、手动重试下一次成功。改为 5 时应相应调整计时推进和 3/4 次断言为 5/6，并检查第 4 次仍恢复、第 5 次暂停。还应覆盖 HTTP 成功但原记录未确认、任务查询失败而历史确认非终态、一次正常确认清零、手动重试清零、30 分钟不因重试重置、多消息互不影响。已有相关入口包括该文件 206/226（原历史回退及独立目标）、277/294（间隔及窗口）、312/328/343/361（取消与迟到响应）、395/411（身份缺失或已受理的静默断流）、425（会话/版本/删消息隔离）、465/480/495（迟到成功与空图片成功）。页面集成入口为 go-chat.test.mjs:936/964/1087/1173/1236/1353/1381/1421/1445；协议入口为 draw-stream.test.mjs:192/207/227/297/317/343/393/414。Wiki 对应次数描述在“聊天流式输出与图片任务恢复.md”:66，若正式改动还需同步文档。\n本轮只读取了这些源码、测试定义和 Wiki，没有运行测试或真实请求。当前生产是否已部署并运行 3 次行为、未来 5 次行为或上述取消竞态，没有可回答的运行证据；本地实现、测试存在及 Wiki 的历史记录不能证明生产部署、当前服务端版本或真实终态，也不能证明取消竞态已经复现。",
+  "chosenPath": "读取目标 parent AGENTS 与 lumine-knowledge 指引；rg 同时寻找 Wiki 和源码入口；实际使用聊天恢复 Wiki 的机制、源码及测试路径索引，然后直接核对客户端状态机、页面归属隔离、协议封装和 Go 取消事务；仅阅读测试定义，不运行测试。",
+  "wikiActuallyUsed": true,
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "line": 34,
+      "sha256": "a27c3e24d851343b217935dba6ed5658d261877321f8cf27caee1a2fbdb0b0a1"
+    },
+    {
+      "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+      "line": 66,
+      "sha256": "dea28b5a4535511b7b86cf7b7fca6dae0faa04ae585568b5d060295d681d2bfc"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+      "line": 396,
+      "sha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/ChatPage.vue",
+      "line": 470,
+      "sha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853"
+    },
+    {
+      "path": "ai-conv-plus/src/api-v2/draw.ts",
+      "line": 234,
+      "sha256": "0a3c4dcd87e2b1676c1030969c95cde16ad9b6267fe765821fba24e171d155bd"
+    },
+    {
+      "path": "ai-conv-plus/src/api-v2/transport.ts",
+      "line": 117,
+      "sha256": "c33f0d7bda360af2bab13d1e02c141448e48f897f33f735e3d8f6bba737b85d5"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/__tests__/image-tasks.test.mjs",
+      "line": 252,
+      "sha256": "68fde329d71774c7b9dbc83796bf546da1d995809e03b167748a1e103c6a6e29"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/__tests__/go-chat.test.mjs",
+      "line": 936,
+      "sha256": "82557960e7ea5a3dc974f7bdd4e7092f739bd617fce230a0501da96380db4426"
+    },
+    {
+      "path": "ai-conv-plus/src/api-v2/__tests__/draw-stream.test.mjs",
+      "line": 414,
+      "sha256": "1d77f4dbd35f34744d9da4060fcb520d7b28f460e915155204041bd289db8d24"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/api/result.go",
+      "line": 19,
+      "sha256": "3dd29f6752ba146dd9d2006b62694985324bb47b95e0c2d5ef6b1ef6c3f7aa51"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/api/comfy.go",
+      "line": 111,
+      "sha256": "67ed7e16930dd938ad7d2810bd35f3f5a05fb55b5a226c4e04e28ab312613efb"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/service/comfy_service.go",
+      "line": 543,
+      "sha256": "5ca147e27affee2bbf172fe5bafac987cd2df904eab8e7a70e0f55e1eb68e7d0"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/service/image_history.go",
+      "line": 115,
+      "sha256": "a5382b754de28aa773b4048a14452aaca56e5d62ba1a6de6f8b08e3694e2e39c"
+    }
+  ],
+  "limits": [
+    "仅证明目标工程当前本地文件所表达的开发实现；sha256 是本轮读取文件的完整内容哈希。",
+    "未读取其他样本、rubric、历史验证答案或历史验证文件；Wiki 包含的历史验证链接未打开，未将其作为本轮验收。",
+    "未运行测试、调用 API、访问网络或调查部署环境；取消竞态仅为源码推断，没有运行复现。",
+    "未修改目标工程业务、配置、Wiki、state；首次答案只写入本调查样本的授权输出文件。",
+    "未确认生产部署版本、真实任务数据、终态或媒体可用性；当前生产行为无答案。"
+  ]
+}

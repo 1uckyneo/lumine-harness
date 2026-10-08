@@ -1,0 +1,665 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-08T04:06:12.181413+00:00",
+  "scope": "AC-009 bounded desktop verification: wide table readability and local scrolling, long code and path, short table regression. Narrow screens deferred by user.",
+  "outcome": "passed_in_scope",
+  "runtime": {
+    "node": "24.14.0",
+    "browser": "Chrome 154.0.8037.98 headed, independent temporary persistent profile",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "browserZoom": "100%",
+    "DPR": 1
+  },
+  "fixture": {
+    "distribution": "Copied current generated Plugin assets, no source or node_modules in fixture",
+    "codeCharacters": 1245,
+    "tableColumns": 18,
+    "firstCellCharacters": 35,
+    "inlinePathCharacters": 995,
+    "shortTableColumns": 2,
+    "markdownSha256": "19a7965351d25e33ac8d5dbc1cb72456eeb9cfdfd999be57a7640cd84560a6da"
+  },
+  "defectBeforeFix": {
+    "description": "Wide tables inherited overflow-wrap:anywhere and collapsed cell text into many tiny fragments even on a desktop.",
+    "generatedAssetHashes": {
+      "styles.css": "038808f71284659f1ebd5dc50c25497984dede2574780201e34265e7418f20dc",
+      "reader.js": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8"
+    },
+    "measurements": {
+      "innerWidth": 1440,
+      "innerHeight": 1000,
+      "outerWidth": 1200,
+      "outerHeight": 1040,
+      "dpr": 1,
+      "visualScale": 1,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "code": {
+        "clientWidth": 760,
+        "scrollWidth": 10039,
+        "initial": 0,
+        "end": 9279,
+        "overflow": "auto",
+        "box": {
+          "left": 345,
+          "right": 1105,
+          "top": 520.25,
+          "bottom": 571.6953125,
+          "width": 760,
+          "height": 51.4453125
+        }
+      },
+      "table": {
+        "clientWidth": 760,
+        "scrollWidth": 760,
+        "initial": 0,
+        "end": 0,
+        "overflow": "auto",
+        "box": {
+          "left": 345,
+          "right": 1105,
+          "top": 676.2890625,
+          "bottom": 1127.7890625,
+          "width": 760,
+          "height": 451.5
+        },
+        "firstCell": {
+          "textCharacters": 35,
+          "width": 41,
+          "height": 359,
+          "textLines": 14,
+          "overflowWrap": "anywhere"
+        }
+      },
+      "path": {
+        "characters": 995,
+        "fragments": [
+          {
+            "left": 350,
+            "right": 1089.8203125,
+            "top": 1234.3828125
+          },
+          {
+            "left": 345,
+            "right": 1057.078125,
+            "top": 1264.1328125
+          },
+          {
+            "left": 345,
+            "right": 1066.328125,
+            "top": 1293.8828125
+          },
+          {
+            "left": 345,
+            "right": 1057.078125,
+            "top": 1323.6328125
+          },
+          {
+            "left": 345,
+            "right": 1084.8203125,
+            "top": 1353.3828125
+          },
+          {
+            "left": 345,
+            "right": 1075.578125,
+            "top": 1383.1328125
+          },
+          {
+            "left": 345,
+            "right": 1094.0703125,
+            "top": 1412.8828125
+          },
+          {
+            "left": 345,
+            "right": 1075.578125,
+            "top": 1442.6328125
+          },
+          {
+            "left": 345,
+            "right": 1094.0703125,
+            "top": 1472.3828125
+          },
+          {
+            "left": 345,
+            "right": 1075.578125,
+            "top": 1502.1328125
+          },
+          {
+            "left": 345,
+            "right": 1094.0703125,
+            "top": 1531.8828125
+          },
+          {
+            "left": 345,
+            "right": 1075.578125,
+            "top": 1561.6328125
+          },
+          {
+            "left": 345,
+            "right": 751.90625,
+            "top": 1591.3828125
+          }
+        ],
+        "bounds": {
+          "left": 345,
+          "right": 1094.0703125,
+          "top": 1232.3828125,
+          "bottom": 1610.8828125,
+          "width": 749.0703125,
+          "height": 378.5
+        },
+        "overflowWrap": "anywhere"
+      },
+      "prose": {
+        "fontSize": "17px",
+        "lineHeight": "29.75px"
+      },
+      "controls": [
+        {
+          "text": "搜索知识",
+          "box": {
+            "left": 1201.1953125,
+            "right": 1277.1953125,
+            "top": 13.5,
+            "bottom": 49.5,
+            "width": 76,
+            "height": 36
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "刷新",
+          "box": {
+            "left": 1283.1953125,
+            "right": 1335.1953125,
+            "top": 13.5,
+            "bottom": 49.5,
+            "width": 52,
+            "height": 36
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "English",
+          "box": {
+            "left": 1341.1953125,
+            "right": 1410,
+            "top": 13.5,
+            "bottom": 49.5,
+            "width": 68.8046875,
+            "height": 36
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "复制引用",
+          "box": {
+            "left": 345,
+            "right": 413,
+            "top": 312.90625,
+            "bottom": 346.90625,
+            "width": 68,
+            "height": 34
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "复制调查问题",
+          "box": {
+            "left": 421,
+            "right": 513,
+            "top": 312.90625,
+            "bottom": 346.90625,
+            "width": 92,
+            "height": 34
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "复制修订指令",
+          "box": {
+            "left": 521,
+            "right": 613,
+            "top": 312.90625,
+            "bottom": 346.90625,
+            "width": 92,
+            "height": 34
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "导出 Markdown",
+          "box": {
+            "left": 621,
+            "right": 726.8046875,
+            "top": 312.90625,
+            "bottom": 346.90625,
+            "width": 105.8046875,
+            "height": 34
+          },
+          "fontSize": "12px"
+        }
+      ],
+      "toc": {
+        "box": {
+          "left": 1145,
+          "right": 1335,
+          "top": 104,
+          "bottom": 237.171875,
+          "width": 190,
+          "height": 133.171875
+        },
+        "open": true
+      },
+      "windowScrollX": 0,
+      "tocNavigation": {
+        "hash": "#阅读完成",
+        "headingInViewport": true
+      },
+      "tableEnd": {
+        "scrollLeft": 0,
+        "lastCellRight": 1104.5,
+        "tableRight": 1105
+      },
+      "globalNoOverflow": true,
+      "codeActuallyScrolls": true,
+      "tableActuallyScrolls": false,
+      "pathWrapsWithinViewport": true
+    }
+  },
+  "afterFix": {
+    "measurements": {
+      "innerWidth": 1440,
+      "innerHeight": 1000,
+      "outerWidth": 1200,
+      "outerHeight": 1040,
+      "dpr": 1,
+      "visualScale": 1,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "code": {
+        "clientWidth": 760,
+        "scrollWidth": 10039,
+        "initial": 0,
+        "end": 9279,
+        "overflow": "auto",
+        "box": {
+          "left": 345,
+          "right": 1105,
+          "top": 519.75,
+          "bottom": 571.1953125,
+          "width": 760,
+          "height": 51.4453125
+        }
+      },
+      "table": {
+        "clientWidth": 760,
+        "scrollWidth": 4740,
+        "initial": 0,
+        "end": 3980,
+        "overflow": "auto",
+        "box": {
+          "left": 345,
+          "right": 1105,
+          "top": 675.7890625,
+          "bottom": 759.7890625,
+          "width": 760,
+          "height": 84
+        },
+        "firstCell": {
+          "textCharacters": 35,
+          "width": 257,
+          "height": 41,
+          "textLines": 1,
+          "overflowWrap": "normal"
+        }
+      },
+      "path": {
+        "characters": 995,
+        "fragments": [
+          {
+            "left": 350,
+            "right": 1089.8203125,
+            "top": 866.3828125
+          },
+          {
+            "left": 345,
+            "right": 1057.078125,
+            "top": 896.1328125
+          },
+          {
+            "left": 345,
+            "right": 1066.328125,
+            "top": 925.8828125
+          },
+          {
+            "left": 345,
+            "right": 1057.078125,
+            "top": 955.6328125
+          },
+          {
+            "left": 345,
+            "right": 1084.8203125,
+            "top": 985.3828125
+          },
+          {
+            "left": 345,
+            "right": 1075.578125,
+            "top": 1015.1328125
+          },
+          {
+            "left": 345,
+            "right": 1094.0703125,
+            "top": 1044.8828125
+          },
+          {
+            "left": 345,
+            "right": 1075.578125,
+            "top": 1074.6328125
+          },
+          {
+            "left": 345,
+            "right": 1094.0703125,
+            "top": 1104.3828125
+          },
+          {
+            "left": 345,
+            "right": 1075.578125,
+            "top": 1134.1328125
+          },
+          {
+            "left": 345,
+            "right": 1094.0703125,
+            "top": 1163.8828125
+          },
+          {
+            "left": 345,
+            "right": 1075.578125,
+            "top": 1193.6328125
+          },
+          {
+            "left": 345,
+            "right": 751.90625,
+            "top": 1223.3828125
+          }
+        ],
+        "bounds": {
+          "left": 345,
+          "right": 1094.0703125,
+          "top": 864.3828125,
+          "bottom": 1242.8828125,
+          "width": 749.0703125,
+          "height": 378.5
+        },
+        "overflowWrap": "anywhere"
+      },
+      "prose": {
+        "fontSize": "17px",
+        "lineHeight": "29.75px"
+      },
+      "controls": [
+        {
+          "text": "搜索知识",
+          "box": {
+            "left": 1201.1953125,
+            "right": 1277.1953125,
+            "top": 13,
+            "bottom": 49,
+            "width": 76,
+            "height": 36
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "刷新",
+          "box": {
+            "left": 1283.1953125,
+            "right": 1335.1953125,
+            "top": 13,
+            "bottom": 49,
+            "width": 52,
+            "height": 36
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "English",
+          "box": {
+            "left": 1341.1953125,
+            "right": 1410,
+            "top": 13,
+            "bottom": 49,
+            "width": 68.8046875,
+            "height": 36
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "复制引用",
+          "box": {
+            "left": 345,
+            "right": 413,
+            "top": 312.40625,
+            "bottom": 346.40625,
+            "width": 68,
+            "height": 34
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "复制调查问题",
+          "box": {
+            "left": 421,
+            "right": 513,
+            "top": 312.40625,
+            "bottom": 346.40625,
+            "width": 92,
+            "height": 34
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "复制修订指令",
+          "box": {
+            "left": 521,
+            "right": 613,
+            "top": 312.40625,
+            "bottom": 346.40625,
+            "width": 92,
+            "height": 34
+          },
+          "fontSize": "12px"
+        },
+        {
+          "text": "导出 Markdown",
+          "box": {
+            "left": 621,
+            "right": 726.8046875,
+            "top": 312.40625,
+            "bottom": 346.40625,
+            "width": 105.8046875,
+            "height": 34
+          },
+          "fontSize": "12px"
+        }
+      ],
+      "toc": {
+        "box": {
+          "left": 1145,
+          "right": 1335,
+          "top": 103.5,
+          "bottom": 263.265625,
+          "width": 190,
+          "height": 159.765625
+        },
+        "open": true
+      },
+      "windowScrollX": 0,
+      "tocNavigation": {
+        "hash": "#阅读完成",
+        "headingInViewport": true
+      },
+      "tableEnd": {
+        "scrollLeft": 3980,
+        "lastCellRight": 1104.53125,
+        "tableRight": 1105
+      },
+      "shortTable": {
+        "clientWidth": 760,
+        "scrollWidth": 760,
+        "height": 126,
+        "firstCellWidth": 95
+      },
+      "globalNoOverflow": true,
+      "codeActuallyScrolls": true,
+      "tableActuallyScrolls": true,
+      "pathWrapsWithinViewport": true
+    },
+    "wheelInput": {
+      "table": {
+        "scrollLeft": 500,
+        "documentScrollX": 0,
+        "documentWidth": 1440,
+        "innerWidth": 1440
+      },
+      "code": {
+        "scrollLeft": 500,
+        "documentScrollX": 0,
+        "documentWidth": 1440,
+        "innerWidth": 1440
+      },
+      "controls": [
+        {
+          "text": "搜索知识",
+          "disabled": false,
+          "inside": true
+        },
+        {
+          "text": "刷新",
+          "disabled": false,
+          "inside": true
+        },
+        {
+          "text": "English",
+          "disabled": false,
+          "inside": true
+        },
+        {
+          "text": "复制引用",
+          "disabled": false,
+          "inside": true
+        },
+        {
+          "text": "复制调查问题",
+          "disabled": false,
+          "inside": true
+        },
+        {
+          "text": "复制修订指令",
+          "disabled": false,
+          "inside": true
+        },
+        {
+          "text": "导出 Markdown",
+          "disabled": false,
+          "inside": true
+        }
+      ]
+    }
+  },
+  "assertions": {
+    "realDesktop100Percent": true,
+    "wideCellReadableSingleLine": true,
+    "wideTableActuallyOverflowsAndScrolls": true,
+    "lastColumnReachable": true,
+    "globalNoHorizontalOverflow": true,
+    "codeActuallyOverflowsAndScrolls": true,
+    "inlinePathWrapsWithinViewport": true,
+    "shortTableNoOverflow": true,
+    "TOCLandsVisible": true,
+    "realWheelMovesLocalRegionsOnly": true,
+    "majorControlsVisibleAndEnabled": true
+  },
+  "codeRefs": [
+    {
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+      "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/reader.tsx",
+      "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+    },
+    {
+      "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+      "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+    },
+    {
+      "path": "skills/lumine-harness/assets/wiki-reader/styles.css",
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "path": "plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/styles.css",
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "output/playwright/20261008-overflow-after-desktop-1440-short-table.png",
+      "sha256": "0f84e11671db51ec6c0e8ba84396b82be52fd62028be97f50390e0425666df8b"
+    },
+    {
+      "path": "output/playwright/20261008-overflow-after-desktop-1440-table-end.png",
+      "sha256": "b6e44019786617736c27084da76527054d7f6e87f025425831a2bd8365c953b2"
+    },
+    {
+      "path": "output/playwright/20261008-overflow-after-desktop-1440-table-path.png",
+      "sha256": "e1544908108eb5ce3baf2a26ca343d054661e79b984dc05632e9804b02bef08b"
+    },
+    {
+      "path": "output/playwright/20261008-overflow-after-desktop-1440-top.png",
+      "sha256": "4caec479edbac46a7241c67c0f163e520bb49e9244243cef099c2017bb48dcd3"
+    },
+    {
+      "path": "output/playwright/20261008-overflow-before-desktop-1440-table-end.png",
+      "sha256": "afb16013cf66517754c349b28246516c91eba30c8877425559073ea1ac30ec3d"
+    },
+    {
+      "path": "output/playwright/20261008-overflow-before-desktop-1440-table-path.png",
+      "sha256": "efb66109824989e73c35866d2d6eb3eb17a0c4dcc6647a98b34b5294ecd56058"
+    },
+    {
+      "path": "output/playwright/20261008-overflow-before-desktop-1440-top.png",
+      "sha256": "6d6eccd42d7d2fc3cc36069de03c78ebbd68ffe5d1facc23f0ba9af9fc4b7093"
+    }
+  ],
+  "visualReview": [
+    "Before desktop screenshot shows 18 squeezed columns and identifiers split across 14 lines.",
+    "After desktop screenshot shows complete identifier text, a compact table, unchanged code formatting and a fully wrapping inline path.",
+    "Short table remains compact and readable; article actions and page navigation remain visible."
+  ],
+  "limitations": [
+    "This verifies a targeted desktop slice, not all of AC-009 or human acceptance.",
+    "Narrow-screen and 200% post-fix verification deferred per user instruction; pre-change observations retained separately.",
+    "Viewport screenshots exclude Chrome browser chrome; true zoom was confirmed independently via Chrome settings, DPR, innerWidth, visualViewport scale and CSS zoom.",
+    "Fixture content is artificial and demonstrates layout behavior; it does not establish project Wiki semantic correctness."
+  ],
+  "cleanup": {
+    "browserClosed": true,
+    "serverStopped": true,
+    "daemonPidsNoLongerPresent": true,
+    "loopbackPortNoLongerListening": true,
+    "independentTemporaryProfileOnly": true
+  },
+  "tooling": {
+    "preferredWrapperAttempt": "npx @playwright/cli registry metadata unavailable in restricted network",
+    "fallback": "Existing locally cached @playwright/cli executable, named independent session",
+    "temporaryFixtureRetained": true
+  }
+}

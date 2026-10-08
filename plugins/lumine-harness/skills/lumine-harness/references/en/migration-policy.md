@@ -12,7 +12,7 @@ Retain business Skills; expose only four canonical everyday Skills. Migration to
 
 ## Recoverable writes
 
-Each project follows preflight, staging, apply, verify, and completion. Preserve recovery content before writing, use atomic replacements, and log operations. Recovery entry points and logs cannot depend on the Runtime being replaced. Store backups and recovery logs in protected locations, not disposable caches.
+Each project follows preflight, staging, apply, verify, and completion. Preserve recovery content before writing, use atomic replacements, and log operations. Recovery entry points and logs cannot depend on the Runtime being replaced. Store backups and recovery logs in protected locations, not disposable caches. When changing Node support policy, retain previous migration tools, their recovery dependencies, and logs. A new release rejecting an older Node must not remove or interrupt the existing recovery path.
 
 Resume only from expected old or already-applied states; any third content state is an external edit. Roll back only files still matching this migration's output to preserve later user work. Record cross-repository operations individually rather than assuming an atomic transaction. Mark migration complete only after verification.
 

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "samples": [
+    {
+      "sample": "source-normal",
+      "startedAt": "2026-10-08T04:47:02.904685+00:00",
+      "finishedAt": "2026-10-08T04:50:27.133557+00:00",
+      "wallSeconds": 204.22885990142822,
+      "readCommands": 10,
+      "stdoutUtf8Bytes": 144179,
+      "stderrUtf8Bytes": 0,
+      "retrievalWallSeconds": 0.17108774185180664,
+      "answerSha256": "831735eeca8a31b4b77f50323ebf33dbfa3491814e8a2136e899c41e09ce54ba",
+      "metric": "bytes returned by chosen read commands; excludes task prompt and reasoning; wall time includes reasoning/tool latency; not Token measurement"
+    },
+    {
+      "sample": "source-only",
+      "startedAt": "2026-10-08T04:47:04.045616+00:00",
+      "finishedAt": "2026-10-08T04:49:17.136177+00:00",
+      "wallSeconds": 133.09057688713074,
+      "readCommands": 7,
+      "stdoutUtf8Bytes": 139777,
+      "stderrUtf8Bytes": 66,
+      "retrievalWallSeconds": 0.12336993217468262,
+      "answerSha256": "8c7102611e9d4be499a58bc7a1cc2a3ef68d6a84760f5945e645415aead42ca3",
+      "metric": "bytes returned by chosen read commands; excludes task prompt and reasoning; wall time includes reasoning/tool latency; not Token measurement"
+    },
+    {
+      "sample": "parent-normal",
+      "startedAt": "2026-10-08T04:51:44.854584+00:00",
+      "finishedAt": "2026-10-08T04:55:44.377396+00:00",
+      "wallSeconds": 239.5228087902069,
+      "readCommands": 16,
+      "stdoutUtf8Bytes": 147335,
+      "stderrUtf8Bytes": 880,
+      "retrievalWallSeconds": 0.250596284866333,
+      "answerSha256": "19beb92bbfe0baf159222eaa05d551fc575940be32db1ab1a6975567818a7acb",
+      "metric": "bytes returned by chosen read commands; excludes task prompt and reasoning; wall time includes reasoning/tool latency; not Token measurement"
+    },
+    {
+      "sample": "parent-source-only",
+      "startedAt": "2026-10-08T04:51:49.282901+00:00",
+      "finishedAt": "2026-10-08T04:54:54.929248+00:00",
+      "wallSeconds": 185.646329164505,
+      "readCommands": 19,
+      "stdoutUtf8Bytes": 207531,
+      "stderrUtf8Bytes": 0,
+      "retrievalWallSeconds": 0.2712080478668213,
+      "answerSha256": "d2e2fa470a62d3e2e934e2c4b7e00ffba25c079d214d254294fc5e6c79c7d880",
+      "metric": "bytes returned by chosen read commands; excludes task prompt and reasoning; wall time includes reasoning/tool latency; not Token measurement"
+    },
+    {
+      "sample": "source-evolution",
+      "startedAt": "2026-10-08T04:54:16.537798+00:00",
+      "finishedAt": "2026-10-08T04:56:03.287542+00:00",
+      "wallSeconds": 106.74975991249084,
+      "readCommands": 14,
+      "stdoutUtf8Bytes": 117406,
+      "stderrUtf8Bytes": 0,
+      "retrievalWallSeconds": 0.11611223220825195,
+      "answerSha256": "e10ae4a2bbed357dd0c44f59c84abc7c6ab7f625758a3f12ef14e1ee11f8aebe",
+      "metric": "bytes returned by chosen read commands; excludes task prompt and reasoning; wall time includes reasoning/tool latency; not Token measurement"
+    }
+  ],
+  "measurement": "实际read命令返回UTF8字节，非文件总字节或Token；wall time含工具延迟/推理/并行调度，不用于因果或长期节省推断；stdout/stderr首次错误也保留。",
+  "sourceOnlyRestriction": "权威源码与必要规则；normal自由选择Wiki/源码/组合。"
+}

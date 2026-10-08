@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-node-runtime-20260930",
+  "mode": "plan",
+  "goal": "准备整个Lumine Harness的Node支持基线执行计划，并保留验收与阶段边界",
+  "scope": "仅源仓两份Spec、全局ExecPlan、关联验证与Runtime管理的任务记录；不实施运行代码、不写采用工程、不提交推送发布",
+  "specRef": "lumine-refactor-product",
+  "planRef": "lumine-node-runtime-execution",
+  "selectedSkills": [
+    "lumine-plan"
+  ],
+  "acceptanceRefs": [
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-runtime",
+      "baselineHash": "87ccae8d29935e83677b6fb34a26fcffad7172aebeadc6e9256f4ff42d4a1c6c"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-distribution",
+      "baselineHash": "12e470ec3f91c16deeb288deba722bb9fa99e181eb5702337de5dfbab13e19a2"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-012",
+      "baselineHash": "fdc7e2202aed2934be558b5ff37bbc115a2a37a76b3191cd672a0540978e66e1"
+    }
+  ],
+  "evidence": [
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/计划检查.md",
+      "sha256": "8be2490652826e9e4cab908122e5bc9b725b8d879e7ecec4e6afa509b6dfadb9",
+      "outcome": "passed",
+      "observedAt": "2026-09-30T05:42:23Z",
+      "command": "Spec and ExecPlan structural checks, local links, diff check and independent read-only semantic review; planning evidence only",
+      "environment": "Local source checkout; existing CLI used for document contracts; no new runtime, host or target execution",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "905d460922e3d94b3b4528021f8089d40065a53c059cff87493d3597311969ab"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "36718fefca1657b323d898bff5c022539ce078c306e79efefc5e851057a9ba90"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+          "sha256": "283ae153091aea0eb962add7d31eb6cb126d1de295478b462aa315e0a7d5e874"
+        }
+      ]
+    }
+  ],
+  "knowledge": {
+    "required": false,
+    "status": "not_applicable",
+    "refs": []
+  },
+  "summary": "全局产品政策已确认，两份Spec及具体执行计划完成并自审、独立复核通过；新计划尚待Run确认。历史Node18证据保留，未产生新Runtime或宿主通过结论。"
+}

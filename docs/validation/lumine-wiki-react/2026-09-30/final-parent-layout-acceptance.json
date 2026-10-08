@@ -1,0 +1,240 @@
+{
+  "date": "2026-09-30",
+  "browserSession": "wiki-layout-parent-final",
+  "directSecond": {
+    "url": "http://127.0.0.1:4335/?doc=workspace-system-boundaries#evidence-boundary",
+    "title": "三仓职责与系统运行边界 · AI 对话工作区",
+    "active": "evidence-boundary",
+    "targetTop": 20,
+    "targetHeight": 538.140625,
+    "scrollMarginTop": "20px",
+    "svgCount": 2,
+    "diagramIds": [
+      {
+        "id": "repository-map",
+        "svg": true,
+        "top": -1214.75,
+        "height": 565.8125
+      },
+      {
+        "id": "evidence-boundary",
+        "svg": true,
+        "top": 20,
+        "height": 538.140625
+      }
+    ],
+    "servedReaderStatus": 200,
+    "servedReaderSHA": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8"
+  },
+  "navigation": {
+    "records": [
+      {
+        "label": "first-diagram",
+        "url": "http://127.0.0.1:4335/?doc=workspace-system-boundaries#repository-map",
+        "target": "repository-map",
+        "active": "repository-map",
+        "top": 20.25,
+        "height": 565.8125,
+        "scrollMarginTop": "20px",
+        "svgCount": 2
+      },
+      {
+        "label": "back-to-second",
+        "url": "http://127.0.0.1:4335/?doc=workspace-system-boundaries#evidence-boundary",
+        "target": "evidence-boundary",
+        "active": "evidence-boundary",
+        "top": 20,
+        "height": 538.140625,
+        "scrollMarginTop": "20px",
+        "svgCount": 2
+      },
+      {
+        "label": "reload-second",
+        "url": "http://127.0.0.1:4335/?doc=workspace-system-boundaries#evidence-boundary",
+        "target": "evidence-boundary",
+        "active": "evidence-boundary",
+        "top": 20,
+        "height": 538.140625,
+        "scrollMarginTop": "20px",
+        "svgCount": 2
+      }
+    ],
+    "errors": [],
+    "responses": [
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-QHDNOTBI.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-PQ6DSH24.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/mermaid.core-BKOI5I3D.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-S3CGXTRJ.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-TBV5XTGP.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-WQ4ZWICK.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-XXUKEYXA.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-ZA5KOOWO.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-IVKHGDOE.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-4LPMS5I3.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-LDPZ6WLC.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-5OJNVHMS.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-NCUBXNYU.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-VMNPMWRH.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-4PJNGS3V.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-OT3T5U35.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-GJGOXJO5.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-5ERCSKIE.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-YYOVST5G.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/flowDiagram-UKHOOZJN-C5TGSOBS.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-3ZIGILXN.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-G46N24PV.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-DIZ42OWK.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-YEYK5MQC.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-FXIIJKVX.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/dagre-VZM6K2ZE-Z5ECMMKY.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-DB453Z6Q.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-MIQTORAF.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4335/chunks/chunk-ACC7BCQK.js",
+        "status": 200
+      }
+    ]
+  },
+  "stability": {
+    "first": {
+      "top": 20,
+      "height": 538.140625,
+      "active": "evidence-boundary",
+      "svgs": 2
+    },
+    "second": {
+      "top": 20,
+      "height": 538.140625,
+      "active": "evidence-boundary",
+      "svgs": 2
+    },
+    "topStable": true,
+    "heightStable": true,
+    "pageErrors": []
+  },
+  "environment": {
+    "nodeVersion": "v18.20.8",
+    "rootNodeModulesExists": false,
+    "installedReaderSHA": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+    "proposalId": "b19ff93a-2045-4a71-ac5a-0e1b1fb67abc",
+    "proposalStatus": "awaiting_host_verification",
+    "wikiCheck": {
+      "status": "passed",
+      "checkedCount": 29,
+      "issues": [
+        {
+          "code": "KNOWLEDGE_UNVERIFIED",
+          "severity": "warning",
+          "document": "backend-ai-devtools",
+          "message": "Review the source observation and applicable evidence before relying on this text."
+        },
+        {
+          "code": "KNOWLEDGE_STALE",
+          "severity": "warning",
+          "document": "workspace-engineering-operations",
+          "message": "Review the source observation and applicable evidence before relying on this text."
+        }
+      ],
+      "notVerified": [
+        "semantic accuracy",
+        "runtime behavior",
+        "human acceptance"
+      ]
+    },
+    "children": {
+      "ai-conv-plus": "",
+      "gin-vue-admin": ""
+    },
+    "observedService": {
+      "port": 4335,
+      "processObserved": true,
+      "runtime": "parent .lumine/wiki.mjs",
+      "nodeVersion": "v18.20.8"
+    }
+  },
+  "boundary": "Local browser and read-only Node18 checks only; no real Codex host Hook evidence or human acceptance claim."
+}

@@ -1,0 +1,16 @@
+{
+  "project": "ai-conv-plus-workspace",
+  "checkedAt": "2026-09-29T19:53:50.741Z",
+  "documents": 29,
+  "converted": 29,
+  "preserved": [],
+  "lossless": true,
+  "checks": [
+    "body and parsed document model",
+    "generated baseline model",
+    "baseline generation and source history",
+    "applied revision mapping",
+    "observation and review metadata and timestamps"
+  ],
+  "note": "A previously deferred unit had a durable keep-current decision; its old packet and candidate remain for history. The final page was converted transactionally after an explicit source scan; the scan time was not changed by conversion."
+}

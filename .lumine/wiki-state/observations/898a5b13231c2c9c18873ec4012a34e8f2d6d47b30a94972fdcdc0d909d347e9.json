@@ -1,31 +1,54 @@
 {
   "id": "lumine-wiki-reader",
-  "revision": "6875894e23182addc05ed7dc41a34b3ec2b0897ce24c8b14759de433769d1ae5",
+  "revision": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
   "freshness": "current",
-  "checkedAt": "2026-09-29T08:09:45.422Z",
-  "sourceFingerprint": "7abf746242456c754b6e310315c3046cc97ddcd3bae1430974e67ad68aafbd85",
+  "checkedAt": "2026-10-08T04:08:46.152Z",
+  "sourceFingerprint": "b777af9a23c13368489aeaa34db92d9d76004708e088f8303f3b9a9a0a0b09bf",
   "sources": {
     "fingerprints": {
-      "project:skills/lumine-harness/src/browser/reader.ts": "c8675aa87ce05392105fbfc8cac3f5eade668a2a4c4fca1159cf09aedc1398a5",
-      "project:skills/lumine-harness/src/harness/wiki/reader-model.ts": "881b9f326047b2a4b546df57bdf3c8c38c70f41e960bd2ca343617539c131125",
-      "project:skills/lumine-harness/src/harness/wiki/server.ts": "ef41214899be8e32d265522973bc88dde8a5a5c99030133304ebc39aa346d582",
+      "project:skills/lumine-harness/src/browser/reader.tsx": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf",
+      "project:skills/lumine-harness/src/harness/wiki/reader-model.ts": "000bab29b9e97e3537e4ddd72347ceea7809b675a6190c8fc81901e45a3e1178",
+      "project:skills/lumine-harness/src/harness/wiki/server.ts": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800",
       "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
-      "project:scripts/build-reader.ts": "91e03836584c49079231ce0c81c0a9d596434dd141e36b95f30d94a3e4057f33",
-      "project:skills/lumine-harness/src/harness/wiki/engine.ts": "bcf4380e3f2c32f2e13a6c8dd76c523f1d8ff55576972d65df87a5b6cd1e8463"
+      "project:scripts/build-reader.ts": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+      "project:skills/lumine-harness/src/harness/wiki/engine.ts": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971",
+      "project:skills/lumine-harness/src/browser/reader-common.ts": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e",
+      "project:skills/lumine-harness/src/browser/reader-search.tsx": "f5b1c8c4cc71d134d3599e5cb31ea849231f263eaabe4ce9fc4c047f2ae927de",
+      "project:skills/lumine-harness/src/browser/reader-markdown.tsx": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e",
+      "project:skills/lumine-harness/src/browser/reader-diagrams.tsx": "69bbe1e49497dad3955cef18c39908bb4dd3d40caedbeb2c4a7de301835a25c6",
+      "project:skills/lumine-harness/src/browser/styles.css": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+      "project:skills/lumine-harness/src/harness/wiki/references.ts": "9e68c9fb58681c6d03ac2ea5b7308ec2694a125230d954a7452e467b69e18b58",
+      "project:skills/lumine-harness/src/harness/core/document-operations.ts": "4b8979a4316be9af2ceaa164dca0e996ddfa9ca7a0ffb23b04e45470665b9f4e"
     },
     "scopeFingerprints": {
-      "project:skills/lumine-harness/src/browser/reader.ts": "05bfcedc37ef36d114325b1d0749bc43b692c471b9e500a0f357b93ea0cf9949",
-      "project:skills/lumine-harness/src/harness/wiki/reader-model.ts": "66d61962066ea83e638aacf2de71bc031c61fc2aded506888bf3ca4f29f77a0c",
-      "project:skills/lumine-harness/src/harness/wiki/server.ts": "8e42d34fb4ccec19ebea103881d82f67524989fe0d9474321b05d393bdab710c",
+      "project:skills/lumine-harness/src/browser/reader.tsx": "2d9ad2605902440c5bec8dd0f97a0f664375ad73b8d36ad7f32d98098cb48c61",
+      "project:skills/lumine-harness/src/browser/reader-common.ts": "5ab860659335fc2d668c06d36e7b2fb429b5237da9ead0e3ae314462e5e9bcf6",
+      "project:skills/lumine-harness/src/browser/reader-search.tsx": "a6a604c0b0e15670fb4a8ba7faa7791df0228c9dd0f77992b8d5a63b3d8a0d66",
+      "project:skills/lumine-harness/src/browser/reader-markdown.tsx": "22897a51aaf466952850e4072ef03242e32de7d6fbd71e2bee484edd7d148ce5",
+      "project:skills/lumine-harness/src/browser/reader-diagrams.tsx": "bdb6b2a25c6b86a3248d7218587b447b3a9fade92b787408f63e3fcdb981cd8b",
+      "project:skills/lumine-harness/src/browser/styles.css": "1ccb08a5c57ef7c8bdb12524d35d5ad85c44dd609d20c602d3cf6adda86cca32",
+      "project:skills/lumine-harness/src/harness/wiki/reader-model.ts": "f00e191b8a40f7072fdabee4ae51e5b31feabb3aa817619d396d687f8220f593",
+      "project:skills/lumine-harness/src/harness/wiki/server.ts": "917f33ac656c8c6210c52878ee6ecf5f79c0293cd00aff2129d940e9071cdd2a",
       "project:skills/lumine-harness/src/harness/wiki/files.ts": "d43f81bd3f6049c4d8f1df5b3ae8f53ec71c1c6791a2a646cbd966b828e3635a",
-      "project:scripts/build-reader.ts": "db812615e54a084357194f832d176541ff8ffa8581fd7e0a140c9f77f2773c34"
+      "project:skills/lumine-harness/src/harness/wiki/engine.ts": "1efc387530f3209bd2c3f8828107c3241343931a2f1ad7eb665bcce2738a3450",
+      "project:scripts/build-reader.ts": "cf809c5e9aedcaf97a94551254adfbda4131cbddc60e447f6fa4816216a0a1d3",
+      "project:skills/lumine-harness/src/harness/wiki/references.ts": "ccc3f80fc682c2224c7b65490c2f58d318c6100fea10afb8bb23dcea95053160",
+      "project:skills/lumine-harness/src/harness/core/document-operations.ts": "d2f4ce87e97659c9d6d7b3e6458ece4e35d60cbdfbd4260b90aef28ee9f544a8"
     },
     "files": {
-      "project:skills/lumine-harness/src/browser/reader.ts": "c8675aa87ce05392105fbfc8cac3f5eade668a2a4c4fca1159cf09aedc1398a5",
-      "project:skills/lumine-harness/src/harness/wiki/reader-model.ts": "881b9f326047b2a4b546df57bdf3c8c38c70f41e960bd2ca343617539c131125",
-      "project:skills/lumine-harness/src/harness/wiki/server.ts": "ef41214899be8e32d265522973bc88dde8a5a5c99030133304ebc39aa346d582",
+      "project:skills/lumine-harness/src/browser/reader.tsx": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf",
+      "project:skills/lumine-harness/src/browser/reader-common.ts": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e",
+      "project:skills/lumine-harness/src/browser/reader-search.tsx": "f5b1c8c4cc71d134d3599e5cb31ea849231f263eaabe4ce9fc4c047f2ae927de",
+      "project:skills/lumine-harness/src/browser/reader-markdown.tsx": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e",
+      "project:skills/lumine-harness/src/browser/reader-diagrams.tsx": "69bbe1e49497dad3955cef18c39908bb4dd3d40caedbeb2c4a7de301835a25c6",
+      "project:skills/lumine-harness/src/browser/styles.css": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+      "project:skills/lumine-harness/src/harness/wiki/reader-model.ts": "000bab29b9e97e3537e4ddd72347ceea7809b675a6190c8fc81901e45a3e1178",
+      "project:skills/lumine-harness/src/harness/wiki/server.ts": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800",
       "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
-      "project:scripts/build-reader.ts": "91e03836584c49079231ce0c81c0a9d596434dd141e36b95f30d94a3e4057f33"
+      "project:skills/lumine-harness/src/harness/wiki/engine.ts": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971",
+      "project:scripts/build-reader.ts": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+      "project:skills/lumine-harness/src/harness/wiki/references.ts": "9e68c9fb58681c6d03ac2ea5b7308ec2694a125230d954a7452e467b69e18b58",
+      "project:skills/lumine-harness/src/harness/core/document-operations.ts": "4b8979a4316be9af2ceaa164dca0e996ddfa9ca7a0ffb23b04e45470665b9f4e"
     },
     "missing": []
   }

@@ -1,0 +1,376 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-30T07:18:16.656445+00:00",
+  "scope": "AC-012 Node-baseline supplement using the existing two isolated Plugin-only fixtures; rename a fixture Wiki filename only, then verify CLI/HTTP stable identity and stop/restart lifecycle. No production parent, task record, source code, or host Hook is changed.",
+  "limitations": [
+    "HTTP identity/body/config/catalog and CLI query are verified here; this supplement does not rerun browser rendering, Mermaid interaction, export or full reader QA.",
+    "Outbound http/https/fetch requests from Node are intercepted by the existing request guard; physical network disconnection and all socket APIs are not claimed.",
+    "No new semantic source review, actual host lifecycle, automatic continuation or human acceptance is claimed.",
+    "The fixtures have no existing Wiki baseline/candidate files; their continued absence is recorded, while existing knowledge-state and migration-history files are hashed."
+  ],
+  "executionEnvironment": {
+    "initialSandboxLoopbackBindDenied": true,
+    "initialDenialCode": "EPERM",
+    "initialDenialClassification": "environment permission; no Runtime failure and no service started",
+    "loopbackVerification": "authorized local fixture verification with automatic approval"
+  },
+  "fixtures": [
+    {
+      "runtime": "22.18.0",
+      "distribution": "plugin-only",
+      "renamedFrom": "docs/repo-wiki/five.md",
+      "renamedTo": "docs/repo-wiki/五类图解 与稳定引用.md",
+      "stableId": "five-diagrams",
+      "operations": [
+        {
+          "name": "show-chinese-relative-path",
+          "command": [
+            "<node-runtime>",
+            ".lumine/wiki.mjs",
+            "show",
+            "docs/repo-wiki/五类图解 与稳定引用.md",
+            "--root",
+            "<fixture>",
+            "--json"
+          ],
+          "exitCode": 0,
+          "stdoutSha256": "75e2e4c2195d2b8f3562187ff3785e7c169ca2ebe0060299db279ebc2d3fdf93",
+          "stderrEmpty": true
+        },
+        {
+          "name": "show-stable-id",
+          "command": [
+            "<node-runtime>",
+            ".lumine/wiki.mjs",
+            "show",
+            "five-diagrams",
+            "--root",
+            "<fixture>",
+            "--json"
+          ],
+          "exitCode": 0,
+          "stdoutSha256": "75e2e4c2195d2b8f3562187ff3785e7c169ca2ebe0060299db279ebc2d3fdf93",
+          "stderrEmpty": true
+        },
+        {
+          "name": "query-renamed-document",
+          "command": [
+            "<node-runtime>",
+            ".lumine/wiki.mjs",
+            "query",
+            "Five representative",
+            "--root",
+            "<fixture>",
+            "--json"
+          ],
+          "exitCode": 0,
+          "stdoutSha256": "ae5a9a8a809aae746e733df09755c2eaec67eaa5a25962d201e0bc910a361fdc",
+          "stderrEmpty": true
+        }
+      ],
+      "serviceCycles": [
+        {
+          "cycle": 1,
+          "freshProcess": true,
+          "loopbackOnly": true,
+          "newAvailablePort": true,
+          "samePortAfterStop": false,
+          "configLocale": "en",
+          "catalogDocumentCount": 1,
+          "catalogPath": "docs/repo-wiki/五类图解 与稳定引用.md",
+          "documentStableId": "five-diagrams",
+          "canonicalReference": "five-diagrams",
+          "documentRevision": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "documentMarkdownSha256": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "fullBodyRetained": true,
+          "stopSignal": "SIGTERM",
+          "stopExitCode": 0,
+          "stderrEmpty": true
+        },
+        {
+          "cycle": 2,
+          "freshProcess": true,
+          "loopbackOnly": true,
+          "newAvailablePort": false,
+          "samePortAfterStop": true,
+          "configLocale": "en",
+          "catalogDocumentCount": 1,
+          "catalogPath": "docs/repo-wiki/五类图解 与稳定引用.md",
+          "documentStableId": "five-diagrams",
+          "canonicalReference": "five-diagrams",
+          "documentRevision": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "documentMarkdownSha256": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "fullBodyRetained": true,
+          "stopSignal": "SIGTERM",
+          "stopExitCode": 0,
+          "stderrEmpty": true
+        }
+      ],
+      "packageIsolation": {
+        "noSourceTree": true,
+        "noNodeModules": true,
+        "runtimeEntry": ".lumine/wiki.mjs",
+        "nodeFlags": "existing outbound guard only; no source transpiler/import loader"
+      },
+      "actualNodeVersion": "v22.18.0",
+      "outboundGuardProbe": {
+        "blockedBeforeRequest": true,
+        "code": "RUNTIME_OUTBOUND_BLOCKED",
+        "guardSha256": "c85a3a3a700a61792dd686b8bdde96260d58d4f9124392d2bfe7d47c38b0a633"
+      },
+      "rename": {
+        "onlyPathChanged": true,
+        "documentSha256": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+        "stableIdUnchanged": true,
+        "mermaidBlocksUnchanged": true,
+        "mermaidBlockCount": 7
+      },
+      "cliIdentity": {
+        "relativePathResolved": true,
+        "stableIdResolved": true,
+        "sameRevision": true,
+        "markdownMatchesOriginal": true,
+        "queryMatchedSameIdAndChinesePath": true,
+        "revision": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34"
+      },
+      "protectedAssets": {
+        "allContentHashesUnchangedExceptRename": true,
+        "before": {
+          ".lumine/wiki-state/coverage.json": "e70c9ed9ba4b0573c66757ec64ad14a426b91f43e7502ef0ad1949fc9a5c71c9",
+          ".lumine/wiki-state/format.json": "90495c272e098a6a6904dbe90cb1f6454ca16fd5d9ba19cd061456dbefd91d94",
+          ".lumine-migrations/19bb2c56-aee0-4349-b04a-3dcf3eb3e55f/journal.json": "81bd4dd5d65d2f80fc15c9a7c0e9d9d60c325c6655867c60f13b5a1931d0a55e",
+          ".lumine-migrations/19bb2c56-aee0-4349-b04a-3dcf3eb3e55f/proposal.json": "8b1bcc08cd0da611d68151d69a63f9799d76c4f36fbdd6d49ab7462cb503eecf",
+          "docs/FRONTEND.md": "45e65075a670615a519d7183a9446a82565a6ab00d342032169e0497404628d1",
+          "docs/design-docs/core-beliefs.md": "515d9139da34ed282e833ff6cd48199c29aa5b2ea33f4bb8444c34261f06f2de",
+          "docs/design-docs/design-gate.md": "0bf1ba526ac5fc85d60daf5fcc796384b3845fc23943075fe2247e13aa06779e",
+          "docs/design-docs/index.md": "fac692aae7f0a148ff538d386c6758c4e133e852bcd9f9fe1949a47b029904af",
+          "docs/references/browser-automation/index.md": "1d2e339ec19c440ce1ffc164d75b8f47569656a8f5aee543eebf317cc16def2f",
+          "docs/references/index.md": "b5520939923ce588cf66e5a4e74613c12754dad9b2cb5e1848e459289e93e9c0",
+          "docs/references/vendor-llms/index.md": "be3e7705fc29ec158aa95f66388f29c2c47376eaa06559cc6d58d3d7f1b3357d",
+          "docs/repo-wiki/five.md": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "docs/templates/DESIGN.md": "3ad98f22fa1bbff0693649e9076a3c572fddb6da12621b54755cb425a6af2fa6",
+          "docs/templates/exec-plan.md": "a582812ef661d6e2344cf2d40ec1c03d714a6cf2fa72021b8d393001add1af0a",
+          "docs/templates/product-spec.md": "b5440a04d7e707261a1cd960cb80e6071b85e5537404293da1278ec3620be055",
+          "docs/templates/repo-wiki.md": "5b76dfbef22ab46ef341a3a774b31455282f49b7db3454dfa7e8fcce4b2ae0a8",
+          "docs/workflow-artifacts.md": "342ab78a385d3a11adf9ad58512ee8b02d4c578c5f09d98c4bb1c6cd63f11ea4"
+        },
+        "after": {
+          ".lumine/wiki-state/coverage.json": "e70c9ed9ba4b0573c66757ec64ad14a426b91f43e7502ef0ad1949fc9a5c71c9",
+          ".lumine/wiki-state/format.json": "90495c272e098a6a6904dbe90cb1f6454ca16fd5d9ba19cd061456dbefd91d94",
+          ".lumine-migrations/19bb2c56-aee0-4349-b04a-3dcf3eb3e55f/journal.json": "81bd4dd5d65d2f80fc15c9a7c0e9d9d60c325c6655867c60f13b5a1931d0a55e",
+          ".lumine-migrations/19bb2c56-aee0-4349-b04a-3dcf3eb3e55f/proposal.json": "8b1bcc08cd0da611d68151d69a63f9799d76c4f36fbdd6d49ab7462cb503eecf",
+          "docs/FRONTEND.md": "45e65075a670615a519d7183a9446a82565a6ab00d342032169e0497404628d1",
+          "docs/design-docs/core-beliefs.md": "515d9139da34ed282e833ff6cd48199c29aa5b2ea33f4bb8444c34261f06f2de",
+          "docs/design-docs/design-gate.md": "0bf1ba526ac5fc85d60daf5fcc796384b3845fc23943075fe2247e13aa06779e",
+          "docs/design-docs/index.md": "fac692aae7f0a148ff538d386c6758c4e133e852bcd9f9fe1949a47b029904af",
+          "docs/references/browser-automation/index.md": "1d2e339ec19c440ce1ffc164d75b8f47569656a8f5aee543eebf317cc16def2f",
+          "docs/references/index.md": "b5520939923ce588cf66e5a4e74613c12754dad9b2cb5e1848e459289e93e9c0",
+          "docs/references/vendor-llms/index.md": "be3e7705fc29ec158aa95f66388f29c2c47376eaa06559cc6d58d3d7f1b3357d",
+          "docs/repo-wiki/五类图解 与稳定引用.md": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "docs/templates/DESIGN.md": "3ad98f22fa1bbff0693649e9076a3c572fddb6da12621b54755cb425a6af2fa6",
+          "docs/templates/exec-plan.md": "a582812ef661d6e2344cf2d40ec1c03d714a6cf2fa72021b8d393001add1af0a",
+          "docs/templates/product-spec.md": "b5440a04d7e707261a1cd960cb80e6071b85e5537404293da1278ec3620be055",
+          "docs/templates/repo-wiki.md": "5b76dfbef22ab46ef341a3a774b31455282f49b7db3454dfa7e8fcce4b2ae0a8",
+          "docs/workflow-artifacts.md": "342ab78a385d3a11adf9ad58512ee8b02d4c578c5f09d98c4bb1c6cd63f11ea4"
+        },
+        "documentFiles": 13,
+        "wikiStateFiles": 2,
+        "baselineFiles": 0,
+        "candidateFiles": 0,
+        "historyFiles": 2,
+        "renameMapping": {
+          "docs/repo-wiki/five.md": "docs/repo-wiki/五类图解 与稳定引用.md"
+        }
+      },
+      "runtimeBaselines": {
+        ".lumine/wiki.mjs": "75b283db26d0e5b38071ac64dad99a7d22a8d087199e27cf99e9ceff840a0b0b",
+        ".lumine/wiki-main.mjs": "5a61ffc6f7aaaacd5bc007d946e2aa074b3edda79dc5657330a609aff059017d",
+        ".lumine/core/node-bootstrap.mjs": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605",
+        ".lumine/core/node-runtime.mjs": "9c0643ecf080a2676b65fba85cde2c7b9143d51297552d71eb14542717950783",
+        ".lumine/wiki-reader/reader.js": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+        ".lumine/wiki-reader/manifest.json": "ea807052f23bf0f35fa75aab6e971a28621e06b0aafa381b0d8f01cf9bba3c77"
+      },
+      "passed": true
+    },
+    {
+      "runtime": "24.11.0",
+      "distribution": "plugin-only",
+      "renamedFrom": "docs/repo-wiki/five.md",
+      "renamedTo": "docs/repo-wiki/五类图解 与稳定引用.md",
+      "stableId": "five-diagrams",
+      "operations": [
+        {
+          "name": "show-chinese-relative-path",
+          "command": [
+            "<node-runtime>",
+            ".lumine/wiki.mjs",
+            "show",
+            "docs/repo-wiki/五类图解 与稳定引用.md",
+            "--root",
+            "<fixture>",
+            "--json"
+          ],
+          "exitCode": 0,
+          "stdoutSha256": "75e2e4c2195d2b8f3562187ff3785e7c169ca2ebe0060299db279ebc2d3fdf93",
+          "stderrEmpty": true
+        },
+        {
+          "name": "show-stable-id",
+          "command": [
+            "<node-runtime>",
+            ".lumine/wiki.mjs",
+            "show",
+            "five-diagrams",
+            "--root",
+            "<fixture>",
+            "--json"
+          ],
+          "exitCode": 0,
+          "stdoutSha256": "75e2e4c2195d2b8f3562187ff3785e7c169ca2ebe0060299db279ebc2d3fdf93",
+          "stderrEmpty": true
+        },
+        {
+          "name": "query-renamed-document",
+          "command": [
+            "<node-runtime>",
+            ".lumine/wiki.mjs",
+            "query",
+            "Five representative",
+            "--root",
+            "<fixture>",
+            "--json"
+          ],
+          "exitCode": 0,
+          "stdoutSha256": "ae5a9a8a809aae746e733df09755c2eaec67eaa5a25962d201e0bc910a361fdc",
+          "stderrEmpty": true
+        }
+      ],
+      "serviceCycles": [
+        {
+          "cycle": 1,
+          "freshProcess": true,
+          "loopbackOnly": true,
+          "newAvailablePort": true,
+          "samePortAfterStop": false,
+          "configLocale": "en",
+          "catalogDocumentCount": 1,
+          "catalogPath": "docs/repo-wiki/五类图解 与稳定引用.md",
+          "documentStableId": "five-diagrams",
+          "canonicalReference": "five-diagrams",
+          "documentRevision": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "documentMarkdownSha256": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "fullBodyRetained": true,
+          "stopSignal": "SIGTERM",
+          "stopExitCode": 0,
+          "stderrEmpty": true
+        },
+        {
+          "cycle": 2,
+          "freshProcess": true,
+          "loopbackOnly": true,
+          "newAvailablePort": false,
+          "samePortAfterStop": true,
+          "configLocale": "en",
+          "catalogDocumentCount": 1,
+          "catalogPath": "docs/repo-wiki/五类图解 与稳定引用.md",
+          "documentStableId": "five-diagrams",
+          "canonicalReference": "five-diagrams",
+          "documentRevision": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "documentMarkdownSha256": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "fullBodyRetained": true,
+          "stopSignal": "SIGTERM",
+          "stopExitCode": 0,
+          "stderrEmpty": true
+        }
+      ],
+      "packageIsolation": {
+        "noSourceTree": true,
+        "noNodeModules": true,
+        "runtimeEntry": ".lumine/wiki.mjs",
+        "nodeFlags": "existing outbound guard only; no source transpiler/import loader"
+      },
+      "actualNodeVersion": "v24.11.0",
+      "outboundGuardProbe": {
+        "blockedBeforeRequest": true,
+        "code": "RUNTIME_OUTBOUND_BLOCKED",
+        "guardSha256": "c85a3a3a700a61792dd686b8bdde96260d58d4f9124392d2bfe7d47c38b0a633"
+      },
+      "rename": {
+        "onlyPathChanged": true,
+        "documentSha256": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+        "stableIdUnchanged": true,
+        "mermaidBlocksUnchanged": true,
+        "mermaidBlockCount": 7
+      },
+      "cliIdentity": {
+        "relativePathResolved": true,
+        "stableIdResolved": true,
+        "sameRevision": true,
+        "markdownMatchesOriginal": true,
+        "queryMatchedSameIdAndChinesePath": true,
+        "revision": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34"
+      },
+      "protectedAssets": {
+        "allContentHashesUnchangedExceptRename": true,
+        "before": {
+          ".lumine/wiki-state/coverage.json": "e70c9ed9ba4b0573c66757ec64ad14a426b91f43e7502ef0ad1949fc9a5c71c9",
+          ".lumine/wiki-state/format.json": "90495c272e098a6a6904dbe90cb1f6454ca16fd5d9ba19cd061456dbefd91d94",
+          ".lumine-migrations/490297eb-a752-46ac-abe4-8cbb449654cd/journal.json": "d479396467593f762c4d53bae563ea30542ec575162de5f80d4696cf3c29e044",
+          ".lumine-migrations/490297eb-a752-46ac-abe4-8cbb449654cd/proposal.json": "0d46bf85f3d8f8dfe284d1fbf8b5401a0f9a31e535e72cb550ea4ebed293571d",
+          "docs/FRONTEND.md": "45e65075a670615a519d7183a9446a82565a6ab00d342032169e0497404628d1",
+          "docs/design-docs/core-beliefs.md": "515d9139da34ed282e833ff6cd48199c29aa5b2ea33f4bb8444c34261f06f2de",
+          "docs/design-docs/design-gate.md": "0bf1ba526ac5fc85d60daf5fcc796384b3845fc23943075fe2247e13aa06779e",
+          "docs/design-docs/index.md": "fac692aae7f0a148ff538d386c6758c4e133e852bcd9f9fe1949a47b029904af",
+          "docs/references/browser-automation/index.md": "1d2e339ec19c440ce1ffc164d75b8f47569656a8f5aee543eebf317cc16def2f",
+          "docs/references/index.md": "b5520939923ce588cf66e5a4e74613c12754dad9b2cb5e1848e459289e93e9c0",
+          "docs/references/vendor-llms/index.md": "be3e7705fc29ec158aa95f66388f29c2c47376eaa06559cc6d58d3d7f1b3357d",
+          "docs/repo-wiki/five.md": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "docs/templates/DESIGN.md": "3ad98f22fa1bbff0693649e9076a3c572fddb6da12621b54755cb425a6af2fa6",
+          "docs/templates/exec-plan.md": "a582812ef661d6e2344cf2d40ec1c03d714a6cf2fa72021b8d393001add1af0a",
+          "docs/templates/product-spec.md": "b5440a04d7e707261a1cd960cb80e6071b85e5537404293da1278ec3620be055",
+          "docs/templates/repo-wiki.md": "5b76dfbef22ab46ef341a3a774b31455282f49b7db3454dfa7e8fcce4b2ae0a8",
+          "docs/workflow-artifacts.md": "342ab78a385d3a11adf9ad58512ee8b02d4c578c5f09d98c4bb1c6cd63f11ea4"
+        },
+        "after": {
+          ".lumine/wiki-state/coverage.json": "e70c9ed9ba4b0573c66757ec64ad14a426b91f43e7502ef0ad1949fc9a5c71c9",
+          ".lumine/wiki-state/format.json": "90495c272e098a6a6904dbe90cb1f6454ca16fd5d9ba19cd061456dbefd91d94",
+          ".lumine-migrations/490297eb-a752-46ac-abe4-8cbb449654cd/journal.json": "d479396467593f762c4d53bae563ea30542ec575162de5f80d4696cf3c29e044",
+          ".lumine-migrations/490297eb-a752-46ac-abe4-8cbb449654cd/proposal.json": "0d46bf85f3d8f8dfe284d1fbf8b5401a0f9a31e535e72cb550ea4ebed293571d",
+          "docs/FRONTEND.md": "45e65075a670615a519d7183a9446a82565a6ab00d342032169e0497404628d1",
+          "docs/design-docs/core-beliefs.md": "515d9139da34ed282e833ff6cd48199c29aa5b2ea33f4bb8444c34261f06f2de",
+          "docs/design-docs/design-gate.md": "0bf1ba526ac5fc85d60daf5fcc796384b3845fc23943075fe2247e13aa06779e",
+          "docs/design-docs/index.md": "fac692aae7f0a148ff538d386c6758c4e133e852bcd9f9fe1949a47b029904af",
+          "docs/references/browser-automation/index.md": "1d2e339ec19c440ce1ffc164d75b8f47569656a8f5aee543eebf317cc16def2f",
+          "docs/references/index.md": "b5520939923ce588cf66e5a4e74613c12754dad9b2cb5e1848e459289e93e9c0",
+          "docs/references/vendor-llms/index.md": "be3e7705fc29ec158aa95f66388f29c2c47376eaa06559cc6d58d3d7f1b3357d",
+          "docs/repo-wiki/五类图解 与稳定引用.md": "8c4a1b85547bba2bc1373b388ef1741ede41f9a0728e50b468c2ad23f1ad9c34",
+          "docs/templates/DESIGN.md": "3ad98f22fa1bbff0693649e9076a3c572fddb6da12621b54755cb425a6af2fa6",
+          "docs/templates/exec-plan.md": "a582812ef661d6e2344cf2d40ec1c03d714a6cf2fa72021b8d393001add1af0a",
+          "docs/templates/product-spec.md": "b5440a04d7e707261a1cd960cb80e6071b85e5537404293da1278ec3620be055",
+          "docs/templates/repo-wiki.md": "5b76dfbef22ab46ef341a3a774b31455282f49b7db3454dfa7e8fcce4b2ae0a8",
+          "docs/workflow-artifacts.md": "342ab78a385d3a11adf9ad58512ee8b02d4c578c5f09d98c4bb1c6cd63f11ea4"
+        },
+        "documentFiles": 13,
+        "wikiStateFiles": 2,
+        "baselineFiles": 0,
+        "candidateFiles": 0,
+        "historyFiles": 2,
+        "renameMapping": {
+          "docs/repo-wiki/five.md": "docs/repo-wiki/五类图解 与稳定引用.md"
+        }
+      },
+      "runtimeBaselines": {
+        ".lumine/wiki.mjs": "75b283db26d0e5b38071ac64dad99a7d22a8d087199e27cf99e9ceff840a0b0b",
+        ".lumine/wiki-main.mjs": "5a61ffc6f7aaaacd5bc007d946e2aa074b3edda79dc5657330a609aff059017d",
+        ".lumine/core/node-bootstrap.mjs": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605",
+        ".lumine/core/node-runtime.mjs": "9c0643ecf080a2676b65fba85cde2c7b9143d51297552d71eb14542717950783",
+        ".lumine/wiki-reader/reader.js": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+        ".lumine/wiki-reader/manifest.json": "ea807052f23bf0f35fa75aab6e971a28621e06b0aafa381b0d8f01cf9bba3c77"
+      },
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "passed": true,
+  "noServersLeftRunning": true
+}

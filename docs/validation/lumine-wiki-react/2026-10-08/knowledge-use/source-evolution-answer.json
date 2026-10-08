@@ -1,0 +1,102 @@
+{
+  "caseId": "source-evolution-table",
+  "arm": "normal",
+  "answer": "桌面阅读的当前方式是：正文保持可读的页面宽度，18 列这类超宽表格在表格自身区域横向滚动，代码块也在自身区域滚动；正文中的长路径允许换行。当前 Wiki《知识树、图解与来源阅读》30、32 行直接说明了桌面范围与这套策略，本轮又以当前源码核对了它。\n\n最小实现入口是 skills/lumine-harness/src/browser/styles.css:160-173。第 160 行 .prose 的 overflow-wrap:anywhere 允许正文长路径在必要处断行；第 171 行 pre 的 max-width:100% 与 overflow:auto 处理代码块；第 172 行 table 的 display:block、max-width:100%、overflow-x:auto 让超宽表格局部滚动；第 173 行 th/td 设置 min-width:10ch、overflow-wrap:normal、word-break:normal，覆盖从正文继承的 anywhere，保留单元格最小可读宽度及长标识符的正常断行方式。因此正文长路径和表格文字不必、也不应在这里强制使用同一种换行策略。normal 仍允许语言本来的正常断行，并不等于所有单元格 white-space:nowrap。\n\n如果仍出现单元格逐字竖排，先核对这一条 th/td 规则是否存在、是否被其他规则覆盖、实际样式是否已加载，以及 table 的局部滚动规则是否生效；同时确认正文确实位于 .prose 内。挂载链为 reader.tsx:167 的 MarkdownBody，reader-markdown.tsx:65、71 将 safeMarkdown(doc.body) 的结果放入 DOM，第 179 行返回 className=\"prose\" 的容器；reader-common.ts:146-153 负责 Markdown 解析和清洗。外围 styles.css:38、68、142-143 的 minmax(0,...) 与 min-width:0 也参与约束正文区域，若问题表现为整个页面被撑宽，再向这些布局入口查。18 列没有专门的列数分支；当前机制是宽度与溢出规则。\n\n源码修改应落在上述规范源码，不能直接修补生成的分发副本或 Plugin wrapper。构建与加载定位可沿 scripts/build-reader.ts:110、123-124（React 入口及复制 styles.css）和 src/browser/index.html:8（加载 /styles.css）；scripts/build-runtime.ts:228 调用阅读器构建。因此源码正确却仍显示旧行为时，应继续核对实际服务的样式资源和分发版本，本轮没有检查运行中的资源，也没有执行构建。\n\n据此只能确认当前 Wiki 与当前源码对桌面阅读机制一致，并提供后续修改/排查入口。不能宣称这篇 18 列表格已通过本轮浏览器验收，更不能外推手机场景或任意列数、任意内容的表格都已验收。Wiki 第 30 行明确说窄屏使用不属于产品支持范围；第 68 行也明确静态代码不能替代浏览器验收或人类接受。本轮按范围未运行测试、浏览器或网络，也未读取 Validation、Spec、Plan 或历史答案；本样本仅验证当前真实改动后的知识再次使用，不评价长期效益。",
+  "chosenPath": "current-wiki-then-current-source",
+  "wikiActuallyUsed": true,
+  "sources": [
+    {
+      "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+      "line": 30,
+      "sha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6"
+    },
+    {
+      "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+      "line": 32,
+      "sha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6"
+    },
+    {
+      "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+      "line": 68,
+      "sha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "line": 160,
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "line": 171,
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "line": 172,
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "line": 173,
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "line": 142,
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/reader.tsx",
+      "line": 167,
+      "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+      "line": 65,
+      "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+      "line": 179,
+      "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/reader-common.ts",
+      "line": 146,
+      "sha256": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e"
+    },
+    {
+      "path": "scripts/build-reader.ts",
+      "line": 110,
+      "sha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d"
+    },
+    {
+      "path": "scripts/build-reader.ts",
+      "line": 123,
+      "sha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d"
+    },
+    {
+      "path": "scripts/build-runtime.ts",
+      "line": 228,
+      "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/index.html",
+      "line": 8,
+      "sha256": "56f92da80a93a5bc14867b4ee6b7db2c1a8bfa1ff3c250a68000b6324189dc7a"
+    },
+    {
+      "path": "AGENTS.md",
+      "line": 15,
+      "sha256": "ae10670251f771dae6ae760ffa73668d3409fae3d2163a01e9db6caa1f62c678"
+    }
+  ],
+  "limits": [
+    "只确认当前Wiki与当前源码机制及修改定位；未验证实际浏览器渲染、运行资源版本或人类接受。",
+    "未运行测试、构建、浏览器或网络；未修改实现、Wiki或配置。",
+    "未读取docs/validation、Spec、Plan、历史答案、评分标准或.lumine/wiki-state/updates历史包内容。",
+    "初始rg --files目录枚举包含.lumine下的文件名；未打开这些历史文件，也未将其作为答案证据。",
+    "桌面阅读机制不能外推手机支持或任意列数、任意内容均已验收。",
+    "本样本只验证当前真实改动后的知识再次使用，不评价长期效益。"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "proposalId": "d8ab1262-c961-4aaa-8bc0-e40ecc0bfcd7",
+  "counts": {
+    "write": 200,
+    "preserve": 8
+  },
+  "changedWrites": [
+    ".lumine/core/node-bootstrap.mjs",
+    ".codex/hooks.json",
+    ".lumine/root.json",
+    ".lumine/managed.json"
+  ],
+  "allChangesWithinConfirmedScope": true,
+  "noBusinessOrKnowledgeWrites": true,
+  "unchangedManagedWriteCount": 196,
+  "warnings": [],
+  "hostVerificationRequiredAfterApply": true,
+  "reviewNote": "The initial prefix assertions omitted unchanged managed docs and gitignore; corrected review permits only identical before/after hashes outside runtime, Skill and selected Adapter config paths."
+}

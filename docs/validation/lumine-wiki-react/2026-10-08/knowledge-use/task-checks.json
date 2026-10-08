@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T05:02:35.545Z",
+  "scope": "Current bounded verify record and repository document closure",
+  "checks": [
+    {
+      "command": "./.lumine/cli task check lumine-wiki-knowledge-verify-20261008",
+      "exitCode": 0,
+      "output": "任务检查：通过\n"
+    },
+    {
+      "command": "./.lumine/cli check docs --json",
+      "exitCode": 0,
+      "output": "{\n  \"ok\": true,\n  \"scope\": \"docs\",\n  \"issues\": [],\n  \"evidenceLevel\": \"repository_checked\"\n}\n"
+    },
+    {
+      "command": "./.lumine/cli wiki check --json",
+      "exitCode": 0,
+      "output": "{\n  \"status\": \"passed\",\n  \"issues\": [],\n  \"checked\": [\n    \"lumine-adapters\",\n    \"lumine-architecture\",\n    \"lumine-wiki\",\n    \"lumine-task-check\",\n    \"lumine-workflow\",\n    \"lumine-wiki-reader\",\n    \"lumine-root-config\",\n    \"lumine-adoption\"\n  ],\n  \"notVerified\": [\n    \"semantic accuracy\",\n    \"runtime behavior\",\n    \"human acceptance\"\n  ]\n}\n"
+    },
+    {
+      "command": "./.lumine/cli task check lumine-node-runtime-run-20260930",
+      "exitCode": 0,
+      "output": "任务检查：通过\n"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "output": "git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead\n"
+    }
+  ],
+  "historicalTaskPolicy": "Earlier implement evidence and knowledge hashes retained; current plan progress is not backdated into old validation.",
+  "hostFinalization": "Not performed; isolated text fixtures do not provide an actual parent Hook receipt."
+}

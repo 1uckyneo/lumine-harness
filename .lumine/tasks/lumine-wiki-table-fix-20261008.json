@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-wiki-table-fix-20261008",
+  "mode": "implement",
+  "goal": "修复桌面宽表格逐字竖排的可读性缺陷，落实桌面产品范围，并以受管升级同步至已授权父仓",
+  "scope": "复用已确认Repo Wiki Run及2026-10-08用户直接授权的产品范围调整；规范CSS、受影响Spec/设计/Plan、生成分发、知识说明与证据可写；父仓仅受管升级，业务子仓及其Node配置只读，不提交推送发布。局部修复任务只承诺此范围，不承载整个AC009或AC-reader验收。",
+  "specRef": "lumine-wiki-product-experience",
+  "planRef": "lumine-wiki-react-execution",
+  "selectedSkills": [
+    "lumine-run",
+    "lumine-knowledge"
+  ],
+  "acceptanceRefs": [],
+  "evidence": [
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/恢复与桌面范围收口.md",
+      "sha256": "63f3865c979c3698b28d3f27c166f2870a7070fafc9f076fea7016d15567515a",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T04:16:07.064407+00:00",
+      "command": "Scoped desktop product-range update, minimal wide-table repair, protected knowledge application and managed parent upgrade",
+      "environment": "macOS arm64; actual Node24.14.0; Chrome154 desktop; scoped samples only, no real target Hook",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "docs/product-specs/Repo Wiki 知识体系与 React 阅读体验.md",
+          "sha256": "7feec3083a185efd7a74fdcb537f31d5382c08cf9885b5f541a425d71479b588"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/product-specs/Lumine 流程与文本知识体验.md",
+          "sha256": "cbb4ac7340003989491e3ce6f9528691bfc5aea61e9a3ed0cfa32acee42ffcb5"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/design-docs/Repo Wiki 阅读体验设计.md",
+          "sha256": "a66fcf793db2c46e8df6457977bd6df1f3e4cda627cfac116c6adee7e6b6099d"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/design-docs/Repo Wiki 阅读体验原型.html",
+          "sha256": "cd442d4a45602416b062052d59fb5dcd10c040dda92384f9c62cc8c9f0ca5f66"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/exec-plans/active/Repo Wiki 知识体系与 React 阅读器改造.md",
+          "sha256": "1c9076bbd887d68955725604d5241b24212acfc57b3d25917d72792f4be784d2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/overflow-desktop-result.json",
+      "sha256": "f8a086ece89d546ac5e8343f9ee71aafd1199a70a1a423d283a96bb289562cc9",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T04:06:12.181413+00:00",
+      "command": "After-fix desktop readability and actual local horizontal scrolling, short table/code/path regression",
+      "environment": "macOS arm64; actual Node24.14.0; Chrome154 desktop; scoped samples only, no real target Hook",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/parent-desktop-integration.json",
+      "sha256": "24168821fa12f532ef95761a209220e890b648696a3ba291d46caa4ab6276c8f",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T04:14:23.862893+00:00",
+      "command": "Parent current managed reader real long document and desktop zoom integration with unchanged protected knowledge",
+      "environment": "macOS arm64; actual Node24.14.0; Chrome154 desktop; scoped samples only, no real target Hook",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/gates.json",
+      "sha256": "4cdd0a0e9e225c1c528f6d4623a1a39051a648252d37227e5a13bded273da091",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T04:10:43.907177+00:00",
+      "command": "Required repository gates, generated Runtime suite and wrapper consistency",
+      "environment": "macOS arm64; actual Node24.14.0; Chrome154 desktop; scoped samples only, no real target Hook",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-reader.ts",
+          "sha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/wiki-reader/manifest.json",
+          "sha256": "2433c8db87e09019ea36a436ec0d1b3019c6269e81b610028aa83e29cc6e086e"
+        },
+        {
+          "repoId": "project",
+          "path": "plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        }
+      ]
+    }
+  ],
+  "knowledge": {
+    "required": true,
+    "status": "synchronized",
+    "refs": [
+      "lumine-wiki-reader"
+    ],
+    "sync": {
+      "contractVersion": 2,
+      "assessedAt": "2026-10-08T04:16:07.064407+00:00",
+      "changedSources": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/product-specs/Repo Wiki 知识体系与 React 阅读体验.md",
+          "sha256": "7feec3083a185efd7a74fdcb537f31d5382c08cf9885b5f541a425d71479b588"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/product-specs/Lumine 流程与文本知识体验.md",
+          "sha256": "cbb4ac7340003989491e3ce6f9528691bfc5aea61e9a3ed0cfa32acee42ffcb5"
+        }
+      ],
+      "verifiedScope": [
+        "Only table-cell wrapping/minimum width and current desktop product scope changed; navigation API, Runtime, Node policy and business contracts unchanged.",
+        "Protected packets cd8ee2ed-dccf-4594-8198-ccc9fcaac5c8 and d42c0af4-c2aa-466f-96dc-a9ebefb7f29e saved reader explanation and source/baseline together.",
+        "Independent source review covers only the new wide-content paragraph; scope change follows the user confirmed Spec, not a whole-page semantic certification."
+      ],
+      "decisions": [
+        {
+          "ref": "lumine-wiki-reader",
+          "action": "revised",
+          "sha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+          "reason": "Explain readable table columns and local scrolling, retain long-path wrapping, and distinguish current desktop product scope from already-existing adaptive styles. Other mechanism pages need no rewrite for this local CSS change."
+        }
+      ]
+    }
+  },
+  "summary": "桌面1440宽表同样出现逐字换行，最小CSS修复已完成并通过定点浏览器复验；用户明确改为桌面阅读器，不要求窄屏场景。适用完整AC009新基线仍由原Wiki任务及本轮verify任务追踪，本局部修复不把技术样本标成整项AC或人类理解通过；无原验收/evidence被重标。 本轮局部目标完成：规范构建/同步、桌面及真实桌面200%技术样本、父仓保护同步、相关知识应用通过。整体Wiki AC与真实宿主收口不由此标成完成。"
+}

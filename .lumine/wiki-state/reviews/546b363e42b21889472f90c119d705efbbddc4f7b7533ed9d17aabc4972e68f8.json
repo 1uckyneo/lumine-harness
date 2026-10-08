@@ -1,20 +1,22 @@
 {
   "documentId": "lumine-task-check",
-  "revision": "3f92c104b98b78b3e8313575a9654b8c6f1955533021743a0df5b0f79383ea4e",
-  "sourceFingerprint": "d9048ad1d7e819cfdfbacafce8ac7b8cc48a0c11f13d8b4812daf86b5b26bd49",
-  "reviewedAt": "2026-09-29T10:27:18.710Z",
+  "revision": "6a7c1c3e1fc769f5b345414663c92782fe3c4e344f05e8c6cd4e6fe7263076c0",
+  "sourceFingerprint": "1a107a33b30530016ed08c1ea1717dfd34bda6b284f85dc6cc7dd5f367097873",
+  "reviewedAt": "2026-09-30T07:02:26.264054Z",
   "reviewer": {
     "kind": "agent",
-    "role": "author"
+    "role": "independent"
   },
   "outcome": "reviewed",
   "scope": [
-    "本次阶段交接、确认恢复与验证边界的修订段落及其规范来源"
+    "Node 22.x >=22.18.0 与 Node 24.x >=24.11.0 的精确支持范围及低语法例外",
+    "入口版本拒绝先于事件读取、根查找与实现加载，包括共同生成的静态 Hook 定位器",
+    "迁移恢复工具与日志保留边界，恢复操作不绕过当前工具版本策略",
+    "终端进程与真实 Hook 进程证据区别，以及 Bun 嵌入运行环境的独立验证边界"
   ],
-  "findings": [
-    "已逐项对照当前中英 Skills、阶段交接参考、入口规则和适用 Runtime 提示；没有把阶段内授权扩展到未来未确认成果。"
-  ],
+  "findings": [],
   "limitations": [
-    "仅本次修订范围的作者核实；不是整页重新审计，不证明真实新宿主会话或人类阅读接受。"
+    "未验证真实宿主生命周期与自动续跑。",
+    "本次仅复核 Node 政策、入口顺序、恢复边界与 Bun；不代表全文所有语义已复核。"
   ]
 }

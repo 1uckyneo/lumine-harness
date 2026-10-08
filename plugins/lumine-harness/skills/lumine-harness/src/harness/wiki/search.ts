@@ -1,4 +1,4 @@
-import type { KnowledgeCard, KnowledgeDocument, KnowledgeMatch, Section } from './types.ts';
+import type { KnowledgeCard, KnowledgeMatch, ReaderDocument, Section } from './types.ts';
 const segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
 const STOP = new Set(('a an and are as at be by can could do does for from how i in into is it me my of on or our please should that the their this to was we what when where which who why will with would you your 这个 那个 这些 那些 怎么 怎样 如何 为什么 什么 是否 可以 需要 进行 处理 提示 页面 项目 功能 使用 相关 一个 一下 我们 以及 还有').split(' '));
 function stem(word: string): string {
@@ -56,11 +56,11 @@ function snippet(text: string, query: string[], maxChars = 560): string {
   for (let index = selected + 1; index < sentences.length && sentences[index].index + sentences[index].segment.length - start <= maxChars - 2; index++) end = sentences[index].index + sentences[index].segment.length;
   return `${start ? '…' : ''}${clean.slice(start, end).trim()}${end < clean.length ? '…' : ''}`;
 }
-function directBody(document: KnowledgeDocument, section: Section): string {
+function directBody(document: ReaderDocument, section: Section): string {
   const child = document.sections.find((item) => item.startLine > section.startLine && item.startLine <= section.endLine);
   return child ? document.body.split(/\r?\n/).slice(section.startLine - 1, child.startLine - 1).join('\n') : section.body;
 }
-export function searchKnowledge(documents: KnowledgeDocument[], query: string, limit: number, budget: number): { query: string; cards: KnowledgeCard[]; total: number; contextChars: number; noAnswer: boolean } {
+export function searchKnowledge(documents: ReaderDocument[], query: string, limit: number, budget: number, offset = 0, bounded = true): { query: string; cards: KnowledgeCard[]; total: number; contextChars: number; noAnswer: boolean } {
   const terms = searchTerms(query);
   if (!terms.length && query.trim()) return { query, cards: [], total: 0, contextChars: 2, noAnswer: true };
   const entries = documents.map((document) => {
@@ -89,15 +89,22 @@ export function searchKnowledge(documents: KnowledgeDocument[], query: string, l
     return { ...entry, matched, score, sectionScores, relevant: !terms.length || (matched.length > 0 && coverage >= 0.25) };
   }).filter((entry) => entry.relevant).sort((a, b) => b.score - a.score || a.document.title.localeCompare(b.document.title));
   const cards: KnowledgeCard[] = [];
-  for (const entry of ranked) {
+  for (const entry of ranked.slice(offset)) {
     if (cards.length >= limit) break;
     const document = entry.document;
     const matches: KnowledgeMatch[] = entry.sectionScores.filter((section) => section.score > 0 || !terms.length).slice(0, 2).map(({ section, text }) => ({ sectionId: section.id, title: section.title, excerpt: snippet(text || section.body, terms), reference: section.id ? `${document.id}#${section.id}` : document.id }));
     const sectionSources = new Set(entry.sectionScores.slice(0, 2).flatMap((item) => item.section.sources));
     const sources = (sectionSources.size ? document.sources.filter((source) => sectionSources.has(source.id)) : document.sources).slice(0, 3);
     const item: KnowledgeCard = { id: document.id, title: document.title, summary: document.summary, type: document.type, status: document.status, collection: document.collection, locale: document.locale, path: document.path, revision: document.revision, freshness: document.freshness, repositories: document.repositories, tags: document.tags, sources, relations: document.relations.slice(0, 4), diagramIds: document.diagrams.map((diagram) => diagram.id), diagramTypes: [...new Set(document.diagrams.map((diagram) => diagram.code.split(/\s+/)[0]))], reason: entry.matched.join(', '), matches, checkedAt: document.checkedAt, sourceObservation: document.sourceObservation, semanticReview: document.semanticReview };
-    if (JSON.stringify([...cards, item]).length > budget) { item.matches = item.matches.slice(0, 1).map((match) => ({ ...match, excerpt: snippet(match.excerpt, terms, 160) })); item.sources = item.sources.slice(0, 1); item.relations = []; item.summary = snippet(item.summary, terms, 180); }
-    if (JSON.stringify([...cards, item]).length <= budget) cards.push(item);
+    if (bounded && JSON.stringify([...cards, item]).length > budget) { item.matches = item.matches.slice(0, 1).map((match) => ({ ...match, excerpt: snippet(match.excerpt, terms, 160) })); item.sources = item.sources.slice(0, 1); item.relations = []; item.summary = snippet(item.summary, terms, 180); }
+    if (!bounded || JSON.stringify([...cards, item]).length <= budget) cards.push(item);
   }
   return { query, cards, total: ranked.length, contextChars: JSON.stringify(cards).length, noAnswer: ranked.length === 0 };
+}
+
+/** Browser pagination has its own bounded page size and never consumes the Agent context budget. */
+export function searchKnowledgePage(documents: ReaderDocument[], query: string, limit: number, offset: number): { query: string; cards: KnowledgeCard[]; total: number; hasMore: boolean } {
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > 30 || !Number.isSafeInteger(offset) || offset < 0) throw new Error('SEARCH_PAGE_INVALID');
+  const result = searchKnowledge(documents, query, limit, 1, offset, false);
+  return { query, cards: result.cards, total: result.total, hasMore: offset + result.cards.length < result.total };
 }

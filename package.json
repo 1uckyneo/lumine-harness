@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@11.13.0",
   "engines": {
-    "node": "^22.18.0 || >=24.11.0"
+    "node": "^22.18.0 || ^24.11.0"
   },
   "scripts": {
     "runtime:typecheck": "tsc --noEmit",
@@ -14,12 +14,16 @@
     "runtime:test:source": "node --import tsx --test skills/lumine-harness/src/harness/tests/*.test.ts"
   },
   "devDependencies": {
-    "@types/node": "^26.3.0",
+    "@types/node": "^22.20.4",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
     "dompurify": "3.4.13",
     "esbuild": "0.28.2",
     "ignore": "7.0.5",
     "marked": "18.0.9",
     "mermaid": "11.16.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "tsdown": "^0.22.14",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2",

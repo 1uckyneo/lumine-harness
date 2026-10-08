@@ -1,0 +1,58 @@
+{
+  "scenario": "Current installer; temporary owned main Mermaid chunk added by upgrade; real rollback while new reader stays open",
+  "initialProposalId": "d5d7124a-8e6d-4977-aa6a-66cdca932429",
+  "upgradeProposalId": "2d0dd322-d91c-434e-bcce-161c6c5705e7",
+  "rollback": {
+    "result": {
+      "status": "rolled_back",
+      "conflicts": []
+    },
+    "newChunkExists": false,
+    "oldChunkExists": true,
+    "readerRestored": true,
+    "managedHasNew": false,
+    "documentExists": true
+  },
+  "browser": {
+    "date": "2026-09-30",
+    "browserSession": "actual-rollback",
+    "port": 4337,
+    "beforeRollback": {
+      "url": "http://127.0.0.1:4337/?doc=rollback-long#long-text",
+      "diagramCanvasTop": 11138.09375,
+      "diagramCanvasText": "Loading…",
+      "mermaidRequests": [],
+      "readerEntryLoaded": true
+    },
+    "afterRollback": {
+      "missingAsset": "chunks/mermaid.core-BKOI5I3D-rollback-fixture.js",
+      "httpStatus": 404,
+      "bodyRetained": true,
+      "mermaidSourceRetained": "flowchart LR\n    A[Readable text] --> B[Restored diagram]",
+      "alert": "The diagram resource could not load. Reload the reader when its service is available; the explanation and Mermaid text remain readable.",
+      "reloadButtonVisible": true,
+      "svgPresent": false,
+      "expectedConsole404Count": 1
+    },
+    "afterReloadButton": {
+      "url": "http://127.0.0.1:4337/?doc=rollback-long#long-text",
+      "urlPreserved": true,
+      "oldEntryLoaded": true,
+      "oldEntryHttpStatus": 200,
+      "oldMainChunk": "chunks/mermaid.core-BKOI5I3D.js",
+      "oldMainChunkHttpStatus": 200,
+      "requestedChunkCount": 29,
+      "allRequestedChunksHttpStatus": 200,
+      "bodyRetained": true,
+      "mermaidSourceRetained": true,
+      "svgPresent": true,
+      "diagramErrors": 0,
+      "pageErrors": []
+    }
+  },
+  "limits": [
+    "Temporary version changes the main Mermaid chunk path only",
+    "No target host Hook proof",
+    "No formal parent repository rollback"
+  ]
+}

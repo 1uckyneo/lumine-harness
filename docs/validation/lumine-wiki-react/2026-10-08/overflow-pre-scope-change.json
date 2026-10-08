@@ -1,0 +1,1867 @@
+{
+  "scope": "Observations completed before the user deferred narrow-screen work; retained diagnostic history only, not current delivery gates.",
+  "before100": {
+    "matrix": [
+      {
+        "viewport": 1440,
+        "measured": {
+          "innerWidth": 1440,
+          "innerHeight": 1000,
+          "outerWidth": 1200,
+          "outerHeight": 1040,
+          "dpr": 1,
+          "visualScale": 1,
+          "documentWidth": 1440,
+          "bodyWidth": 1440,
+          "code": {
+            "clientWidth": 760,
+            "scrollWidth": 10039,
+            "initial": 0,
+            "end": 9279,
+            "overflow": "auto",
+            "box": {
+              "left": 345,
+              "right": 1105,
+              "top": 520.25,
+              "bottom": 571.6953125,
+              "width": 760,
+              "height": 51.4453125
+            }
+          },
+          "table": {
+            "clientWidth": 760,
+            "scrollWidth": 760,
+            "initial": 0,
+            "end": 0,
+            "overflow": "auto",
+            "box": {
+              "left": 345,
+              "right": 1105,
+              "top": 676.2890625,
+              "bottom": 1127.7890625,
+              "width": 760,
+              "height": 451.5
+            }
+          },
+          "path": {
+            "characters": 995,
+            "fragments": [
+              {
+                "left": 350,
+                "right": 1089.8203125,
+                "top": 1234.3828125
+              },
+              {
+                "left": 345,
+                "right": 1057.078125,
+                "top": 1264.1328125
+              },
+              {
+                "left": 345,
+                "right": 1066.328125,
+                "top": 1293.8828125
+              },
+              {
+                "left": 345,
+                "right": 1057.078125,
+                "top": 1323.6328125
+              },
+              {
+                "left": 345,
+                "right": 1084.8203125,
+                "top": 1353.3828125
+              },
+              {
+                "left": 345,
+                "right": 1075.578125,
+                "top": 1383.1328125
+              },
+              {
+                "left": 345,
+                "right": 1094.0703125,
+                "top": 1412.8828125
+              },
+              {
+                "left": 345,
+                "right": 1075.578125,
+                "top": 1442.6328125
+              },
+              {
+                "left": 345,
+                "right": 1094.0703125,
+                "top": 1472.3828125
+              },
+              {
+                "left": 345,
+                "right": 1075.578125,
+                "top": 1502.1328125
+              },
+              {
+                "left": 345,
+                "right": 1094.0703125,
+                "top": 1531.8828125
+              },
+              {
+                "left": 345,
+                "right": 1075.578125,
+                "top": 1561.6328125
+              },
+              {
+                "left": 345,
+                "right": 751.90625,
+                "top": 1591.3828125
+              }
+            ],
+            "bounds": {
+              "left": 345,
+              "right": 1094.0703125,
+              "top": 1232.3828125,
+              "bottom": 1610.8828125,
+              "width": 749.0703125,
+              "height": 378.5
+            },
+            "overflowWrap": "anywhere"
+          },
+          "prose": {
+            "fontSize": "17px",
+            "lineHeight": "29.75px"
+          },
+          "controls": [
+            {
+              "text": "搜索知识",
+              "box": {
+                "left": 1201.1953125,
+                "right": 1277.1953125,
+                "top": 13.5,
+                "bottom": 49.5,
+                "width": 76,
+                "height": 36
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "刷新",
+              "box": {
+                "left": 1283.1953125,
+                "right": 1335.1953125,
+                "top": 13.5,
+                "bottom": 49.5,
+                "width": 52,
+                "height": 36
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "English",
+              "box": {
+                "left": 1341.1953125,
+                "right": 1410,
+                "top": 13.5,
+                "bottom": 49.5,
+                "width": 68.8046875,
+                "height": 36
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制引用",
+              "box": {
+                "left": 345,
+                "right": 413,
+                "top": 312.90625,
+                "bottom": 346.90625,
+                "width": 68,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制调查问题",
+              "box": {
+                "left": 421,
+                "right": 513,
+                "top": 312.90625,
+                "bottom": 346.90625,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制修订指令",
+              "box": {
+                "left": 521,
+                "right": 613,
+                "top": 312.90625,
+                "bottom": 346.90625,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "导出 Markdown",
+              "box": {
+                "left": 621,
+                "right": 726.8046875,
+                "top": 312.90625,
+                "bottom": 346.90625,
+                "width": 105.8046875,
+                "height": 34
+              },
+              "fontSize": "12px"
+            }
+          ],
+          "toc": {
+            "box": {
+              "left": 1145,
+              "right": 1335,
+              "top": 104,
+              "bottom": 237.171875,
+              "width": 190,
+              "height": 133.171875
+            },
+            "open": true
+          },
+          "windowScrollX": 0,
+          "tocNavigation": {
+            "hash": "#阅读完成",
+            "headingInViewport": false
+          },
+          "tableEnd": {
+            "scrollLeft": 0,
+            "lastCellRight": 1104.5,
+            "tableRight": 1105
+          },
+          "globalNoOverflow": true,
+          "codeActuallyScrolls": true,
+          "tableActuallyScrolls": false,
+          "pathWrapsWithinViewport": true
+        }
+      },
+      {
+        "viewport": 1024,
+        "measured": {
+          "innerWidth": 1024,
+          "innerHeight": 1000,
+          "outerWidth": 1200,
+          "outerHeight": 1040,
+          "dpr": 1,
+          "visualScale": 1,
+          "documentWidth": 1024,
+          "bodyWidth": 1024,
+          "code": {
+            "clientWidth": 728,
+            "scrollWidth": 10039,
+            "initial": 0,
+            "end": 9311,
+            "overflow": "auto",
+            "box": {
+              "left": 268,
+              "right": 996,
+              "top": 591.046875,
+              "bottom": 642.4921875,
+              "width": 728,
+              "height": 51.4453125
+            }
+          },
+          "table": {
+            "clientWidth": 728,
+            "scrollWidth": 728,
+            "initial": 0,
+            "end": 0,
+            "overflow": "auto",
+            "box": {
+              "left": 268,
+              "right": 996,
+              "top": 747.0859375,
+              "bottom": 1272.0859375,
+              "width": 728,
+              "height": 525
+            }
+          },
+          "path": {
+            "characters": 995,
+            "fragments": [
+              {
+                "left": 273,
+                "right": 929.59375,
+                "top": 1378.6796875
+              },
+              {
+                "left": 268,
+                "right": 924.59375,
+                "top": 1408.4296875
+              },
+              {
+                "left": 268,
+                "right": 980.078125,
+                "top": 1438.1796875
+              },
+              {
+                "left": 268,
+                "right": 989.328125,
+                "top": 1467.9296875
+              },
+              {
+                "left": 268,
+                "right": 989.328125,
+                "top": 1497.6796875
+              },
+              {
+                "left": 268,
+                "right": 933.84375,
+                "top": 1527.4296875
+              },
+              {
+                "left": 268,
+                "right": 943.0859375,
+                "top": 1557.1796875
+              },
+              {
+                "left": 268,
+                "right": 952.3359375,
+                "top": 1586.9296875
+              },
+              {
+                "left": 268,
+                "right": 980.078125,
+                "top": 1616.6796875
+              },
+              {
+                "left": 268,
+                "right": 943.0859375,
+                "top": 1646.4296875
+              },
+              {
+                "left": 268,
+                "right": 952.3359375,
+                "top": 1676.1796875
+              },
+              {
+                "left": 268,
+                "right": 980.078125,
+                "top": 1705.9296875
+              },
+              {
+                "left": 268,
+                "right": 952.3359375,
+                "top": 1735.6796875
+              },
+              {
+                "left": 268,
+                "right": 508.4453125,
+                "top": 1765.4296875
+              }
+            ],
+            "bounds": {
+              "left": 268,
+              "right": 989.328125,
+              "top": 1376.6796875,
+              "bottom": 1784.9296875,
+              "width": 721.328125,
+              "height": 408.25
+            },
+            "overflowWrap": "anywhere"
+          },
+          "prose": {
+            "fontSize": "17px",
+            "lineHeight": "29.75px"
+          },
+          "controls": [
+            {
+              "text": "搜索知识",
+              "box": {
+                "left": 785.1953125,
+                "right": 861.1953125,
+                "top": 13.5,
+                "bottom": 49.5,
+                "width": 76,
+                "height": 36
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "刷新",
+              "box": {
+                "left": 867.1953125,
+                "right": 919.1953125,
+                "top": 13.5,
+                "bottom": 49.5,
+                "width": 52,
+                "height": 36
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "English",
+              "box": {
+                "left": 925.1953125,
+                "right": 994,
+                "top": 13.5,
+                "bottom": 49.5,
+                "width": 68.8046875,
+                "height": 36
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制引用",
+              "box": {
+                "left": 268,
+                "right": 336,
+                "top": 383.703125,
+                "bottom": 417.703125,
+                "width": 68,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制调查问题",
+              "box": {
+                "left": 344,
+                "right": 436,
+                "top": 383.703125,
+                "bottom": 417.703125,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制修订指令",
+              "box": {
+                "left": 444,
+                "right": 536,
+                "top": 383.703125,
+                "bottom": 417.703125,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "导出 Markdown",
+              "box": {
+                "left": 544,
+                "right": 649.8046875,
+                "top": 383.703125,
+                "bottom": 417.703125,
+                "width": 105.8046875,
+                "height": 34
+              },
+              "fontSize": "12px"
+            }
+          ],
+          "toc": {
+            "box": {
+              "left": 268,
+              "right": 996,
+              "top": 96,
+              "bottom": 134.796875,
+              "width": 728,
+              "height": 38.796875
+            },
+            "open": false
+          },
+          "windowScrollX": 0,
+          "tocNavigation": {
+            "hash": "#阅读完成",
+            "headingInViewport": false
+          },
+          "tableEnd": {
+            "scrollLeft": 0,
+            "lastCellRight": 995.5,
+            "tableRight": 996
+          },
+          "globalNoOverflow": true,
+          "codeActuallyScrolls": true,
+          "tableActuallyScrolls": false,
+          "pathWrapsWithinViewport": true
+        }
+      },
+      {
+        "viewport": 390,
+        "measured": {
+          "innerWidth": 390,
+          "innerHeight": 1000,
+          "outerWidth": 1200,
+          "outerHeight": 1040,
+          "dpr": 1,
+          "visualScale": 1,
+          "documentWidth": 390,
+          "bodyWidth": 390,
+          "code": {
+            "clientWidth": 356,
+            "scrollWidth": 10039,
+            "initial": 0,
+            "end": 9683,
+            "overflow": "auto",
+            "box": {
+              "left": 17,
+              "right": 373,
+              "top": 775.6015625,
+              "bottom": 827.046875,
+              "width": 356,
+              "height": 51.4453125
+            }
+          },
+          "table": {
+            "clientWidth": 356,
+            "scrollWidth": 631,
+            "initial": 0,
+            "end": 275,
+            "overflow": "auto",
+            "box": {
+              "left": 17,
+              "right": 373,
+              "top": 928.84375,
+              "bottom": 1674.34375,
+              "width": 356,
+              "height": 745.5
+            }
+          },
+          "path": {
+            "characters": 995,
+            "fragments": [
+              {
+                "left": 22,
+                "right": 370.15625,
+                "top": 1777.640625
+              },
+              {
+                "left": 17,
+                "right": 365.15625,
+                "top": 1805.640625
+              },
+              {
+                "left": 17,
+                "right": 286.8203125,
+                "top": 1833.640625
+              },
+              {
+                "left": 17,
+                "right": 286.8203125,
+                "top": 1861.640625
+              },
+              {
+                "left": 17,
+                "right": 286.8203125,
+                "top": 1889.640625
+              },
+              {
+                "left": 17,
+                "right": 286.8203125,
+                "top": 1917.640625
+              },
+              {
+                "left": 17,
+                "right": 286.8203125,
+                "top": 1945.640625
+              },
+              {
+                "left": 17,
+                "right": 286.8203125,
+                "top": 1973.640625
+              },
+              {
+                "left": 17,
+                "right": 286.8203125,
+                "top": 2001.640625
+              },
+              {
+                "left": 17,
+                "right": 286.8203125,
+                "top": 2029.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2057.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2085.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2113.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2141.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2169.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2197.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2225.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2253.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2281.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2309.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2337.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2365.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2393.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2421.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2449.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2477.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2505.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2533.640625
+              },
+              {
+                "left": 17,
+                "right": 295.5234375,
+                "top": 2561.640625
+              },
+              {
+                "left": 17,
+                "right": 365.15625,
+                "top": 2589.640625
+              },
+              {
+                "left": 17,
+                "right": 182.375,
+                "top": 2617.640625
+              }
+            ],
+            "bounds": {
+              "left": 17,
+              "right": 370.15625,
+              "top": 1775.640625,
+              "bottom": 2636.640625,
+              "width": 353.15625,
+              "height": 861
+            },
+            "overflowWrap": "anywhere"
+          },
+          "prose": {
+            "fontSize": "16px",
+            "lineHeight": "28px"
+          },
+          "controls": [
+            {
+              "text": "☰",
+              "box": {
+                "left": 12,
+                "right": 53.1953125,
+                "top": 8.5,
+                "bottom": 48.5,
+                "width": 41.1953125,
+                "height": 40
+              },
+              "fontSize": "15px"
+            },
+            {
+              "text": "刷新",
+              "box": {
+                "left": 287.140625,
+                "right": 323.140625,
+                "top": 11.5,
+                "bottom": 45.5,
+                "width": 36,
+                "height": 34
+              },
+              "fontSize": "11px"
+            },
+            {
+              "text": "English",
+              "box": {
+                "left": 326.140625,
+                "right": 378,
+                "top": 11.5,
+                "bottom": 45.5,
+                "width": 51.859375,
+                "height": 34
+              },
+              "fontSize": "11px"
+            },
+            {
+              "text": "复制引用",
+              "box": {
+                "left": 17,
+                "right": 85,
+                "top": 502.8046875,
+                "bottom": 536.8046875,
+                "width": 68,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制调查问题",
+              "box": {
+                "left": 93,
+                "right": 185,
+                "top": 502.8046875,
+                "bottom": 536.8046875,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制修订指令",
+              "box": {
+                "left": 193,
+                "right": 285,
+                "top": 502.8046875,
+                "bottom": 536.8046875,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "导出 Markdown",
+              "box": {
+                "left": 17,
+                "right": 122.8046875,
+                "top": 544.8046875,
+                "bottom": 578.8046875,
+                "width": 105.8046875,
+                "height": 34
+              },
+              "fontSize": "12px"
+            }
+          ],
+          "toc": {
+            "box": {
+              "left": 17,
+              "right": 373,
+              "top": 82,
+              "bottom": 233.171875,
+              "width": 356,
+              "height": 151.171875
+            },
+            "open": true
+          },
+          "windowScrollX": 0,
+          "tocNavigation": {
+            "hash": "#阅读完成",
+            "headingInViewport": false
+          },
+          "tableEnd": {
+            "scrollLeft": 275,
+            "lastCellRight": 372.5,
+            "tableRight": 373
+          },
+          "globalNoOverflow": true,
+          "codeActuallyScrolls": true,
+          "tableActuallyScrolls": true,
+          "pathWrapsWithinViewport": true
+        }
+      }
+    ]
+  },
+  "before200": {
+    "matrix": [
+      {
+        "viewport": 1440,
+        "measured": {
+          "innerWidth": 720,
+          "innerHeight": 500,
+          "outerWidth": 1200,
+          "outerHeight": 1040,
+          "dpr": 2,
+          "visualScale": 1,
+          "documentWidth": 720,
+          "bodyWidth": 720,
+          "code": {
+            "clientWidth": 686,
+            "scrollWidth": 10039,
+            "initial": 0,
+            "end": 9353,
+            "overflow": "auto",
+            "box": {
+              "left": 17,
+              "right": 703,
+              "top": 565.23046875,
+              "bottom": 616.6796875,
+              "width": 686,
+              "height": 51.44921875
+            }
+          },
+          "table": {
+            "clientWidth": 686,
+            "scrollWidth": 686,
+            "initial": 0,
+            "end": 0,
+            "overflow": "auto",
+            "box": {
+              "left": 17,
+              "right": 703,
+              "top": 718.4765625,
+              "bottom": 1267.9765625,
+              "width": 686,
+              "height": 549.5
+            },
+            "firstCell": {
+              "textCharacters": 35,
+              "width": 37,
+              "height": 457,
+              "textLines": 17,
+              "overflowWrap": "anywhere"
+            }
+          },
+          "path": {
+            "characters": 995,
+            "fragments": [
+              {
+                "left": 22,
+                "right": 639.96875,
+                "top": 1371.2734375
+              },
+              {
+                "left": 17,
+                "right": 634.96875,
+                "top": 1399.2734375
+              },
+              {
+                "left": 17,
+                "right": 687.19140625,
+                "top": 1427.2734375
+              },
+              {
+                "left": 17,
+                "right": 695.89453125,
+                "top": 1455.2734375
+              },
+              {
+                "left": 17,
+                "right": 695.89453125,
+                "top": 1483.2734375
+              },
+              {
+                "left": 17,
+                "right": 643.671875,
+                "top": 1511.2734375
+              },
+              {
+                "left": 17,
+                "right": 652.375,
+                "top": 1539.2734375
+              },
+              {
+                "left": 17,
+                "right": 661.078125,
+                "top": 1567.2734375
+              },
+              {
+                "left": 17,
+                "right": 687.19140625,
+                "top": 1595.2734375
+              },
+              {
+                "left": 17,
+                "right": 652.375,
+                "top": 1623.2734375
+              },
+              {
+                "left": 17,
+                "right": 661.078125,
+                "top": 1651.2734375
+              },
+              {
+                "left": 17,
+                "right": 687.19140625,
+                "top": 1679.2734375
+              },
+              {
+                "left": 17,
+                "right": 661.078125,
+                "top": 1707.2734375
+              },
+              {
+                "left": 17,
+                "right": 243.30078125,
+                "top": 1735.2734375
+              }
+            ],
+            "bounds": {
+              "left": 17,
+              "right": 695.89453125,
+              "top": 1369.2734375,
+              "bottom": 1754.2734375,
+              "width": 678.89453125,
+              "height": 385
+            },
+            "overflowWrap": "anywhere"
+          },
+          "prose": {
+            "fontSize": "16px",
+            "lineHeight": "28px"
+          },
+          "controls": [
+            {
+              "text": "☰",
+              "box": {
+                "left": 12,
+                "right": 53.19140625,
+                "top": 8.5,
+                "bottom": 48.5,
+                "width": 41.19140625,
+                "height": 40
+              },
+              "fontSize": "15px"
+            },
+            {
+              "text": "刷新",
+              "box": {
+                "left": 617.14453125,
+                "right": 653.14453125,
+                "top": 11.5,
+                "bottom": 45.5,
+                "width": 36,
+                "height": 34
+              },
+              "fontSize": "11px"
+            },
+            {
+              "text": "English",
+              "box": {
+                "left": 656.14453125,
+                "right": 708,
+                "top": 11.5,
+                "bottom": 45.5,
+                "width": 51.85546875,
+                "height": 34
+              },
+              "fontSize": "11px"
+            },
+            {
+              "text": "复制引用",
+              "box": {
+                "left": 17,
+                "right": 85,
+                "top": 362.43359375,
+                "bottom": 396.43359375,
+                "width": 68,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制调查问题",
+              "box": {
+                "left": 93,
+                "right": 185,
+                "top": 362.43359375,
+                "bottom": 396.43359375,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制修订指令",
+              "box": {
+                "left": 193,
+                "right": 285,
+                "top": 362.43359375,
+                "bottom": 396.43359375,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "导出 Markdown",
+              "box": {
+                "left": 293,
+                "right": 398.80078125,
+                "top": 362.43359375,
+                "bottom": 396.43359375,
+                "width": 105.80078125,
+                "height": 34
+              },
+              "fontSize": "12px"
+            }
+          ],
+          "toc": {
+            "box": {
+              "left": 17,
+              "right": 703,
+              "top": 82,
+              "bottom": 120.796875,
+              "width": 686,
+              "height": 38.796875
+            },
+            "open": false
+          },
+          "windowScrollX": 0,
+          "tocNavigation": {
+            "hash": "#阅读完成",
+            "headingInViewport": true
+          },
+          "tableEnd": {
+            "scrollLeft": 0,
+            "lastCellRight": 702.5,
+            "tableRight": 703
+          },
+          "globalNoOverflow": true,
+          "codeActuallyScrolls": true,
+          "tableActuallyScrolls": false,
+          "pathWrapsWithinViewport": true
+        }
+      },
+      {
+        "viewport": 1024,
+        "measured": {
+          "innerWidth": 512,
+          "innerHeight": 500,
+          "outerWidth": 1200,
+          "outerHeight": 1040,
+          "dpr": 2,
+          "visualScale": 1,
+          "documentWidth": 512,
+          "bodyWidth": 512,
+          "code": {
+            "clientWidth": 478,
+            "scrollWidth": 10039,
+            "initial": 0,
+            "end": 9561,
+            "overflow": "auto",
+            "box": {
+              "left": 17,
+              "right": 495,
+              "top": 677.62109375,
+              "bottom": 729.0703125,
+              "width": 478,
+              "height": 51.44921875
+            }
+          },
+          "table": {
+            "clientWidth": 478,
+            "scrollWidth": 631,
+            "initial": 0,
+            "end": 153,
+            "overflow": "auto",
+            "box": {
+              "left": 17,
+              "right": 495,
+              "top": 830.8671875,
+              "bottom": 1576.3671875,
+              "width": 478,
+              "height": 745.5
+            },
+            "firstCell": {
+              "textCharacters": 35,
+              "width": 34,
+              "height": 629,
+              "textLines": 24,
+              "overflowWrap": "anywhere"
+            }
+          },
+          "path": {
+            "characters": 995,
+            "fragments": [
+              {
+                "left": 22,
+                "right": 448.484375,
+                "top": 1679.6640625
+              },
+              {
+                "left": 17,
+                "right": 478.30078125,
+                "top": 1707.6640625
+              },
+              {
+                "left": 17,
+                "right": 452.1875,
+                "top": 1735.6640625
+              },
+              {
+                "left": 17,
+                "right": 469.59765625,
+                "top": 1763.6640625
+              },
+              {
+                "left": 17,
+                "right": 478.30078125,
+                "top": 1791.6640625
+              },
+              {
+                "left": 17,
+                "right": 452.1875,
+                "top": 1819.6640625
+              },
+              {
+                "left": 17,
+                "right": 478.30078125,
+                "top": 1847.6640625
+              },
+              {
+                "left": 17,
+                "right": 426.078125,
+                "top": 1875.6640625
+              },
+              {
+                "left": 17,
+                "right": 443.484375,
+                "top": 1903.6640625
+              },
+              {
+                "left": 17,
+                "right": 426.078125,
+                "top": 1931.6640625
+              },
+              {
+                "left": 17,
+                "right": 443.484375,
+                "top": 1959.6640625
+              },
+              {
+                "left": 17,
+                "right": 426.078125,
+                "top": 1987.6640625
+              },
+              {
+                "left": 17,
+                "right": 443.484375,
+                "top": 2015.6640625
+              },
+              {
+                "left": 17,
+                "right": 426.078125,
+                "top": 2043.6640625
+              },
+              {
+                "left": 17,
+                "right": 443.484375,
+                "top": 2071.6640625
+              },
+              {
+                "left": 17,
+                "right": 426.078125,
+                "top": 2099.6640625
+              },
+              {
+                "left": 17,
+                "right": 443.484375,
+                "top": 2127.6640625
+              },
+              {
+                "left": 17,
+                "right": 426.078125,
+                "top": 2155.6640625
+              },
+              {
+                "left": 17,
+                "right": 443.484375,
+                "top": 2183.6640625
+              },
+              {
+                "left": 17,
+                "right": 469.59765625,
+                "top": 2211.6640625
+              },
+              {
+                "left": 17,
+                "right": 77.9296875,
+                "top": 2239.6640625
+              }
+            ],
+            "bounds": {
+              "left": 17,
+              "right": 478.30078125,
+              "top": 1677.6640625,
+              "bottom": 2258.6640625,
+              "width": 461.30078125,
+              "height": 581
+            },
+            "overflowWrap": "anywhere"
+          },
+          "prose": {
+            "fontSize": "16px",
+            "lineHeight": "28px"
+          },
+          "controls": [
+            {
+              "text": "☰",
+              "box": {
+                "left": 12,
+                "right": 53.19140625,
+                "top": 8.5,
+                "bottom": 48.5,
+                "width": 41.19140625,
+                "height": 40
+              },
+              "fontSize": "15px"
+            },
+            {
+              "text": "刷新",
+              "box": {
+                "left": 409.14453125,
+                "right": 445.14453125,
+                "top": 11.5,
+                "bottom": 45.5,
+                "width": 36,
+                "height": 34
+              },
+              "fontSize": "11px"
+            },
+            {
+              "text": "English",
+              "box": {
+                "left": 448.14453125,
+                "right": 500,
+                "top": 11.5,
+                "bottom": 45.5,
+                "width": 51.85546875,
+                "height": 34
+              },
+              "fontSize": "11px"
+            },
+            {
+              "text": "复制引用",
+              "box": {
+                "left": 17,
+                "right": 85,
+                "top": 474.82421875,
+                "bottom": 508.82421875,
+                "width": 68,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制调查问题",
+              "box": {
+                "left": 93,
+                "right": 185,
+                "top": 474.82421875,
+                "bottom": 508.82421875,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制修订指令",
+              "box": {
+                "left": 193,
+                "right": 285,
+                "top": 474.82421875,
+                "bottom": 508.82421875,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "导出 Markdown",
+              "box": {
+                "left": 293,
+                "right": 398.80078125,
+                "top": 474.82421875,
+                "bottom": 508.82421875,
+                "width": 105.80078125,
+                "height": 34
+              },
+              "fontSize": "12px"
+            }
+          ],
+          "toc": {
+            "box": {
+              "left": 17,
+              "right": 495,
+              "top": 82,
+              "bottom": 233.1875,
+              "width": 478,
+              "height": 151.1875
+            },
+            "open": true
+          },
+          "windowScrollX": 0,
+          "tocNavigation": {
+            "hash": "#阅读完成",
+            "headingInViewport": true
+          },
+          "tableEnd": {
+            "scrollLeft": 153,
+            "lastCellRight": 494.5,
+            "tableRight": 495
+          },
+          "globalNoOverflow": true,
+          "codeActuallyScrolls": true,
+          "tableActuallyScrolls": true,
+          "pathWrapsWithinViewport": true
+        }
+      },
+      {
+        "viewport": 390,
+        "measured": {
+          "innerWidth": 195,
+          "innerHeight": 500,
+          "outerWidth": 1200,
+          "outerHeight": 1040,
+          "dpr": 2,
+          "visualScale": 1,
+          "documentWidth": 195,
+          "bodyWidth": 195,
+          "code": {
+            "clientWidth": 161,
+            "scrollWidth": 10039,
+            "initial": 0,
+            "end": 9878,
+            "overflow": "auto",
+            "box": {
+              "left": 17,
+              "right": 178,
+              "top": 976.65625,
+              "bottom": 1028.10546875,
+              "width": 161,
+              "height": 51.44921875
+            }
+          },
+          "table": {
+            "clientWidth": 161,
+            "scrollWidth": 631,
+            "initial": 0,
+            "end": 470,
+            "overflow": "auto",
+            "box": {
+              "left": 17,
+              "right": 178,
+              "top": 1129.90234375,
+              "bottom": 1875.40234375,
+              "width": 161,
+              "height": 745.5
+            },
+            "firstCell": {
+              "textCharacters": 35,
+              "width": 34,
+              "height": 629,
+              "textLines": 24,
+              "overflowWrap": "anywhere"
+            }
+          },
+          "path": {
+            "characters": 995,
+            "fragments": [
+              {
+                "left": 22,
+                "right": 100.3359375,
+                "top": 1978.69921875
+              },
+              {
+                "left": 17,
+                "right": 95.3359375,
+                "top": 2006.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2034.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2062.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2090.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2118.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2146.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2174.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2202.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2230.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2258.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2286.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2314.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2342.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2370.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2398.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2426.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2454.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2482.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2510.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2538.69921875
+              },
+              {
+                "left": 17,
+                "right": 156.26171875,
+                "top": 2566.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2594.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 2622.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2650.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 2678.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2706.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 2734.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2762.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 2790.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2818.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 2846.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2874.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 2902.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2930.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 2958.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 2986.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3014.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3042.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3070.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3098.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3126.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3154.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3182.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3210.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3238.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3266.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3294.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3322.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3350.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3378.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3406.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3434.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3462.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3490.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3518.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3546.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3574.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3602.69921875
+              },
+              {
+                "left": 17,
+                "right": 164.96484375,
+                "top": 3630.69921875
+              },
+              {
+                "left": 17,
+                "right": 147.55859375,
+                "top": 3658.69921875
+              },
+              {
+                "left": 17,
+                "right": 173.66796875,
+                "top": 3686.69921875
+              },
+              {
+                "left": 17,
+                "right": 121.4453125,
+                "top": 3714.69921875
+              },
+              {
+                "left": 17,
+                "right": 138.85546875,
+                "top": 3742.69921875
+              }
+            ],
+            "bounds": {
+              "left": 17,
+              "right": 173.66796875,
+              "top": 1976.69921875,
+              "bottom": 3761.69921875,
+              "width": 156.66796875,
+              "height": 1785
+            },
+            "overflowWrap": "anywhere"
+          },
+          "prose": {
+            "fontSize": "16px",
+            "lineHeight": "28px"
+          },
+          "controls": [
+            {
+              "text": "☰",
+              "box": {
+                "left": 12,
+                "right": 53.19140625,
+                "top": 8.5,
+                "bottom": 48.5,
+                "width": 41.19140625,
+                "height": 40
+              },
+              "fontSize": "15px"
+            },
+            {
+              "text": "刷新",
+              "box": {
+                "left": 92.14453125,
+                "right": 128.14453125,
+                "top": 11.5,
+                "bottom": 45.5,
+                "width": 36,
+                "height": 34
+              },
+              "fontSize": "11px"
+            },
+            {
+              "text": "English",
+              "box": {
+                "left": 131.14453125,
+                "right": 183,
+                "top": 11.5,
+                "bottom": 45.5,
+                "width": 51.85546875,
+                "height": 34
+              },
+              "fontSize": "11px"
+            },
+            {
+              "text": "复制引用",
+              "box": {
+                "left": 17,
+                "right": 85,
+                "top": 591.859375,
+                "bottom": 625.859375,
+                "width": 68,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制调查问题",
+              "box": {
+                "left": 17,
+                "right": 109,
+                "top": 633.859375,
+                "bottom": 667.859375,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "复制修订指令",
+              "box": {
+                "left": 17,
+                "right": 109,
+                "top": 675.859375,
+                "bottom": 709.859375,
+                "width": 92,
+                "height": 34
+              },
+              "fontSize": "12px"
+            },
+            {
+              "text": "导出 Markdown",
+              "box": {
+                "left": 17,
+                "right": 122.80078125,
+                "top": 717.859375,
+                "bottom": 751.859375,
+                "width": 105.80078125,
+                "height": 34
+              },
+              "fontSize": "12px"
+            }
+          ],
+          "toc": {
+            "box": {
+              "left": 17,
+              "right": 178,
+              "top": 82,
+              "bottom": 233.1875,
+              "width": 161,
+              "height": 151.1875
+            },
+            "open": true
+          },
+          "windowScrollX": 0,
+          "tocNavigation": {
+            "hash": "#阅读完成",
+            "headingInViewport": true
+          },
+          "tableEnd": {
+            "scrollLeft": 470,
+            "lastCellRight": 177.5,
+            "tableRight": 178
+          },
+          "globalNoOverflow": true,
+          "codeActuallyScrolls": true,
+          "tableActuallyScrolls": true,
+          "pathWrapsWithinViewport": true
+        }
+      }
+    ]
+  },
+  "realBrowserZoom": {
+    "method": "Independent temporary Chrome profile appearance setting: page zoom 200%",
+    "before": {
+      "innerWidth": 1440,
+      "dpr": 1
+    },
+    "after": {
+      "innerWidth": 720,
+      "dpr": 2,
+      "visualViewportScale": 1,
+      "cssZoom": "1"
+    },
+    "restoredTo100": true
+  },
+  "caveats": [
+    "Initial 100% TOC measurements did not wait for smooth scrolling to settle; false headingInViewport values are preliminary measurements, not established navigation failures.",
+    "No post-fix narrow-screen or 200% matrix was run after the scope changed."
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "auditDate": "2026-10-08",
+  "auditedAt": "2026-10-08T04:42:49.628260+00:00",
+  "scope": "Second read-only recovery pass against the latest parent upgrade",
+  "proposalId": "8c2059a8-f42b-4fb0-9425-13e7f86452db",
+  "selectedAdapters": [
+    "codex"
+  ],
+  "journalStatus": "awaiting_host_verification",
+  "latestAppliedAt": "2026-10-08T04:07:32.928Z",
+  "journalHasHostEvidence": false,
+  "integrity": {
+    "operationCounts": {
+      "write": 200,
+      "preserve": 8
+    },
+    "postHashMismatchCount": 0,
+    "postHashMismatches": [],
+    "managedCount": 198,
+    "managedMismatchCount": 0,
+    "managedMismatches": []
+  },
+  "activeProbe": {
+    "product": "codex",
+    "issuedAt": "2026-10-08T04:00:15.812Z",
+    "expiresAt": "2026-10-09T04:00:15.812Z",
+    "validAtAudit": true,
+    "issuedBeforeLatestApply": true,
+    "rootHashMatchesParent": true,
+    "hostVersion": "unknown",
+    "hostVersionSource": "unknown",
+    "eventsFilePresent": false,
+    "eventCount": 0,
+    "eventsAfterLatestApplyCount": 0,
+    "processRuntimePresentCount": 0
+  },
+  "adapterStatus": {
+    "command": "adapter status codex --details --json --root <parent>",
+    "exitCode": 0,
+    "readiness": "ready",
+    "runtimeStatus": "not_tested",
+    "hostVersion": "unknown",
+    "observedAt": null,
+    "checkProcess": {
+      "source": "actual_process",
+      "runtime": "node",
+      "version": "24.14.0",
+      "support": "supported"
+    },
+    "hostProcess": {
+      "status": "not_observed",
+      "runtime": null,
+      "observedAt": null
+    }
+  },
+  "sessionMetadata": [
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "statusProtocolVersion": 2,
+      "startedAt": "2026-09-28T08:31:46.125Z",
+      "updatedAt": "2026-09-28T08:50:22.426Z",
+      "resumedAt": null,
+      "cwdMatchesParent": true,
+      "hasSessionId": true,
+      "hasHarnessRoot": false,
+      "updatedAfterLatestApply": false,
+      "processRuntimePresent": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "statusProtocolVersion": 2,
+      "startedAt": "2026-09-28T04:42:40.518Z",
+      "updatedAt": "2026-09-29T10:34:16.440Z",
+      "resumedAt": "2026-09-29T09:57:30.526Z",
+      "cwdMatchesParent": true,
+      "hasSessionId": true,
+      "hasHarnessRoot": false,
+      "updatedAfterLatestApply": false,
+      "processRuntimePresent": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "statusProtocolVersion": 2,
+      "startedAt": "2026-09-28T09:53:47.905Z",
+      "updatedAt": "2026-09-28T10:11:04.860Z",
+      "resumedAt": null,
+      "cwdMatchesParent": true,
+      "hasSessionId": true,
+      "hasHarnessRoot": false,
+      "updatedAfterLatestApply": false,
+      "processRuntimePresent": false
+    }
+  ],
+  "allProbeEventsMetadata": [
+    {
+      "product": "codex",
+      "eventCount": 35,
+      "firstAt": "2026-09-28T12:20:18.611Z",
+      "lastAt": "2026-09-29T10:34:16.441Z",
+      "afterLatestApplyCount": 0,
+      "actualProcessRuntimePresentCount": 0,
+      "eventTypes": {
+        "stop": 27,
+        "session_start": 8
+      }
+    }
+  ],
+  "existingHostEnvelopeMetadata": [
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatchesParent": true,
+      "observedAt": "2026-09-29T04:10:36.069790+00:00",
+      "observedAfterLatestApply": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatchesParent": true,
+      "observedAt": "2026-09-29T07:19:00.915Z",
+      "observedAfterLatestApply": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatchesParent": true,
+      "observedAt": "2026-09-29T07:31:09.774Z",
+      "observedAfterLatestApply": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatchesParent": true,
+      "observedAt": "2026-09-29T07:41:28.395Z",
+      "observedAfterLatestApply": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatchesParent": true,
+      "observedAt": "2026-09-29T08:09:39.631Z",
+      "observedAfterLatestApply": false
+    }
+  ],
+  "conclusion": {
+    "canFinalize": false,
+    "eligiblePostApplyEvidenceFound": false,
+    "reason": "The active challenge is still valid but has no real Hook events. Existing SessionState, Probe events and retained schema2 host envelopes all predate the latest apply. There is no actual host processRuntime for the upgraded parent.",
+    "nextStep": "Perform one normal interaction in a real parent-rooted Codex session while the existing probe is valid, then inspect its real Hook receipt and processRuntime. Only after matching the latest application, session, product and project root should a schema2 host artifact be used to finalize. A new begin is not currently necessary.",
+    "note": "Issuing a probe before the latest application does not invalidate later real events automatically; the required evidence observation must be after the latest apply.",
+    "writesPerformedByAuditor": "Only this safe temporary report",
+    "probeRestarted": false,
+    "hookInvoked": false,
+    "finalized": false,
+    "sourceOrParentModified": false,
+    "nodeMatrixRepeated": false
+  }
+}

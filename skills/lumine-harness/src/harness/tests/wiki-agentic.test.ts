@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { applyUpdate, prepareUpdate, queryKnowledge, showKnowledge, outlineKnowledge, mapKnowledge, relatedKnowledge, inspectKnowledge, scanWiki, recoverWiki, recordSemanticReview, recordUpdateDecision, sourceFingerprint, checkWiki } from '../wiki/engine.ts';
 import { parseSections } from '../wiki/sections.ts';
-import { baselineFor, parseDocument } from '../wiki/documents.ts';
+import { baselineFor, formatWikiDocument, parseDocument } from '../wiki/documents.ts';
 import { searchKnowledge } from '../wiki/search.ts';
 import { hash, snapshotSources } from '../wiki/files.ts';
 import type { ChangeManifest, CoverageContent, ReviewRecord } from '../wiki/types.ts';
@@ -16,10 +16,12 @@ function fixture() {
   writeFileSync(path.join(root, '.lumine/project.json'), JSON.stringify({ schemaVersion: 2, workflowVersion: 2, locale: 'zh-CN', repositories: [{ id: 'root', path: '.' }], wiki: { root: 'docs/repo-wiki', watchScopes: [{ repoId: 'root', path: 'src' }], maxCards: 6, maxContextChars: 12000 } }));
   writeFileSync(path.join(root, 'src/session.ts'), 'export function recoverSession() { return true; }\n');
   const source = { id: 'session-source', repoId: 'root', path: 'src/session.ts' }, scopes = [{ repoId: 'root', path: 'src/session.ts' }];
-  const content = (id = 'session', title = '登录与会话', extra: Record<string, unknown> = {}) => `---\n${JSON.stringify({ id, title, summary: '解释登录、权限与会话恢复的边界。', type: 'mechanism', status: 'current', locale: 'zh-CN', aliases: ['authentication', 'session recovery', 'recoverSession'], sources: [source], watchScopes: scopes, relations: [], ...extra }, null, 2)}\n---\n\n# ${title}\n\n<a id="login"></a>\n\n## 登录\n\n登录成功后创建令牌。\n\n<a id="recovery"></a>\n\n## 会话恢复\n\nrecoverSession 会复用已有会话，不重新提交请求；令牌过期则要求登录。\n`;
+  const content = (id = 'session', title = '登录与会话', extra: Record<string, unknown> = {}) => formatWikiDocument(`---\n${JSON.stringify({ id, title, summary: '解释登录、权限与会话恢复的边界。', type: 'mechanism', status: 'current', locale: 'zh-CN', aliases: ['authentication', 'session recovery', 'recoverSession'], sources: [source], watchScopes: scopes, relations: [], ...extra }, null, 2)}\n---\n\n# ${title}\n\n<a id="login"></a>\n\n## 登录\n\n登录成功后创建令牌。\n\n<a id="recovery"></a>\n\n## 会话恢复\n\nrecoverSession 会复用已有会话，不重新提交请求；令牌过期则要求登录。\n`, `docs/repo-wiki/${title}.md`);
   const create = (id = 'session', title = '登录与会话', text = content(id, title)) => { const packet = prepareUpdate(root, [], { schemaVersion: 1, changes: [{ kind: 'create', id, path: `docs/repo-wiki/${title}.md`, sourceRefs: [source], watchScopes: scopes }] }); const result = applyUpdate(root, packet.id, [{ id, markdown: text }]); assert.equal(result.status, 'applied', JSON.stringify(result)); return packet; };
   return { root, source, scopes, content, create, close: () => rmSync(root, { recursive: true, force: true }) };
 }
+const appendBody = (markdown: string, addition: string): string => markdown.replace('\n<!-- lumine-wiki-metadata:v1\n', `\n${addition}\n<!-- lumine-wiki-metadata:v1\n`);
+const removeRecovery = (markdown: string): string => markdown.replace(/<a id="recovery"><\/a>[\s\S]*?(?=\n<!-- lumine-wiki-metadata:v1)/, '恢复细节见专题。\n');
 test('new text pages are created through prepared sources, with no prior document or model service', () => {
   const data = fixture(); try { data.create(); const doc = showKnowledge(data.root, 'session'); assert.equal(doc.sections.find((section) => section.id === 'recovery')?.stable, true); assert.equal(doc.freshness, 'current'); assert.ok(doc.checkedAt); assert.equal(doc.semanticReview.status, 'unreviewed'); assert.equal(baselineFor(data.root, 'session')?.generatedMarkdown, data.content()); assert.equal(checkWiki(data.root).status, 'passed'); } finally { data.close(); }
 });
@@ -33,12 +35,49 @@ test('source discovery must be prepared; new scopes can be added without bypassi
     assert.equal(applyUpdate(data.root, packet.id, [{ id: 'session', markdown: text }]).status, 'applied');
   } finally { data.close(); }
 });
+test('replacing deleted sources and watch scopes requires an explicit prepared declaration', () => {
+  const data = fixture(); try {
+    data.create();
+    rmSync(path.join(data.root, 'src/session.ts'));
+    writeFileSync(path.join(data.root, 'src/permissions.ts'), 'export function recoverSession() { return true; }\n');
+    const source = { id: 'permission-source', repoId: 'root', path: 'src/permissions.ts' };
+    const scopes = [{ repoId: 'root', path: 'src/permissions.ts' }];
+    const change = { kind: 'update' as const, id: 'session', sourceRefs: [source], watchScopes: scopes };
+    assert.throws(() => prepareUpdate(data.root, [], { schemaVersion: 1, changes: [change] }), /UPDATE_SOURCES_MISSING/);
+    assert.throws(() => prepareUpdate(data.root, [], { schemaVersion: 1, changes: [{ ...change, replaceSources: true, sourceRefs: [] }] }), /CHANGE_REPLACE_SOURCES_REQUIRED/);
+    assert.throws(() => prepareUpdate(data.root, [], { schemaVersion: 1, changes: [{ ...change, replaceWatchScopes: true, watchScopes: [] }] }), /CHANGE_REPLACE_SCOPES_REQUIRED/);
+    const packet = prepareUpdate(data.root, [], { schemaVersion: 1, changes: [{ ...change, replaceSources: true, replaceWatchScopes: true }] });
+    assert.deepEqual(packet.units[0].sourceRefs, [source]);
+    assert.deepEqual(packet.units[0].watchScopes, scopes);
+    const candidate = data.content('session', '登录与会话', { sources: [source], watchScopes: scopes });
+    assert.equal(applyUpdate(data.root, packet.id, [{ id: 'session', markdown: candidate }]).status, 'applied');
+    assert.deepEqual(showKnowledge(data.root, 'session').sources, [source]);
+    assert.deepEqual(showKnowledge(data.root, 'session').watchScopes, scopes);
+  } finally { data.close(); }
+});
+test('explicit source replacement cannot retain an old source through a broad prepared scope', () => {
+  const data = fixture(); try {
+    data.create();
+    writeFileSync(path.join(data.root, 'src/permissions.ts'), 'export const permissions = [];\n');
+    const source = { id: 'permission-source', repoId: 'root', path: 'src/permissions.ts' };
+    const scopes = [{ repoId: 'root', path: 'src' }];
+    const manifest: ChangeManifest = { schemaVersion: 1, changes: [{ kind: 'update', id: 'session', sourceRefs: [source], watchScopes: scopes, replaceSources: true, replaceWatchScopes: true }] };
+    const packet = prepareUpdate(data.root, [], manifest);
+    const stale = data.content('session', '登录与会话', { sources: [data.source], watchScopes: scopes });
+    assert.equal(applyUpdate(data.root, packet.id, [{ id: 'session', markdown: stale }]).results[0].status, 'invalid');
+    assert.deepEqual(showKnowledge(data.root, 'session').sources, [data.source]);
+    const valid = data.content('session', '登录与会话', { sources: [source], watchScopes: scopes });
+    const retry = prepareUpdate(data.root, [], manifest);
+    assert.equal(applyUpdate(data.root, retry.id, [{ id: 'session', markdown: valid }]).status, 'applied');
+    assert.deepEqual(showKnowledge(data.root, 'session').sources, [source]);
+  } finally { data.close(); }
+});
 test('creation protects another writer and source drift retains candidate text', () => {
   const data = fixture(); try {
     const manifest: ChangeManifest = { schemaVersion: 1, changes: [{ kind: 'create', id: 'session', path: 'docs/repo-wiki/登录与会话.md', sourceRefs: [data.source], watchScopes: data.scopes }] };
     let packet = prepareUpdate(data.root, [], manifest); writeFileSync(path.join(data.root, 'src/session.ts'), 'changed source');
     const drift = applyUpdate(data.root, packet.id, [{ id: 'session', markdown: data.content() }]); assert.equal(drift.results[0].status, 'source-drift'); assert.ok(existsSync(path.join(data.root, drift.results[0].candidatePath!)));
-    packet = prepareUpdate(data.root, [], manifest); writeFileSync(path.join(data.root, 'docs/repo-wiki/登录与会话.md'), data.content() + '\n人工补充。');
+    packet = prepareUpdate(data.root, [], manifest); writeFileSync(path.join(data.root, 'docs/repo-wiki/登录与会话.md'), appendBody(data.content(), '人工补充。'));
     assert.equal(applyUpdate(data.root, packet.id, [{ id: 'session', markdown: data.content() }]).results[0].status, 'conflict'); assert.match(readFileSync(path.join(data.root, 'docs/repo-wiki/登录与会话.md'), 'utf8'), /人工补充/);
   } finally { data.close(); }
 });
@@ -63,7 +102,7 @@ test('directory and split pages publish as one recoverable group and retain old 
     data.create();
     const coverage: CoverageContent = { schemaVersion: 1, topics: [{ id: 'overview', title: '系统总览', questions: ['如何登录'], documentRefs: ['session'], sourceScopes: data.scopes, status: 'covered' }, { id: 'recovery-topic', title: '恢复机制', parentId: 'overview', questions: ['如何恢复'], documentRefs: ['recovery'], sourceScopes: data.scopes, status: 'covered' }] };
     const manifest: ChangeManifest = { schemaVersion: 1, changes: [{ kind: 'update', id: 'session' }, { kind: 'create', id: 'recovery', path: 'docs/repo-wiki/会话恢复专题.md', sourceRefs: [data.source], watchScopes: data.scopes }], coverage, referenceMoves: [{ from: 'session#recovery', to: 'recovery#recovery' }] };
-    const packet = prepareUpdate(data.root, [], manifest), parent = data.content().split('<a id="recovery">')[0] + '\n恢复细节见专题。\n', child = data.content('recovery', '会话恢复专题');
+    const packet = prepareUpdate(data.root, [], manifest), parent = removeRecovery(data.content()), child = data.content('recovery', '会话恢复专题');
     assert.throws(() => applyUpdate(data.root, packet.id, [{ id: 'session', markdown: parent }, { id: 'recovery', markdown: child }], { failAfterWrites: 1 }), /INTERRUPTION/);
     assert.match(showKnowledge(data.root, 'session').body, /recoverSession/); assert.equal(mapKnowledge(data.root).topics.length, 0); assert.throws(() => showKnowledge(data.root, 'recovery'), /NOT_FOUND/);
     assert.equal(recoverWiki(data.root).recovered.length, 1); const retry = applyUpdate(data.root, packet.id, []); assert.equal(retry.status, 'applied'); assert.equal(mapKnowledge(data.root).topics.length, 2); assert.equal(showKnowledge(data.root, 'session#recovery').id, 'recovery'); assert.equal(relatedKnowledge(data.root, 'recovery').relations[0].kind, 'part_of');
@@ -82,7 +121,7 @@ test('semantic review is separately recorded against exact text and source, then
   const data = fixture(); try {
     data.create(); const document = showKnowledge(data.root, 'session'); const review: ReviewRecord = { documentId: document.id, revision: document.revision, sourceFingerprint: sourceFingerprint(snapshotSources(data.root, document.sources, document.watchScopes)), reviewedAt: new Date().toISOString(), reviewer: { kind: 'agent', role: 'author' }, outcome: 'reviewed', scope: ['正常恢复与令牌过期边界'], findings: [], limitations: ['未验证部署状态'] };
     recordSemanticReview(data.root, review); assert.equal(showKnowledge(data.root, 'session').semanticReview.status, 'reviewed'); assert.equal(readFileSync(path.join(data.root, document.path), 'utf8'), data.content());
-    writeFileSync(path.join(data.root, document.path), data.content() + '\n人工修订。'); assert.equal(showKnowledge(data.root, 'session').semanticReview.status, 'outdated'); assert.throws(() => recordSemanticReview(data.root, review), /BASELINE_MISMATCH/);
+    writeFileSync(path.join(data.root, document.path), appendBody(data.content(), '人工修订。')); assert.equal(showKnowledge(data.root, 'session').semanticReview.status, 'outdated'); assert.throws(() => recordSemanticReview(data.root, review), /BASELINE_MISMATCH/);
   } finally { data.close(); }
 });
 test('a malformed page is isolated from catalog, query and healthy documents, but check reports it', () => {
@@ -96,7 +135,7 @@ test('merged identity and new human watch scopes cannot silently change a prepar
   for (const change of ['identity', 'scope']) {
     const data = fixture(); try {
       data.create(); const packet = prepareUpdate(data.root, ['session']), filename = path.join(data.root, 'docs/repo-wiki/登录与会话.md');
-      const current = change === 'identity' ? data.content().replace('"id": "session"', '"id": "different"') : data.content('session', '登录与会话', { watchScopes: [...data.scopes, { repoId: 'root', path: 'src' }] });
+      const current = change === 'identity' ? data.content().replace('id: "session"', 'id: "different"') : data.content('session', '登录与会话', { watchScopes: [...data.scopes, { repoId: 'root', path: 'src' }] });
       writeFileSync(filename, current);
       const result = applyUpdate(data.root, packet.id, [{ id: 'session', markdown: data.content().replace('令牌。', '安全令牌。') }]);
       assert.equal(result.results[0].status, 'conflict', change); assert.equal(readFileSync(filename, 'utf8'), current); assert.equal(baselineFor(data.root, 'session')?.generatedMarkdown, data.content());
@@ -118,9 +157,9 @@ test('prospective reference moves preserve inbound links and related navigation 
   const data = fixture(); try {
     data.create(); data.create('consumer', '消费者', data.content('consumer', '消费者', { relations: [{ target: 'session#recovery', kind: 'depends_on' }] }));
     const packet = prepareUpdate(data.root, [], { schemaVersion: 1, changes: [{ kind: 'update', id: 'session' }, { kind: 'create', id: 'details', path: 'docs/repo-wiki/详情.md', sourceRefs: [data.source], watchScopes: data.scopes }], referenceMoves: [{ from: 'session#recovery', to: 'details#recovery' }] });
-    assert.equal(applyUpdate(data.root, packet.id, [{ id: 'session', markdown: data.content().split('<a id="recovery">')[0] }, { id: 'details', markdown: data.content('details', '详情') }]).status, 'applied');
+    assert.equal(applyUpdate(data.root, packet.id, [{ id: 'session', markdown: removeRecovery(data.content()) }, { id: 'details', markdown: data.content('details', '详情') }]).status, 'applied');
     assert.equal(showKnowledge(data.root, 'session#recovery').id, 'details'); assert.ok(relatedKnowledge(data.root, 'details', { direction: 'in' }).relations.some((edge) => edge.target === 'consumer')); assert.equal(checkWiki(data.root).status, 'passed');
-    const next = prepareUpdate(data.root, ['consumer']); assert.equal(applyUpdate(data.root, next.id, [{ id: 'consumer', markdown: data.content('consumer', '消费者', { relations: [{ target: 'session#recovery', kind: 'depends_on' }] }) + '\n更多说明。' }]).status, 'applied');
+    const next = prepareUpdate(data.root, ['consumer']); assert.equal(applyUpdate(data.root, next.id, [{ id: 'consumer', markdown: appendBody(data.content('consumer', '消费者', { relations: [{ target: 'session#recovery', kind: 'depends_on' }] }), '更多说明。') }]).status, 'applied');
   } finally { data.close(); }
 });
 test('document fallback aliases reject fragment cycles before publishing and resolve valid fragments once', () => {
@@ -138,7 +177,7 @@ test('latest explicit update decisions protect candidates and their dependent gr
       data.create(); data.create('other', '其他');
       const packet = prepareUpdate(data.root, [], { schemaVersion: 1, changes: [{ kind: 'update', id: 'session', group: 'together' }, { kind: 'update', id: 'other', group: 'together' }] });
       recordUpdateDecision(data.root, packet.id, 'session', action, '人工选择暂不使用候选');
-      const result = applyUpdate(data.root, packet.id, [{ id: 'session', markdown: data.content() + '\n候选。' }, { id: 'other', markdown: data.content('other', '其他') + '\n候选。' }]);
+      const result = applyUpdate(data.root, packet.id, [{ id: 'session', markdown: appendBody(data.content(), '候选。') }, { id: 'other', markdown: appendBody(data.content('other', '其他'), '候选。') }]);
       assert.equal(result.status, 'partial'); assert.equal(readFileSync(path.join(data.root, 'docs/repo-wiki/登录与会话.md'), 'utf8'), data.content()); assert.equal(readFileSync(path.join(data.root, 'docs/repo-wiki/其他.md'), 'utf8'), data.content('other', '其他'));
       assert.ok(existsSync(path.join(data.root, `.lumine/wiki-state/updates/${packet.id}/candidates/${hash('session')}.md`)));
       if (action === 'keep-current') { assert.notEqual(showKnowledge(data.root, 'session').freshness, 'conflict'); recordUpdateDecision(data.root, packet.id, 'session', 'defer', '重新评估，仍待处理'); assert.equal(showKnowledge(data.root, 'session').freshness, 'conflict'); }

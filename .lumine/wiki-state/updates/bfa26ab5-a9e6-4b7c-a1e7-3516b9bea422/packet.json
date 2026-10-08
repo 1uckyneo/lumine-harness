@@ -1,0 +1,765 @@
+{
+  "schemaVersion": 2,
+  "id": "bfa26ab5-a9e6-4b7c-a1e7-3516b9bea422",
+  "createdAt": "2026-09-30T04:13:00.569Z",
+  "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+  "scope": [
+    "lumine-wiki",
+    "lumine-architecture",
+    "lumine-task-check"
+  ],
+  "units": [
+    {
+      "kind": "update",
+      "id": "lumine-wiki",
+      "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+      "currentMarkdown": "---\nid: \"lumine-wiki\"\ntitle: \"Wiki 扫描、检索、增量更新与阅读\"\nsummary: \"Agent 决定读什么和写什么；知识地图、章节检索、来源观察与可恢复三方合并把认识安全沉淀为项目资产。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"wiki-扫描检索增量更新与阅读\"></a>\n# Wiki 扫描、检索、增量更新与阅读\n\n<a id=\"knowledge-producer\"></a>\n## 什么真正产生知识\n\nAgent 根据问题选择 Wiki、源码或组合，理解入口、调用链、约束与异常，再撰写正文和 Mermaid。`wiki scan` 只发现来源变化；`wiki update` 接收已经写好的文本，没有独立模型生成过程。没有活动 Agent 时只能登记待处理线索，不能把来源扫描完成显示为知识更新完成。\n\n```mermaid\nflowchart LR\n  Q[当前任务与问题] --> A[Agent 选择调查路径]\n  K[已有正文与知识地图] --> A\n  S[源码 配置 证据] --> A\n  A --> T[理解并撰写文本候选]\n  S --> C[扫描和输入指纹]\n  T --> U[校验 三方比较 安全保存]\n  C --> U\n  U --> K\n  K --> N[后续会话按需复用]\n```\n\n重要缺口、过期或矛盾应在核实后形成相关知识增量；显式只读请求不写文件，没有新认识的小修可以零更新。检索不到已有内容时先考虑别名、关键词或结构，不立即复制另一篇。Wiki 保留现状，Spec 维护目标，Plan 保留本次技术变化，运行证据仍在 Validation。\n\n<a id=\"hierarchy-and-sections\"></a>\n## 一份目录，多种阅读粒度\n\n`.lumine/wiki-state/coverage.json` 是主题层级唯一来源，topic 的 parentId 表达归属、数组表示同级顺序，问题和来源范围说明覆盖目标。planned／partial／covered／deferred 描述内容推进，deferred 需要理由。程序能检查引用和循环，不能判定“这个专题解释得足够深入”。页面只有一个主要位置，其他关联用有类型的 related／depends_on／decision；父子关系由目录派生。\n\nMarkdown 页面是三方合并主要单位。重要章节在标题前用 `<a id=\"稳定ID\"></a>` 固定身份，标题和文件改名不应改变该 ID。parser 识别代码围栏外的 H1—H6，记录层级、范围及可选来源关联。`show 文档ID#片段ID` 展开章节或图解，片段不存在返回错误，不静默退回全文；图 ID 与章节 ID 不能碰撞。章节没有独立审批状态机。\n\n<a id=\"retrieval-and-budget\"></a>\n## 检索怎样选择文本，什么时候不足\n\n本地词项检索结合中文分词、英文词项、代码标识符拆分和常用双语别名。标题、章节、正文、来源和图解文字参与排名，稀有词与命中覆盖影响得分，常见问句词被过滤。结果包含稳定引用、片段、命中原因、来源与时效。Agent 的 `wiki query` 默认最多六张卡片，并受总字符预算限制；少于上限不补齐。浏览器的 `/api/search` 独立分页，每页默认 20 条、最多 30 条，返回 `total`、`hasMore` 和 `nextCursor`。读者用返回的 cursor 继续看下一页；查询条件或结果文档变化后，旧 cursor 失效，应重新搜索。浏览器分页不占用 Agent 的上下文预算。\n\n浏览器默认只搜 Wiki 正文；主动切到全部范围时，才会同时搜索 Spec、Plan，以及在 `wiki.searchValidationFiles` 中逐文件登记的 Validation Markdown。验证记录以历史材料标识，不因此成为现状结论；目录或通配符不能代替逐文件登记。这不是任意跨语言语义检索。问法与术语不一致时，可重述查询或直接看目录／源码。卡片片段不能代替完整限定条件，Agent 修改前按需要 `wiki show 文档ID#片段ID` 展开；代码位置已知时直接读文件合理。\n\n查询读取已保存正文与状态，不逐页扫描源码。正文索引和导航可从持久文本重建，缺少缓存不需要重新调用模型。持久的核对时间与来源指纹描述历史观察；本机还通过 `.lumine/local/wiki/observation-receipts.json` 确认该观察适用于当前真实项目根、登记仓库根与配置。清缓存或换 clone 后，无匹配记录时显示尚待核对；登记仓库根缺失时直接显示来源缺失，已有正文和历史语义审阅继续保留。\n\n查询只核对根存在、身份及本机记录，不哈希或遍历整仓源码。显式 scan、成功应用候选或语义核实会重新检查适用来源并建立本机记录；缓存写入失败不回滚已经可靠保存的正文，只使后续读取继续保持未知。即使本机记录存在，时效仍指上次观察，当前任务的关键行为应按需要核实源码。\n\n<a id=\"source-and-review\"></a>\n## 来源未变不等于解释正确\n\n精确 sources 给出结论依据，watchScopes 发现新增、删除、改名及未提交变化；扫描按仓库和重叠范围复用快照。没有精确来源引用的文件先是线索，不会自动生成正文。Agent 对照主题问题和当前源码，判断它已由现有解释覆盖、需要补充解释，还是暂缓；`wiki classify` 将文件、主题、监控范围、内容指纹、处置理由和时间保存于 `.lumine/wiki-state/source-dispositions.json`。`needs-explanation` 只是待补正文的判断，不能当成知识已更新。\n\n以后文件内容、关联主题的定义、该主题关联 Wiki 文档的版本，或项目监控范围改变，旧处置在扫描结果中标为过期并重新进入待分类清单，原理由仍可查看；首次发现则标为待分类。即使先前判断为“已覆盖”或“暂缓”，关联解释正文变化后也须重新核实，不能直接沿用旧判断。分类输入采用预期文件指纹，避免把依据已变化的决定直接写入。仓库 ID 与相对路径通过登记根解析，忽略私有文件、Runtime 副本、备份和候选，真实路径不能越界。源码只能证明当前开发实现，不能证明已部署或外部服务运行。\n\nsource observation 记录 checkedAt 与来源指纹；semantic review 另记正文 revision、来源指纹、范围、发现、限制、作者或独立 reviewer。旧版本审阅变为 outdated；未审阅不能因来源一致自动显示已核实。仅审阅可保存记录而不重写正文。结构检查的 notVerified 明确保留语义、运行和人类接受边界。\n\n<a id=\"protected-update\"></a>\n## 新建、拆页和更新怎么保存\n\nprepare 工作包绑定配置、来源、当前正文和生成基线。新页要求路径预期不存在，避免覆盖同期创建；更新比较上次生成全文、当前含人工编辑的正文和新候选。无基线页面先按人工资产保护。新增来源或监控范围要在准备清单中声明，不能生成后偷偷扩大来源集合。若旧来源或范围已移除，更新清单需显式选择替换来源或监控范围，并列出完整、非空的新集合；默认仍为追加。替换同样接受来源快照、候选和三方比较的检查。\n\n```mermaid\nflowchart TB\n  B[上次生成全文] --> M[三方比较]\n  H[当前人工内容] --> M\n  C[Agent候选] --> M\n  M -->|无冲突| T[可恢复依赖组事务]\n  M -->|重叠| F[保留候选和人工内容]\n  T --> D[正文 目录 基线 来源观察]\n```\n\n含目录或引用移动的变更组一起处理。例如拆页同时修改总览、创建子页、更新 coverage 与旧引用映射；不能子页已出现而目录仍指向被删章节。应用前重新核对源码与配置，漂移则保留候选并重新评估。事务保存 before／after，读者在未完成组期间读取上一个完整版本；恢复接受预期旧值或本次输出，第三种修改保留冲突。各独立组分别报告，不把部分完成当全部完成。\n\n<a id=\"durable-state-and-validation\"></a>\n## 什么能清理，怎样验证\n\n`.lumine/wiki-state/` 的真实基线、目录、审阅、候选、人工决定和事务是项目资产，适合共享的内容纳入 Git。`.lumine/local/wiki/` 仅放可重建缓存和本机运行态；重新让模型写一遍不是无损恢复。不要删除正在运行的锁或唯一恢复材料。\n\n修改维护工具应覆盖人工改文与改图、重叠冲突、并发新建、生成期间源码漂移、同组中断与恢复、错误引用和新文件漏扫。检索应用中文、英文、代码符号、模糊问法及明确无答案测试；更重要的是未参与建库的 Agent 能否据此正确回答、定位实现并维护新知识。程序通过不能单独证明内容质量。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"repo wiki\",\n    \"knowledge\",\n    \"知识库\",\n    \"Agentic Search\"\n  ],\n  \"aliases\": [\n    \"repo wiki\",\n    \"knowledge\",\n    \"知识库\",\n    \"Agentic Search\",\n    \"检索\",\n    \"threeWayMerge\",\n    \"prepareUpdate\",\n    \"coverage\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"engine\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/engine.ts\",\n      \"startLine\": 1,\n      \"endLine\": 356,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"files\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/files.ts\",\n      \"startLine\": 1,\n      \"endLine\": 203,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"merge\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/merge.ts\",\n      \"startLine\": 1,\n      \"endLine\": 41,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"documents\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/documents.ts\",\n      \"startLine\": 1,\n      \"endLine\": 139,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"sections\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/sections.ts\",\n      \"startLine\": 1,\n      \"endLine\": 32,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"coverage\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/coverage.ts\",\n      \"startLine\": 1,\n      \"endLine\": 42,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"search\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/search.ts\",\n      \"startLine\": 1,\n      \"endLine\": 110,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"transactions\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/transactions.ts\",\n      \"startLine\": 1,\n      \"endLine\": 63,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"skill\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md\",\n      \"startLine\": 1,\n      \"endLine\": 24,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"server-search\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/server.ts\",\n      \"startLine\": 64,\n      \"endLine\": 86,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"dispositions\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/dispositions.ts\",\n      \"startLine\": 1,\n      \"endLine\": 80,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"validation-allowlist\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/validation-documents.ts\",\n      \"startLine\": 1,\n      \"endLine\": 57,\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-architecture\",\n      \"kind\": \"related\",\n      \"note\": \"知识生产与工具构建的职责\"\n    },\n    {\n      \"target\": \"lumine-wiki-reader\",\n      \"kind\": \"related\",\n      \"note\": \"同一文本的浏览器阅读\"\n    },\n    {\n      \"target\": \"lumine-adoption\",\n      \"kind\": \"related\",\n      \"note\": \"格式转换保留当前正文与真实基线\"\n    },\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"related\",\n      \"note\": \"知识与任务产物的权威分工\"\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/engine.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/files.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/merge.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/documents.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/sections.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/coverage.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/search.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/transactions.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/server.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/dispositions.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/validation-documents.ts\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"knowledge\",\n      \"title\": \"调查所得进入持久知识\",\n      \"caption\": \"写正文与判断影响由Agent完成；扫描只提供线索，工具负责输入检查和安全保存。\",\n      \"sources\": [\n        \"engine\",\n        \"skill\",\n        \"files\"\n      ]\n    },\n    {\n      \"id\": \"merge\",\n      \"title\": \"生成基线、人工内容与候选的三方比较\",\n      \"caption\": \"生成基线保留真实全文。正文、基线、目录等依赖组通过事务一起生效；冲突不作为成功。\",\n      \"sources\": [\n        \"engine\",\n        \"merge\",\n        \"transactions\"\n      ]\n    }\n  ],\n  \"sections\": [\n    {\n      \"id\": \"retrieval-and-budget\",\n      \"sources\": [\n        \"search\",\n        \"server-search\",\n        \"validation-allowlist\"\n      ]\n    },\n    {\n      \"id\": \"source-and-review\",\n      \"sources\": [\n        \"files\",\n        \"engine\",\n        \"dispositions\"\n      ]\n    }\n  ]\n}\n-->\n",
+      "currentRevision": "9e0c95132e281aca492b7ac216bc965715c9b6873e3747946936c1d54b235eb1",
+      "baseline": {
+        "schemaVersion": 2,
+        "id": "lumine-wiki",
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+        "generation": 7,
+        "generatedMarkdown": "---\nid: \"lumine-wiki\"\ntitle: \"Wiki 扫描、检索、增量更新与阅读\"\nsummary: \"Agent 决定读什么和写什么；知识地图、章节检索、来源观察与可恢复三方合并把认识安全沉淀为项目资产。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"wiki-扫描检索增量更新与阅读\"></a>\n# Wiki 扫描、检索、增量更新与阅读\n\n<a id=\"knowledge-producer\"></a>\n## 什么真正产生知识\n\nAgent 根据问题选择 Wiki、源码或组合，理解入口、调用链、约束与异常，再撰写正文和 Mermaid。`wiki scan` 只发现来源变化；`wiki update` 接收已经写好的文本，没有独立模型生成过程。没有活动 Agent 时只能登记待处理线索，不能把来源扫描完成显示为知识更新完成。\n\n```mermaid\nflowchart LR\n  Q[当前任务与问题] --> A[Agent 选择调查路径]\n  K[已有正文与知识地图] --> A\n  S[源码 配置 证据] --> A\n  A --> T[理解并撰写文本候选]\n  S --> C[扫描和输入指纹]\n  T --> U[校验 三方比较 安全保存]\n  C --> U\n  U --> K\n  K --> N[后续会话按需复用]\n```\n\n重要缺口、过期或矛盾应在核实后形成相关知识增量；显式只读请求不写文件，没有新认识的小修可以零更新。检索不到已有内容时先考虑别名、关键词或结构，不立即复制另一篇。Wiki 保留现状，Spec 维护目标，Plan 保留本次技术变化，运行证据仍在 Validation。\n\n<a id=\"hierarchy-and-sections\"></a>\n## 一份目录，多种阅读粒度\n\n`.lumine/wiki-state/coverage.json` 是主题层级唯一来源，topic 的 parentId 表达归属、数组表示同级顺序，问题和来源范围说明覆盖目标。planned／partial／covered／deferred 描述内容推进，deferred 需要理由。程序能检查引用和循环，不能判定“这个专题解释得足够深入”。页面只有一个主要位置，其他关联用有类型的 related／depends_on／decision；父子关系由目录派生。\n\nMarkdown 页面是三方合并主要单位。重要章节在标题前用 `<a id=\"稳定ID\"></a>` 固定身份，标题和文件改名不应改变该 ID。parser 识别代码围栏外的 H1—H6，记录层级、范围及可选来源关联。`show 文档ID#片段ID` 展开章节或图解，片段不存在返回错误，不静默退回全文；图 ID 与章节 ID 不能碰撞。章节没有独立审批状态机。\n\n<a id=\"retrieval-and-budget\"></a>\n## 检索怎样选择文本，什么时候不足\n\n本地词项检索结合中文分词、英文词项、代码标识符拆分和常用双语别名。标题、章节、正文、来源和图解文字参与排名，稀有词与命中覆盖影响得分，常见问句词被过滤。结果包含稳定引用、片段、命中原因、来源与时效。Agent 的 `wiki query` 默认最多六张卡片，并受总字符预算限制；少于上限不补齐。浏览器的 `/api/search` 独立分页，每页默认 20 条、最多 30 条，返回 `total`、`hasMore` 和 `nextCursor`。读者用返回的 cursor 继续看下一页；查询条件或结果文档变化后，旧 cursor 失效，应重新搜索。浏览器分页不占用 Agent 的上下文预算。\n\n浏览器默认只搜 Wiki 正文；主动切到全部范围时，才会同时搜索 Spec、Plan，以及在 `wiki.searchValidationFiles` 中逐文件登记的 Validation Markdown。验证记录以历史材料标识，不因此成为现状结论；目录或通配符不能代替逐文件登记。这不是任意跨语言语义检索。问法与术语不一致时，可重述查询或直接看目录／源码。卡片片段不能代替完整限定条件，Agent 修改前按需要 `wiki show 文档ID#片段ID` 展开；代码位置已知时直接读文件合理。\n\n查询读取已保存正文与状态，不逐页扫描源码。正文索引和导航可从持久文本重建，缺少缓存不需要重新调用模型。持久的核对时间与来源指纹描述历史观察；本机还通过 `.lumine/local/wiki/observation-receipts.json` 确认该观察适用于当前真实项目根、登记仓库根与配置。清缓存或换 clone 后，无匹配记录时显示尚待核对；登记仓库根缺失时直接显示来源缺失，已有正文和历史语义审阅继续保留。\n\n查询只核对根存在、身份及本机记录，不哈希或遍历整仓源码。显式 scan、成功应用候选或语义核实会重新检查适用来源并建立本机记录；缓存写入失败不回滚已经可靠保存的正文，只使后续读取继续保持未知。即使本机记录存在，时效仍指上次观察，当前任务的关键行为应按需要核实源码。\n\n<a id=\"source-and-review\"></a>\n## 来源未变不等于解释正确\n\n精确 sources 给出结论依据，watchScopes 发现新增、删除、改名及未提交变化；扫描按仓库和重叠范围复用快照。没有精确来源引用的文件先是线索，不会自动生成正文。Agent 对照主题问题和当前源码，判断它已由现有解释覆盖、需要补充解释，还是暂缓；`wiki classify` 将文件、主题、监控范围、内容指纹、处置理由和时间保存于 `.lumine/wiki-state/source-dispositions.json`。`needs-explanation` 只是待补正文的判断，不能当成知识已更新。\n\n以后文件内容、关联主题的定义、该主题关联 Wiki 文档的版本，或项目监控范围改变，旧处置在扫描结果中标为过期并重新进入待分类清单，原理由仍可查看；首次发现则标为待分类。即使先前判断为“已覆盖”或“暂缓”，关联解释正文变化后也须重新核实，不能直接沿用旧判断。分类输入采用预期文件指纹，避免把依据已变化的决定直接写入。仓库 ID 与相对路径通过登记根解析，忽略私有文件、Runtime 副本、备份和候选，真实路径不能越界。源码只能证明当前开发实现，不能证明已部署或外部服务运行。\n\nsource observation 记录 checkedAt 与来源指纹；semantic review 另记正文 revision、来源指纹、范围、发现、限制、作者或独立 reviewer。旧版本审阅变为 outdated；未审阅不能因来源一致自动显示已核实。仅审阅可保存记录而不重写正文。结构检查的 notVerified 明确保留语义、运行和人类接受边界。\n\n<a id=\"protected-update\"></a>\n## 新建、拆页和更新怎么保存\n\nprepare 工作包绑定配置、来源、当前正文和生成基线。新页要求路径预期不存在，避免覆盖同期创建；更新比较上次生成全文、当前含人工编辑的正文和新候选。无基线页面先按人工资产保护。新增来源或监控范围要在准备清单中声明，不能生成后偷偷扩大来源集合。若旧来源或范围已移除，更新清单需显式选择替换来源或监控范围，并列出完整、非空的新集合；默认仍为追加。替换同样接受来源快照、候选和三方比较的检查。\n\n```mermaid\nflowchart TB\n  B[上次生成全文] --> M[三方比较]\n  H[当前人工内容] --> M\n  C[Agent候选] --> M\n  M -->|无冲突| T[可恢复依赖组事务]\n  M -->|重叠| F[保留候选和人工内容]\n  T --> D[正文 目录 基线 来源观察]\n```\n\n含目录或引用移动的变更组一起处理。例如拆页同时修改总览、创建子页、更新 coverage 与旧引用映射；不能子页已出现而目录仍指向被删章节。应用前重新核对源码与配置，漂移则保留候选并重新评估。事务保存 before／after，读者在未完成组期间读取上一个完整版本；恢复接受预期旧值或本次输出，第三种修改保留冲突。各独立组分别报告，不把部分完成当全部完成。\n\n<a id=\"durable-state-and-validation\"></a>\n## 什么能清理，怎样验证\n\n`.lumine/wiki-state/` 的真实基线、目录、审阅、候选、人工决定和事务是项目资产，适合共享的内容纳入 Git。`.lumine/local/wiki/` 仅放可重建缓存和本机运行态；重新让模型写一遍不是无损恢复。不要删除正在运行的锁或唯一恢复材料。\n\n修改维护工具应覆盖人工改文与改图、重叠冲突、并发新建、生成期间源码漂移、同组中断与恢复、错误引用和新文件漏扫。检索应用中文、英文、代码符号、模糊问法及明确无答案测试；更重要的是未参与建库的 Agent 能否据此正确回答、定位实现并维护新知识。程序通过不能单独证明内容质量。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"repo wiki\",\n    \"knowledge\",\n    \"知识库\",\n    \"Agentic Search\"\n  ],\n  \"aliases\": [\n    \"repo wiki\",\n    \"knowledge\",\n    \"知识库\",\n    \"Agentic Search\",\n    \"检索\",\n    \"threeWayMerge\",\n    \"prepareUpdate\",\n    \"coverage\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"engine\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/engine.ts\",\n      \"startLine\": 1,\n      \"endLine\": 356,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"files\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/files.ts\",\n      \"startLine\": 1,\n      \"endLine\": 203,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"merge\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/merge.ts\",\n      \"startLine\": 1,\n      \"endLine\": 41,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"documents\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/documents.ts\",\n      \"startLine\": 1,\n      \"endLine\": 139,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"sections\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/sections.ts\",\n      \"startLine\": 1,\n      \"endLine\": 32,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"coverage\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/coverage.ts\",\n      \"startLine\": 1,\n      \"endLine\": 42,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"search\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/search.ts\",\n      \"startLine\": 1,\n      \"endLine\": 110,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"transactions\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/transactions.ts\",\n      \"startLine\": 1,\n      \"endLine\": 63,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"skill\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md\",\n      \"startLine\": 1,\n      \"endLine\": 24,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"server-search\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/server.ts\",\n      \"startLine\": 64,\n      \"endLine\": 86,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"dispositions\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/dispositions.ts\",\n      \"startLine\": 1,\n      \"endLine\": 80,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"validation-allowlist\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/validation-documents.ts\",\n      \"startLine\": 1,\n      \"endLine\": 57,\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-architecture\",\n      \"kind\": \"related\",\n      \"note\": \"知识生产与工具构建的职责\"\n    },\n    {\n      \"target\": \"lumine-wiki-reader\",\n      \"kind\": \"related\",\n      \"note\": \"同一文本的浏览器阅读\"\n    },\n    {\n      \"target\": \"lumine-adoption\",\n      \"kind\": \"related\",\n      \"note\": \"格式转换保留当前正文与真实基线\"\n    },\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"related\",\n      \"note\": \"知识与任务产物的权威分工\"\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/engine.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/files.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/merge.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/documents.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/sections.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/coverage.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/search.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/transactions.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/server.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/dispositions.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/wiki/validation-documents.ts\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"knowledge\",\n      \"title\": \"调查所得进入持久知识\",\n      \"caption\": \"写正文与判断影响由Agent完成；扫描只提供线索，工具负责输入检查和安全保存。\",\n      \"sources\": [\n        \"engine\",\n        \"skill\",\n        \"files\"\n      ]\n    },\n    {\n      \"id\": \"merge\",\n      \"title\": \"生成基线、人工内容与候选的三方比较\",\n      \"caption\": \"生成基线保留真实全文。正文、基线、目录等依赖组通过事务一起生效；冲突不作为成功。\",\n      \"sources\": [\n        \"engine\",\n        \"merge\",\n        \"transactions\"\n      ]\n    }\n  ],\n  \"sections\": [\n    {\n      \"id\": \"retrieval-and-budget\",\n      \"sources\": [\n        \"search\",\n        \"server-search\",\n        \"validation-allowlist\"\n      ]\n    },\n    {\n      \"id\": \"source-and-review\",\n      \"sources\": [\n        \"files\",\n        \"engine\",\n        \"dispositions\"\n      ]\n    }\n  ]\n}\n-->\n",
+        "appliedRevision": "9e0c95132e281aca492b7ac216bc965715c9b6873e3747946936c1d54b235eb1",
+        "sources": {
+          "fingerprints": {
+            "project:skills/lumine-harness/src/harness/wiki/engine.ts": "b710cebed47b100f9ade9230c9e4447de18f429f0f332a2abe095e69113016f8",
+            "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+            "project:skills/lumine-harness/src/harness/wiki/merge.ts": "81ea65a12e24471e785f528443463f68c69a853a095d68f3840577eccf454b7b",
+            "project:skills/lumine-harness/src/harness/wiki/documents.ts": "c6cd3097124ffe9e48bf51ffcc5ec86786fea5618a923636e1da37cb9b1483c9",
+            "project:skills/lumine-harness/src/harness/wiki/sections.ts": "3f425ecd340031fe058b499bf3bfabc93138e6376f5e3ea1c189842b8679e0c3",
+            "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "f9e647229ffceae8071f729dd4e119a5d2cead3df52ca1d75c9e75490e07a6a0",
+            "project:skills/lumine-harness/src/harness/wiki/search.ts": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4",
+            "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "4ca902993c3486347d5f3613b2afde7de52b936429faca072c05ed7aa3a738d1",
+            "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2",
+            "project:skills/lumine-harness/src/harness/wiki/server.ts": "b77acd60d6fa908aed50f4568806d279c952d9810f3cd3acc4617deaad6e754d",
+            "project:skills/lumine-harness/src/harness/wiki/dispositions.ts": "e12248fde0d89c8fa1376bad63212f36a570adb5132338d11fd61b1c37002544",
+            "project:skills/lumine-harness/src/harness/wiki/validation-documents.ts": "ef8be032fdb488b34d8efcabd1991b561a94e00d8dafbb24a3435b692c72fcb1"
+          },
+          "scopeFingerprints": {
+            "project:skills/lumine-harness/src/harness/wiki/engine.ts": "26a87d4285e5b9a93e58adfeaa75b0ea060238d029ec54931551dacfbb523f18",
+            "project:skills/lumine-harness/src/harness/wiki/files.ts": "d43f81bd3f6049c4d8f1df5b3ae8f53ec71c1c6791a2a646cbd966b828e3635a",
+            "project:skills/lumine-harness/src/harness/wiki/merge.ts": "b6f050f919f67b56512204f6e5b859c393539ee04440cb622c0859597e99eafe",
+            "project:skills/lumine-harness/src/harness/wiki/documents.ts": "1d98eacc505a6a5f3ab35fd1fb6822e2a00458d50cf27975a7e934a5e47ccbc6",
+            "project:skills/lumine-harness/src/harness/wiki/sections.ts": "dd234ed0c4a261190c99d8b9306d8e7b4da8f232f51ae4d2095ea857b44f4ae9",
+            "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "e9a2ab8b81595653d13ba8f7048e7f94658e4994e588ff03f540fef4d282a71d",
+            "project:skills/lumine-harness/src/harness/wiki/search.ts": "ed5fc998e97dc154bbd46e03fe3b532a973403c7d14e376670f9ba695491e967",
+            "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "3ee1984a16a6bb0b53d10e49950f15758d051f9155d752335a8ad10647cb3a82",
+            "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1a3a3dd1de295895155f63f5acf0e8c406b4187ae0eb12ec6b00723d28b20685",
+            "project:skills/lumine-harness/src/harness/wiki/server.ts": "020c5b6e9fdf5ec7c223c4f494046771fe410290500dfab1970e865e6ccd2ecd",
+            "project:skills/lumine-harness/src/harness/wiki/dispositions.ts": "8333f769758c16edb198581a4743dd50e9c4aa434d5aac295d3ad7450bd6ce68",
+            "project:skills/lumine-harness/src/harness/wiki/validation-documents.ts": "fe49e91dadef5c05b4590eec211150519865f7c3e4a8b6e92d89d6d5fa9608a1"
+          },
+          "files": {
+            "project:skills/lumine-harness/src/harness/wiki/engine.ts": "b710cebed47b100f9ade9230c9e4447de18f429f0f332a2abe095e69113016f8",
+            "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+            "project:skills/lumine-harness/src/harness/wiki/merge.ts": "81ea65a12e24471e785f528443463f68c69a853a095d68f3840577eccf454b7b",
+            "project:skills/lumine-harness/src/harness/wiki/documents.ts": "c6cd3097124ffe9e48bf51ffcc5ec86786fea5618a923636e1da37cb9b1483c9",
+            "project:skills/lumine-harness/src/harness/wiki/sections.ts": "3f425ecd340031fe058b499bf3bfabc93138e6376f5e3ea1c189842b8679e0c3",
+            "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "f9e647229ffceae8071f729dd4e119a5d2cead3df52ca1d75c9e75490e07a6a0",
+            "project:skills/lumine-harness/src/harness/wiki/search.ts": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4",
+            "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "4ca902993c3486347d5f3613b2afde7de52b936429faca072c05ed7aa3a738d1",
+            "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2",
+            "project:skills/lumine-harness/src/harness/wiki/server.ts": "b77acd60d6fa908aed50f4568806d279c952d9810f3cd3acc4617deaad6e754d",
+            "project:skills/lumine-harness/src/harness/wiki/dispositions.ts": "e12248fde0d89c8fa1376bad63212f36a570adb5132338d11fd61b1c37002544",
+            "project:skills/lumine-harness/src/harness/wiki/validation-documents.ts": "ef8be032fdb488b34d8efcabd1991b561a94e00d8dafbb24a3435b692c72fcb1"
+          },
+          "missing": []
+        },
+        "updatedAt": "2026-09-29T20:09:56.462Z"
+      },
+      "sources": {
+        "fingerprints": {
+          "project:skills/lumine-harness/src/harness/wiki/engine.ts": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971",
+          "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+          "project:skills/lumine-harness/src/harness/wiki/merge.ts": "81ea65a12e24471e785f528443463f68c69a853a095d68f3840577eccf454b7b",
+          "project:skills/lumine-harness/src/harness/wiki/documents.ts": "c6cd3097124ffe9e48bf51ffcc5ec86786fea5618a923636e1da37cb9b1483c9",
+          "project:skills/lumine-harness/src/harness/wiki/sections.ts": "3f425ecd340031fe058b499bf3bfabc93138e6376f5e3ea1c189842b8679e0c3",
+          "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "f9e647229ffceae8071f729dd4e119a5d2cead3df52ca1d75c9e75490e07a6a0",
+          "project:skills/lumine-harness/src/harness/wiki/search.ts": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4",
+          "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "4ca902993c3486347d5f3613b2afde7de52b936429faca072c05ed7aa3a738d1",
+          "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2",
+          "project:skills/lumine-harness/src/harness/wiki/server.ts": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800",
+          "project:skills/lumine-harness/src/harness/wiki/dispositions.ts": "e12248fde0d89c8fa1376bad63212f36a570adb5132338d11fd61b1c37002544",
+          "project:skills/lumine-harness/src/harness/wiki/validation-documents.ts": "ef8be032fdb488b34d8efcabd1991b561a94e00d8dafbb24a3435b692c72fcb1",
+          "project:skills/lumine-harness/src/harness/wiki/references.ts": "9e68c9fb58681c6d03ac2ea5b7308ec2694a125230d954a7452e467b69e18b58"
+        },
+        "scopeFingerprints": {
+          "project:skills/lumine-harness/src/harness/wiki/engine.ts": "1efc387530f3209bd2c3f8828107c3241343931a2f1ad7eb665bcce2738a3450",
+          "project:skills/lumine-harness/src/harness/wiki/files.ts": "d43f81bd3f6049c4d8f1df5b3ae8f53ec71c1c6791a2a646cbd966b828e3635a",
+          "project:skills/lumine-harness/src/harness/wiki/merge.ts": "b6f050f919f67b56512204f6e5b859c393539ee04440cb622c0859597e99eafe",
+          "project:skills/lumine-harness/src/harness/wiki/documents.ts": "1d98eacc505a6a5f3ab35fd1fb6822e2a00458d50cf27975a7e934a5e47ccbc6",
+          "project:skills/lumine-harness/src/harness/wiki/sections.ts": "dd234ed0c4a261190c99d8b9306d8e7b4da8f232f51ae4d2095ea857b44f4ae9",
+          "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "e9a2ab8b81595653d13ba8f7048e7f94658e4994e588ff03f540fef4d282a71d",
+          "project:skills/lumine-harness/src/harness/wiki/search.ts": "ed5fc998e97dc154bbd46e03fe3b532a973403c7d14e376670f9ba695491e967",
+          "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "3ee1984a16a6bb0b53d10e49950f15758d051f9155d752335a8ad10647cb3a82",
+          "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1a3a3dd1de295895155f63f5acf0e8c406b4187ae0eb12ec6b00723d28b20685",
+          "project:skills/lumine-harness/src/harness/wiki/server.ts": "917f33ac656c8c6210c52878ee6ecf5f79c0293cd00aff2129d940e9071cdd2a",
+          "project:skills/lumine-harness/src/harness/wiki/dispositions.ts": "8333f769758c16edb198581a4743dd50e9c4aa434d5aac295d3ad7450bd6ce68",
+          "project:skills/lumine-harness/src/harness/wiki/validation-documents.ts": "fe49e91dadef5c05b4590eec211150519865f7c3e4a8b6e92d89d6d5fa9608a1",
+          "project:skills/lumine-harness/src/harness/wiki/references.ts": "ccc3f80fc682c2224c7b65490c2f58d318c6100fea10afb8bb23dcea95053160"
+        },
+        "files": {
+          "project:skills/lumine-harness/src/harness/wiki/engine.ts": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971",
+          "project:skills/lumine-harness/src/harness/wiki/files.ts": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+          "project:skills/lumine-harness/src/harness/wiki/merge.ts": "81ea65a12e24471e785f528443463f68c69a853a095d68f3840577eccf454b7b",
+          "project:skills/lumine-harness/src/harness/wiki/documents.ts": "c6cd3097124ffe9e48bf51ffcc5ec86786fea5618a923636e1da37cb9b1483c9",
+          "project:skills/lumine-harness/src/harness/wiki/sections.ts": "3f425ecd340031fe058b499bf3bfabc93138e6376f5e3ea1c189842b8679e0c3",
+          "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "f9e647229ffceae8071f729dd4e119a5d2cead3df52ca1d75c9e75490e07a6a0",
+          "project:skills/lumine-harness/src/harness/wiki/search.ts": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4",
+          "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "4ca902993c3486347d5f3613b2afde7de52b936429faca072c05ed7aa3a738d1",
+          "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2",
+          "project:skills/lumine-harness/src/harness/wiki/server.ts": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800",
+          "project:skills/lumine-harness/src/harness/wiki/dispositions.ts": "e12248fde0d89c8fa1376bad63212f36a570adb5132338d11fd61b1c37002544",
+          "project:skills/lumine-harness/src/harness/wiki/validation-documents.ts": "ef8be032fdb488b34d8efcabd1991b561a94e00d8dafbb24a3435b692c72fcb1",
+          "project:skills/lumine-harness/src/harness/wiki/references.ts": "9e68c9fb58681c6d03ac2ea5b7308ec2694a125230d954a7452e467b69e18b58"
+        },
+        "missing": []
+      },
+      "sourceRefs": [
+        {
+          "id": "engine",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "startLine": 1,
+          "endLine": 378,
+          "kind": "source"
+        },
+        {
+          "id": "files",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+          "startLine": 1,
+          "endLine": 203,
+          "kind": "source"
+        },
+        {
+          "id": "merge",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/merge.ts",
+          "startLine": 1,
+          "endLine": 41,
+          "kind": "source"
+        },
+        {
+          "id": "documents",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
+          "startLine": 1,
+          "endLine": 139,
+          "kind": "source"
+        },
+        {
+          "id": "sections",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/sections.ts",
+          "startLine": 1,
+          "endLine": 32,
+          "kind": "source"
+        },
+        {
+          "id": "coverage",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/coverage.ts",
+          "startLine": 1,
+          "endLine": 42,
+          "kind": "source"
+        },
+        {
+          "id": "search",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+          "startLine": 1,
+          "endLine": 110,
+          "kind": "source"
+        },
+        {
+          "id": "transactions",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/transactions.ts",
+          "startLine": 1,
+          "endLine": 63,
+          "kind": "source"
+        },
+        {
+          "id": "skill",
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
+          "startLine": 1,
+          "endLine": 24,
+          "kind": "source"
+        },
+        {
+          "id": "server-search",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "startLine": 64,
+          "endLine": 86,
+          "kind": "source"
+        },
+        {
+          "id": "dispositions",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/dispositions.ts",
+          "startLine": 1,
+          "endLine": 80,
+          "kind": "source"
+        },
+        {
+          "id": "validation-allowlist",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/validation-documents.ts",
+          "startLine": 1,
+          "endLine": 57,
+          "kind": "source"
+        },
+        {
+          "id": "server-document",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "startLine": 86,
+          "endLine": 93,
+          "kind": "source"
+        },
+        {
+          "id": "reference-alias",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/references.ts",
+          "startLine": 1,
+          "endLine": 19,
+          "kind": "source"
+        }
+      ],
+      "watchScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/files.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/merge.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/documents.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/sections.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/coverage.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/transactions.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/dispositions.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/validation-documents.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/references.ts"
+        }
+      ],
+      "replaceSources": true,
+      "replaceWatchScopes": true
+    },
+    {
+      "kind": "update",
+      "id": "lumine-architecture",
+      "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+      "currentMarkdown": "---\nid: \"lumine-architecture\"\ntitle: \"Core、Skill、Adapter 与构建分发\"\nsummary: \"Lumine 保存项目理解与执行依据；规范资源通过独立服务端、浏览器和迁移构建进入同一安装与 Plugin 分发。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"coreskilladapter-与构建分发\"></a>\n# Core、Skill、Adapter 与构建分发\n\n<a id=\"project-harness-purpose\"></a>\n## 为什么需要项目级 Harness\n\nAgent 产品的 Harness 提供模型与工具循环、上下文管理、权限和生命周期。Lumine 提供项目级环境：目标、工程边界、方法、知识、进度和证据留在项目里，使换会话、换 Agent 后仍能恢复。二者互补；项目资产不会因为某个产品有更强模型就自动出现，也不能由安装一组脚本替代模型理解。\n\n人通过 README、架构地图和知识树理解工程；Agent 按任务选择规则、知识、源码与证据。Product Spec 保存目标，Exec Plan 保存本次技术变化，Wiki 解释现状，Validation 保存实际观测。共享资产减少重复调查，但不把整个知识库固定塞入每次上下文。\n\n<a id=\"canonical-source\"></a>\n## 哪一层可以修改\n\n唯一规范包是 `skills/lumine-harness/`。TypeScript 在 `src/`，日常 Skills、双语模板与资产在 assets；`.mjs` 由构建生成。Plugin wrapper 通过 rsync 同步规范包，不是第二套实现。源仓维护者修改规范源码后构建与同步，不能只修项目 Runtime 或 wrapper，否则下一次升级会丢失修正并造成安装方式分叉。\n\n```mermaid\nflowchart TB\n  T[规范 TypeScript] --> B[服务端构建为 Node 18 ESM]\n  B --> C[公共 Core 和 CLI]\n  B --> A[Adapter 协议转换]\n  B --> M[独立维护迁移器]\n  R[浏览器 TypeScript] --> E[Markdown Mermaid 清洗与样式打包]\n  L[选定语言规范 Skills] --> P[目标项目工具环境]\n  C --> P\n  A --> P\n  E --> P\n  M -->|提案与保护性转换| P\n  P --> K[项目自己的知识 任务 证据]\n  N[规范分发包] --> W[Plugin 同步副本]\n```\n\nCore 统一任务、身份、工作报告和停止条件；Adapter 只翻译宿主输入输出。四个 Skills 提供理解和判断方法，不能把关键词命中当授权或把检查结果当语义正确。阅读器只负责展示与文本定位，不内置模型聊天和任务管理。\n\n<a id=\"server-browser-boundary\"></a>\n## 服务端与阅读器为何分别构建\n\n维护工具链使用源仓约定的较新 Node，正式项目 Runtime 以 Node 18 为目标。`runtime-artifacts.ts` 将规范 TypeScript 映射成正式 `.mjs` 和类型合同；`build-runtime.ts` 在临时目录编译、添加生成标记、改写本地 vendor 引用并检查清单覆盖，避免漏分发或无源文件残留。\n\nYAML 与忽略规则打包成本地 vendor。Mermaid 的绘图依赖由 `build-reader.ts` 用浏览器目标打包，不由 Node 服务端导入。阅读器的动态 chunk、CSS、HTML、许可和内容指纹 manifest 一并分发；只复制主 reader.js 会导致离线打开某类图时缺 chunk。构建一致性检查比较实际内容而非只看文件存在。\n\n知识正文不属于 Runtime 模板。升级不能用旧受管文件淘汰逻辑删除 `.lumine/wiki-state/`、任务与项目检查扩展。模型撰写的知识、人工决定和恢复候选都可能是唯一资产，不能当作可重新下载的工具副本。\n\n<a id=\"locales-and-installation\"></a>\n## 中英文与两种安装保持同一行为\n\n中文规范在 assets，英文条目用 `SKILL.md.template` 避免递归发现重复 Skill。安装时选定一种语言，去掉 template 后缀，目标项目只有四个日常入口。行为标记、Runtime 和验收共用，语言切换不应引入另一套状态或授权逻辑。维护入口 lumine-harness 负责采用与升级，不成为第五个日常阶段。\n\n源仓自用 root manifest 将 skills 指向规范资产、runtime 指向构建目录；采用项目则指向自己的 `.agents/skills` 与 `.lumine`。两者的项目状态仍各自保存，不能根据当前 cwd 猜资源根。详情见配置与根解析专题。\n\n<a id=\"build-failures-verification\"></a>\n## 构建故障与修改验证\n\n新增服务端模块或迁移模块后，需要检查清单映射、生成物 import 路径和正式分发测试。源码测试能从源码仓依赖解析的模块，在安装包中未必存在；本轮就以分发回归覆盖共享阅读模型和 YAML AST 导出，避免只在开发环境可运行。\n\n维护顺序是 typecheck、Runtime build、源码与分发测试、build consistency、Skill 包检查、Plugin sync 与一致性检查。涉及阅读交互另做浏览器验收；涉及宿主生命周期另看真实事件。正式包脱离源码仓依赖、无缓存和无模型调用仍应可阅读检索已有 Wiki 并绘图。此页说明构建与职责，不声称当前改动已发布、所有宿主已运行或用户已接受。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"architecture\",\n    \"架构\",\n    \"build distribution\",\n    \"分发\"\n  ],\n  \"aliases\": [\n    \"architecture\",\n    \"架构\",\n    \"build distribution\",\n    \"分发\",\n    \"Agent Harness\",\n    \"Project Harness\",\n    \"runtimeArtifacts\",\n    \"offline\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"position\",\n      \"repoId\": \"project\",\n      \"path\": \"README.zh-CN.md\",\n      \"startLine\": 1,\n      \"endLine\": 170,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"core\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\",\n      \"startLine\": 1,\n      \"endLine\": 59,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"routing\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/phase-router.ts\",\n      \"startLine\": 1,\n      \"endLine\": 152,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"build\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-runtime.ts\",\n      \"startLine\": 1,\n      \"endLine\": 217,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manifest\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/runtime-artifacts.ts\",\n      \"startLine\": 1,\n      \"endLine\": 63,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"reader\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-reader.ts\",\n      \"startLine\": 1,\n      \"endLine\": 119,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"wrapper\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/sync-plugin-wrapper.sh\",\n      \"startLine\": 1,\n      \"endLine\": 15,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"sync-check\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/check-repo-sync.sh\",\n      \"startLine\": 1,\n      \"endLine\": 38,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manager\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\",\n      \"startLine\": 1,\n      \"endLine\": 1009,\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-root-config\",\n      \"kind\": \"depends_on\",\n      \"note\": \"所有运行与来源以登记根和身份定位\"\n    },\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"related\",\n      \"note\": \"模型工作方法与文档职责\"\n    },\n    {\n      \"target\": \"lumine-adapters\",\n      \"kind\": \"related\",\n      \"note\": \"宿主具体协议和能力边界\"\n    },\n    {\n      \"target\": \"lumine-adoption\",\n      \"kind\": \"related\",\n      \"note\": \"安装与升级如何选择这些资源\"\n    },\n    {\n      \"target\": \"lumine-wiki\",\n      \"kind\": \"related\",\n      \"note\": \"知识生产与确定性工具的分工\"\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"README.zh-CN.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/phase-router.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-runtime.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/runtime-artifacts.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-reader.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/sync-plugin-wrapper.sh\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/check-repo-sync.sh\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"layers\",\n      \"title\": \"从规范源码到项目环境\",\n      \"caption\": \"服务端与浏览器分别打包，知识和任务保存在项目，不由工具升级重新生成。\",\n      \"sources\": [\n        \"build\",\n        \"manifest\",\n        \"reader\",\n        \"wrapper\",\n        \"manager\"\n      ]\n    }\n  ]\n}\n-->\n",
+      "currentRevision": "53140c48c72c2e1be76a07580aeb0bc8b850b1ed38f70fff3029dec8528c9e6f",
+      "baseline": {
+        "schemaVersion": 2,
+        "id": "lumine-architecture",
+        "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+        "generation": 4,
+        "generatedMarkdown": "---\nid: \"lumine-architecture\"\ntitle: \"Core、Skill、Adapter 与构建分发\"\nsummary: \"Lumine 保存项目理解与执行依据；规范资源通过独立服务端、浏览器和迁移构建进入同一安装与 Plugin 分发。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"coreskilladapter-与构建分发\"></a>\n# Core、Skill、Adapter 与构建分发\n\n<a id=\"project-harness-purpose\"></a>\n## 为什么需要项目级 Harness\n\nAgent 产品的 Harness 提供模型与工具循环、上下文管理、权限和生命周期。Lumine 提供项目级环境：目标、工程边界、方法、知识、进度和证据留在项目里，使换会话、换 Agent 后仍能恢复。二者互补；项目资产不会因为某个产品有更强模型就自动出现，也不能由安装一组脚本替代模型理解。\n\n人通过 README、架构地图和知识树理解工程；Agent 按任务选择规则、知识、源码与证据。Product Spec 保存目标，Exec Plan 保存本次技术变化，Wiki 解释现状，Validation 保存实际观测。共享资产减少重复调查，但不把整个知识库固定塞入每次上下文。\n\n<a id=\"canonical-source\"></a>\n## 哪一层可以修改\n\n唯一规范包是 `skills/lumine-harness/`。TypeScript 在 `src/`，日常 Skills、双语模板与资产在 assets；`.mjs` 由构建生成。Plugin wrapper 通过 rsync 同步规范包，不是第二套实现。源仓维护者修改规范源码后构建与同步，不能只修项目 Runtime 或 wrapper，否则下一次升级会丢失修正并造成安装方式分叉。\n\n```mermaid\nflowchart TB\n  T[规范 TypeScript] --> B[服务端构建为 Node 18 ESM]\n  B --> C[公共 Core 和 CLI]\n  B --> A[Adapter 协议转换]\n  B --> M[独立维护迁移器]\n  R[浏览器 TypeScript] --> E[Markdown Mermaid 清洗与样式打包]\n  L[选定语言规范 Skills] --> P[目标项目工具环境]\n  C --> P\n  A --> P\n  E --> P\n  M -->|提案与保护性转换| P\n  P --> K[项目自己的知识 任务 证据]\n  N[规范分发包] --> W[Plugin 同步副本]\n```\n\nCore 统一任务、身份、工作报告和停止条件；Adapter 只翻译宿主输入输出。四个 Skills 提供理解和判断方法，不能把关键词命中当授权或把检查结果当语义正确。阅读器只负责展示与文本定位，不内置模型聊天和任务管理。\n\n<a id=\"server-browser-boundary\"></a>\n## 服务端与阅读器为何分别构建\n\n维护工具链使用源仓约定的较新 Node，正式项目 Runtime 以 Node 18 为目标。`runtime-artifacts.ts` 将规范 TypeScript 映射成正式 `.mjs` 和类型合同；`build-runtime.ts` 在临时目录编译、添加生成标记、改写本地 vendor 引用并检查清单覆盖，避免漏分发或无源文件残留。\n\nYAML 与忽略规则打包成本地 vendor。Mermaid 的绘图依赖由 `build-reader.ts` 用浏览器目标打包，不由 Node 服务端导入。阅读器的动态 chunk、CSS、HTML、许可和内容指纹 manifest 一并分发；只复制主 reader.js 会导致离线打开某类图时缺 chunk。构建一致性检查比较实际内容而非只看文件存在。\n\n知识正文不属于 Runtime 模板。升级不能用旧受管文件淘汰逻辑删除 `.lumine/wiki-state/`、任务与项目检查扩展。模型撰写的知识、人工决定和恢复候选都可能是唯一资产，不能当作可重新下载的工具副本。\n\n<a id=\"locales-and-installation\"></a>\n## 中英文与两种安装保持同一行为\n\n中文规范在 assets，英文条目用 `SKILL.md.template` 避免递归发现重复 Skill。安装时选定一种语言，去掉 template 后缀，目标项目只有四个日常入口。行为标记、Runtime 和验收共用，语言切换不应引入另一套状态或授权逻辑。维护入口 lumine-harness 负责采用与升级，不成为第五个日常阶段。\n\n源仓自用 root manifest 将 skills 指向规范资产、runtime 指向构建目录；采用项目则指向自己的 `.agents/skills` 与 `.lumine`。两者的项目状态仍各自保存，不能根据当前 cwd 猜资源根。详情见配置与根解析专题。\n\n<a id=\"build-failures-verification\"></a>\n## 构建故障与修改验证\n\n新增服务端模块或迁移模块后，需要检查清单映射、生成物 import 路径和正式分发测试。源码测试能从源码仓依赖解析的模块，在安装包中未必存在；本轮就以分发回归覆盖共享阅读模型和 YAML AST 导出，避免只在开发环境可运行。\n\n维护顺序是 typecheck、Runtime build、源码与分发测试、build consistency、Skill 包检查、Plugin sync 与一致性检查。涉及阅读交互另做浏览器验收；涉及宿主生命周期另看真实事件。正式包脱离源码仓依赖、无缓存和无模型调用仍应可阅读检索已有 Wiki 并绘图。此页说明构建与职责，不声称当前改动已发布、所有宿主已运行或用户已接受。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"architecture\",\n    \"架构\",\n    \"build distribution\",\n    \"分发\"\n  ],\n  \"aliases\": [\n    \"architecture\",\n    \"架构\",\n    \"build distribution\",\n    \"分发\",\n    \"Agent Harness\",\n    \"Project Harness\",\n    \"runtimeArtifacts\",\n    \"offline\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"position\",\n      \"repoId\": \"project\",\n      \"path\": \"README.zh-CN.md\",\n      \"startLine\": 1,\n      \"endLine\": 170,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"core\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\",\n      \"startLine\": 1,\n      \"endLine\": 59,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"routing\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/phase-router.ts\",\n      \"startLine\": 1,\n      \"endLine\": 152,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"build\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-runtime.ts\",\n      \"startLine\": 1,\n      \"endLine\": 217,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manifest\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/runtime-artifacts.ts\",\n      \"startLine\": 1,\n      \"endLine\": 63,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"reader\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-reader.ts\",\n      \"startLine\": 1,\n      \"endLine\": 119,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"wrapper\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/sync-plugin-wrapper.sh\",\n      \"startLine\": 1,\n      \"endLine\": 15,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"sync-check\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/check-repo-sync.sh\",\n      \"startLine\": 1,\n      \"endLine\": 38,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manager\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\",\n      \"startLine\": 1,\n      \"endLine\": 1009,\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-root-config\",\n      \"kind\": \"depends_on\",\n      \"note\": \"所有运行与来源以登记根和身份定位\"\n    },\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"related\",\n      \"note\": \"模型工作方法与文档职责\"\n    },\n    {\n      \"target\": \"lumine-adapters\",\n      \"kind\": \"related\",\n      \"note\": \"宿主具体协议和能力边界\"\n    },\n    {\n      \"target\": \"lumine-adoption\",\n      \"kind\": \"related\",\n      \"note\": \"安装与升级如何选择这些资源\"\n    },\n    {\n      \"target\": \"lumine-wiki\",\n      \"kind\": \"related\",\n      \"note\": \"知识生产与确定性工具的分工\"\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"README.zh-CN.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/phase-router.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-runtime.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/runtime-artifacts.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-reader.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/sync-plugin-wrapper.sh\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/check-repo-sync.sh\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"layers\",\n      \"title\": \"从规范源码到项目环境\",\n      \"caption\": \"服务端与浏览器分别打包，知识和任务保存在项目，不由工具升级重新生成。\",\n      \"sources\": [\n        \"build\",\n        \"manifest\",\n        \"reader\",\n        \"wrapper\",\n        \"manager\"\n      ]\n    }\n  ]\n}\n-->\n",
+        "appliedRevision": "53140c48c72c2e1be76a07580aeb0bc8b850b1ed38f70fff3029dec8528c9e6f",
+        "sources": {
+          "fingerprints": {
+            "project:README.zh-CN.md": "e95cbb94801534fdff2cd10d8836a889c81f708fc127449178f280d8e1e292e7",
+            "project:skills/lumine-harness/src/harness/core/session-context.ts": "0971730a2128ac18831d32f52401a6aef588a85d044701928d9a6b3e9a905bdc",
+            "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
+            "project:scripts/build-runtime.ts": "36718fefca1657b323d898bff5c022539ce078c306e79efefc5e851057a9ba90",
+            "project:scripts/runtime-artifacts.ts": "ac9c2582f8cf0cb3df7cff12c6e96b9258fad12fcb98e9a87e8e86fe898af74d",
+            "project:scripts/build-reader.ts": "91e03836584c49079231ce0c81c0a9d596434dd141e36b95f30d94a3e4057f33",
+            "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+            "project:scripts/check-repo-sync.sh": "0a23aa61bf9d7de1deba7375bfb60b6b998c25745733489ce1333764fa2db058",
+            "project:skills/lumine-harness/src/scripts/harness-manager.ts": "e5b92b53dab06f415ebbc50ba1e85b6bfacee2f3a065020aeae746f0dee75eb5"
+          },
+          "scopeFingerprints": {
+            "project:README.zh-CN.md": "7fb7144b8bee57e4281ee356bb10e3ea884cb767b2bd271c87822455e9a33560",
+            "project:skills/lumine-harness/src/harness/core/session-context.ts": "88604f388219d88d6ceabdc08fd91ba3245e56b4a411bf8a3db64e12be42b65c",
+            "project:skills/lumine-harness/src/harness/core/phase-router.ts": "64fa2e9dab9922216f8760190d8077c25d18cf0c5d08f28651e2455ace438520",
+            "project:scripts/build-runtime.ts": "9c29b203dd48c5c87d799b7b3cde9e07060396500231f2eac871e1e2df836775",
+            "project:scripts/runtime-artifacts.ts": "9c266f7858699317fb2a9b8f84d75715d4775312cd47d8b11b4e362ea139e1a5",
+            "project:scripts/build-reader.ts": "db812615e54a084357194f832d176541ff8ffa8581fd7e0a140c9f77f2773c34",
+            "project:scripts/sync-plugin-wrapper.sh": "4726841156286e11e720a90ce23b1df720cdd24ddfa750f8a21f5cceec6c3ed1",
+            "project:scripts/check-repo-sync.sh": "fdd04081b8e64e1f5f49ee406b0bebfb6fe0f81f99f84c2ee7c55dbc0765f3c8",
+            "project:skills/lumine-harness/src/scripts/harness-manager.ts": "863a00233cf7aac7a5f8573278f3a4bb59c10dd362538588ba3a89469d243c2d"
+          },
+          "files": {
+            "project:README.zh-CN.md": "e95cbb94801534fdff2cd10d8836a889c81f708fc127449178f280d8e1e292e7",
+            "project:skills/lumine-harness/src/harness/core/session-context.ts": "0971730a2128ac18831d32f52401a6aef588a85d044701928d9a6b3e9a905bdc",
+            "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
+            "project:scripts/build-runtime.ts": "36718fefca1657b323d898bff5c022539ce078c306e79efefc5e851057a9ba90",
+            "project:scripts/runtime-artifacts.ts": "ac9c2582f8cf0cb3df7cff12c6e96b9258fad12fcb98e9a87e8e86fe898af74d",
+            "project:scripts/build-reader.ts": "91e03836584c49079231ce0c81c0a9d596434dd141e36b95f30d94a3e4057f33",
+            "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+            "project:scripts/check-repo-sync.sh": "0a23aa61bf9d7de1deba7375bfb60b6b998c25745733489ce1333764fa2db058",
+            "project:skills/lumine-harness/src/scripts/harness-manager.ts": "e5b92b53dab06f415ebbc50ba1e85b6bfacee2f3a065020aeae746f0dee75eb5"
+          },
+          "missing": []
+        },
+        "updatedAt": "2026-09-29T07:39:20.709Z"
+      },
+      "sources": {
+        "fingerprints": {
+          "project:README.zh-CN.md": "600dab1b6fdacf8579f7ec0ea3fdcdc7fa9b2f380c333a58281c31027a3b97c4",
+          "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+          "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
+          "project:scripts/build-runtime.ts": "36718fefca1657b323d898bff5c022539ce078c306e79efefc5e851057a9ba90",
+          "project:scripts/runtime-artifacts.ts": "ac9c2582f8cf0cb3df7cff12c6e96b9258fad12fcb98e9a87e8e86fe898af74d",
+          "project:scripts/build-reader.ts": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+          "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+          "project:scripts/check-repo-sync.sh": "0a23aa61bf9d7de1deba7375bfb60b6b998c25745733489ce1333764fa2db058",
+          "project:skills/lumine-harness/src/scripts/harness-manager.ts": "45f13ee7bd41d6eca0c2bf75dcb41e41b5f51d917a345353b6df886fd52f8017"
+        },
+        "scopeFingerprints": {
+          "project:README.zh-CN.md": "8b514df26e3505f301a20d896d52b07e060169caaaf073345c66f16c51917604",
+          "project:skills/lumine-harness/src/harness/core/session-context.ts": "18d4ab343f35393d5a7dc571377dbe4a912523c4219cf92ef207ea095f20d95d",
+          "project:skills/lumine-harness/src/harness/core/phase-router.ts": "64fa2e9dab9922216f8760190d8077c25d18cf0c5d08f28651e2455ace438520",
+          "project:scripts/build-runtime.ts": "9c29b203dd48c5c87d799b7b3cde9e07060396500231f2eac871e1e2df836775",
+          "project:scripts/runtime-artifacts.ts": "9c266f7858699317fb2a9b8f84d75715d4775312cd47d8b11b4e362ea139e1a5",
+          "project:scripts/build-reader.ts": "cf809c5e9aedcaf97a94551254adfbda4131cbddc60e447f6fa4816216a0a1d3",
+          "project:scripts/sync-plugin-wrapper.sh": "4726841156286e11e720a90ce23b1df720cdd24ddfa750f8a21f5cceec6c3ed1",
+          "project:scripts/check-repo-sync.sh": "fdd04081b8e64e1f5f49ee406b0bebfb6fe0f81f99f84c2ee7c55dbc0765f3c8",
+          "project:skills/lumine-harness/src/scripts/harness-manager.ts": "295df5bc1955b268b60242c492d6c38e9f22f69e93ff67c92cc4f0f80f2703d4"
+        },
+        "files": {
+          "project:README.zh-CN.md": "600dab1b6fdacf8579f7ec0ea3fdcdc7fa9b2f380c333a58281c31027a3b97c4",
+          "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+          "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
+          "project:scripts/build-runtime.ts": "36718fefca1657b323d898bff5c022539ce078c306e79efefc5e851057a9ba90",
+          "project:scripts/runtime-artifacts.ts": "ac9c2582f8cf0cb3df7cff12c6e96b9258fad12fcb98e9a87e8e86fe898af74d",
+          "project:scripts/build-reader.ts": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+          "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+          "project:scripts/check-repo-sync.sh": "0a23aa61bf9d7de1deba7375bfb60b6b998c25745733489ce1333764fa2db058",
+          "project:skills/lumine-harness/src/scripts/harness-manager.ts": "45f13ee7bd41d6eca0c2bf75dcb41e41b5f51d917a345353b6df886fd52f8017"
+        },
+        "missing": []
+      },
+      "sourceRefs": [
+        {
+          "id": "position",
+          "repoId": "project",
+          "path": "README.zh-CN.md",
+          "startLine": 1,
+          "endLine": 175,
+          "kind": "source"
+        },
+        {
+          "id": "core",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+          "startLine": 1,
+          "endLine": 61,
+          "kind": "source"
+        },
+        {
+          "id": "routing",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
+          "startLine": 1,
+          "endLine": 152,
+          "kind": "source"
+        },
+        {
+          "id": "build",
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "startLine": 1,
+          "endLine": 217,
+          "kind": "source"
+        },
+        {
+          "id": "manifest",
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "startLine": 1,
+          "endLine": 63,
+          "kind": "source"
+        },
+        {
+          "id": "reader",
+          "repoId": "project",
+          "path": "scripts/build-reader.ts",
+          "startLine": 1,
+          "endLine": 199,
+          "kind": "source"
+        },
+        {
+          "id": "wrapper",
+          "repoId": "project",
+          "path": "scripts/sync-plugin-wrapper.sh",
+          "startLine": 1,
+          "endLine": 15,
+          "kind": "source"
+        },
+        {
+          "id": "sync-check",
+          "repoId": "project",
+          "path": "scripts/check-repo-sync.sh",
+          "startLine": 1,
+          "endLine": 38,
+          "kind": "source"
+        },
+        {
+          "id": "manager",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "startLine": 1,
+          "endLine": 1052,
+          "kind": "source"
+        }
+      ],
+      "watchScopes": [
+        {
+          "repoId": "project",
+          "path": "README.zh-CN.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/phase-router.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-reader.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/sync-plugin-wrapper.sh"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/check-repo-sync.sh"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts"
+        }
+      ],
+      "replaceSources": true,
+      "replaceWatchScopes": true
+    },
+    {
+      "kind": "update",
+      "id": "lumine-task-check",
+      "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+      "currentMarkdown": "---\nid: \"lumine-task-check\"\ntitle: \"任务检查、停止状态与继续条件\"\nsummary: \"三种工作状态控制结束、继续或等待；当前任务证据、统一续跑预算、事件去重和真实宿主回执分别限制误完成与无界重试。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"lumine-task-check-overview\"></a>\n# 任务检查、停止状态与继续条件\n\n<a id=\"status-answer\"></a>\n## “完成了什么”先于“写了什么状态”\n\n停止策略解决两个工程问题：Agent 不能因为一轮输出结束就遗忘已经授权但尚未完成的工作，也不能为了满足一个检查而无界续跑。它并不替用户定义产品验收，不负责授予新动作权限。\n\n`done` 针对本轮请求：讨论产物已交付、诊断已说明事实与影响，都可以完成。实施请求则需要当前任务的适用证据。部署没有被请求时，未部署不阻塞开发任务；真实运行尚未验证时，也不能把代码检查通过说成真实运行通过。\n\n```mermaid\nflowchart LR\n  S[Spec 的适用验收 ID] --> T[当前任务及内容基线]\n  C[代码和环境范围] --> E[实际操作及证据文件]\n  T --> V[实施证据检查]\n  E --> V\n  M[本轮模式与授权] --> G{是否是实施收口}\n  G -->|是| V\n  G -->|规划或诊断| D[交付当前请求结果]\n  V --> F[完成或解释证据缺口]\n```\n\n图描述确定性关联。证据是否足以解释业务正确性仍需审阅，源码无法替代运行观察。\n\n<a id=\"status-values\"></a>\n## 三种状态，原因和下一步单独说明\n\n| 公共状态 | Agent 表达的意图 | Core 的正常控制结果 |\n|---|---|---|\n| `done` | 当前授权范围内的结果已经交付 | 适用检查满足后允许结束 |\n| `continue` | 当前已确认阶段内有明确且已授权的下一步 | 在宿主能力和预算允许时请求继续 |\n| `blocked` | 当前无法自主推进 | 不自动续跑，说明阻塞及解除条件 |\n\n阶段交接等待用户确认时，不通过自动续跑进入后续产品阶段。仅要求就绪评估时，完成评估可以 `done`；承诺的整体工作尚未完成且需确认才能推进时，报告 `blocked`。续跑提示提醒遵守当前已确认阶段，但 Runtime 不理解成果的产品语义，也不能替用户或 Agent 判定确认是否充分。\n\n阻塞可能需要用户取舍、凭据、人工应用操作，也可能是外部服务不可用。这些原因并不形成四条不同调度算法，因此作为 `reason` 与 `nextStep` 说明保存。结构化形式是 `WorkReport` 版本 2，包含 `protocolVersion` 和 `status`，可附原因与下一步。不会把原因枚举扩展成新的公共状态列表。\n\n面向人类的尾行保持 `WORK_STATUS: done`、`WORK_STATUS: continue` 或 `WORK_STATUS: blocked`。裸 `blocked` 也有效；若没有结构化原因，Runtime 记为 `unknown`，不会猜成缺凭据或错误状态。Agent 仍有责任在正文解释阻塞。可选的 `| 原因` 后缀能够被读取，但不是必填的新手续。\n\n<a id=\"status-parsing\"></a>\n## 文本与结构化报告怎样避免互相误导\n\n文本解析只读回答末尾独立状态行。代码围栏、引用、缩进代码、行内举例和状态后仍有正文的行都不驱动控制；连续多个结尾声明被视为冲突。尾部引用元数据会先剥离，因此不会把引用块当新正文。\n\n结构化报告可由 Hook 输入或 `.lumine/cli work-status` 提供。CLI 必须知道明确宿主与会话，可使用 `--report <文件或->` 读取 JSON，也可传状态及原因参数；`--expect-turn` 用于拒绝已变更用户轮次的写入。Runtime 只复用当前用户轮次、当前宿主轮次内尚未消费的报告，不能从任意较早一轮捡出 `done`。\n\n两种渠道同时存在时，状态、协议版本及明确提供的原因／下一步必须一致；缺少解释的一方可以由另一方补充，冲突时要求重报当前意图。仅修正文档里的例子不会触发继续工作，结构化状态也不能暗中覆盖人类看到的相反结尾。\n\n<a id=\"status-checks\"></a>\n## 当前任务检查与全项目检查不是同一个门槛\n\n`done` 进入实施完成判断时读取当前绑定任务，验证验收基线、实际证据、适用源码与必要知识同步。未绑定实施任务会报告 `TASK_NOT_BOUND`；较新失败、源码漂移和缺少适用证据都不能被一个“通过”字符串掩盖。\n\n`plan`、`verify`、`diagnose` 和显式检查请求的完成表示相应工作已交付，不要求先修好被检查对象。Runtime 不会把诊断失败转换成实施授权。`check health`、`check all` 是另行调用的项目检查，正常任务收口不会自动扫描并修复整个工程。\n\n报告无效或实施证据不足时，内部可以产生 `reject_completion`，它表示需要范围内的重新判断或补充，既不是第四种公共工作状态，也不允许偷偷改验收。Agent 可以补已授权证据、修正自己的完成表述，或说明实际阻塞；不能为了“过门禁”部署服务、修改业务目标或修复未授权问题。\n\n<a id=\"status-budget\"></a>\n## 所有自动跟进都经过同一预算\n\n```mermaid\nflowchart TD\n  I[当前 Stop 输入] --> P[解析并核对本轮报告]\n  P --> B{公共状态}\n  B -->|blocked| W[等待并说明原因]\n  B -->|done| C[当前请求的适用检查]\n  C -->|满足| F[结束]\n  C -->|证据不足| R[范围内重判请求]\n  P -->|无效或冲突| R\n  B -->|continue| R\n  R --> H{宿主支持且首次投递}\n  H -->|否| W\n  H -->|是| L{预算和重复失败检查}\n  L -->|达到限制| W\n  L -->|允许| N[登记请求并投递一次]\n```\n\n默认一条自主继续链最多 20 次，项目可配置；ZCode 还受实现中的最多 3 次宿主上限约束。普通 `continue`、报告格式修正以及完成检查失败都扣同一预算。不能通过反复写 `done` 让检查拒绝，从另一条分支绕开上限。\n\n相同失败、相同任务输入和可观察进度没有改变时，默认第二次出现就停止自动重试。一般进度检查只有在宿主明确提供可观察进度时才启用；没有进度信号表示“不知道”，不能声称观察到两轮毫无进展。即便进度未知，总链长限制仍有效。\n\n预算针对逻辑续跑请求，不能证明宿主已经执行它。先登记再送达可能遇到进程中断，系统选择保守不重复投递；这避免重复动作，但意味着有些中断需要人工核实后恢复，而不是保证恰好执行一次。\n\n<a id=\"status-identity\"></a>\n## 重复事件、并发与新用户轮次\n\n优先使用宿主的回答／消息／生成 ID 作为一次报告身份，Hook 调用 ID 只代表传输尝试，不应让同一个回答被重试时得到新预算。没有稳定回答 ID 时，使用会话、用户轮次、宿主轮次和回答文本组合去重。\n\n同一报告身份重复到达，返回已算出的决定但不再次投递。相同身份携带不同报告时暂停并报告身份冲突。Stop 的文件锁避免同一会话并发评估都看到旧计数后各自发出续跑。锁若因中断残留，不自动超时抢占，应先核对进程和状态。\n\n明确的新用户轮次会清除旧结束报告、待投递请求及旧模式，使旧任务绑定不再直接适用于本轮，并开启新的预算链。项目任务文件、已有进度和授权依据仍在；重新绑定当前工作是核对上下文，不是要求用户再批准一次。迁移也要保留已经消耗的预算，不把“换了协议”当作免费重置。\n\n<a id=\"status-proof\"></a>\n## 请求继续不等于证明已经自动继续\n\n探针区分至少三件事：Stop 事件被调用、Adapter 返回了允许继续的协议、宿主因此启动后续工作。新的证明条件要求后续非 Stop 事件关联同一会话、同一用户轮次和准确的 `continuationRequestId`，并确认不是新的用户输入。\n\n任意后续工具事件、稍后打开的新会话、手动发送“继续”或直接塞一个 `automatic_continuation` 标签，都不足以证明自动续跑。普通事件可以推进本地去重轮次，但没有匹配回执时仍保留“未证实送达”。未提供相关回执的宿主，不能凭本地静态配置显示自动续跑实测通过。\n\n当前源码和测试验证控制协议；本轮并未因此新增真实宿主完整续跑证据。历史 Codex 会话与 CLI 记录只证明记录中实际发生的入口行为，其他社区应用也不能借用这些证据。\n\n<a id=\"status-recovery\"></a>\n## 维护与验证要保留什么\n\n遇到预算限制、相同失败重现或状态冲突，先查看当前任务、会话轮次、最后报告和已登记请求，明确还剩什么工作及当前权限。不要删除会话文件来绕过预算，也不要把未知的待投递请求自动重放。锁冲突先确认原进程已结束，再依据受保护记录恢复。\n\n协议升级属于独立维护工具：有效任务、模式、用户轮次、进度和已用预算保留；旧待投递动作保留为未知历史，当前运行需要新的报告。日常 Runtime 只执行当前三态协议，相关旧格式规则不注入 Skill 上下文。\n\n修改此机制至少应覆盖：三态正常路径、示例不触发、文本与结构化冲突、同一事件多次投递、并发 Stop、20 次共享预算、ZCode 上限、重复失败、未知进度、诊断带失败完成、新轮次隔离，以及匹配和不匹配的续跑回执。单元测试能验证判定，真实宿主验收必须另外报告。\n\n<a id=\"计划完成后仍可追溯\"></a>\n## 计划完成后仍可追溯\n\n\n计划归档在 active 与 completed 之间移动，保留稳定 ID、验收与证据；只调整生命周期状态和必要相对链接。任务继续引用原 ID，不需要重新绑定要求。默认目录排除归档内容，显式 ID、路径和旧路径映射仍可定位当前协议的计划。恢复同一任务时可以受控移回；写入前核对内容指纹，中断可续跑，后续人工修改引发冲突而不会被覆盖。无身份或明确标为历史的记录不自动升级为当前任务。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"停止策略\",\n    \"三态\",\n    \"续跑\",\n    \"诊断\",\n    \"任务检查\",\n    \"WORK_STATUS\",\n    \"WorkReport\",\n    \"continuation\",\n    \"stop policy\"\n  ],\n  \"aliases\": [\n    \"停止策略\",\n    \"三态\",\n    \"续跑\",\n    \"诊断\",\n    \"任务检查\",\n    \"WORK_STATUS\",\n    \"WorkReport\",\n    \"continuation\",\n    \"stop policy\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"task-check\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/task-contract.ts\",\n      \"startLine\": 87,\n      \"endLine\": 170,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"stop-report\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/stop-policy.ts\",\n      \"startLine\": 33,\n      \"endLine\": 102,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"stop-budget\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/stop-policy.ts\",\n      \"startLine\": 104,\n      \"endLine\": 133,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"stop-lock\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/stop-policy.ts\",\n      \"startLine\": 50,\n      \"endLine\": 79,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"terminal-parser\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\",\n      \"startLine\": 43,\n      \"endLine\": 99,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"report-state\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\",\n      \"startLine\": 352,\n      \"endLine\": 403,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"turn-state\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\",\n      \"startLine\": 252,\n      \"endLine\": 349,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"host-delivery\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/continuation-delivery.ts\",\n      \"startLine\": 3,\n      \"endLine\": 23,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"receipt-evidence\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\",\n      \"startLine\": 217,\n      \"endLine\": 268,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"proof-summary\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\",\n      \"startLine\": 294,\n      \"endLine\": 352,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"report-cli\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\",\n      \"startLine\": 934,\n      \"endLine\": 952,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"check-scope\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/check.ts\",\n      \"startLine\": 17,\n      \"endLine\": 108,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"status-tests\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/tests/status-protocol.test.ts\",\n      \"startLine\": 19,\n      \"endLine\": 165,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"document-lifecycle\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/document-operations.ts\",\n      \"startLine\": 1,\n      \"endLine\": 216,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"stage-handoff\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md\",\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"depends_on\",\n      \"note\": \"先理解任务模式、验收和证据归属\"\n    },\n    {\n      \"target\": \"lumine-adapters\",\n      \"kind\": \"related\",\n      \"note\": \"续跑决策如何送达各宿主\"\n    },\n    {\n      \"target\": \"lumine-root-config\",\n      \"kind\": \"related\",\n      \"note\": \"会话和任务记录的位置\"\n    },\n    {\n      \"target\": \"lumine-wiki\",\n      \"kind\": \"related\",\n      \"note\": \"任务承担的知识同步如何完成\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"checks\",\n      \"title\": \"任务完成的证据路径\",\n      \"caption\": \"保留原图身份。产品要求与当前代码和环境决定证据是否适用，当前请求模式决定是否进入实施完成检查。\",\n      \"sources\": [\n        \"task-check\",\n        \"stop-report\"\n      ]\n    },\n    {\n      \"id\": \"bounded-continuation\",\n      \"title\": \"停止判断与有界续跑\",\n      \"caption\": \"无效报告和完成检查失败也必须经过相同预算与去重；图中等待只停止自动调度，不自动修改用户授权。\",\n      \"sources\": [\n        \"stop-report\",\n        \"stop-budget\",\n        \"stop-lock\",\n        \"host-delivery\"\n      ]\n    }\n  ],\n  \"sections\": [\n    {\n      \"id\": \"status-answer\",\n      \"sources\": [\n        \"stop-report\",\n        \"task-check\"\n      ]\n    },\n    {\n      \"id\": \"status-values\",\n      \"sources\": [\n        \"terminal-parser\",\n        \"report-state\",\n        \"stage-handoff\"\n      ]\n    },\n    {\n      \"id\": \"status-parsing\",\n      \"sources\": [\n        \"terminal-parser\",\n        \"stop-report\"\n      ]\n    },\n    {\n      \"id\": \"status-checks\",\n      \"sources\": [\n        \"task-check\",\n        \"check-scope\"\n      ]\n    },\n    {\n      \"id\": \"status-budget\",\n      \"sources\": [\n        \"stop-budget\",\n        \"host-delivery\"\n      ]\n    },\n    {\n      \"id\": \"status-identity\",\n      \"sources\": [\n        \"stop-lock\",\n        \"turn-state\",\n        \"report-state\"\n      ]\n    },\n    {\n      \"id\": \"status-proof\",\n      \"sources\": [\n        \"receipt-evidence\",\n        \"proof-summary\"\n      ]\n    },\n    {\n      \"id\": \"status-recovery\",\n      \"sources\": [\n        \"stop-lock\",\n        \"report-cli\",\n        \"status-tests\"\n      ]\n    },\n    {\n      \"id\": \"计划完成后仍可追溯\",\n      \"sources\": [\n        \"document-lifecycle\"\n      ]\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/task-contract.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/stop-policy.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/continuation-delivery.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/check.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/tests/status-protocol.test.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/document-operations.ts\"\n    }\n  ]\n}\n-->\n",
+      "currentRevision": "421d3ed1e8ee7dbe501d374d62446d9148418b1b55afe88b81e333a54c6db31c",
+      "baseline": {
+        "schemaVersion": 2,
+        "id": "lumine-task-check",
+        "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+        "generation": 6,
+        "generatedMarkdown": "---\nid: \"lumine-task-check\"\ntitle: \"任务检查、停止状态与继续条件\"\nsummary: \"三种工作状态控制结束、继续或等待；当前任务证据、统一续跑预算、事件去重和真实宿主回执分别限制误完成与无界重试。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"lumine-task-check-overview\"></a>\n# 任务检查、停止状态与继续条件\n\n<a id=\"status-answer\"></a>\n## “完成了什么”先于“写了什么状态”\n\n停止策略解决两个工程问题：Agent 不能因为一轮输出结束就遗忘已经授权但尚未完成的工作，也不能为了满足一个检查而无界续跑。它并不替用户定义产品验收，不负责授予新动作权限。\n\n`done` 针对本轮请求：讨论产物已交付、诊断已说明事实与影响，都可以完成。实施请求则需要当前任务的适用证据。部署没有被请求时，未部署不阻塞开发任务；真实运行尚未验证时，也不能把代码检查通过说成真实运行通过。\n\n```mermaid\nflowchart LR\n  S[Spec 的适用验收 ID] --> T[当前任务及内容基线]\n  C[代码和环境范围] --> E[实际操作及证据文件]\n  T --> V[实施证据检查]\n  E --> V\n  M[本轮模式与授权] --> G{是否是实施收口}\n  G -->|是| V\n  G -->|规划或诊断| D[交付当前请求结果]\n  V --> F[完成或解释证据缺口]\n```\n\n图描述确定性关联。证据是否足以解释业务正确性仍需审阅，源码无法替代运行观察。\n\n<a id=\"status-values\"></a>\n## 三种状态，原因和下一步单独说明\n\n| 公共状态 | Agent 表达的意图 | Core 的正常控制结果 |\n|---|---|---|\n| `done` | 当前授权范围内的结果已经交付 | 适用检查满足后允许结束 |\n| `continue` | 当前已确认阶段内有明确且已授权的下一步 | 在宿主能力和预算允许时请求继续 |\n| `blocked` | 当前无法自主推进 | 不自动续跑，说明阻塞及解除条件 |\n\n阶段交接等待用户确认时，不通过自动续跑进入后续产品阶段。仅要求就绪评估时，完成评估可以 `done`；承诺的整体工作尚未完成且需确认才能推进时，报告 `blocked`。续跑提示提醒遵守当前已确认阶段，但 Runtime 不理解成果的产品语义，也不能替用户或 Agent 判定确认是否充分。\n\n阻塞可能需要用户取舍、凭据、人工应用操作，也可能是外部服务不可用。这些原因并不形成四条不同调度算法，因此作为 `reason` 与 `nextStep` 说明保存。结构化形式是 `WorkReport` 版本 2，包含 `protocolVersion` 和 `status`，可附原因与下一步。不会把原因枚举扩展成新的公共状态列表。\n\n面向人类的尾行保持 `WORK_STATUS: done`、`WORK_STATUS: continue` 或 `WORK_STATUS: blocked`。裸 `blocked` 也有效；若没有结构化原因，Runtime 记为 `unknown`，不会猜成缺凭据或错误状态。Agent 仍有责任在正文解释阻塞。可选的 `| 原因` 后缀能够被读取，但不是必填的新手续。\n\n<a id=\"status-parsing\"></a>\n## 文本与结构化报告怎样避免互相误导\n\n文本解析只读回答末尾独立状态行。代码围栏、引用、缩进代码、行内举例和状态后仍有正文的行都不驱动控制；连续多个结尾声明被视为冲突。尾部引用元数据会先剥离，因此不会把引用块当新正文。\n\n结构化报告可由 Hook 输入或 `.lumine/cli work-status` 提供。CLI 必须知道明确宿主与会话，可使用 `--report <文件或->` 读取 JSON，也可传状态及原因参数；`--expect-turn` 用于拒绝已变更用户轮次的写入。Runtime 只复用当前用户轮次、当前宿主轮次内尚未消费的报告，不能从任意较早一轮捡出 `done`。\n\n两种渠道同时存在时，状态、协议版本及明确提供的原因／下一步必须一致；缺少解释的一方可以由另一方补充，冲突时要求重报当前意图。仅修正文档里的例子不会触发继续工作，结构化状态也不能暗中覆盖人类看到的相反结尾。\n\n<a id=\"status-checks\"></a>\n## 当前任务检查与全项目检查不是同一个门槛\n\n`done` 进入实施完成判断时读取当前绑定任务，验证验收基线、实际证据、适用源码与必要知识同步。未绑定实施任务会报告 `TASK_NOT_BOUND`；较新失败、源码漂移和缺少适用证据都不能被一个“通过”字符串掩盖。\n\n`plan`、`verify`、`diagnose` 和显式检查请求的完成表示相应工作已交付，不要求先修好被检查对象。Runtime 不会把诊断失败转换成实施授权。`check health`、`check all` 是另行调用的项目检查，正常任务收口不会自动扫描并修复整个工程。\n\n报告无效或实施证据不足时，内部可以产生 `reject_completion`，它表示需要范围内的重新判断或补充，既不是第四种公共工作状态，也不允许偷偷改验收。Agent 可以补已授权证据、修正自己的完成表述，或说明实际阻塞；不能为了“过门禁”部署服务、修改业务目标或修复未授权问题。\n\n<a id=\"status-budget\"></a>\n## 所有自动跟进都经过同一预算\n\n```mermaid\nflowchart TD\n  I[当前 Stop 输入] --> P[解析并核对本轮报告]\n  P --> B{公共状态}\n  B -->|blocked| W[等待并说明原因]\n  B -->|done| C[当前请求的适用检查]\n  C -->|满足| F[结束]\n  C -->|证据不足| R[范围内重判请求]\n  P -->|无效或冲突| R\n  B -->|continue| R\n  R --> H{宿主支持且首次投递}\n  H -->|否| W\n  H -->|是| L{预算和重复失败检查}\n  L -->|达到限制| W\n  L -->|允许| N[登记请求并投递一次]\n```\n\n默认一条自主继续链最多 20 次，项目可配置；ZCode 还受实现中的最多 3 次宿主上限约束。普通 `continue`、报告格式修正以及完成检查失败都扣同一预算。不能通过反复写 `done` 让检查拒绝，从另一条分支绕开上限。\n\n相同失败、相同任务输入和可观察进度没有改变时，默认第二次出现就停止自动重试。一般进度检查只有在宿主明确提供可观察进度时才启用；没有进度信号表示“不知道”，不能声称观察到两轮毫无进展。即便进度未知，总链长限制仍有效。\n\n预算针对逻辑续跑请求，不能证明宿主已经执行它。先登记再送达可能遇到进程中断，系统选择保守不重复投递；这避免重复动作，但意味着有些中断需要人工核实后恢复，而不是保证恰好执行一次。\n\n<a id=\"status-identity\"></a>\n## 重复事件、并发与新用户轮次\n\n优先使用宿主的回答／消息／生成 ID 作为一次报告身份，Hook 调用 ID 只代表传输尝试，不应让同一个回答被重试时得到新预算。没有稳定回答 ID 时，使用会话、用户轮次、宿主轮次和回答文本组合去重。\n\n同一报告身份重复到达，返回已算出的决定但不再次投递。相同身份携带不同报告时暂停并报告身份冲突。Stop 的文件锁避免同一会话并发评估都看到旧计数后各自发出续跑。锁若因中断残留，不自动超时抢占，应先核对进程和状态。\n\n明确的新用户轮次会清除旧结束报告、待投递请求及旧模式，使旧任务绑定不再直接适用于本轮，并开启新的预算链。项目任务文件、已有进度和授权依据仍在；重新绑定当前工作是核对上下文，不是要求用户再批准一次。迁移也要保留已经消耗的预算，不把“换了协议”当作免费重置。\n\n<a id=\"status-proof\"></a>\n## 请求继续不等于证明已经自动继续\n\n探针区分至少三件事：Stop 事件被调用、Adapter 返回了允许继续的协议、宿主因此启动后续工作。新的证明条件要求后续非 Stop 事件关联同一会话、同一用户轮次和准确的 `continuationRequestId`，并确认不是新的用户输入。\n\n任意后续工具事件、稍后打开的新会话、手动发送“继续”或直接塞一个 `automatic_continuation` 标签，都不足以证明自动续跑。普通事件可以推进本地去重轮次，但没有匹配回执时仍保留“未证实送达”。未提供相关回执的宿主，不能凭本地静态配置显示自动续跑实测通过。\n\n当前源码和测试验证控制协议；本轮并未因此新增真实宿主完整续跑证据。历史 Codex 会话与 CLI 记录只证明记录中实际发生的入口行为，其他社区应用也不能借用这些证据。\n\n<a id=\"status-recovery\"></a>\n## 维护与验证要保留什么\n\n遇到预算限制、相同失败重现或状态冲突，先查看当前任务、会话轮次、最后报告和已登记请求，明确还剩什么工作及当前权限。不要删除会话文件来绕过预算，也不要把未知的待投递请求自动重放。锁冲突先确认原进程已结束，再依据受保护记录恢复。\n\n协议升级属于独立维护工具：有效任务、模式、用户轮次、进度和已用预算保留；旧待投递动作保留为未知历史，当前运行需要新的报告。日常 Runtime 只执行当前三态协议，相关旧格式规则不注入 Skill 上下文。\n\n修改此机制至少应覆盖：三态正常路径、示例不触发、文本与结构化冲突、同一事件多次投递、并发 Stop、20 次共享预算、ZCode 上限、重复失败、未知进度、诊断带失败完成、新轮次隔离，以及匹配和不匹配的续跑回执。单元测试能验证判定，真实宿主验收必须另外报告。\n\n<a id=\"计划完成后仍可追溯\"></a>\n## 计划完成后仍可追溯\n\n\n计划归档在 active 与 completed 之间移动，保留稳定 ID、验收与证据；只调整生命周期状态和必要相对链接。任务继续引用原 ID，不需要重新绑定要求。默认目录排除归档内容，显式 ID、路径和旧路径映射仍可定位当前协议的计划。恢复同一任务时可以受控移回；写入前核对内容指纹，中断可续跑，后续人工修改引发冲突而不会被覆盖。无身份或明确标为历史的记录不自动升级为当前任务。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"停止策略\",\n    \"三态\",\n    \"续跑\",\n    \"诊断\",\n    \"任务检查\",\n    \"WORK_STATUS\",\n    \"WorkReport\",\n    \"continuation\",\n    \"stop policy\"\n  ],\n  \"aliases\": [\n    \"停止策略\",\n    \"三态\",\n    \"续跑\",\n    \"诊断\",\n    \"任务检查\",\n    \"WORK_STATUS\",\n    \"WorkReport\",\n    \"continuation\",\n    \"stop policy\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"task-check\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/task-contract.ts\",\n      \"startLine\": 87,\n      \"endLine\": 170,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"stop-report\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/stop-policy.ts\",\n      \"startLine\": 33,\n      \"endLine\": 102,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"stop-budget\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/stop-policy.ts\",\n      \"startLine\": 104,\n      \"endLine\": 133,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"stop-lock\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/stop-policy.ts\",\n      \"startLine\": 50,\n      \"endLine\": 79,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"terminal-parser\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\",\n      \"startLine\": 43,\n      \"endLine\": 99,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"report-state\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\",\n      \"startLine\": 352,\n      \"endLine\": 403,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"turn-state\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\",\n      \"startLine\": 252,\n      \"endLine\": 349,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"host-delivery\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/continuation-delivery.ts\",\n      \"startLine\": 3,\n      \"endLine\": 23,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"receipt-evidence\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\",\n      \"startLine\": 217,\n      \"endLine\": 268,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"proof-summary\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\",\n      \"startLine\": 294,\n      \"endLine\": 352,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"report-cli\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\",\n      \"startLine\": 934,\n      \"endLine\": 952,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"check-scope\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/check.ts\",\n      \"startLine\": 17,\n      \"endLine\": 108,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"status-tests\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/tests/status-protocol.test.ts\",\n      \"startLine\": 19,\n      \"endLine\": 165,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"document-lifecycle\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/document-operations.ts\",\n      \"startLine\": 1,\n      \"endLine\": 216,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"stage-handoff\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md\",\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"depends_on\",\n      \"note\": \"先理解任务模式、验收和证据归属\"\n    },\n    {\n      \"target\": \"lumine-adapters\",\n      \"kind\": \"related\",\n      \"note\": \"续跑决策如何送达各宿主\"\n    },\n    {\n      \"target\": \"lumine-root-config\",\n      \"kind\": \"related\",\n      \"note\": \"会话和任务记录的位置\"\n    },\n    {\n      \"target\": \"lumine-wiki\",\n      \"kind\": \"related\",\n      \"note\": \"任务承担的知识同步如何完成\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"checks\",\n      \"title\": \"任务完成的证据路径\",\n      \"caption\": \"保留原图身份。产品要求与当前代码和环境决定证据是否适用，当前请求模式决定是否进入实施完成检查。\",\n      \"sources\": [\n        \"task-check\",\n        \"stop-report\"\n      ]\n    },\n    {\n      \"id\": \"bounded-continuation\",\n      \"title\": \"停止判断与有界续跑\",\n      \"caption\": \"无效报告和完成检查失败也必须经过相同预算与去重；图中等待只停止自动调度，不自动修改用户授权。\",\n      \"sources\": [\n        \"stop-report\",\n        \"stop-budget\",\n        \"stop-lock\",\n        \"host-delivery\"\n      ]\n    }\n  ],\n  \"sections\": [\n    {\n      \"id\": \"status-answer\",\n      \"sources\": [\n        \"stop-report\",\n        \"task-check\"\n      ]\n    },\n    {\n      \"id\": \"status-values\",\n      \"sources\": [\n        \"terminal-parser\",\n        \"report-state\",\n        \"stage-handoff\"\n      ]\n    },\n    {\n      \"id\": \"status-parsing\",\n      \"sources\": [\n        \"terminal-parser\",\n        \"stop-report\"\n      ]\n    },\n    {\n      \"id\": \"status-checks\",\n      \"sources\": [\n        \"task-check\",\n        \"check-scope\"\n      ]\n    },\n    {\n      \"id\": \"status-budget\",\n      \"sources\": [\n        \"stop-budget\",\n        \"host-delivery\"\n      ]\n    },\n    {\n      \"id\": \"status-identity\",\n      \"sources\": [\n        \"stop-lock\",\n        \"turn-state\",\n        \"report-state\"\n      ]\n    },\n    {\n      \"id\": \"status-proof\",\n      \"sources\": [\n        \"receipt-evidence\",\n        \"proof-summary\"\n      ]\n    },\n    {\n      \"id\": \"status-recovery\",\n      \"sources\": [\n        \"stop-lock\",\n        \"report-cli\",\n        \"status-tests\"\n      ]\n    },\n    {\n      \"id\": \"计划完成后仍可追溯\",\n      \"sources\": [\n        \"document-lifecycle\"\n      ]\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/task-contract.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/stop-policy.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/continuation-delivery.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/check.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/tests/status-protocol.test.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/document-operations.ts\"\n    }\n  ]\n}\n-->\n",
+        "appliedRevision": "421d3ed1e8ee7dbe501d374d62446d9148418b1b55afe88b81e333a54c6db31c",
+        "sources": {
+          "fingerprints": {
+            "project:skills/lumine-harness/src/harness/core/task-contract.ts": "5243a81165de92099d3aed9e29068331cd6a8683076ed6b128900ce39c2dadc2",
+            "project:skills/lumine-harness/src/harness/core/stop-policy.ts": "8b3b81378fada7d0efbd42540b5dd6479bfe006d666d1b5670f23fa4b1bbf983",
+            "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+            "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+            "project:skills/lumine-harness/src/harness/core/verification.ts": "5523fdad61a206b0f6f393131eb0006177d6ab8771dffcd9add2dcd930e7e71b",
+            "project:skills/lumine-harness/src/harness/adapter-manager.ts": "7d5cbfbcdc4de8abf2c2d0531d499960c152b2643b61e54d2111db3cf50ce482",
+            "project:skills/lumine-harness/src/harness/check.ts": "00331dbea61b4e25535aa3f2dc821c590e3e18175ee88201cc46733808e2500a",
+            "project:skills/lumine-harness/src/harness/tests/status-protocol.test.ts": "1a255c1ecdf7a5912bfbb0e8271a7b8563f4633473d8e81a3716c68eaf306c18",
+            "project:skills/lumine-harness/src/harness/core/document-operations.ts": "4b8979a4316be9af2ceaa164dca0e996ddfa9ca7a0ffb23b04e45470665b9f4e",
+            "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "4ed5e34174e0020d859a5ae1b931ecb50547a7c46be28a22471b72905ec24f6e"
+          },
+          "scopeFingerprints": {
+            "project:skills/lumine-harness/src/harness/core/task-contract.ts": "8f43f781d10d8bbd89df7a2e5a999c896a43ebf703040fa7819798eb5559ddea",
+            "project:skills/lumine-harness/src/harness/core/stop-policy.ts": "22f72b4bb0e654790c4a5a12a1d390fee809b107fe1d2b6eedaf466335b1756c",
+            "project:skills/lumine-harness/src/harness/core/work-status.ts": "772b312f2e95a5008bbd0b5300a035fc0a47beef90143105d3eef1fd092d422d",
+            "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "fcf865b6b40c753dc57a1e0e88c9a8bb7a701f4ed43f51f03569a37e760804c4",
+            "project:skills/lumine-harness/src/harness/core/verification.ts": "dd9e3bf6dfb3a321b3d785e2e4d61ea395b8582633314809978f2ee4455a6f0c",
+            "project:skills/lumine-harness/src/harness/adapter-manager.ts": "bcac175456ee20d0661f4d616c89c92d49eee23475a961f65668c06c7a88102d",
+            "project:skills/lumine-harness/src/harness/check.ts": "a3dd19c9b1a291315e6bf6043ca568265ebe33ad1963ecb5323e73beff679ef0",
+            "project:skills/lumine-harness/src/harness/tests/status-protocol.test.ts": "db10da7d414bfdc344d9485606562b6bc96bb3bb267810374bcf3e993fcbf0c5",
+            "project:skills/lumine-harness/src/harness/core/document-operations.ts": "d2f4ce87e97659c9d6d7b3e6458ece4e35d60cbdfbd4260b90aef28ee9f544a8"
+          },
+          "files": {
+            "project:skills/lumine-harness/src/harness/core/task-contract.ts": "5243a81165de92099d3aed9e29068331cd6a8683076ed6b128900ce39c2dadc2",
+            "project:skills/lumine-harness/src/harness/core/stop-policy.ts": "8b3b81378fada7d0efbd42540b5dd6479bfe006d666d1b5670f23fa4b1bbf983",
+            "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+            "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+            "project:skills/lumine-harness/src/harness/core/verification.ts": "5523fdad61a206b0f6f393131eb0006177d6ab8771dffcd9add2dcd930e7e71b",
+            "project:skills/lumine-harness/src/harness/adapter-manager.ts": "7d5cbfbcdc4de8abf2c2d0531d499960c152b2643b61e54d2111db3cf50ce482",
+            "project:skills/lumine-harness/src/harness/check.ts": "00331dbea61b4e25535aa3f2dc821c590e3e18175ee88201cc46733808e2500a",
+            "project:skills/lumine-harness/src/harness/tests/status-protocol.test.ts": "1a255c1ecdf7a5912bfbb0e8271a7b8563f4633473d8e81a3716c68eaf306c18",
+            "project:skills/lumine-harness/src/harness/core/document-operations.ts": "4b8979a4316be9af2ceaa164dca0e996ddfa9ca7a0ffb23b04e45470665b9f4e"
+          },
+          "missing": []
+        },
+        "updatedAt": "2026-09-29T10:26:21.096Z"
+      },
+      "sources": {
+        "fingerprints": {
+          "project:skills/lumine-harness/src/harness/core/task-contract.ts": "283ae153091aea0eb962add7d31eb6cb126d1de295478b462aa315e0a7d5e874",
+          "project:skills/lumine-harness/src/harness/core/stop-policy.ts": "8b3b81378fada7d0efbd42540b5dd6479bfe006d666d1b5670f23fa4b1bbf983",
+          "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+          "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+          "project:skills/lumine-harness/src/harness/core/verification.ts": "5523fdad61a206b0f6f393131eb0006177d6ab8771dffcd9add2dcd930e7e71b",
+          "project:skills/lumine-harness/src/harness/adapter-manager.ts": "7d5cbfbcdc4de8abf2c2d0531d499960c152b2643b61e54d2111db3cf50ce482",
+          "project:skills/lumine-harness/src/harness/check.ts": "00331dbea61b4e25535aa3f2dc821c590e3e18175ee88201cc46733808e2500a",
+          "project:skills/lumine-harness/src/harness/tests/status-protocol.test.ts": "1a255c1ecdf7a5912bfbb0e8271a7b8563f4633473d8e81a3716c68eaf306c18",
+          "project:skills/lumine-harness/src/harness/core/document-operations.ts": "4b8979a4316be9af2ceaa164dca0e996ddfa9ca7a0ffb23b04e45470665b9f4e",
+          "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "4ed5e34174e0020d859a5ae1b931ecb50547a7c46be28a22471b72905ec24f6e"
+        },
+        "scopeFingerprints": {
+          "project:skills/lumine-harness/src/harness/core/task-contract.ts": "1f63bf718d748f9bc4297c4f7847566c89f3f780b50830fbcb1d9c0524b6420c",
+          "project:skills/lumine-harness/src/harness/core/stop-policy.ts": "22f72b4bb0e654790c4a5a12a1d390fee809b107fe1d2b6eedaf466335b1756c",
+          "project:skills/lumine-harness/src/harness/core/work-status.ts": "772b312f2e95a5008bbd0b5300a035fc0a47beef90143105d3eef1fd092d422d",
+          "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "fcf865b6b40c753dc57a1e0e88c9a8bb7a701f4ed43f51f03569a37e760804c4",
+          "project:skills/lumine-harness/src/harness/core/verification.ts": "dd9e3bf6dfb3a321b3d785e2e4d61ea395b8582633314809978f2ee4455a6f0c",
+          "project:skills/lumine-harness/src/harness/adapter-manager.ts": "bcac175456ee20d0661f4d616c89c92d49eee23475a961f65668c06c7a88102d",
+          "project:skills/lumine-harness/src/harness/check.ts": "a3dd19c9b1a291315e6bf6043ca568265ebe33ad1963ecb5323e73beff679ef0",
+          "project:skills/lumine-harness/src/harness/tests/status-protocol.test.ts": "db10da7d414bfdc344d9485606562b6bc96bb3bb267810374bcf3e993fcbf0c5",
+          "project:skills/lumine-harness/src/harness/core/document-operations.ts": "d2f4ce87e97659c9d6d7b3e6458ece4e35d60cbdfbd4260b90aef28ee9f544a8"
+        },
+        "files": {
+          "project:skills/lumine-harness/src/harness/core/task-contract.ts": "283ae153091aea0eb962add7d31eb6cb126d1de295478b462aa315e0a7d5e874",
+          "project:skills/lumine-harness/src/harness/core/stop-policy.ts": "8b3b81378fada7d0efbd42540b5dd6479bfe006d666d1b5670f23fa4b1bbf983",
+          "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+          "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+          "project:skills/lumine-harness/src/harness/core/verification.ts": "5523fdad61a206b0f6f393131eb0006177d6ab8771dffcd9add2dcd930e7e71b",
+          "project:skills/lumine-harness/src/harness/adapter-manager.ts": "7d5cbfbcdc4de8abf2c2d0531d499960c152b2643b61e54d2111db3cf50ce482",
+          "project:skills/lumine-harness/src/harness/check.ts": "00331dbea61b4e25535aa3f2dc821c590e3e18175ee88201cc46733808e2500a",
+          "project:skills/lumine-harness/src/harness/tests/status-protocol.test.ts": "1a255c1ecdf7a5912bfbb0e8271a7b8563f4633473d8e81a3716c68eaf306c18",
+          "project:skills/lumine-harness/src/harness/core/document-operations.ts": "4b8979a4316be9af2ceaa164dca0e996ddfa9ca7a0ffb23b04e45470665b9f4e"
+        },
+        "missing": []
+      },
+      "sourceRefs": [
+        {
+          "id": "task-check",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
+          "startLine": 87,
+          "endLine": 205,
+          "kind": "source"
+        },
+        {
+          "id": "stop-report",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+          "startLine": 33,
+          "endLine": 102,
+          "kind": "source"
+        },
+        {
+          "id": "stop-budget",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+          "startLine": 104,
+          "endLine": 133,
+          "kind": "source"
+        },
+        {
+          "id": "stop-lock",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+          "startLine": 50,
+          "endLine": 79,
+          "kind": "source"
+        },
+        {
+          "id": "terminal-parser",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts",
+          "startLine": 43,
+          "endLine": 99,
+          "kind": "source"
+        },
+        {
+          "id": "report-state",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts",
+          "startLine": 352,
+          "endLine": 403,
+          "kind": "source"
+        },
+        {
+          "id": "turn-state",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts",
+          "startLine": 252,
+          "endLine": 349,
+          "kind": "source"
+        },
+        {
+          "id": "host-delivery",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/continuation-delivery.ts",
+          "startLine": 3,
+          "endLine": 23,
+          "kind": "source"
+        },
+        {
+          "id": "receipt-evidence",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "startLine": 217,
+          "endLine": 268,
+          "kind": "source"
+        },
+        {
+          "id": "proof-summary",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "startLine": 294,
+          "endLine": 352,
+          "kind": "source"
+        },
+        {
+          "id": "report-cli",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "startLine": 934,
+          "endLine": 952,
+          "kind": "source"
+        },
+        {
+          "id": "check-scope",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "startLine": 17,
+          "endLine": 108,
+          "kind": "source"
+        },
+        {
+          "id": "status-tests",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/tests/status-protocol.test.ts",
+          "startLine": 19,
+          "endLine": 165,
+          "kind": "source"
+        },
+        {
+          "id": "document-lifecycle",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/document-operations.ts",
+          "startLine": 1,
+          "endLine": 216,
+          "kind": "source"
+        },
+        {
+          "id": "stage-handoff",
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md",
+          "kind": "source"
+        }
+      ],
+      "watchScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-contract.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/continuation-delivery.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/tests/status-protocol.test.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/document-operations.ts"
+        }
+      ],
+      "replaceSources": true,
+      "replaceWatchScopes": true
+    }
+  ],
+  "status": "applied",
+  "results": [
+    {
+      "id": "lumine-wiki",
+      "status": "applied",
+      "reason": "Text, source observation and generation baseline saved together.",
+      "candidatePath": ".lumine/wiki-state/updates/bfa26ab5-a9e6-4b7c-a1e7-3516b9bea422/candidates/644f388d251fd2bd3cea369d7d36c63f688f22c24ccbb8a04fee423cf0fe6dac.md"
+    },
+    {
+      "id": "lumine-architecture",
+      "status": "applied",
+      "reason": "Text, source observation and generation baseline saved together.",
+      "candidatePath": ".lumine/wiki-state/updates/bfa26ab5-a9e6-4b7c-a1e7-3516b9bea422/candidates/ce9559b6bb68e6cf640171fe03f7722138038b72da987b33249c27d0fda324fb.md"
+    },
+    {
+      "id": "lumine-task-check",
+      "status": "applied",
+      "reason": "Text, source observation and generation baseline saved together.",
+      "candidatePath": ".lumine/wiki-state/updates/bfa26ab5-a9e6-4b7c-a1e7-3516b9bea422/candidates/546b363e42b21889472f90c119d705efbbddc4f7b7533ed9d17aabc4972e68f8.md"
+    }
+  ]
+}

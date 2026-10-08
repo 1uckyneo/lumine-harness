@@ -4,7 +4,7 @@
 Inspect the user-selected target, repository boundaries, existing rules, and uncommitted changes. Use the business root for a single repository and a common directory covering registered repositories for a multi-repository project; that directory need not have Git. Read [Target topology](target-topology.md) when classification is needed.
 
 <!-- LH-ADOPT-02 -->
-Resolve language and selected host adapters before generating a concrete migration proposal. Use the tools bundled with this Skill:
+Resolve language and selected host adapters before generating a concrete migration proposal. Confirm that the Node process running installation uses 22.x from 22.18.0 or 24.x LTS from 24.11.0; 24 LTS is recommended. Node 18, 20, other major versions, and prereleases are unsupported. For an unsupported version, report the current version, supported range, and next action, then stop before any project write. Do not install or switch Node automatically or change business `package.json`, `.nvmrc`, dependencies, or user runtime configuration. Terminal and host Hook environments may differ; a working installer does not verify Hooks. Use the tools bundled with this Skill:
 
 ```bash
 node scripts/harness-manager.mjs inspect <target-root>

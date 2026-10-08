@@ -28,7 +28,7 @@ It supports single repositories and multiple related repositories, including a s
 
 ## Getting started
 
-The distributed Runtime requires Node.js 18 or newer. Maintaining this repository or rebuilding the Runtime requires Node.js 22.18+ or 24.11+. Choose either source to install the same initialization Skill.
+Lumine Harness supports Node.js 22.x from 22.18.0 and Node.js 24.x LTS from 24.11.0 for both the distributed Runtime and repository maintenance. **Node.js 24 LTS is recommended.** Node.js 18 and 20 are unsupported; other major versions and prereleases are not automatically supported. Choose either source to install the same initialization Skill.
 
 GitHub / skills.sh:
 
@@ -57,6 +57,8 @@ Preserve business rules, uncommitted changes, and repository boundaries.
 ```
 
 The Agent inspects the target and prepares a Migration Proposal listing writes, preserved files, backups, language, and host limits, then acts within existing authorization. If writes are not yet authorized, review the concrete proposal first. Choose English first (en) or Simplified Chinese first (zh-CN) before the proposal is generated.
+
+The Node process that runs Harness must meet the version requirement. An Agent's Hooks may use a different environment from your terminal; see [Adapter setup and limits](docs/adapter-compatibility.md). Adoption and upgrades preserve the business project's Node settings and do not install or switch Node automatically.
 
 ## Everyday development
 
@@ -103,13 +105,13 @@ Ask the Agent to archive a completed Plan or restore it when work resumes. For c
 
 Knowledge defaults to `docs/repo-wiki/`, with one configurable authoritative root. The Agent first understands project purpose, real entry points, module relationships, and dependencies, then builds a suitable knowledge hierarchy. Initial building covers major modules in depth by default; users may narrow or defer the scope. Large projects proceed in resumable batches. Getting-started, API, frontend, or deployment topics appear only where applicable.
 
-Wiki explains entry points, call chains, data flow, normal and failure paths, tradeoffs, change impact, and verification. Pages provide coherent explanations; important sections have stable identities. Cards reuse section conclusions, qualifications, and sources for selective expansion. The reader connects the hierarchy, body, page outline, diagrams, and source locations, with cards and lists for browsing and search. Source changes and semantic content review are shown separately.
+Wiki explains entry points, call chains, data flow, normal and failure paths, tradeoffs, change impact, and verification. Pages provide coherent explanations; important sections have stable identities. Cards reuse section conclusions, qualifications, and sources for selective expansion. The bundled React reader opens on a project home, then connects the knowledge tree, body, page outline, diagrams, and nearby source locations. Its human search can continue through pages of results; Agent queries retain the six-card and context-size limits. Search defaults to the current project's Wiki. An explicit all-documents scope includes registered Specs, active Plans, and individually allowlisted validation Markdown. Source changes and semantic content review are shown separately.
 
 **The Agent/model understands, judges, and writes; Runtime searches, detects changes, validates, and saves safely.** The Agent chooses knowledge, source, or both according to the goal. There is no full-library context injection or mandatory query sequence for every task. Commands do not independently understand projects or generate high-quality knowledge. When important knowledge is missing, stale, or contradictory, the Agent verifies source and preserves reusable findings within authorization. Explicit read-only requests receive a report; a small repair with no knowledge increment needs no update. Without an active Agent, changes remain pending.
 
-For example, after cancellation behavior changes, the Agent understands the new calls and state transitions and writes updated prose and Mermaid. The update tool checks source drift, concurrent creation, and human edits, then safely saves body, hierarchy, and durable state. A later session can retrieve the new knowledge. Upgrades update tools and managed guidance without regenerating the entire Wiki by default.
+For example, after cancellation behavior changes, the Agent understands the new calls and state transitions and writes updated prose and Mermaid. The update tool checks source drift, concurrent creation, and human edits, then safely saves body, hierarchy, and durable state. A later session can retrieve the new knowledge. Unreferenced source files can receive durable, scoped dispositions that are revisited when their source fingerprint changes. Tasks that promise knowledge synchronization record the affected sources, decision, knowledge revision, and verified scope. Upgrades update tools and managed guidance without regenerating the entire Wiki by default.
 
-The reader is installed with project adoption or upgrades. Ask the Agent to “open this project’s knowledge base”, “restart the Wiki reader”, or “stop the Wiki reader”; `lumine-knowledge` manages the project’s service when needed. Running it requires Node.js, with no separate frontend dependency installation. Direct Markdown reading and Agent retrieval need no server.
+The reader is installed with project adoption or upgrades. Set optional `displayName` in `.lumine/project.json` to label a project in the reader; otherwise it uses a neutral label rather than guessing from a machine path. Ask the Agent to “open this project’s knowledge base”, “restart the Wiki reader”, or “stop the Wiki reader”; `lumine-knowledge` manages the project’s service when needed. Running it requires Node.js, with no separate frontend dependency installation or network assets. Direct Markdown reading and Agent retrieval need no server.
 
 These terminal commands are composable tools; users need not invoke each one:
 
@@ -123,7 +125,7 @@ These terminal commands are composable tools; users need not invoke each one:
 ./.lumine/cli wiki check
 ```
 
-`query/show/map/related` find and expand knowledge. `scan` supplies change clues. `update` accepts Agent-authored text and handles three-way comparison, candidates, conflicts, and recovery. Checks do not substitute for semantic review, actual operation, or user acceptance. Diagrams explain architecture, sequences, flows, states, and data relationships beside the relevant prose. They retain enlargement, zoom, pan, reset, source lookup, and text copy/export. A failed diagram does not block the body.
+`query/show/map/related` find and expand knowledge. `scan` supplies change clues; `classify` saves a scoped decision for an unreferenced source file. `update` accepts Agent-authored text and handles three-way comparison, candidates, conflicts, and recovery. Wiki Markdown starts with a short identity and summary header; detailed source, section, relation, and diagram declarations live in a structured block at the end of the same file. Legacy headers remain readable, and `wiki format plan/apply` converts eligible pages one at a time while protecting pending updates and durable state. Checks do not substitute for semantic review, actual operation, or user acceptance. Diagrams explain architecture, sequences, flows, states, and data relationships beside the relevant prose. They retain enlargement, zoom, pan, reset, source lookup, and text copy/export. A failed diagram does not block the body.
 
 Markdown, Mermaid, and text metadata are the knowledge sources; cards are selectable, searchable, copyable HTML. Knowledge production creates no card images, thumbnails, or persistent images, uses no vision model, and never sends rendered SVG to models. Mermaid generates SVG DOM in the browser; explicit user-requested SVG export stays local and does not become knowledge source. No additional model account or background generation service is required.
 

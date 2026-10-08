@@ -1,0 +1,1265 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-08T05:01:07.205998+00:00",
+  "reviewerRole": "独立评审；未参与Wiki撰写或样本首答，未向样本Agent反馈，首答冻结后评审。",
+  "status": "passed",
+  "scope": "2026-10-08固定问题、同日当前基线的四个新上下文对照首答，加一个真实来源演进后新上下文首答；只评知识使用答案，不验收产品运行。",
+  "gradingOrder": [
+    "完整问题正确性及关键遗漏",
+    "限定与未知准确性",
+    "实际来源、哈希及行定位",
+    "最后比较时间与读取量"
+  ],
+  "fixedInputs": {
+    "questions.json": "331f57c9030b8e1c83d1560a6a8f5c28aec69d01d322da35242cade3f2b44d39",
+    "rubric.json": "a59b119f5fdc39714f048854ba66664527b6842900946c19af811f8bc187f580",
+    "baseline.json": "c4be4a69f0bd442d340676628d6c751831ede9a15512bb012beee1091ac69aa7",
+    "evolution-protocol.json": "a2a6f76f3aa1dd27327e85c8d28293bb2101def5571146bb1120fa718a2eeb6f"
+  },
+  "baselineAudit": {
+    "declared": {
+      "schemaVersion": 1,
+      "fixedAt": "2026-10-08T04:46:16.307839+00:00",
+      "projects": {
+        "lumine-source": {
+          "fileCount": 385,
+          "aggregateSha256": "10e1f79b398fe222ef4407ac0040b694f50f7b03ecd6fadb4ce83356752d5aea"
+        },
+        "adopting-parent": {
+          "fileCount": 1871,
+          "aggregateSha256": "044e9e831ac41fb54c05b28864c71d12b0a7d5b9ec830b75dfb9274f3b0e1ca9"
+        }
+      },
+      "meterSha256": "48eadc96527c8adabde44888ccd42f6f6647e6d3bdbdac26b584a0d8d22c6eae",
+      "scope": "Wiki Markdown and persistent state in both projects, source runtime/browser/scripts and tracked Vue/Go code. Temporary query caches excluded. No runtime/deployment claim."
+    },
+    "fullAggregateRecomputed": false,
+    "keyAnswerSourcesIndependentlyVerified": true,
+    "qualification": "逐一独立核对首答引用的实际文件哈希与关键行；未把未复算的全量聚合hash宣称为本评审重新验证。"
+  },
+  "reviews": [
+    {
+      "sample": "source-normal",
+      "answerFile": "source-normal-answer.json",
+      "answerSha256": "831735eeca8a31b4b77f50323ebf33dbfa3491814e8a2136e899c41e09ce54ba",
+      "overall": "passed",
+      "criticalOmissions": [],
+      "criteria": [
+        {
+          "id": "source-query-change-1",
+          "originalCriterion": "区分项目默认maxCards、queryKnowledge及显式--limit范围；不能把默认六卡说成所有入口永久硬限制。",
+          "status": "passed",
+          "evidenceAndJudgment": "回答分别定位本项目 .lumine/project.json:38、通用缺省 project-config.ts:88、files.ts:38、首次初始化 harness-manager-main.ts:368-376；queryKnowledge:90-94 的显式 limit 优先且最多30，不把六条说成永久硬上限。另识别 /api/query:59-62 独立默认六。",
+          "missing": []
+        },
+        {
+          "id": "source-query-change-2",
+          "originalCriterion": "浏览器分页/hasMore与Agent卡片预算分开；字符预算有自身作用，增加默认卡片数不强制把其他路径同步改大。",
+          "status": "passed",
+          "evidenceAndJudgment": "回答以 reader-search.tsx:44-53、server.ts:64-84、search.ts:105-109 说明浏览器默认20条、hasMore/nextCursor与Agent字符预算分开；maxContextChars无需随默认卡数同步增加。",
+          "missing": []
+        },
+        {
+          "id": "source-query-change-3",
+          "originalCriterion": "准确定位最小修改入口、调用关系及有意义的验证方向；不能声称当前已实施八卡。",
+          "status": "passed",
+          "evidenceAndJudgment": "给出配置、CLI、HTTP入口与调用链；明确只调查、未实施八卡。验证方向区分默认八、显式六/八/其他limit、字符预算、分页和游标，识别既有fixture显式六与缺省断言的区别。",
+          "missing": []
+        },
+        {
+          "id": "source-query-change-4",
+          "originalCriterion": "无可靠结果不凑数；中英及代码标识符按相同语义回答。",
+          "status": "passed",
+          "evidenceAndJudgment": "回答按词项与覆盖率过滤、候选数量及字符预算说明不足不补齐；noAnswer来自ranked.length，保留启发式相关性不等于语义可靠的限制；英文 --limit/hasMore 问题与中文结论一致。",
+          "missing": []
+        },
+        {
+          "id": "source-query-change-5",
+          "originalCriterion": "Token收益不可由静态源码保证，应明确缺少测量，不填0或推算百分比。",
+          "status": "passed",
+          "evidenceAndJudgment": "明确静态源码不能保证或量化Token节省，contextChars/UTF8字节不是Token；指出需真实任务用量与质量测量，未填零或推算比例。",
+          "missing": []
+        }
+      ],
+      "fullQuestionAssessment": {
+        "status": "passed",
+        "scope": "按固定完整问题逐项语义评审，未把问题缩为单个数字修改或单个API成功。",
+        "qualifications": "仅静态来源与修改定位；答案均没有将计划、测试存在或当前本地文件当成实施/运行/部署结果。"
+      },
+      "wikiUse": {
+        "declared": true,
+        "observed": true,
+        "evidence": "实际正文读取及源码核对记录支持"
+      },
+      "sourceAudit": {
+        "referenceCount": 20,
+        "uniqueFiles": 20,
+        "allHashesMatch": true,
+        "allRangesExist": true,
+        "references": [
+          {
+            "path": ".lumine/project.json",
+            "line": 38,
+            "endLine": 38,
+            "expectedSha256": "dd6997074958705cc6913b419d33aa0e94daaed04f197390fc96987fcd4161c2",
+            "actualSha256": "dd6997074958705cc6913b419d33aa0e94daaed04f197390fc96987fcd4161c2",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+            "line": 63,
+            "endLine": 63,
+            "expectedSha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449",
+            "actualSha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+            "line": 90,
+            "endLine": 90,
+            "expectedSha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971",
+            "actualSha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/core/project-config.ts",
+            "line": 88,
+            "endLine": 88,
+            "expectedSha256": "fed70a1868ce7a97a2a2fda750c38b1d83e1e788cf1bcadca56bfe71b7610b46",
+            "actualSha256": "fed70a1868ce7a97a2a2fda750c38b1d83e1e788cf1bcadca56bfe71b7610b46",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+            "line": 38,
+            "endLine": 38,
+            "expectedSha256": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+            "actualSha256": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+            "line": 368,
+            "endLine": 368,
+            "expectedSha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+            "actualSha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+            "line": 63,
+            "endLine": 63,
+            "expectedSha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4",
+            "actualSha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+            "line": 59,
+            "endLine": 59,
+            "expectedSha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800",
+            "actualSha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/reader-search.tsx",
+            "line": 39,
+            "endLine": 39,
+            "expectedSha256": "f5b1c8c4cc71d134d3599e5cb31ea849231f263eaabe4ce9fc4c047f2ae927de",
+            "actualSha256": "f5b1c8c4cc71d134d3599e5cb31ea849231f263eaabe4ce9fc4c047f2ae927de",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/tests/core-v2.test.ts",
+            "line": 59,
+            "endLine": 59,
+            "expectedSha256": "b9fd611cc565076c7d689612cb3b7c867b0115e125f955318f3b3a0b6c8976da",
+            "actualSha256": "b9fd611cc565076c7d689612cb3b7c867b0115e125f955318f3b3a0b6c8976da",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/tests/wiki-agentic.test.ts",
+            "line": 91,
+            "endLine": 91,
+            "expectedSha256": "e699af6b8ba0d8f773b982afc8a7ebdec99778b2a87a37207f80ac529dfbce29",
+            "actualSha256": "e699af6b8ba0d8f773b982afc8a7ebdec99778b2a87a37207f80ac529dfbce29",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/tests/wiki-search-dispositions.test.ts",
+            "line": 43,
+            "endLine": 43,
+            "expectedSha256": "a9b6406ca7a1a0ac51e7eb2625b73b48ee5ddcfc91220f8adbf15a5068c9c8de",
+            "actualSha256": "a9b6406ca7a1a0ac51e7eb2625b73b48ee5ddcfc91220f8adbf15a5068c9c8de",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
+            "line": 12,
+            "endLine": 12,
+            "expectedSha256": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2",
+            "actualSha256": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
+            "line": 28,
+            "endLine": 28,
+            "expectedSha256": "e9d212df96040bc40091a41e8124d903b3477cf7bfeabc7943c004dc0d9135de",
+            "actualSha256": "e9d212df96040bc40091a41e8124d903b3477cf7bfeabc7943c004dc0d9135de",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "README.md",
+            "line": 108,
+            "endLine": 108,
+            "expectedSha256": "947dc8e4cae8c091010440001bb9414275f7ad1425fbc96b4a3e0a87ad024359",
+            "actualSha256": "947dc8e4cae8c091010440001bb9414275f7ad1425fbc96b4a3e0a87ad024359",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "README.zh-CN.md",
+            "line": 110,
+            "endLine": 110,
+            "expectedSha256": "c4ab93a21f8e408547abfbe95090697b4c8e26d455726626067635ff95e1d2e9",
+            "actualSha256": "c4ab93a21f8e408547abfbe95090697b4c8e26d455726626067635ff95e1d2e9",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+            "line": 45,
+            "endLine": 45,
+            "expectedSha256": "99d964c9554cbab0356b455cb1b1e6a2426e03d9c300d2cd42a5fbd2eca4a3a6",
+            "actualSha256": "99d964c9554cbab0356b455cb1b1e6a2426e03d9c300d2cd42a5fbd2eca4a3a6",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "docs/repo-wiki/项目配置、根解析与多仓身份.md",
+            "line": 58,
+            "endLine": 58,
+            "expectedSha256": "e105e76836aceddcbd5443d3ac74f8824c9b4dfde2b73d4fa52cba265b2d1289",
+            "actualSha256": "e105e76836aceddcbd5443d3ac74f8824c9b4dfde2b73d4fa52cba265b2d1289",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "AGENTS.md",
+            "line": 28,
+            "endLine": 28,
+            "expectedSha256": "ae10670251f771dae6ae760ffa73668d3409fae3d2163a01e9db6caa1f62c678",
+            "actualSha256": "ae10670251f771dae6ae760ffa73668d3409fae3d2163a01e9db6caa1f62c678",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "package.json",
+            "line": 9,
+            "endLine": 9,
+            "expectedSha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a",
+            "actualSha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a",
+            "hashMatches": true,
+            "rangeExists": true
+          }
+        ]
+      },
+      "nonBlockingNotes": []
+    },
+    {
+      "sample": "source-only",
+      "answerFile": "source-only-answer.json",
+      "answerSha256": "8c7102611e9d4be499a58bc7a1cc2a3ef68d6a84760f5945e645415aead42ca3",
+      "overall": "passed",
+      "criticalOmissions": [],
+      "criteria": [
+        {
+          "id": "source-query-change-1",
+          "originalCriterion": "区分项目默认maxCards、queryKnowledge及显式--limit范围；不能把默认六卡说成所有入口永久硬限制。",
+          "status": "passed",
+          "evidenceAndJudgment": "回答分别定位本项目 .lumine/project.json:38、通用缺省 project-config.ts:88、files.ts:38、首次初始化 harness-manager-main.ts:368-376；queryKnowledge:90-94 的显式 limit 优先且最多30，不把六条说成永久硬上限。另识别 /api/query:59-62 独立默认六。",
+          "missing": []
+        },
+        {
+          "id": "source-query-change-2",
+          "originalCriterion": "浏览器分页/hasMore与Agent卡片预算分开；字符预算有自身作用，增加默认卡片数不强制把其他路径同步改大。",
+          "status": "passed",
+          "evidenceAndJudgment": "回答以 reader-search.tsx:44-53、server.ts:64-84、search.ts:105-109 说明浏览器默认20条、hasMore/nextCursor与Agent字符预算分开；maxContextChars无需随默认卡数同步增加。",
+          "missing": []
+        },
+        {
+          "id": "source-query-change-3",
+          "originalCriterion": "准确定位最小修改入口、调用关系及有意义的验证方向；不能声称当前已实施八卡。",
+          "status": "passed",
+          "evidenceAndJudgment": "给出配置、CLI、HTTP入口与调用链；明确只调查、未实施八卡。验证方向区分默认八、显式六/八/其他limit、字符预算、分页和游标，识别既有fixture显式六与缺省断言的区别。",
+          "missing": []
+        },
+        {
+          "id": "source-query-change-4",
+          "originalCriterion": "无可靠结果不凑数；中英及代码标识符按相同语义回答。",
+          "status": "passed",
+          "evidenceAndJudgment": "回答按词项与覆盖率过滤、候选数量及字符预算说明不足不补齐；noAnswer来自ranked.length，保留启发式相关性不等于语义可靠的限制；英文 --limit/hasMore 问题与中文结论一致。",
+          "missing": []
+        },
+        {
+          "id": "source-query-change-5",
+          "originalCriterion": "Token收益不可由静态源码保证，应明确缺少测量，不填0或推算百分比。",
+          "status": "passed",
+          "evidenceAndJudgment": "明确静态源码不能保证或量化Token节省，contextChars/UTF8字节不是Token；指出需真实任务用量与质量测量，未填零或推算比例。",
+          "missing": []
+        }
+      ],
+      "fullQuestionAssessment": {
+        "status": "passed",
+        "scope": "按固定完整问题逐项语义评审，未把问题缩为单个数字修改或单个API成功。",
+        "qualifications": "仅静态来源与修改定位；答案均没有将计划、测试存在或当前本地文件当成实施/运行/部署结果。"
+      },
+      "wikiUse": {
+        "declared": false,
+        "observed": false,
+        "evidence": "计量命令及首答引用中未见Wiki正文读取；遵守对照路径"
+      },
+      "sourceAudit": {
+        "referenceCount": 15,
+        "uniqueFiles": 15,
+        "allHashesMatch": true,
+        "allRangesExist": true,
+        "references": [
+          {
+            "path": ".lumine/project.json",
+            "line": 26,
+            "endLine": 40,
+            "expectedSha256": "dd6997074958705cc6913b419d33aa0e94daaed04f197390fc96987fcd4161c2",
+            "actualSha256": "dd6997074958705cc6913b419d33aa0e94daaed04f197390fc96987fcd4161c2",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/core/project-config.ts",
+            "line": 24,
+            "endLine": 88,
+            "expectedSha256": "fed70a1868ce7a97a2a2fda750c38b1d83e1e788cf1bcadca56bfe71b7610b46",
+            "actualSha256": "fed70a1868ce7a97a2a2fda750c38b1d83e1e788cf1bcadca56bfe71b7610b46",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+            "line": 32,
+            "endLine": 41,
+            "expectedSha256": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+            "actualSha256": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+            "line": 83,
+            "endLine": 94,
+            "expectedSha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971",
+            "actualSha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+            "line": 14,
+            "endLine": 87,
+            "expectedSha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449",
+            "actualSha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+            "line": 8,
+            "endLine": 109,
+            "expectedSha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4",
+            "actualSha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+            "line": 59,
+            "endLine": 84,
+            "expectedSha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800",
+            "actualSha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/reader-search.tsx",
+            "line": 39,
+            "endLine": 122,
+            "expectedSha256": "f5b1c8c4cc71d134d3599e5cb31ea849231f263eaabe4ce9fc4c047f2ae927de",
+            "actualSha256": "f5b1c8c4cc71d134d3599e5cb31ea849231f263eaabe4ce9fc4c047f2ae927de",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+            "line": 368,
+            "endLine": 376,
+            "expectedSha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+            "actualSha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/tests/wiki-agentic.test.ts",
+            "line": 91,
+            "endLine": 99,
+            "expectedSha256": "e699af6b8ba0d8f773b982afc8a7ebdec99778b2a87a37207f80ac529dfbce29",
+            "actualSha256": "e699af6b8ba0d8f773b982afc8a7ebdec99778b2a87a37207f80ac529dfbce29",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/tests/core-v2.test.ts",
+            "line": 59,
+            "endLine": 70,
+            "expectedSha256": "b9fd611cc565076c7d689612cb3b7c867b0115e125f955318f3b3a0b6c8976da",
+            "actualSha256": "b9fd611cc565076c7d689612cb3b7c867b0115e125f955318f3b3a0b6c8976da",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/harness/tests/wiki-search-dispositions.test.ts",
+            "line": 43,
+            "endLine": 63,
+            "expectedSha256": "a9b6406ca7a1a0ac51e7eb2625b73b48ee5ddcfc91220f8adbf15a5068c9c8de",
+            "actualSha256": "a9b6406ca7a1a0ac51e7eb2625b73b48ee5ddcfc91220f8adbf15a5068c9c8de",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "AGENTS.md",
+            "line": 1,
+            "endLine": 1,
+            "expectedSha256": "ae10670251f771dae6ae760ffa73668d3409fae3d2163a01e9db6caa1f62c678",
+            "actualSha256": "ae10670251f771dae6ae760ffa73668d3409fae3d2163a01e9db6caa1f62c678",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "package.json",
+            "line": 9,
+            "endLine": 14,
+            "expectedSha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a",
+            "actualSha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "scripts/sync-plugin-wrapper.sh",
+            "line": 4,
+            "endLine": 14,
+            "expectedSha256": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+            "actualSha256": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+            "hashMatches": true,
+            "rangeExists": true
+          }
+        ]
+      },
+      "nonBlockingNotes": [
+        "未逐一枚举README及Skill中六条文案的准确位置；已说明对应文案/帮助需同步，此为定位细节差异，不影响本题最小实现入口与核心联动结论。"
+      ]
+    },
+    {
+      "sample": "parent-normal",
+      "answerFile": "parent-normal-answer.json",
+      "answerSha256": "19beb92bbfe0baf159222eaa05d551fc575940be32db1ab1a6975567818a7acb",
+      "overall": "passed",
+      "criticalOmissions": [],
+      "criteria": [
+        {
+          "id": "parent-image-recovery-change-1",
+          "originalCriterion": "定位useChatImageTasks中的queryFailed或未confirmed条件、连续计数/暂停、计数重置、恢复窗口与对应测试；不只指向一处魔法数字。",
+          "status": "passed",
+          "evidenceAndJudgment": "定位 useChatImageTasks.ts:396-403 的 queryFailed || !confirmed 连续轮次、>=3及30分钟上限；核对makeTracker、正常确认、retry、reset/detach重置与不重置createdAt；定位image-tasks测试252-309并提出前四轮继续/第五轮暂停等验证。",
+          "missing": []
+        },
+        {
+          "id": "parent-image-recovery-change-2",
+          "originalCriterion": "区分会话、消息与任务身份，恢复更新原消息而非重发生成；缺身份/来源失败/取消失败等保留不确定性。",
+          "status": "passed",
+          "evidenceAndJudgment": "区分anchor/message/conversation/prompt及revision/session/operation所有权；依据current:91-96、applyRecord/applyHistory:272-306、ChatPage:425-490说明更新原消息与刷新恢复；缺会话/消息身份、双来源无法确认、失败/取消历史歧义保留未知，未重发生成。",
+          "missing": []
+        },
+        {
+          "id": "parent-image-recovery-change-3",
+          "originalCriterion": "接口成功、本地取消标志与真实服务端终态区分；核对Go条件写入竞态及相应限制，不能把静态推断说成运行复现。",
+          "status": "passed",
+          "evidenceAndJudgment": "以result.go:19-35、transport.ts:117-132区分HTTP200与code0；以Cancel:543-583和claimTaskFinish:115-159识别条件写入0行仍返回成功、前端requestCancel:425-428仍标记取消的窗口；明确只是静态竞态推断，未报告运行复现。",
+          "missing": []
+        },
+        {
+          "id": "parent-image-recovery-change-4",
+          "originalCriterion": "生产版本及部署运行没有证据时明确无答案，不能将本机源码或历史联调当当前生产证明。",
+          "status": "passed",
+          "evidenceAndJudgment": "明确本地Vue/Go开发源码与测试定义不能证明当前生产部署、实际服务端版本或任务终态；生产行为无答案，未将本机或历史联调当证据。",
+          "missing": []
+        }
+      ],
+      "fullQuestionAssessment": {
+        "status": "passed",
+        "scope": "按固定完整问题逐项语义评审，未把问题缩为单个数字修改或单个API成功。",
+        "qualifications": "仅静态来源与修改定位；答案均没有将计划、测试存在或当前本地文件当成实施/运行/部署结果。"
+      },
+      "wikiUse": {
+        "declared": true,
+        "observed": true,
+        "evidence": "实际正文读取及源码核对记录支持"
+      },
+      "sourceAudit": {
+        "referenceCount": 13,
+        "uniqueFiles": 13,
+        "allHashesMatch": true,
+        "allRangesExist": true,
+        "references": [
+          {
+            "path": "AGENTS.md",
+            "line": 34,
+            "endLine": 34,
+            "expectedSha256": "a27c3e24d851343b217935dba6ed5658d261877321f8cf27caee1a2fbdb0b0a1",
+            "actualSha256": "a27c3e24d851343b217935dba6ed5658d261877321f8cf27caee1a2fbdb0b0a1",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "docs/repo-wiki/聊天流式输出与图片任务恢复.md",
+            "line": 66,
+            "endLine": 66,
+            "expectedSha256": "dea28b5a4535511b7b86cf7b7fca6dae0faa04ae585568b5d060295d681d2bfc",
+            "actualSha256": "dea28b5a4535511b7b86cf7b7fca6dae0faa04ae585568b5d060295d681d2bfc",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+            "line": 396,
+            "endLine": 396,
+            "expectedSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "actualSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/ChatPage.vue",
+            "line": 470,
+            "endLine": 470,
+            "expectedSha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853",
+            "actualSha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/api-v2/draw.ts",
+            "line": 234,
+            "endLine": 234,
+            "expectedSha256": "0a3c4dcd87e2b1676c1030969c95cde16ad9b6267fe765821fba24e171d155bd",
+            "actualSha256": "0a3c4dcd87e2b1676c1030969c95cde16ad9b6267fe765821fba24e171d155bd",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/api-v2/transport.ts",
+            "line": 117,
+            "endLine": 117,
+            "expectedSha256": "c33f0d7bda360af2bab13d1e02c141448e48f897f33f735e3d8f6bba737b85d5",
+            "actualSha256": "c33f0d7bda360af2bab13d1e02c141448e48f897f33f735e3d8f6bba737b85d5",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/__tests__/image-tasks.test.mjs",
+            "line": 252,
+            "endLine": 252,
+            "expectedSha256": "68fde329d71774c7b9dbc83796bf546da1d995809e03b167748a1e103c6a6e29",
+            "actualSha256": "68fde329d71774c7b9dbc83796bf546da1d995809e03b167748a1e103c6a6e29",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/__tests__/go-chat.test.mjs",
+            "line": 936,
+            "endLine": 936,
+            "expectedSha256": "82557960e7ea5a3dc974f7bdd4e7092f739bd617fce230a0501da96380db4426",
+            "actualSha256": "82557960e7ea5a3dc974f7bdd4e7092f739bd617fce230a0501da96380db4426",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/api-v2/__tests__/draw-stream.test.mjs",
+            "line": 414,
+            "endLine": 414,
+            "expectedSha256": "1d77f4dbd35f34744d9da4060fcb520d7b28f460e915155204041bd289db8d24",
+            "actualSha256": "1d77f4dbd35f34744d9da4060fcb520d7b28f460e915155204041bd289db8d24",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/api/result.go",
+            "line": 19,
+            "endLine": 19,
+            "expectedSha256": "3dd29f6752ba146dd9d2006b62694985324bb47b95e0c2d5ef6b1ef6c3f7aa51",
+            "actualSha256": "3dd29f6752ba146dd9d2006b62694985324bb47b95e0c2d5ef6b1ef6c3f7aa51",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/api/comfy.go",
+            "line": 111,
+            "endLine": 111,
+            "expectedSha256": "67ed7e16930dd938ad7d2810bd35f3f5a05fb55b5a226c4e04e28ab312613efb",
+            "actualSha256": "67ed7e16930dd938ad7d2810bd35f3f5a05fb55b5a226c4e04e28ab312613efb",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/service/comfy_service.go",
+            "line": 543,
+            "endLine": 543,
+            "expectedSha256": "5ca147e27affee2bbf172fe5bafac987cd2df904eab8e7a70e0f55e1eb68e7d0",
+            "actualSha256": "5ca147e27affee2bbf172fe5bafac987cd2df904eab8e7a70e0f55e1eb68e7d0",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/service/image_history.go",
+            "line": 115,
+            "endLine": 115,
+            "expectedSha256": "a5382b754de28aa773b4048a14452aaca56e5d62ba1a6de6f8b08e3694e2e39c",
+            "actualSha256": "a5382b754de28aa773b4048a14452aaca56e5d62ba1a6de6f8b08e3694e2e39c",
+            "hashMatches": true,
+            "rangeExists": true
+          }
+        ]
+      },
+      "nonBlockingNotes": []
+    },
+    {
+      "sample": "parent-source-only",
+      "answerFile": "parent-source-only-answer.json",
+      "answerSha256": "d2e2fa470a62d3e2e934e2c4b7e00ffba25c079d214d254294fc5e6c79c7d880",
+      "overall": "passed",
+      "criticalOmissions": [],
+      "criteria": [
+        {
+          "id": "parent-image-recovery-change-1",
+          "originalCriterion": "定位useChatImageTasks中的queryFailed或未confirmed条件、连续计数/暂停、计数重置、恢复窗口与对应测试；不只指向一处魔法数字。",
+          "status": "passed",
+          "evidenceAndJudgment": "定位 useChatImageTasks.ts:396-403 的 queryFailed || !confirmed 连续轮次、>=3及30分钟上限；核对makeTracker、正常确认、retry、reset/detach重置与不重置createdAt；定位image-tasks测试252-309并提出前四轮继续/第五轮暂停等验证。",
+          "missing": []
+        },
+        {
+          "id": "parent-image-recovery-change-2",
+          "originalCriterion": "区分会话、消息与任务身份，恢复更新原消息而非重发生成；缺身份/来源失败/取消失败等保留不确定性。",
+          "status": "passed",
+          "evidenceAndJudgment": "区分anchor/message/conversation/prompt及revision/session/operation所有权；依据current:91-96、applyRecord/applyHistory:272-306、ChatPage:425-490说明更新原消息与刷新恢复；缺会话/消息身份、双来源无法确认、失败/取消历史歧义保留未知，未重发生成。",
+          "missing": []
+        },
+        {
+          "id": "parent-image-recovery-change-3",
+          "originalCriterion": "接口成功、本地取消标志与真实服务端终态区分；核对Go条件写入竞态及相应限制，不能把静态推断说成运行复现。",
+          "status": "passed",
+          "evidenceAndJudgment": "以result.go:19-35、transport.ts:117-132区分HTTP200与code0；以Cancel:543-583和claimTaskFinish:115-159识别条件写入0行仍返回成功、前端requestCancel:425-428仍标记取消的窗口；明确只是静态竞态推断，未报告运行复现。",
+          "missing": []
+        },
+        {
+          "id": "parent-image-recovery-change-4",
+          "originalCriterion": "生产版本及部署运行没有证据时明确无答案，不能将本机源码或历史联调当当前生产证明。",
+          "status": "passed",
+          "evidenceAndJudgment": "明确本地Vue/Go开发源码与测试定义不能证明当前生产部署、实际服务端版本或任务终态；生产行为无答案，未将本机或历史联调当证据。",
+          "missing": []
+        }
+      ],
+      "fullQuestionAssessment": {
+        "status": "passed",
+        "scope": "按固定完整问题逐项语义评审，未把问题缩为单个数字修改或单个API成功。",
+        "qualifications": "仅静态来源与修改定位；答案均没有将计划、测试存在或当前本地文件当成实施/运行/部署结果。"
+      },
+      "wikiUse": {
+        "declared": false,
+        "observed": false,
+        "evidence": "计量命令及首答引用中未见Wiki正文读取；遵守对照路径"
+      },
+      "sourceAudit": {
+        "referenceCount": 20,
+        "uniqueFiles": 15,
+        "allHashesMatch": true,
+        "allRangesExist": true,
+        "references": [
+          {
+            "path": "AGENTS.md",
+            "line": 1,
+            "endLine": 36,
+            "expectedSha256": "a27c3e24d851343b217935dba6ed5658d261877321f8cf27caee1a2fbdb0b0a1",
+            "actualSha256": "a27c3e24d851343b217935dba6ed5658d261877321f8cf27caee1a2fbdb0b0a1",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+            "line": 91,
+            "endLine": 171,
+            "expectedSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "actualSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+            "line": 173,
+            "endLine": 306,
+            "expectedSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "actualSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+            "line": 324,
+            "endLine": 442,
+            "expectedSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "actualSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+            "line": 444,
+            "endLine": 525,
+            "expectedSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "actualSha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/api-v2/draw.ts",
+            "line": 113,
+            "endLine": 282,
+            "expectedSha256": "0a3c4dcd87e2b1676c1030969c95cde16ad9b6267fe765821fba24e171d155bd",
+            "actualSha256": "0a3c4dcd87e2b1676c1030969c95cde16ad9b6267fe765821fba24e171d155bd",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/api-v2/transport.ts",
+            "line": 117,
+            "endLine": 132,
+            "expectedSha256": "c33f0d7bda360af2bab13d1e02c141448e48f897f33f735e3d8f6bba737b85d5",
+            "actualSha256": "c33f0d7bda360af2bab13d1e02c141448e48f897f33f735e3d8f6bba737b85d5",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/api-v2/conversation.ts",
+            "line": 46,
+            "endLine": 90,
+            "expectedSha256": "45df6155915572d88fb883d6d773178ea62003fc10543aaf44c53975693ea75c",
+            "actualSha256": "45df6155915572d88fb883d6d773178ea62003fc10543aaf44c53975693ea75c",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/ChatPage.vue",
+            "line": 392,
+            "endLine": 491,
+            "expectedSha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853",
+            "actualSha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/ChatPage.vue",
+            "line": 520,
+            "endLine": 595,
+            "expectedSha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853",
+            "actualSha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/ChatPage.vue",
+            "line": 806,
+            "endLine": 847,
+            "expectedSha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853",
+            "actualSha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/views/Chat/__tests__/image-tasks.test.mjs",
+            "line": 196,
+            "endLine": 531,
+            "expectedSha256": "68fde329d71774c7b9dbc83796bf546da1d995809e03b167748a1e103c6a6e29",
+            "actualSha256": "68fde329d71774c7b9dbc83796bf546da1d995809e03b167748a1e103c6a6e29",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/src/api-v2/__tests__/draw-stream.test.mjs",
+            "line": 343,
+            "endLine": 437,
+            "expectedSha256": "1d77f4dbd35f34744d9da4060fcb520d7b28f460e915155204041bd289db8d24",
+            "actualSha256": "1d77f4dbd35f34744d9da4060fcb520d7b28f460e915155204041bd289db8d24",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "ai-conv-plus/package.json",
+            "line": 6,
+            "endLine": 13,
+            "expectedSha256": "c23137a743812664d8ba356c73850c6a2b1b1bf3c02bd0f7e9acac47d9e775cb",
+            "actualSha256": "c23137a743812664d8ba356c73850c6a2b1b1bf3c02bd0f7e9acac47d9e775cb",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/api/comfy.go",
+            "line": 111,
+            "endLine": 143,
+            "expectedSha256": "67ed7e16930dd938ad7d2810bd35f3f5a05fb55b5a226c4e04e28ab312613efb",
+            "actualSha256": "67ed7e16930dd938ad7d2810bd35f3f5a05fb55b5a226c4e04e28ab312613efb",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/api/result.go",
+            "line": 19,
+            "endLine": 35,
+            "expectedSha256": "3dd29f6752ba146dd9d2006b62694985324bb47b95e0c2d5ef6b1ef6c3f7aa51",
+            "actualSha256": "3dd29f6752ba146dd9d2006b62694985324bb47b95e0c2d5ef6b1ef6c3f7aa51",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/service/comfy_service.go",
+            "line": 404,
+            "endLine": 618,
+            "expectedSha256": "5ca147e27affee2bbf172fe5bafac987cd2df904eab8e7a70e0f55e1eb68e7d0",
+            "actualSha256": "5ca147e27affee2bbf172fe5bafac987cd2df904eab8e7a70e0f55e1eb68e7d0",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/service/image_history.go",
+            "line": 34,
+            "endLine": 188,
+            "expectedSha256": "a5382b754de28aa773b4048a14452aaca56e5d62ba1a6de6f8b08e3694e2e39c",
+            "actualSha256": "a5382b754de28aa773b4048a14452aaca56e5d62ba1a6de6f8b08e3694e2e39c",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/model/comfy_prompt_task.go",
+            "line": 5,
+            "endLine": 10,
+            "expectedSha256": "109adf1ff8e2174ddf47bc58dc0747e2b91cddaa13376a0466ecc88eb4a55ac1",
+            "actualSha256": "109adf1ff8e2174ddf47bc58dc0747e2b91cddaa13376a0466ecc88eb4a55ac1",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "gin-vue-admin/server/plugin/lm_draw/service/task_reconciler.go",
+            "line": 20,
+            "endLine": 89,
+            "expectedSha256": "d7c859f6444283289acdaf053d2efd038153450efa3e16b6292923178b9b7375",
+            "actualSha256": "d7c859f6444283289acdaf053d2efd038153450efa3e16b6292923178b9b7375",
+            "hashMatches": true,
+            "rangeExists": true
+          }
+        ]
+      },
+      "nonBlockingNotes": []
+    },
+    {
+      "sample": "source-evolution",
+      "answerFile": "source-evolution-answer.json",
+      "answerSha256": "e10ae4a2bbed357dd0c44f59c84abc7c6ab7f625758a3f12ef14e1ee11f8aebe",
+      "overall": "passed",
+      "criticalOmissions": [],
+      "criteria": [
+        {
+          "id": "source-evolution-table-1",
+          "originalCriterion": "准确定位prose表格外层局部overflow与单元格可读性样式；正文长路径与表格不必同策略。",
+          "status": "passed",
+          "evidenceAndJudgment": "准确指向styles.css:160-173：正文anywhere、pre局部overflow、table自身display:block/max-width/overflow-x:auto、th/td最小宽度和normal规则；说明正文路径与表格不必相同换行。实际滚动元素是table，无独立外层wrapper要求。",
+          "missing": []
+        },
+        {
+          "id": "source-evolution-table-2",
+          "originalCriterion": "指出当前min-width和normal换行规则已存在，不把调查建议当实施，定位回归范围。",
+          "status": "passed",
+          "evidenceAndJudgment": "明确min-width:10ch、overflow-wrap:normal与word-break:normal已经存在；从样式加载/覆盖、.prose挂载、外围min-width:0及构建资源定位回归，未把调查当新修复。",
+          "missing": []
+        },
+        {
+          "id": "source-evolution-table-3",
+          "originalCriterion": "能在来源演进后的当前Wiki找到新增认识并由源码核对；不靠历史答案复述。",
+          "status": "passed",
+          "evidenceAndJudgment": "计量记录显示实际读取当前Wiki正文，再核对当前CSS及React挂载链；前后CSS实物哈希与仅一行差异、generation11旧Wiki正文及当前新增段落分别匹配固定protocol；不依赖旧答案。",
+          "missing": []
+        },
+        {
+          "id": "source-evolution-table-4",
+          "originalCriterion": "当前桌面支持范围、源码与运行验收区分，不扩张为手机或任意表格保证。",
+          "status": "passed",
+          "evidenceAndJudgment": "区分当前桌面机制与运行验收；未宣称本轮18列表格已浏览器通过，明确不能外推手机、任意列数或人类接受。",
+          "missing": []
+        }
+      ],
+      "fullQuestionAssessment": {
+        "status": "passed",
+        "scope": "按固定完整问题逐项语义评审，未把问题缩为单个数字修改或单个API成功。",
+        "qualifications": "仅静态来源与修改定位；答案均没有将计划、测试存在或当前本地文件当成实施/运行/部署结果。"
+      },
+      "wikiUse": {
+        "declared": true,
+        "observed": true,
+        "evidence": "实际正文读取及源码核对记录支持"
+      },
+      "sourceAudit": {
+        "referenceCount": 17,
+        "uniqueFiles": 9,
+        "allHashesMatch": true,
+        "allRangesExist": true,
+        "references": [
+          {
+            "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+            "line": 30,
+            "endLine": 30,
+            "expectedSha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+            "actualSha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+            "line": 32,
+            "endLine": 32,
+            "expectedSha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+            "actualSha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+            "line": 68,
+            "endLine": 68,
+            "expectedSha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+            "actualSha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/styles.css",
+            "line": 160,
+            "endLine": 160,
+            "expectedSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "actualSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/styles.css",
+            "line": 171,
+            "endLine": 171,
+            "expectedSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "actualSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/styles.css",
+            "line": 172,
+            "endLine": 172,
+            "expectedSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "actualSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/styles.css",
+            "line": 173,
+            "endLine": 173,
+            "expectedSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "actualSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/styles.css",
+            "line": 142,
+            "endLine": 142,
+            "expectedSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "actualSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/reader.tsx",
+            "line": 167,
+            "endLine": 167,
+            "expectedSha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf",
+            "actualSha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+            "line": 65,
+            "endLine": 65,
+            "expectedSha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e",
+            "actualSha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+            "line": 179,
+            "endLine": 179,
+            "expectedSha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e",
+            "actualSha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/reader-common.ts",
+            "line": 146,
+            "endLine": 146,
+            "expectedSha256": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e",
+            "actualSha256": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "scripts/build-reader.ts",
+            "line": 110,
+            "endLine": 110,
+            "expectedSha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+            "actualSha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "scripts/build-reader.ts",
+            "line": 123,
+            "endLine": 123,
+            "expectedSha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+            "actualSha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "scripts/build-runtime.ts",
+            "line": 228,
+            "endLine": 228,
+            "expectedSha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb",
+            "actualSha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "skills/lumine-harness/src/browser/index.html",
+            "line": 8,
+            "endLine": 8,
+            "expectedSha256": "56f92da80a93a5bc14867b4ee6b7db2c1a8bfa1ff3c250a68000b6324189dc7a",
+            "actualSha256": "56f92da80a93a5bc14867b4ee6b7db2c1a8bfa1ff3c250a68000b6324189dc7a",
+            "hashMatches": true,
+            "rangeExists": true
+          },
+          {
+            "path": "AGENTS.md",
+            "line": 15,
+            "endLine": 15,
+            "expectedSha256": "ae10670251f771dae6ae760ffa73668d3409fae3d2163a01e9db6caa1f62c678",
+            "actualSha256": "ae10670251f771dae6ae760ffa73668d3409fae3d2163a01e9db6caa1f62c678",
+            "hashMatches": true,
+            "rangeExists": true
+          }
+        ]
+      },
+      "nonBlockingNotes": [
+        "AGENTS.md:15主要描述宿主启动器生成关系，支持阅读器禁止直接修补生成副本的引用不够就近；仓库地图与唯一真源段落直接支持该规则。此非表格机制结论的来源缺口。"
+      ]
+    }
+  ],
+  "rubricAssessment": {
+    "status": "adequate_with_clarification",
+    "originalCriteriaRetained": true,
+    "regradingToCreatePass": false,
+    "clarifications": [
+      {
+        "criterion": "source-evolution-table-1",
+        "issue": "“表格外层局部overflow”可能让人误以为必须存在独立wrapper。",
+        "independentInterpretation": "按完整题意评实际滚动容器；当前滚动规则在.prose table本身，不能要求不存在的wrapper才给通过。"
+      }
+    ],
+    "additionalFullQuestionChecks": [
+      "source两份均覆盖/api/query独立默认六、显式--limit与字符预算、hasMore，不缩成项目配置一行。",
+      "parent两份均覆盖未confirmed而非仅HTTP失败、轮次/重置/窗口、原会话原消息、HTTP200/code0与终态竞态、当前生产无答案。",
+      "evolution区分当前已存在规则、加载回归、正文与表格策略、桌面支持和运行验收。"
+    ]
+  },
+  "evolutionAudit": {
+    "protocolFixedBeforeSample": true,
+    "protocolFixedAt": "2026-10-08T04:52:39.569813+00:00",
+    "beforeCssSha256": "038808f71284659f1ebd5dc50c25497984dede2574780201e34265e7418f20dc",
+    "afterCssSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+    "beforeWikiSha256": "29a5ca0e658609126c5effbb72c31c300d47ed0ab5164dfcb2fcaba038eefa90",
+    "afterWikiSha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+    "physicalBeforeAndAfterHashesMatched": true,
+    "cssDifference": "唯一差异为th/td新增min-width:10ch; overflow-wrap:normal; word-break:normal。",
+    "knowledgeDifference": "generation11旧正文无表格可读性段落；当前正文有局部滚动/正文路径换行/单元格可读性段落，并明示桌面支持范围。",
+    "limits": "只证明明确CSS与知识正文版本差异及再次使用；不将保留副本内全部源码/README视为同一早期基线，不据日期推定演进。"
+  },
+  "metrics": [
+    {
+      "sample": "source-normal",
+      "readCommandsAsRecorded": 10,
+      "stdoutUtf8Bytes": 144179,
+      "stderrUtf8Bytes": 0,
+      "totalReturnedUtf8Bytes": 144179,
+      "retrievalWallSeconds": 0.17108774185180664,
+      "wallSeconds": 204.22885990142822,
+      "startedAt": "2026-10-08T04:47:02.904685+00:00",
+      "finishedAt": "2026-10-08T04:50:27.133557+00:00",
+      "answerShaMatchesSummary": true,
+      "eventsAndStoredOutputsMatchSummary": true,
+      "eventsMatchSummary": true,
+      "storedOutputsMatchSummary": true
+    },
+    {
+      "sample": "source-only",
+      "readCommandsAsRecorded": 7,
+      "stdoutUtf8Bytes": 139777,
+      "stderrUtf8Bytes": 66,
+      "totalReturnedUtf8Bytes": 139843,
+      "retrievalWallSeconds": 0.12336993217468262,
+      "wallSeconds": 133.09057688713074,
+      "startedAt": "2026-10-08T04:47:04.045616+00:00",
+      "finishedAt": "2026-10-08T04:49:17.136177+00:00",
+      "answerShaMatchesSummary": true,
+      "eventsAndStoredOutputsMatchSummary": true,
+      "eventsMatchSummary": true,
+      "storedOutputsMatchSummary": true
+    },
+    {
+      "sample": "parent-normal",
+      "readCommandsAsRecorded": 16,
+      "stdoutUtf8Bytes": 147335,
+      "stderrUtf8Bytes": 880,
+      "totalReturnedUtf8Bytes": 148215,
+      "retrievalWallSeconds": 0.250596284866333,
+      "wallSeconds": 239.5228087902069,
+      "startedAt": "2026-10-08T04:51:44.854584+00:00",
+      "finishedAt": "2026-10-08T04:55:44.377396+00:00",
+      "answerShaMatchesSummary": true,
+      "eventsAndStoredOutputsMatchSummary": true,
+      "eventsMatchSummary": true,
+      "storedOutputsMatchSummary": true
+    },
+    {
+      "sample": "parent-source-only",
+      "readCommandsAsRecorded": 19,
+      "stdoutUtf8Bytes": 207531,
+      "stderrUtf8Bytes": 0,
+      "totalReturnedUtf8Bytes": 207531,
+      "retrievalWallSeconds": 0.2712080478668213,
+      "wallSeconds": 185.646329164505,
+      "startedAt": "2026-10-08T04:51:49.282901+00:00",
+      "finishedAt": "2026-10-08T04:54:54.929248+00:00",
+      "answerShaMatchesSummary": true,
+      "eventsAndStoredOutputsMatchSummary": false,
+      "eventsMatchSummary": true,
+      "storedOutputsMatchSummary": false,
+      "storedOutputAudit": {
+        "stdoutFileCount": 18,
+        "stdoutUtf8Bytes": 203248,
+        "summaryAndEventsStdoutUtf8Bytes": 207531,
+        "unavailableOutputBytes": 4283,
+        "missingFilename": "003.stdout",
+        "observedCollisionClue": "002.stdout为2520字节，与第3条事件一致；第2条事件为4283字节。",
+        "qualification": "编号复用或覆盖为迹象而非已证实原因；不重算原始事件指标，不把残缺落盘文件称为完整原始输出。"
+      }
+    },
+    {
+      "sample": "source-evolution",
+      "readCommandsAsRecorded": 14,
+      "stdoutUtf8Bytes": 117406,
+      "stderrUtf8Bytes": 0,
+      "totalReturnedUtf8Bytes": 117406,
+      "retrievalWallSeconds": 0.11611223220825195,
+      "wallSeconds": 106.74975991249084,
+      "startedAt": "2026-10-08T04:54:16.537798+00:00",
+      "finishedAt": "2026-10-08T04:56:03.287542+00:00",
+      "answerShaMatchesSummary": true,
+      "eventsAndStoredOutputsMatchSummary": true,
+      "eventsMatchSummary": true,
+      "storedOutputsMatchSummary": true
+    }
+  ],
+  "costComparison": {
+    "sourcePair": {
+      "normalMinusSourceOnlyBytes": 4336,
+      "normalMinusSourceOnlyWallSeconds": 71.13828301429749,
+      "interpretation": "本题常规路径读取返回量略多、总用时更长。"
+    },
+    "parentPair": {
+      "normalMinusSourceOnlyBytes": -59316,
+      "normalMinusSourceOnlyWallSeconds": 53.876479625701904,
+      "interpretation": "本题常规路径读取返回量较少，但总用时更长。"
+    },
+    "evolution": "无对应source-only首答，不作成本对照。",
+    "conclusion": "在核心正确性均通过后，这些一次性样本仅显示混合成本结果，未呈现一致时间优势；parent-source-only还有4283字节原始输出保留缺口。保留summary/events原值，不将其包装为完整工具可见文本或Wiki的长期因果收益。"
+  },
+  "measurementQualifications": [
+    "summary与events逐项累计的字节、命令数、命令时间及首答哈希均一致。四个样本的私有落盘stdout/stderr也一致；parent-source-only有单独披露的原始输出保留缺口。",
+    "parent-source-only：19条事件合计stdout 207531字节与summary一致，落盘仅18个stdout文件共203248字节，缺003.stdout，少4283字节；002.stdout为第3条事件的2520字节，存在编号复用/覆盖迹象，但原因未证实。保留原事件指标，不宣称该样本全部原始输出可复核。",
+    "readCommands沿用计量字段原名，其中parent-source-only末次命令还保存首答并返回214字节元数据；不将全部值称为纯源码内容字节。",
+    "保留初始stderr、失败检索和环境警告，未作为产品缺陷；目录枚举包含文件名不等于读取历史文件正文。",
+    "该仪表计量子进程输出；未独立观测所有宿主传输层是否截断显示、完整提示上下文或未计量宿主开销。wall包含推理/工具延迟，不能等同纯阅读时间。",
+    "没有模型输入/输出Token，不把字节、contextChars或wall时间改称Token，也不填0、不推算节省百分比。",
+    "问题、规则读取、目录枚举、哈希与元数据均计入原口径；同题独立上下文仍可能采取不同调查路径，不构成随机重复的因果实验。"
+  ],
+  "productObservations": [
+    {
+      "area": "Agent查询入口",
+      "status": "static_limitation",
+      "observation": "/api/query自行回退六并显式传给queryKnowledge，项目maxCards变化不会自然覆盖该入口。",
+      "action": "本轮只定位，未修改。"
+    },
+    {
+      "area": "取消结果",
+      "status": "static_limitation",
+      "observation": "Cancel在claimed=false时仍返回业务成功，前端随后本地cancelled并停止跟踪；实际服务端终态可能与本地提示不同。",
+      "action": "本轮只报告；没有运行复现，不自动修复。"
+    }
+  ],
+  "deliveryBoundary": {
+    "wikiUseFixedSamples": "本轮可交付：五份首答在固定问题核心语义、限定与直接来源上通过。三个常规样本实际使用当前Wiki，两个对照样本未使用Wiki。",
+    "nodeHostAndFinalize": "本评审未执行或复核Node真实宿主/finalize，不能由知识首答通过推定通过；这些未验证项不使本轮知识使用结果整体失败。",
+    "humanProductionHook": "人类理解/接受、当前生产部署行为、真实Hook执行均未由本样本验证。",
+    "longTerm": "仅同日固定样本及一个真实版本增量，未验证长期可靠性、跨问题泛化或Token收益。"
+  },
+  "mutations": "仅新建independent-review.json与independent-review.md；不改五份首答，不改源码、Wiki、配置、state或业务。",
+  "workStatus": "done"
+}

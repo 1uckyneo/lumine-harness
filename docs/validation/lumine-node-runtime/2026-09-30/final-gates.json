@@ -1,0 +1,69 @@
+{
+  "observedAt": "2026-09-30T06:58:10.368015+00:00",
+  "actualMaintenanceNode": "24.14.0",
+  "checks": {
+    "typecheck": {
+      "exitCode": 0,
+      "outputSha256": "8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92"
+    },
+    "build": {
+      "exitCode": 0,
+      "outputSha256": "2cbdcf65034e886ed3837b66ea1fa0bed9049020c4f56b848476ff2b2d345ae3"
+    },
+    "check": {
+      "exitCode": 0,
+      "outputSha256": "0e1671e975049caab394c97f32df929fec3811dbe740af9fb6a4c1536a2e6d18"
+    },
+    "test:source": {
+      "tests": 236,
+      "passed": 235,
+      "skipped": 1,
+      "failed": 0,
+      "outputSha256": "96ea7c78d94bce24c48a3f3b42e468f2bdab0f13ca3c4e0c804d865a2aaf33c0"
+    },
+    "test:dist": {
+      "tests": 236,
+      "passed": 235,
+      "skipped": 1,
+      "failed": 0,
+      "outputSha256": "2a69f5d978607b98800f21a19b3319eb202adf4793210131d6b61bb7a53b91ee"
+    },
+    "hook-config-special": {
+      "passed": 3,
+      "failed": 0,
+      "source": "scripts/build-hook-configs.test.ts"
+    },
+    "skill-package": {
+      "passed": true
+    },
+    "repo-sync": {
+      "passed": true
+    },
+    "diff-check": {
+      "passed": true
+    },
+    "wiki-structure": {
+      "status": "passed",
+      "issues": [],
+      "checked": [
+        "lumine-adapters",
+        "lumine-architecture",
+        "lumine-wiki",
+        "lumine-task-check",
+        "lumine-workflow",
+        "lumine-wiki-reader",
+        "lumine-root-config",
+        "lumine-adoption"
+      ],
+      "notVerified": [
+        "semantic accuracy",
+        "runtime behavior",
+        "human acceptance"
+      ]
+    }
+  },
+  "limitations": [
+    "Runtime source and generated suites use the maintenance process; actual minimum-version evidence is recorded separately.",
+    "The existing skipped case is not counted as passed."
+  ]
+}

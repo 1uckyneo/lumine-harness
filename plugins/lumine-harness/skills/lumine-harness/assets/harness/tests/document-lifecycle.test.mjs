@@ -45,7 +45,7 @@ test("archive and restore preserve Chinese plan IDs, task references and accepta
 		const specBaseline = acceptanceSections(resolveDocument(root, "product-test"));
 		const planBaseline = acceptanceSections(resolveDocument(root, "plan-test"));
 		saveTaskRecord(root, {
-			schemaVersion: 2,
+			schemaVersion: 3,
 			taskId: "lifecycle",
 			mode: "diagnose",
 			goal: "Verify lifecycle",

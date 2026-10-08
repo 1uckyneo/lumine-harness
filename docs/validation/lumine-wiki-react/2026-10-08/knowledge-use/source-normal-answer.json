@@ -1,0 +1,135 @@
+{
+  "caseId": "source-query-change",
+  "arm": "normal",
+  "answer": "只调查的结论：把 Agent 查询默认值从六条改为八条，应调整 Agent 的条数默认与说明；浏览器“继续看结果”和 maxContextChars 不必一起改。八条是返回上限，不是必须凑齐的数量，也不能仅凭源码保证节省 Token。\n\n1. 最小入口取决于作用范围\n如果只让本仓 Agent 查询默认八条，最小入口是 .lumine/project.json:38 的 wiki.maxCards（当前显式为 6），保留 :39 的 maxContextChars=12000 即可。[S1]\n调用链是 wiki-main.ts:63 把未提供的 --limit 转为 undefined → engine.ts:90-94 的 queryKnowledge → wiki/files.ts:32-39 加载规范项目配置 → searchKnowledge。queryKnowledge 使用 Math.min(options.limit ?? config.maxCards, 30)，字符预算使用另一项 Math.min(options.maxChars ?? config.maxContextChars, 200000)。因此核心算法没有“永远六条”的限制，不需要改 ranking、卡片结构或 hasMore。[S2][S3][S5][S7]\n\n如果要修改 Lumine 分发给所有项目的产品默认，而不仅本仓配置，应定位：\n- core/project-config.ts:88 的缺省 maxCards=6（positive 只在值 undefined 时取兜底，显式配置保留）；\n- wiki/files.ts:38 的防御性兜底 6，维持两层默认一致；\n- scripts/harness-manager-main.ts:368-375 的首次生成 wiki 配置 maxCards=6。\n初始化用 project.wiki ??=，已有 wiki 对象不会被这段重新覆盖；已有项目显式的 6 不会因为产品兜底改为 8 自动升级。本仓显式配置也需要单独调整，才能观察到八条默认。是否迁移采用工程的显式值属于另一个范围，不能在只调查任务中自动实施。[S4][S5][S6][S1]\n\n另外不能漏看 server.ts:59-62 的 /api/query：它当前自行用 6 作为省略 limit 的默认，并把这个值显式传给 queryKnowledge，会覆盖配置的 maxCards。现有测试也把 /api/query 归在 Agent budget 行为下。若“Agent 默认八条”覆盖该 API，应同步将它的缺省连接到配置或统一的新默认；否则会出现 CLI 八条、该 API 六条。它不是浏览器目前使用的分页接口。[S8][S12]\n\n2. 显式 --limit 的行为\nCLI 显式 --limit 6 仍应最多六条；--limit 8、--limit 10 分别覆盖默认为八条、十条，最终仍最多 30 条，并且受独立字符预算影响。正安全整数校验、无效值报 QUERY_BUDGET_INVALID 的合同保持；只改变默认不应把显式 --limit 6 也强制改成八条。--max-chars 同样优先于项目字符默认。[S2][S3]\nwiki-main.ts:87 的帮助中 [--limit 6] 应反映新的默认。maintenance.md:28 的 --limit 6 是显式示例，可以保留作为覆盖示例，或为表达新默认改用 8／省略；不能把所有数字 6 一律替换。[S2][S14]\n\n3. 浏览器 hasMore 与“继续看结果”\n不需要联动改变。reader-search.tsx:44 固定请求 /api/search、limit=20；server.ts:64-84 单独选择页面大小，默认 20、合法范围 1..30，解析 cursor 后按 offset 查询。searchKnowledgePage 调用 searchKnowledge(..., bounded=false)，跳过 Agent 字符预算，返回 hasMore = offset + 本页 cards.length < total。nextCursor 仅在 hasMore 时生成，并携带下一 offset；查询条件或文档指纹变化会使旧 cursor 失效。[S9][S8][S7]\n前端把更多页追加并去重，保存服务端 hasMore 与 nextCursor；有非空查询且 hasMore 时才显示“继续看结果”，点击用 cursor 继续，遇到失效 cursor 则重新搜索。[S9]\n所以仅将 Agent maxCards 6→8，不改变浏览器每页 20、total、hasMore 算式、cursor 或按钮条件。不要为了 Agent 默认八条把浏览器 page size 改成八条；若未来有浏览器条数需求，应另行定义并验证。[S7][S8][S9]\n\n4. 预算、匹配和不足\nmaxContextChars 不必修改。条数与字符是两个独立约束；预算仍为 12000 时，即使有八个以上匹配，也可能返回不足八张。search.ts:99-100 先尝试缩短匹配摘要、减少来源与关系；压缩后仍超过预算的卡片不会加入，随后继续尝试后续已排名项。返回的 contextChars 是 JSON.stringify(cards).length；这是 JavaScript 字符串长度，并不是模型 Token 数，也不是完整 CLI／对话输入大小。[S1][S3][S7]\n检索先进行中英文／代码词项处理与常见问句词过滤，再按标题、章节、正文、元数据的命中和覆盖率排名；有词项的查询要求至少命中一项且 coverage>=0.25。只从这些相关项取卡片，不从不相关页面补齐上限。非空查询仅剩停用词时返回空结果；无相关排名时 total=0、noAnswer=true，CLI 提示改写问题或核实源码。若因预算放不下而 cards 为空，noAnswer 仍由 ranked.length 决定，不能混淆“无匹配”和“有匹配但没装下”。相关性门槛本身是词项启发式，不能保证每张卡片语义可靠；关键结论仍须核实实际来源。[S7][S2][S13][S17]\n因此没有可靠匹配时不能凑足八条，不能降低匹配门槛或放入无关内容来满足数量。\n\n5. 联动说明与验证方向\n规范 Skill 的 LH-KNOWLEDGE-02、wiki-main 帮助、中英文 README 的六张说明、相关 Wiki 的检索预算描述需要随最终产品默认同步；Wiki 是解释层，不能替代上述源码入口。[S13][S2][S15][S16][S17][S18]\n现有 core-v2.test.ts:59-70 验证省略配置的默认 6；wiki-agentic.test.ts:97-98 验证六条与总字符预算，但该 fixture 在 :16 显式配置 6。修改产品默认时，不能只改断言期待 8 而仍留该显式配置。应新增／调整缺省八条用例，保留显式六条的覆盖回归。[S10][S11]\n建议验证：\n- 省略 maxCards 与 --limit 时，至少九个可靠、小体积匹配返回最多八条；新生成项目默认与本仓显式配置分别核对。\n- 显式配置 6、显式 --limit 6／8／10、超过 30 的上限及无效参数；如覆盖 /api/query，再验证省略 limit 与显式 limit。\n- 字符预算保持 12000，另用小预算验证压缩／跳过后 contextChars 不超预算；少于八个匹配、无关问题、只含通用问句词均不得补齐。\n- 浏览器第一页、继续分页、最后一页 hasMore=false、无重复结果及 cursor 失效；这应证明分页独立，而非把八条传播进去。\n已有 wiki-search-dispositions.test.ts:43-63 提供分页、Agent 预算隔离和旧 cursor 失效的测试入口。[S12]\n真正实施后只改 TypeScript 唯一源码，再生成 Runtime；同步 Plugin wrapper，不直接编辑生成 .mjs 或 wrapper 副本。按仓库要求执行 runtime:typecheck、runtime:build、runtime:check、runtime:test、check-skill-package.sh、sync-plugin-wrapper.sh 与 check-repo-sync.sh。[S19][S20]\n\n6. 证据限制与 Token 判断\n本轮实际阅读了当前 Wiki、源码、配置和既有测试定义，没有修改实现／配置／Wiki，没有运行测试或浏览器，没有验证采用工程、发布产物或真实宿主行为。以上是当前开发实现与修改影响定位，不是“八条已实施／已验证／已部署”。\n源码只能说明卡片数、相关性与字符预算的关系。增加两张卡片可能减少后续补查，也可能带来更多文本、干扰或额外核实；不一定装得下八张。不存在从“卡片更多”必然推出“Token 更少”的依据。评价节省应在固定任务与知识基线、相同预算下，用独立新会话比较六条和八条，记录真实输入／输出 Token、额外源码读取与工具调用、正确性和耗时。实际读取字节只能作为读取量，不能换算 Token 或推算长期节省比例。",
+  "chosenPath": "组合：读取当前 Wiki 的检索预算解释作线索，再核对项目配置、CLI、配置默认、检索引擎、分页服务、React 搜索入口和测试定义。",
+  "wikiActuallyUsed": true,
+  "sources": [
+    {
+      "id": "S1",
+      "path": ".lumine/project.json",
+      "line": 38,
+      "sha256": "dd6997074958705cc6913b419d33aa0e94daaed04f197390fc96987fcd4161c2"
+    },
+    {
+      "id": "S2",
+      "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+      "line": 63,
+      "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+    },
+    {
+      "id": "S3",
+      "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+      "line": 90,
+      "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+    },
+    {
+      "id": "S4",
+      "path": "skills/lumine-harness/src/harness/core/project-config.ts",
+      "line": 88,
+      "sha256": "fed70a1868ce7a97a2a2fda750c38b1d83e1e788cf1bcadca56bfe71b7610b46"
+    },
+    {
+      "id": "S5",
+      "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+      "line": 38,
+      "sha256": "bb6e2fa35399f23c68fe8151a3815232799d7d79c43b99d655bdf4dbd95388dc"
+    },
+    {
+      "id": "S6",
+      "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+      "line": 368,
+      "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+    },
+    {
+      "id": "S7",
+      "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+      "line": 63,
+      "sha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4"
+    },
+    {
+      "id": "S8",
+      "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+      "line": 59,
+      "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+    },
+    {
+      "id": "S9",
+      "path": "skills/lumine-harness/src/browser/reader-search.tsx",
+      "line": 39,
+      "sha256": "f5b1c8c4cc71d134d3599e5cb31ea849231f263eaabe4ce9fc4c047f2ae927de"
+    },
+    {
+      "id": "S10",
+      "path": "skills/lumine-harness/src/harness/tests/core-v2.test.ts",
+      "line": 59,
+      "sha256": "b9fd611cc565076c7d689612cb3b7c867b0115e125f955318f3b3a0b6c8976da"
+    },
+    {
+      "id": "S11",
+      "path": "skills/lumine-harness/src/harness/tests/wiki-agentic.test.ts",
+      "line": 91,
+      "sha256": "e699af6b8ba0d8f773b982afc8a7ebdec99778b2a87a37207f80ac529dfbce29"
+    },
+    {
+      "id": "S12",
+      "path": "skills/lumine-harness/src/harness/tests/wiki-search-dispositions.test.ts",
+      "line": 43,
+      "sha256": "a9b6406ca7a1a0ac51e7eb2625b73b48ee5ddcfc91220f8adbf15a5068c9c8de"
+    },
+    {
+      "id": "S13",
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
+      "line": 12,
+      "sha256": "dbf69bfcdce6709f11fb1ae0be96be21cdb3444340ec1d2d828e9f47eb80d6a2"
+    },
+    {
+      "id": "S14",
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
+      "line": 28,
+      "sha256": "e9d212df96040bc40091a41e8124d903b3477cf7bfeabc7943c004dc0d9135de"
+    },
+    {
+      "id": "S15",
+      "path": "README.md",
+      "line": 108,
+      "sha256": "947dc8e4cae8c091010440001bb9414275f7ad1425fbc96b4a3e0a87ad024359"
+    },
+    {
+      "id": "S16",
+      "path": "README.zh-CN.md",
+      "line": 110,
+      "sha256": "c4ab93a21f8e408547abfbe95090697b4c8e26d455726626067635ff95e1d2e9"
+    },
+    {
+      "id": "S17",
+      "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+      "line": 45,
+      "sha256": "99d964c9554cbab0356b455cb1b1e6a2426e03d9c300d2cd42a5fbd2eca4a3a6"
+    },
+    {
+      "id": "S18",
+      "path": "docs/repo-wiki/项目配置、根解析与多仓身份.md",
+      "line": 58,
+      "sha256": "e105e76836aceddcbd5443d3ac74f8824c9b4dfde2b73d4fa52cba265b2d1289"
+    },
+    {
+      "id": "S19",
+      "path": "AGENTS.md",
+      "line": 28,
+      "sha256": "ae10670251f771dae6ae760ffa73668d3409fae3d2163a01e9db6caa1f62c678"
+    },
+    {
+      "id": "S20",
+      "path": "package.json",
+      "line": 9,
+      "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+    }
+  ],
+  "limits": [
+    "仅静态只读调查，未运行测试、浏览器或网络；未修改实现、配置或 Wiki。",
+    "未阅读 rubric、其他 arm 答案、历史 validation 答案或私有会话；未与其他样本通信。",
+    "源码与既有测试定义不证明假设变更已实施、生成产物一致、真实宿主运行、人类接受或生产部署。",
+    "contextChars 与读取 stdout 字节均不是模型 Token；缺少独立会话实际用量数据，不能保证或量化节省。"
+  ]
+}

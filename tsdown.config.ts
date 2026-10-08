@@ -23,8 +23,8 @@ if (!outDir) {
 export default defineConfig({
   entry: [
     ...collectTypeScriptEntries(path.join(sourceRoot, "harness")),
-    path.join(sourceRoot, "opencode/plugins/harness.ts"),
-    path.join(sourceRoot, "scripts/harness-manager.ts"),
+    ...collectTypeScriptEntries(path.join(sourceRoot, "opencode/plugins")),
+    ...collectTypeScriptEntries(path.join(sourceRoot, "scripts")),
     ...collectTypeScriptEntries(path.join(sourceRoot, "migration"))
   ],
   root: sourceRoot,
@@ -32,7 +32,7 @@ export default defineConfig({
   format: ["esm"],
   platform: "node",
   deps: { neverBundle: ["yaml", "ignore"] },
-  target: "node18",
+  target: "node22",
   unbundle: true,
   clean: true,
   dts: false,

@@ -36,7 +36,7 @@ function task(root: string): TaskRecord {
   write(root, "docs/validation/search/output.txt", "node test: passed\n");
   const criterion = acceptanceSections(resolveDocument(root, "spec-search"))[0];
   return {
-    schemaVersion: 2, taskId: "search", mode: "implement", goal: "Implement scoped search", scope: "app/src/main.ts",
+    schemaVersion: 3, taskId: "search", mode: "implement", goal: "Implement scoped search", scope: "app/src/main.ts",
     specRef: "spec-search", planRef: "plan-search",
     acceptanceRefs: [{ specId: "spec-search", acId: criterion.acId, baselineHash: criterion.baselineHash }],
     evidence: [{ specId: "spec-search", acId: criterion.acId, artifact: "docs/validation/search/output.txt", sha256: contentHash(readFileSync(path.join(root, "docs/validation/search/output.txt"))), outcome: "passed", observedAt: new Date().toISOString(), command: "node test", environment: "local fixture", codeRefs: [{ repoId: "app", path: "src/main.ts", sha256: contentHash(readFileSync(path.join(root, "app/src/main.ts"))) }] }],
@@ -175,8 +175,9 @@ test("task knowledge references accept Wiki IDs and preserve them across readabl
     const disposition = "docs/validation/search/knowledge-disposition.md";
     write(root, disposition, "# 知识同步记录\n已核对本次搜索机制，无其他受影响页面。\n");
     const record = task(root);
+    record.schemaVersion = 2;
     record.knowledge = { required: true, status: "synchronized", refs: ["knowledge-search", oldPath, disposition] };
-    saveTaskRecord(root, record);
+    write(root, ".lumine/tasks/search.json", `${JSON.stringify(record, null, 2)}\n`);
     const originalTask = readFileSync(taskRecordPath(root, record.taskId), "utf8");
     assert.equal(checkTask(root, record.taskId).ok, true, "Wiki ID and plain disposition path are valid references");
     renameDocument(root, "knowledge-search", newPath, contentHash(readFileSync(path.join(root, oldPath))));
@@ -189,6 +190,59 @@ test("task knowledge references accept Wiki IDs and preserve them across readabl
     record.knowledge.refs = [disposition, "../outside.md", "docs/knowledge"];
     saveTaskRecord(root, record, contentHash(originalTask));
     assert.equal(checkTask(root, record.taskId).issues.filter((item) => item.code === "KNOWLEDGE_REF_MISSING").length, 2, "escaping paths and directories cannot substitute for knowledge evidence");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("new tasks require v3 while existing v2 records retain CAS updates and can only upgrade", () => {
+  const root = fixture();
+  try {
+    const record = task(root);
+    record.schemaVersion = 2;
+    assert.throws(() => saveTaskRecord(root, record), /TASK_SCHEMA_V3_REQUIRED/);
+    write(root, ".lumine/tasks/search.json", `${JSON.stringify(record, null, 2)}\n`);
+    assert.equal(checkTask(root, record.taskId).ok, true, "historical v2 checks keep their earlier contract");
+    const initial = contentHash(readFileSync(taskRecordPath(root, record.taskId)));
+    record.summary = "Historical task updated with its current hash";
+    saveTaskRecord(root, record, initial);
+    const updated = contentHash(readFileSync(taskRecordPath(root, record.taskId)));
+    record.schemaVersion = 3;
+    saveTaskRecord(root, record, updated);
+    assert.equal(checkTask(root, record.taskId).ok, true);
+    record.schemaVersion = 2;
+    assert.throws(() => saveTaskRecord(root, record, contentHash(readFileSync(taskRecordPath(root, record.taskId)))), /TASK_SCHEMA_DOWNGRADE_FORBIDDEN/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("v3 implementation cannot claim synchronized knowledge with the old refs-only shape", () => {
+  const root = fixture();
+  try {
+    const record = task(root);
+    write(root, "docs/repo-wiki/search.md", "---\nid: knowledge-search\ntitle: Search mechanism\ntype: architecture\nstatus: current\n---\n# Search mechanism\n");
+    record.knowledge = { required: true, status: "synchronized", refs: ["knowledge-search"] };
+    saveTaskRecord(root, record);
+    assert.ok(checkTask(root, record.taskId).issues.some((item) => item.code === "KNOWLEDGE_SYNC_MISSING"));
+    const current = contentHash(readFileSync(taskRecordPath(root, record.taskId)));
+    delete record.knowledge;
+    saveTaskRecord(root, record, current);
+    assert.ok(checkTask(root, record.taskId).issues.some((item) => item.code === "KNOWLEDGE_ASSESSMENT_MISSING"));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("versioned knowledge sync records the affected source, disposition and verified scope", () => {
+  const root = fixture();
+  try {
+    const markdown = "---\nid: knowledge-search\ntitle: Search mechanism\ntype: architecture\nstatus: current\n---\n# Search mechanism\n\nQueries retain relevant context.\n";
+    write(root, "docs/repo-wiki/search.md", markdown);
+    const record = task(root), codeHash = contentHash(readFileSync(path.join(root, "app/src/main.ts")));
+    record.knowledge = { required: true, status: "synchronized", refs: ["knowledge-search"], sync: {
+      contractVersion: 2, assessedAt: new Date().toISOString(), changedSources: [{ repoId: "app", path: "src/main.ts", sha256: codeHash }],
+      verifiedScope: ["Search implementation and its documented query behavior"],
+      decisions: [{ ref: "knowledge-search", action: "retained", sha256: contentHash(markdown), reason: "The existing explanation remains accurate for this scoped change." }]
+    } };
+    saveTaskRecord(root, record);
+    assert.equal(checkTask(root, record.taskId).ok, true);
+    write(root, "docs/repo-wiki/search.md", markdown.replace("relevant context", "all context"));
+    assert.ok(checkTask(root, record.taskId).issues.some((item) => item.code === "KNOWLEDGE_DECISION_CHANGED"));
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 

@@ -68,7 +68,7 @@ function directBody(document, section) {
 	const child = document.sections.find((item) => item.startLine > section.startLine && item.startLine <= section.endLine);
 	return child ? document.body.split(/\r?\n/).slice(section.startLine - 1, child.startLine - 1).join("\n") : section.body;
 }
-function searchKnowledge(documents, query, limit, budget) {
+function searchKnowledge(documents, query, limit, budget, offset = 0, bounded = true) {
 	const terms = searchTerms(query);
 	if (!terms.length && query.trim()) return {
 		query,
@@ -131,7 +131,7 @@ function searchKnowledge(documents, query, limit, budget) {
 		};
 	}).filter((entry) => entry.relevant).sort((a, b) => b.score - a.score || a.document.title.localeCompare(b.document.title));
 	const cards = [];
-	for (const entry of ranked) {
+	for (const entry of ranked.slice(offset)) {
 		if (cards.length >= limit) break;
 		const document = entry.document;
 		const matches = entry.sectionScores.filter((section) => section.score > 0 || !terms.length).slice(0, 2).map(({ section, text }) => ({
@@ -165,7 +165,7 @@ function searchKnowledge(documents, query, limit, budget) {
 			sourceObservation: document.sourceObservation,
 			semanticReview: document.semanticReview
 		};
-		if (JSON.stringify([...cards, item]).length > budget) {
+		if (bounded && JSON.stringify([...cards, item]).length > budget) {
 			item.matches = item.matches.slice(0, 1).map((match) => ({
 				...match,
 				excerpt: snippet(match.excerpt, terms, 160)
@@ -174,7 +174,7 @@ function searchKnowledge(documents, query, limit, budget) {
 			item.relations = [];
 			item.summary = snippet(item.summary, terms, 180);
 		}
-		if (JSON.stringify([...cards, item]).length <= budget) cards.push(item);
+		if (!bounded || JSON.stringify([...cards, item]).length <= budget) cards.push(item);
 	}
 	return {
 		query,
@@ -184,6 +184,17 @@ function searchKnowledge(documents, query, limit, budget) {
 		noAnswer: ranked.length === 0
 	};
 }
+/** Browser pagination has its own bounded page size and never consumes the Agent context budget. */
+function searchKnowledgePage(documents, query, limit, offset) {
+	if (!Number.isSafeInteger(limit) || limit < 1 || limit > 30 || !Number.isSafeInteger(offset) || offset < 0) throw new Error("SEARCH_PAGE_INVALID");
+	const result = searchKnowledge(documents, query, limit, 1, offset, false);
+	return {
+		query,
+		cards: result.cards,
+		total: result.total,
+		hasMore: offset + result.cards.length < result.total
+	};
+}
 
 //#endregion
-export { searchKnowledge, searchTerms };
+export { searchKnowledge, searchKnowledgePage, searchTerms };

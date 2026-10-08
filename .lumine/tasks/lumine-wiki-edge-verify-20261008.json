@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-wiki-edge-verify-20261008",
+  "mode": "verify",
+  "goal": "恢复既有Repo Wiki Run：桌面迟到响应/无效章节与超宽代码/表格/路径定点验证",
+  "scope": "仅隔离桌面阅读器夹具及验收证据；用户已明确移除窄屏/移动场景产品要求，完整AC009仍含桌面浏览器缩放和人类理解；实际表格缺陷由独立scoped implement任务修复和受管同步。其他AC和历史结果保留，不提交发布。",
+  "specRef": "lumine-wiki-product-experience",
+  "planRef": "lumine-wiki-react-execution",
+  "selectedSkills": [
+    "lumine-run"
+  ],
+  "acceptanceRefs": [
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-009",
+      "baselineHash": "530f7a691137b70ff30bfc1938bc0ed8b16a4843207dd647ad990e46339ab722"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-011",
+      "baselineHash": "78de48678e42d657b08e7f492bbfd7d28411ee7008eb178708a039e28ace6ae4"
+    }
+  ],
+  "evidence": [
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/race-verification.json",
+      "sha256": "8b94dcdb74908cf2e3e7e57a31a553c0cf3a6071c94220274f83ceed129ee02b",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T04:04:01.710129+00:00",
+      "command": "Desktop native abort, late fetch Promise and invalid fragment browser verification",
+      "environment": "macOS arm64; actual Node24.14.0; Chrome154 desktop; scoped samples only, no real target Hook",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-common.ts",
+          "sha256": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/sections.ts",
+          "sha256": "3f425ecd340031fe058b499bf3bfabc93138e6376f5e3ea1c189842b8679e0c3"
+        },
+        {
+          "repoId": "project",
+          "path": "plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/reader.js",
+          "sha256": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8"
+        },
+        {
+          "repoId": "project",
+          "path": "plugins/lumine-harness/skills/lumine-harness/assets/harness/wiki/server.mjs",
+          "sha256": "a1af446c8fa0b7523cb9816f4a288e0334b57ba63b97e88ed4ea92a05b070f6b"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/overflow-desktop-result.json",
+      "sha256": "f8a086ece89d546ac5e8343f9ee71aafd1199a70a1a423d283a96bb289562cc9",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T04:06:12.181413+00:00",
+      "command": "1440px desktop wide table/code/path fixture verification after minimal CSS repair",
+      "environment": "macOS arm64; actual Node24.14.0; Chrome154 desktop; scoped samples only, no real target Hook",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/parent-desktop-integration.json",
+      "sha256": "24168821fa12f532ef95761a209220e890b648696a3ba291d46caa4ab6276c8f",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T04:14:23.862893+00:00",
+      "command": "Real parent desktop reader 100 percent and genuine desktop browser200 percent; one wide fixture zoom check",
+      "environment": "macOS arm64; actual Node24.14.0; Chrome154 desktop; scoped samples only, no real target Hook",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        },
+        {
+          "repoId": "project",
+          "path": "plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        }
+      ]
+    }
+  ],
+  "knowledge": {
+    "required": false,
+    "status": "not_applicable",
+    "refs": []
+  },
+  "summary": "用户2026-10-08要求继续，复用已确认Wiki Run；源Node任务仍通过，父宿主核对并行。当前只补两处定点浏览器验收，不宣称AC009/011整体完成。 2026-10-08用户明确产品为桌面阅读器，窄屏/移动不在支持及交付目标；仅更新AC009已确认基线，旧evidence与knowledge哈希不改写。新桌面补验和局部表格修复由独立任务承载。 桌面定点验证已完成，分别记录真实取消、晚到Promise、无效章节及局部滚动；未将任何泛化样本标为整项AC通过。"
+}

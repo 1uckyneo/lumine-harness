@@ -367,7 +367,7 @@
       "sourceScopes": [
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader.ts"
+          "path": "skills/lumine-harness/src/browser"
         },
         {
           "repoId": "project",
@@ -384,6 +384,14 @@
         {
           "repoId": "project",
           "path": "scripts/build-reader.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-reader.test.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/reader-diagram-recovery.test.ts"
         }
       ],
       "status": "covered"

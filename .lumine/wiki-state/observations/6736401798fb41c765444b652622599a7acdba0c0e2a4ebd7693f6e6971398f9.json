@@ -1,37 +1,46 @@
 {
   "id": "lumine-adoption",
-  "revision": "9c38a2f35c9651fd2237526a8a4962f812bf66076a578cae358fa253df01536b",
-  "freshness": "current",
-  "checkedAt": "2026-09-29T08:09:45.422Z",
-  "sourceFingerprint": "8f16f2a3bc88f509bd1faca7ca0c498801122bb9dbf09a7f70c512c50b33db30",
+  "revision": "c94b3868035cf44f6dcc47a4cc914d4e048d093449df0a5da31e9f15d39fe0db",
+  "checkedAt": "2026-09-30T07:03:47.197Z",
+  "sourceFingerprint": "4348c0fb01b889da5ffeb2216f30245f8c7e6df7dba5e518ed836d860884014f",
   "sources": {
     "fingerprints": {
-      "project:skills/lumine-harness/src/scripts/harness-manager.ts": "e5b92b53dab06f415ebbc50ba1e85b6bfacee2f3a065020aeae746f0dee75eb5",
+      "project:skills/lumine-harness/src/scripts/harness-manager-main.ts": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
       "project:skills/lumine-harness/src/migration/legacy.ts": "f2489ee7c946beda60aa7b6bbcb8fbdef7ebe1537dde39ef61403139866d1d55",
       "project:skills/lumine-harness/src/migration/knowledge.ts": "59a7c2d4d766bdb743e8d1245b00f4dd5c8900c70c68343508565451b3dd799a",
       "project:skills/lumine-harness/src/migration/work-status.ts": "8d23c16c5041c58e90da258778be7ccbd4dae226117b316a8591d4ca3d98d0bc",
-      "project:skills/lumine-harness/references/adoption.md": "688e5075f4a39a8a009168879687ab064f7b4e16f7966fae068debcef0b8fe41",
-      "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "2566133f5742486e69f8496a9a7c81277a0314dc0464a557b165d62cc6829190",
-      "project:skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts": "9ec837a913b0a1c1ab860167cea34093a25bcbaeaa7840a8a0039e6d7b705278"
+      "project:skills/lumine-harness/references/adoption.md": "32738364e6041389cf3b9daa1eab9c3f45b941da04efaf8df61f6e2dd790ef98",
+      "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "708face86fb4af075c0e3d3cb846b005fb1ed6961a78fcbf2e8ad531ed230375",
+      "project:skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts": "9ec837a913b0a1c1ab860167cea34093a25bcbaeaa7840a8a0039e6d7b705278",
+      "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+      "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+      "project:skills/lumine-harness/src/scripts/harness-manager.ts": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
     },
     "scopeFingerprints": {
-      "project:skills/lumine-harness/src/scripts/harness-manager.ts": "863a00233cf7aac7a5f8573278f3a4bb59c10dd362538588ba3a89469d243c2d",
+      "project:skills/lumine-harness/src/scripts/harness-manager.ts": "fd9abac13badeba65971a5f3d235c53365355017511756e4bf118f019be05469",
       "project:skills/lumine-harness/src/migration/legacy.ts": "56d61f6f74e7d59606c227f8693d12f76016d57f38b1050fd00c9cd4b08c4ef5",
       "project:skills/lumine-harness/src/migration/knowledge.ts": "d144b591f6b5d67e46018e6b00537bbb0f44d3867a1bbeb4c80a23eca23127de",
       "project:skills/lumine-harness/src/migration/work-status.ts": "faca4f150d30080e78778da0cc1003125edae97d6336953a5ee5c1bdcf98384c",
-      "project:skills/lumine-harness/references/adoption.md": "cffad65f424fd58cf45040fb00a1900b4bf298674fd11162637e978abf94c923",
-      "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "272d0dec536c241d899c2eca0f068ded2447ff0065a86a0672df493cc874904a",
-      "project:skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts": "61f3957f520ad4dcb28face329a4e7632dd9676a71af4e2278b5e120bf5c5b7f"
+      "project:skills/lumine-harness/references/adoption.md": "7032c897786e644bf64c39bedeacff6fe07ef714e544f3339e528ca7256a6327",
+      "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "c3ed7e52631b73c86f672c438ebcf5099b2bd03c8f111715bfe3253e96d1e735",
+      "project:skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts": "61f3957f520ad4dcb28face329a4e7632dd9676a71af4e2278b5e120bf5c5b7f",
+      "project:skills/lumine-harness/src/scripts/harness-manager-main.ts": "d5fe6cd5b28dc7db05318074c057fdb87fca625324c7d57fa040c6da08820ab3",
+      "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "c9f100138deb735fe33fed32cab6e6c54b5d43d4e559409dadd18fa6008a4dfe",
+      "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "2372bb890e38c5c479fa5d932cf594d98e1a22dd27e44c677cf1b59c56f84540"
     },
     "files": {
-      "project:skills/lumine-harness/src/scripts/harness-manager.ts": "e5b92b53dab06f415ebbc50ba1e85b6bfacee2f3a065020aeae746f0dee75eb5",
+      "project:skills/lumine-harness/src/scripts/harness-manager.ts": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62",
       "project:skills/lumine-harness/src/migration/legacy.ts": "f2489ee7c946beda60aa7b6bbcb8fbdef7ebe1537dde39ef61403139866d1d55",
       "project:skills/lumine-harness/src/migration/knowledge.ts": "59a7c2d4d766bdb743e8d1245b00f4dd5c8900c70c68343508565451b3dd799a",
       "project:skills/lumine-harness/src/migration/work-status.ts": "8d23c16c5041c58e90da258778be7ccbd4dae226117b316a8591d4ca3d98d0bc",
-      "project:skills/lumine-harness/references/adoption.md": "688e5075f4a39a8a009168879687ab064f7b4e16f7966fae068debcef0b8fe41",
-      "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "2566133f5742486e69f8496a9a7c81277a0314dc0464a557b165d62cc6829190",
-      "project:skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts": "9ec837a913b0a1c1ab860167cea34093a25bcbaeaa7840a8a0039e6d7b705278"
+      "project:skills/lumine-harness/references/adoption.md": "32738364e6041389cf3b9daa1eab9c3f45b941da04efaf8df61f6e2dd790ef98",
+      "project:skills/lumine-harness/src/harness/tests/adoption-manager.test.ts": "708face86fb4af075c0e3d3cb846b005fb1ed6961a78fcbf2e8ad531ed230375",
+      "project:skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts": "9ec837a913b0a1c1ab860167cea34093a25bcbaeaa7840a8a0039e6d7b705278",
+      "project:skills/lumine-harness/src/scripts/harness-manager-main.ts": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+      "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+      "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
     },
     "missing": []
-  }
+  },
+  "freshness": "current"
 }

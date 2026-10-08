@@ -22,6 +22,12 @@ Every project Skill body lives only under `.agents/skills/`. Products that suppo
 
 The public control protocol uses done/continue/blocked, with reasons and next actions in the report. Automatic follow-ups share a budget and deduplication; completed diagnosis does not require repair. Verified continuation requires a receipt tied to the same session, user turn, and continuation request. Later human input is not automatic recovery. When a host exposes no attributable receipt, continuation remains unverified: a Hook call or emitted request does not prove delivery.
 
+## Runtime environment
+
+CLI commands, installation and migration tools, and external Node Hooks use the [Node support policy in the README](../README.md#getting-started). The version check concerns the process that actually runs Harness. A supported `node --version` in a terminal does not prove that a desktop Agent or its Hooks use the same executable. If a Hook reports an unsupported version, make a supported Node release available to that host's Hook environment, then verify it in a new session. A failed version check follows the host's Hook failure behavior; a fail-open Hook does not mean Harness executed successfully.
+
+OpenCode embeds Harness Core in its own Runtime. Its API compatibility and actual host behavior need separate evidence. Bun's Node compatibility version is not evidence of execution under Node, and the Node command policy alone neither rejects nor certifies Bun. Static configuration, actual process compatibility, and host lifecycle verification are reported separately. Adoption and upgrades preserve business `package.json`, `.nvmrc`, dependencies, and user runtime configuration.
+
 ## The most important Hook difference: can the Agent check before stopping?
 
 Most products can add engineering context when a session starts or a prompt is submitted. What matters most for long-running work is whether the host provides a pre-stop gate before the Agent actually becomes idle. This guide uses Stop Gate as a shared name for this class of pre-stop capability; it is not necessarily the event name used by each product.

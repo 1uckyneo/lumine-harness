@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "fixedAt": "2026-10-08T04:45:25.860765+00:00",
+  "cases": [
+    {
+      "caseId": "source-query-change",
+      "projectId": "lumine-source",
+      "question": "本轮只调查，不改实现：如果只把 Agent 查询的默认卡片数从六条调整为八条，应定位什么最小修改入口及联动范围？浏览器“继续看结果”和 maxContextChars 是否必须一起改？What changes for explicit --limit and browser hasMore? 没有可靠匹配时能否凑足八条？仅据当前源码能否保证“卡片变多一定节省 Token”？请说明机制、修改定位、验证方向和依据限制。"
+    },
+    {
+      "caseId": "parent-image-recovery-change",
+      "projectId": "adopting-parent",
+      "question": "本轮只调查，不改业务：如果把图片任务“连续查询失败或未确认三次后暂停恢复”的门槛从3改5，应定位哪些条件、状态重置和验证入口？“三次”是否仅统计 HTTP 查询失败？SSE断开、页面刷新和主动取消时，如何只更新原会话的原消息，何时无法精确恢复？Does HTTP200 from cancel prove a canceled terminal state? 当前生产是否已经部署并运行该行为？请给出实际来源能证明的范围和无答案部分。"
+    }
+  ],
+  "arms": {
+    "normal": "可自主选择Wiki、源码或组合；不要求某命令或固定次数。",
+    "source-only": "对照样本只查权威源码及必要规则，不读取Wiki/Spec/Plan/验证答案。"
+  },
+  "measurement": "统一记录工具读取返回的UTF8 stdout/stderr字节、每次命令时间及从实验start到finish的wall time；不把文件总大小冒充实际读取量，不换算Token，不推算长期节省比例。"
+}

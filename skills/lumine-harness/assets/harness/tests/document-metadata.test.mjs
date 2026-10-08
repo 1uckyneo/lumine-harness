@@ -2,7 +2,7 @@
 // Source: skills/lumine-harness/src/harness/tests/document-metadata.test.ts
 import { contentHash, parseDocumentMetadata } from "../core/documents.mjs";
 import { resolveCurrentDocument } from "../core/document-operations.mjs";
-import { checkTask, saveTaskRecord } from "../core/task-contract.mjs";
+import { checkTask } from "../core/task-contract.mjs";
 import path from "node:path";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
@@ -123,7 +123,7 @@ test("task knowledge refs resolve JSON Wiki IDs through current documents", () =
 		}));
 		write("src/session.ts", code);
 		write("docs/validation/metadata.txt", artifact);
-		saveTaskRecord(root, {
+		write(".lumine/tasks/metadata.json", `${JSON.stringify({
 			schemaVersion: 2,
 			taskId: "metadata",
 			mode: "implement",
@@ -148,7 +148,7 @@ test("task knowledge refs resolve JSON Wiki IDs through current documents", () =
 				status: "synchronized",
 				refs: ["knowledge-session"]
 			}
-		});
+		}, null, 2)}\n`);
 		for (const metadata of [json, yaml]) {
 			write(wikiFile, frontmatter(metadata));
 			assert.equal(resolveCurrentDocument(root, "knowledge-session").file, wikiFile);

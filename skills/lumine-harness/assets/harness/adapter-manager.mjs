@@ -3,6 +3,8 @@
 import { findHarnessRoot, isStartedAtHarnessRoot, projectRuntimeRoot } from "./core/root-resolver.mjs";
 import { discoverSharedSkills, getSharedSkill, inspectSharedSkillCatalog, searchSharedSkills } from "./core/skill-catalog.mjs";
 import { WORK_STATUSES, listCurrentSessionPointers, readCurrentSessionPointer, readSessionState, recordWorkReport } from "./core/work-status.mjs";
+import { inspectNodeRuntime } from "./core/node-runtime.mjs";
+import { observeRuntimeProcess } from "./core/runtime-environment.mjs";
 import { beginVerificationRun, verifyRuntimeEvidence } from "./core/verification.mjs";
 import { commandLocale } from "./core/messages.mjs";
 import { resolveHarnessRuntimeRoot } from "./core/runtime-layout.mjs";
@@ -113,6 +115,10 @@ function formatProductStatus(item, details, subjectLabel, locale) {
 	const joiner = t("；", "; ");
 	const evidence = capabilityEvidenceSections(item);
 	const lines = [`${subjectLabel}${separator}${item.product}`, `${t("结论", "Readiness")}${separator}${item.label}`];
+	const checkRuntime = item.environment.checkProcess;
+	lines.push(`${t("检查进程运行环境", "Check process runtime")}${separator}${checkRuntime.runtime} ${checkRuntime.version}`);
+	const hostRuntime = item.environment.hostProcess.runtime;
+	lines.push(`${t("宿主进程运行环境", "Host process runtime")}${separator}${hostRuntime ? `${hostRuntime.runtime} ${hostRuntime.version} (${hostRuntime.support === "supported" ? t("版本受支持", "Version supported") : hostRuntime.support === "unsupported" ? t("版本不受支持", "Version unsupported") : t("兼容性尚未验证", "Compatibility unverified")})` : t("尚未观察；终端版本不能代表宿主 Hook 的实际环境", "Not observed; the terminal version does not establish the host Hook runtime")}`);
 	if (item.setup.actions.length) {
 		lines.push(`${t("开始前", "Before starting")}${separator}${item.setup.actions.map((action) => action.title).join(joiner)}`);
 		for (const action of item.setup.actions) {
@@ -496,7 +502,8 @@ function productStatus(root, product, options = {}) {
 	const runtime = verifyRuntimeEvidence(root, product, options);
 	const mergedCapabilities = mergeCapabilities(capability.capabilities, runtime.capabilities);
 	const setupActions = remainingSetupActions(doctor, runtime);
-	const readiness = classifyReadiness(capability, doctor, setupActions);
+	const unsupportedHostRuntime = runtime.processRuntime?.support === "unsupported";
+	const readiness = unsupportedHostRuntime ? "connection_error" : classifyReadiness(capability, doctor, setupActions);
 	const lines = Object.entries(mergedCapabilities).map(([name, value]) => capabilityLine(name, value));
 	const summary = evidenceSummary(runtime, mergedCapabilities);
 	return {
@@ -524,10 +531,18 @@ function productStatus(root, product, options = {}) {
 			observedAt: runtime.verifiedAt ?? null,
 			evidence: runtime.evidence ?? null
 		},
+		environment: {
+			checkProcess: observeRuntimeProcess(),
+			hostProcess: {
+				status: runtime.processRuntime ? "observed" : "not_observed",
+				runtime: runtime.processRuntime ?? null,
+				observedAt: runtime.processRuntime ? runtime.verifiedAt ?? null : null
+			}
+		},
 		capabilities: mergedCapabilities,
 		capabilityGroups: capabilityGroups(mergedCapabilities),
 		skillCatalog: doctor.skillCatalog ?? null,
-		nextSteps: statusNextSteps(readiness, product, setupActions)
+		nextSteps: unsupportedHostRuntime ? [inspectNodeRuntime(runtime.processRuntime.version, adapterLocale(options)).remediation] : statusNextSteps(readiness, product, setupActions)
 	};
 }
 function freshCurrentPointers(root, options = {}) {

@@ -8,6 +8,8 @@ import { listCurrentSessionPointers, readCurrentSessionPointer, recordWorkReport
 import { beginVerificationRun, verifyRuntimeEvidence } from "./core/verification.ts";
 import { commandLocale, type Locale } from "./core/messages.ts";
 import { resolveHarnessRuntimeRoot } from "./core/runtime-layout.ts";
+import { observeRuntimeProcess, type RuntimeProcessObservation } from "./core/runtime-environment.ts";
+import { inspectNodeRuntime } from "./core/node-runtime.ts";
 import type { RuntimeVerificationResult } from "./core/verification.ts";
 import type {
   AdapterCapabilityName,
@@ -151,6 +153,10 @@ interface ProductStatusResult {
     observedAt: string | null;
     evidence: string | null;
   };
+  environment: {
+    checkProcess: RuntimeProcessObservation;
+    hostProcess: { status: "not_observed" | "observed"; runtime: RuntimeProcessObservation | null; observedAt: string | null };
+  };
   capabilities: RuntimeCapabilities;
   capabilityGroups: CapabilityGroup[];
   skillCatalog: SkillCatalogSummary | null;
@@ -266,6 +272,12 @@ function formatProductStatus(item: ProductStatusResult, details: boolean, subjec
   const joiner = t("；", "; ");
   const evidence = capabilityEvidenceSections(item);
   const lines = [`${subjectLabel}${separator}${item.product}`, `${t("结论", "Readiness")}${separator}${item.label}`];
+  const checkRuntime = item.environment.checkProcess;
+  lines.push(`${t("检查进程运行环境", "Check process runtime")}${separator}${checkRuntime.runtime} ${checkRuntime.version}`);
+  const hostRuntime = item.environment.hostProcess.runtime;
+  lines.push(`${t("宿主进程运行环境", "Host process runtime")}${separator}${hostRuntime
+    ? `${hostRuntime.runtime} ${hostRuntime.version} (${hostRuntime.support === "supported" ? t("版本受支持", "Version supported") : hostRuntime.support === "unsupported" ? t("版本不受支持", "Version unsupported") : t("兼容性尚未验证", "Compatibility unverified")})`
+    : t("尚未观察；终端版本不能代表宿主 Hook 的实际环境", "Not observed; the terminal version does not establish the host Hook runtime")}`);
   if (item.setup.actions.length) {
     lines.push(`${t("开始前", "Before starting")}${separator}${item.setup.actions.map((action) => action.title).join(joiner)}`);
     for (const action of item.setup.actions) {
@@ -627,7 +639,8 @@ function productStatus(root: string, product: HarnessProduct, options: AdapterOp
   const runtime = verifyRuntimeEvidence(root, product, options);
   const mergedCapabilities = mergeCapabilities(capability.capabilities, runtime.capabilities);
   const setupActions = remainingSetupActions(doctor, runtime);
-  const readiness = classifyReadiness(capability, doctor, setupActions);
+  const unsupportedHostRuntime = runtime.processRuntime?.support === "unsupported";
+  const readiness = unsupportedHostRuntime ? "connection_error" : classifyReadiness(capability, doctor, setupActions);
   const lines = Object.entries(mergedCapabilities).map(([name, value]) => (
     capabilityLine(name as AdapterCapabilityName, value as AdapterCapabilityResult)
   ));
@@ -654,10 +667,20 @@ function productStatus(root: string, product: HarnessProduct, options: AdapterOp
       observedAt: runtime.verifiedAt ?? null,
       evidence: runtime.evidence ?? null
     },
+    environment: {
+      checkProcess: observeRuntimeProcess(),
+      hostProcess: {
+        status: runtime.processRuntime ? "observed" : "not_observed",
+        runtime: runtime.processRuntime ?? null,
+        observedAt: runtime.processRuntime ? runtime.verifiedAt ?? null : null
+      }
+    },
     capabilities: mergedCapabilities,
     capabilityGroups: capabilityGroups(mergedCapabilities),
     skillCatalog: doctor.skillCatalog ?? null,
-    nextSteps: statusNextSteps(readiness, product, setupActions)
+    nextSteps: unsupportedHostRuntime
+      ? [inspectNodeRuntime(runtime.processRuntime!.version, adapterLocale(options)).remediation!]
+      : statusNextSteps(readiness, product, setupActions)
   };
 }
 

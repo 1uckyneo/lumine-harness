@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync, statSync } from "node:fs";
 import path from "node:path";
 import type { HarnessProduct } from "./contracts.ts";
 
@@ -6,9 +6,10 @@ export interface RepositoryConfig { id: string; path: string; }
 export interface ProjectConfig {
   schemaVersion: 2;
   locale: "zh-CN" | "en";
+  displayName?: string;
   workflowVersion: 2;
   repositories: RepositoryConfig[];
-  wiki: { root: string; watchScopes: Array<{ repoId: string; path: string }>; maxCards: number; maxContextChars: number };
+  wiki: { root: string; watchScopes: Array<{ repoId: string; path: string }>; maxCards: number; maxContextChars: number; searchValidationFiles: string[] };
   selectedAdapters: HarnessProduct[];
   extensions: Record<string, unknown>;
   autonomy: { maxContinuationChain: number; noProgressThreshold: number };
@@ -47,6 +48,7 @@ export function loadProjectConfig(root: string): ProjectConfig {
   if (raw.workflowVersion !== undefined && raw.workflowVersion !== 2) throw new Error("Unsupported workflowVersion");
   const locale = raw.locale ?? "en";
   if (locale !== "zh-CN" && locale !== "en") throw new Error("locale must be zh-CN or en");
+  if (raw.displayName !== undefined && (typeof raw.displayName !== "string" || !raw.displayName.trim() || raw.displayName.length > 120 || /[\x00-\x1f\x7f]/.test(raw.displayName))) throw new Error("displayName must be a non-empty project label of at most 120 characters");
   const entries = raw.repositories ?? [{ id: "root", path: "." }];
   if (!Array.isArray(entries) || entries.length === 0) throw new Error("repositories must be a non-empty array");
   const ids = new Set<string>();
@@ -71,12 +73,19 @@ export function loadProjectConfig(root: string): ProjectConfig {
     resolveProjectPath(resolveProjectPath(root, repo.path), scope.path, "watch scope path");
     return { repoId: repo.id, path: scope.path };
   });
+  const validationFiles = wiki.searchValidationFiles ?? [];
+  if (!Array.isArray(validationFiles) || validationFiles.some((file) => typeof file !== "string" || !/^docs\/validation\/.+\.md$/.test(file) || file.includes("\\") || file.includes("*") || file.split("/").some((part) => part === "." || part === ".." || !part))) throw new Error("wiki.searchValidationFiles must list exact Markdown files under docs/validation");
+  for (const file of validationFiles as string[]) {
+    const absolute = resolveProjectPath(root, file, "wiki.searchValidationFiles path");
+    if (existsSync(absolute) && !statSync(absolute).isFile()) throw new Error("wiki.searchValidationFiles entries must be files");
+  }
+  if (new Set(validationFiles).size !== validationFiles.length) throw new Error("wiki.searchValidationFiles contains duplicates");
   const adapters = raw.selectedAdapters ?? [];
   if (!Array.isArray(adapters) || adapters.some((item) => typeof item !== "string" || !PRODUCTS.has(item))) throw new Error("selectedAdapters contains an unsupported product");
   const autonomy = raw.autonomy === undefined ? {} : object(raw.autonomy, "autonomy");
   return {
-    ...raw, schemaVersion: 2, locale, workflowVersion: 2, repositories,
-    wiki: { root: wikiRoot, watchScopes, maxCards: positive(wiki.maxCards, 6, "wiki.maxCards"), maxContextChars: positive(wiki.maxContextChars, 12000, "wiki.maxContextChars") },
+    ...raw, schemaVersion: 2, locale, displayName: typeof raw.displayName === "string" ? raw.displayName.trim() : undefined, workflowVersion: 2, repositories,
+    wiki: { root: wikiRoot, watchScopes, maxCards: positive(wiki.maxCards, 6, "wiki.maxCards"), maxContextChars: positive(wiki.maxContextChars, 12000, "wiki.maxContextChars"), searchValidationFiles: [...validationFiles] as string[] },
     selectedAdapters: [...new Set(adapters)] as HarnessProduct[],
     extensions: raw.extensions === undefined ? {} : object(raw.extensions, "extensions"),
     autonomy: { maxContinuationChain: positive(autonomy.maxContinuationChain, 20, "autonomy.maxContinuationChain"), noProgressThreshold: positive(autonomy.noProgressThreshold, 2, "autonomy.noProgressThreshold") }

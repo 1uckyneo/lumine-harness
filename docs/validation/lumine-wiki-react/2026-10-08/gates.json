@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T04:10:43.907177+00:00",
+  "environment": "macOS arm64, actual Node 24.14.0",
+  "outcome": "passed",
+  "checks": [
+    {
+      "command": "pnpm runtime:typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm runtime:build",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm runtime:check",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm runtime:test",
+      "exitCode": 0
+    },
+    {
+      "command": "bash skills/lumine-harness/scripts/check-skill-package.sh",
+      "exitCode": 0
+    },
+    {
+      "command": "bash scripts/sync-plugin-wrapper.sh",
+      "exitCode": 0
+    },
+    {
+      "command": "bash scripts/check-repo-sync.sh",
+      "exitCode": 0
+    },
+    {
+      "command": "./.lumine/cli wiki check --json",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "command": "./.lumine/cli check docs --json",
+      "exitCode": 0
+    }
+  ],
+  "runtimeTests": {
+    "tests": 236,
+    "pass": 235,
+    "fail": 0,
+    "skipped": 1
+  },
+  "codeRefs": [
+    {
+      "repoId": "project",
+      "path": "package.json",
+      "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+    },
+    {
+      "repoId": "project",
+      "path": "scripts/build-reader.ts",
+      "sha256": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/wiki-reader/styles.css",
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/wiki-reader/manifest.json",
+      "sha256": "2433c8db87e09019ea36a436ec0d1b3019c6269e81b610028aa83e29cc6e086e"
+    },
+    {
+      "repoId": "project",
+      "path": "plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/styles.css",
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    }
+  ],
+  "temporaryLogHashes": {
+    "typecheck": "8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92",
+    "build": "82dc221cdea979af81a6a741d4662066c0def7729d28aef0333ba9b013f734f1",
+    "runtime-check": "17645977354d6ab04eaa20eafae88786c1f93c1f035f60bfa3548aa9a05c42ea",
+    "test": "af9c4bb1743dac1bab86ca17204a9a76b25d02bb7789636a998344a07160cf4b",
+    "package-check": "5e51c0b966e9717b80ca25ed47fe0fb97f5b05cd7d72abdc7d97be6f231db29c",
+    "wrapper": "1cd2b0b70f45d7ba6c34adde179b0f5a470bd1b9c49720b803ed086b83571992",
+    "sync-check": "344ff47b0909fa7123e4d12beecd9f287229edc20226dc6930b0213ecb14fd1d"
+  },
+  "environmentFailuresResolved": [
+    "Sandbox denied tsx IPC on initial build; authorized local build completed.",
+    "Sandbox denied test loopback listeners; authorized runtime:test rerun passed."
+  ],
+  "limits": [
+    "Source and generated runtime logic unchanged by this local CSS repair. No new full Node 22/24 installation matrix run; earlier Node Run current evidence remains separate.",
+    "No target host Hook evidence; no finalize, commit, push or deployment."
+  ]
+}

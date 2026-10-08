@@ -12,6 +12,7 @@
 - `skills/lumine-harness/`：唯一规范 Agent Skill，包含入口指令、参考资料、模板、公共 Harness Core、四个日常 Skills 和产品 Adapter。
 - `skills/lumine-harness/src/`：Harness Runtime、Adapter、CLI 和运行测试的 TypeScript 唯一源码。
 - `skills/lumine-harness/assets/harness/**/*.mjs`、`skills/lumine-harness/assets/opencode/plugins/harness.mjs`、`skills/lumine-harness/scripts/harness-manager.mjs`：由 TypeScript 构建生成的可分发运行产物，禁止直接编辑。
+- `skills/lumine-harness/src/adapter-launchers/`：宿主内联启动器的 TypeScript 与协议模板；`assets/codex/hooks.json`、`assets/qoder/settings.json`、`assets/trae/hooks.json`、`assets/cursor/hooks.json` 由 Runtime 构建生成，禁止直接编辑。
 - `plugins/lumine-harness/`：Codex Plugin 分发包装；其中的 `skills/lumine-harness/` 由规范 Skill 同步生成，不是第二套实现。
 - `.agents/plugins/marketplace.json`：仓库级 Codex Marketplace 目录，只声明 Plugin 的发现和安装位置，不承载 Harness 工作流。
 - `scripts/sync-plugin-wrapper.sh`：从规范 Skill 重新生成 Plugin wrapper 中的 Skill。
@@ -23,6 +24,7 @@
 ## 唯一真源与生成关系
 
 - Skill 行为、参考资料、模板、Harness Core、四个日常 Skills 和 Adapter 只在 `skills/lumine-harness/` 中维护。
+- 宿主 `node -e` 配置由 `scripts/build-hook-configs.ts` 将 `src/adapter-launchers/` 协议模板与唯一 Node 预检逻辑编译生成；内联启动器不作为额外 `.mjs` 分发入口。
 - Runtime、Adapter、CLI 和运行测试必须修改 `skills/lumine-harness/src/` 下的 TypeScript 源码，再运行 `pnpm runtime:build` 生成 `.mjs`；不得直接修补生成产物。
 - 不要直接修改 `plugins/lumine-harness/skills/lumine-harness/` 下的任何文件；同步脚本会覆盖这些改动。
 - 修改规范 Skill 后必须执行：
@@ -85,7 +87,7 @@ bash scripts/check-repo-sync.sh
 
 ## 仓库验证
 
-普通使用者运行已生成 Runtime 时保持 Node.js 18 兼容；维护本仓库和重新生成 Runtime 需要 Node.js 22.18+ 或 24.11+，以满足当前 `tsdown` 工具链要求。
+普通使用者运行已生成 Runtime、维护本仓库和重新生成 Runtime，统一支持 Node.js 22.x（22.18.0 及以上）或 Node.js 24.x LTS（24.11.0 及以上），推荐 Node.js 24 LTS。Node.js 18、20 不再支持；其他主版本与预发布版本须独立验证后才可纳入支持范围。对外 Node 入口应在导入实现和执行操作前检查当前进程，不能只依赖 `engines` 或终端版本。嵌入式宿主按实际 Runtime API 和宿主证据判断，不把 Bun 的 Node 兼容版本字段当作 Node 验证。升级不自动修改业务工程的 Node 配置。
 
 修改完成后至少运行：
 

@@ -4,7 +4,7 @@ Use this reference when the user asks to open the knowledge base or start, resta
 
 ## Requirements and project ownership
 
-Lumine installs the reader and its bundled dependencies. Running it requires Node.js 18 or later and a modern browser; no npm install, model connection, or business service is needed. Use the confirmed Harness root and its `.lumine/cli` to resolve the correct Runtime. The nearest Git root in a business subrepository may be wrong. Ordinary adopted projects can also run `node .lumine/wiki.mjs serve` without the Bash wrapper; source-repository self-use should use its own `.lumine/cli`.
+Lumine installs the reader and its bundled dependencies. Running it requires Node.js 22.x from 22.18.0 or Node.js 24.x LTS from 24.11.0 and a modern browser; Node.js 24 LTS is recommended. No npm install, model connection, or business service is needed. Use the confirmed Harness root and its `.lumine/cli` to resolve the correct Runtime. The nearest Git root in a business subrepository may be wrong. Ordinary adopted projects can also run `node .lumine/wiki.mjs serve` without the Bash wrapper; source-repository self-use should use its own `.lumine/cli`.
 
 Inspect the current session's process handles, startup logs, and listening sockets as needed. Establish that a service belongs to this Harness root before reusing or stopping it:
 

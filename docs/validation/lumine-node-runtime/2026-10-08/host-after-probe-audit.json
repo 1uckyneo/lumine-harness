@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "auditDate": "2026-10-08",
+  "auditedAt": "2026-10-08T04:02:10.099423+00:00",
+  "scope": "Read-only metadata and integrity audit after formal parent Codex probe preparation",
+  "proposalId": "d8ab1262-c961-4aaa-8bc0-e40ecc0bfcd7",
+  "finalApplyAt": "2026-09-30T06:52:41.944Z",
+  "journalStatus": "awaiting_host_verification",
+  "probe": {
+    "schemaVersion": 1,
+    "product": "codex",
+    "issuedAt": "2026-10-08T04:00:15.812Z",
+    "expiresAt": "2026-10-09T04:00:15.812Z",
+    "activeAtAudit": true,
+    "issuedAfterFinalApply": true,
+    "rootHashMatchesParent": true,
+    "hostVersion": "unknown",
+    "hostVersionSource": "unknown",
+    "eventsFilePresent": false,
+    "eventCount": 0,
+    "preparedRecordIssuedAtMatches": true,
+    "preparedRecordExpiresAtMatches": true,
+    "previousActivePointerBackupHashMatches": true
+  },
+  "adapterStatus": {
+    "command": "adapter status codex --details --json --root <parent>",
+    "exitCode": 0,
+    "readiness": "ready",
+    "runtimeStatus": "not_tested",
+    "hostVersion": "unknown",
+    "observedAt": null,
+    "checkProcess": {
+      "source": "actual_process",
+      "runtime": "node",
+      "version": "24.14.0",
+      "support": "supported"
+    },
+    "hostProcess": {
+      "status": "not_observed",
+      "runtime": null,
+      "observedAt": null
+    }
+  },
+  "integrity": {
+    "writePostHashesChecked": 200,
+    "postHashMismatchCount": 0,
+    "postHashMismatches": [],
+    "managedFilesChecked": 198,
+    "managedMismatchCount": 0,
+    "managedMismatches": []
+  },
+  "documentReview": {
+    "document": "docs/validation/lumine-node-runtime/2026-10-08/恢复与宿主验证.md",
+    "reviewedClaims": [
+      "Final proposal remains awaiting_host_verification",
+      "200 write posthashes and 198 managed hashes unchanged",
+      "Existing SessionState, Probe, and host envelopes predate final application",
+      "Formal new probe is valid from Oct 8 12:00 to Oct 9 12:00 Asia/Shanghai",
+      "Unknown host version and missing real Hook evidence are not promoted to verified host status",
+      "Current source session is not parent evidence",
+      "No Hook or finalize was run in this audit"
+    ],
+    "substantiveFindings": [],
+    "scopeLimit": "Node task/AC contract and Wiki browser claims are owned by their separate verifiers; this review verifies parent evidence and probe claims only."
+  },
+  "conclusion": {
+    "satisfiesFinalize": false,
+    "reason": "A freshly issued challenge is preparation only. No events or actual host process observation exist for the new probe; the finalization evidence artifact and correlated real session remain unavailable.",
+    "nextStep": "Perform a normal interaction in an actual parent-rooted Codex session while the probe is valid; inspect fresh Hook event metadata and processRuntime, then use a matching schema2 host artifact to finalize.",
+    "writesPerformedByAuditor": "Only this safe temporary audit report; no parent/source changes.",
+    "hookInvoked": false,
+    "probeStartedByAuditor": false,
+    "finalized": false,
+    "fullNodeMatrixRepeated": false
+  }
+}

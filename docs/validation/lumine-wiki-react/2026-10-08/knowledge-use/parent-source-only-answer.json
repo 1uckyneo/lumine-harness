@@ -1,0 +1,137 @@
+{
+  "caseId": "parent-image-recovery-change",
+  "arm": "source-only",
+  "answer": "本轮结论来自本地父工程入口、Vue 图片业务源码及现有测试源码、Go 重构后端源码。仅调查，没有修改业务，也没有运行测试、调用接口或核实生产。\n\n1. 从 3 改为 5 的直接修改点与控制条件\nai-conv-plus/src/views/Chat/useChatImageTasks.ts:396-404 是实际门槛：task.failures = queryFailed || !confirmed ? task.failures + 1 : 0；随后在没有待执行取消的分支判断 task.failures >= 3 或任务创建已满 30 分钟。范围只是增加连续恢复轮次时，应定位这一个 >= 3，并将对应测试的“三轮暂停”预期改为“前四轮继续，第五轮暂停”。这不是把页面提示里的“三次”替换为“五次”；当前暂停提示本身没有写次数。\n完整控制链还包括：每个 tracker 的 due 调度；单请求 15 秒超时（324-343）；已取消、已成功在计数前退出（390-395）；有 cancelRequested 且已知 promptId 时优先 requestCancel，因此不走该次数门槛（397-399）；pause 仅将 connection 设为 paused、due 设为 Infinity，保留 server 状态（123-127）。30 分钟上限由 recoveryWindow=30*60_000（61）与 createdAt 判断共同决定，改次数不会延长该时间窗。恢复最初每 2 秒查询，恢复满 1 分钟或 server=failed 改为每 10 秒（140-143）；这两个间隔不等于次数门槛。\n\n2. “三次”不是只统计 HTTP 查询失败\n计数单位是一个目标消息的一轮 poll，而非单个 HTTP 请求数。每轮先 GET /comfy/tasks/recent，传原 conversation_id、message_id、limit=1；未确认时再用原会话历史查询兜底（354-388）。一轮可发两次请求，但最多加一。\nqueryFailed 是任一查询抛错，包含 HTTP、业务 code、格式解析错误和 15 秒限时产生的 AbortError；而没有异常也可能因空数组、无匹配记录、非法/不完整身份或状态被过滤、历史找不到原消息而 !confirmed，仍加一。draw.ts:239-267 对返回结果再按会话/消息、完整身份与四种数字状态过滤；conversation.ts:46-67 校验历史属于请求会话。\n细节：任务查询失败后，历史若只确认原消息仍在运行/失败，queryFailed 仍是 true，本轮仍累计；若历史取回成功图片，则先进入 succeeded 分支退出，本轮不会再因前面的错误触发次数暂停。没有查询异常且确认到原任务或历史原消息时，计数归零。收到 SSE 断开本身不直接增加 failures，后续恢复查询才按上述规则计数。\n状态重置应一并核对：makeTracker 将 failures=0、recoveringSince=当前时间（104-120），start 与 restore 都经它建立新 tracker；手动 retry 显式 failures=0、recoveringSince=当前时间，再恢复查询（477-484）；正常确认的非终态轮次通过396行归零。recover 只改 connection/due，不重置累计次数；取消失败后调用 recover 也没有重置 failures。detach/reset 删除 tracker，切换会话或重新加载后不会沿用旧计数。retry 不重置 createdAt，所以超出30分钟的任务仍可人工查一次，未完成后再次暂停；现有测试294-309专门约束这一点。\n\n3. SSE 断开：继续确认原任务，不重新提交\nsubmitted 事件先取得 conversationId、messageId、promptId，并绑定当前消息（173-187）；streamDraw 严格校验 submitted 身份，后续事件中出现的身份字段不能指向其他任务（draw.ts:176-203）。没有 images 就流结束会抛中断错误（223）；start 在非准备阶段断开时进入 recover，60秒无事件也会 abort 本地订阅、释放前景并恢复（210-269）。这些 abort 不等于显式 POST cancel。\n恢复只更新原 message 对象：tracker 按只读 anchorId 保存；current 要求同一 tracker、页面 revision、登录 session version、消息仍在列表且属于当前会话（91-96）。查询结果先检验 conversationId/messageId，并在已知 aiTask_id 时检验 promptId（272-290）；历史兜底只找原 conversationId 与 message_id（293-306）。所以查询恢复不会重建整页消息列表，其他消息不因该任务被覆盖。\nGo 重构源码也区分断开与取消：AllinStream 的 ctx.Done 分支转 finishStreamTask 后台继续查询和落库（comfy_service.go:404-458、505-535），不把断线改成 -2。这证明该开发源码有此实现分支，不能证明实际进程或后台 goroutine 当前活着。\n\n4. 页面刷新、切换会话与精确恢复边界\nChatPage.vue:470-491 的历史恢复先 reset，再读取指定会话历史，生成本页消息并逐条 imageTasks.restore；425-466 保留历史消息 id/conversationId，promptId 初始为空，通过精确任务查询补回。带完整图片的历史直接 succeeded/idle，不依赖新任务索引；没有图片且创建不足30分钟的记录自动 recover，超过时间窗保持暂停（useChatImageTasks.ts:462-475）。\n首次 submitted 绑定成功后，bindFirstConversationId 将新会话写入页面/Store，并 router.replace 成详情 URL（ChatPage.vue:520-543）；路由会话参数是刷新后恢复的入口，立即监听该参数，切换时 reset，登录会话变更与卸载也 reset（806-847）。reset 增加 revision、撤销旧流/历史请求并清 tracker（392-420）。单条删除先 detach（162-170）。迟到响应同时受 current 和每次查询捕获的 operation 保护，不应写到新页面/新登录或已经移除的消息。\n无法精确恢复的情况须保留未知：未收到 submitted 或身份不完整时，没有 message_id/conversation_id 就立即暂停为“提交结果待确认，请重新查看历史”，不会盲查最近任务或猜测另一条消息（129-138）；新会话提交前或确认前刷新，可能连详情路由 ID 都尚未绑定。本轮读到的客户端没有从无ID临时消息精确关联服务端任务的机制。索引缺失可用原历史找最终图片，但两个来源都没有原消息/身份、记录无权访问或不可解析时只能暂停重试。旧历史若没有 messageType=image 且 answer 也解析不出图片，ChatPage 的映射不能把它识别为可恢复图片任务（425-430）。只有成功状态而图片地址为空/不安全时保留成功状态并暂停展示，可人工重新获取，不能伪装成生成中。历史消息 status=-1 同时表示失败或取消，仅靠该历史字段不能精确区分取消（applyHistory:301-305）；需要匹配任务 status=-2 才能由查询确认取消。\n\n5. 主动取消、并发保护与 HTTP 200 的含义\nprepare 阶段取消只 abort 本地准备并显示“已停止提交”，不发送服务端 cancel；submitting 尚无 promptId 时保存 cancelRequested、等待 submitted，再针对原 promptId 发 cancel（444-460、173-187）。requestCancel 增加 operation，使之前在途恢复查询失去写入所有权；cancelRequested 时忽略 SSE images，由取消响应/后续查询决定；查询到 -2 后 cancelled 增加 operation、设 server=cancelled/connection=idle、due=Infinity、终止订阅并释放前景（161-170、198-200、349-350、414-441）。取消失败或超时则清 cancelRequested、结束旧订阅、恢复查询真实结果，可能取得已完成图片。\nHTTP 200 不能证明已取消：Go api/result.go:20-35 明确 javaOk 与 javaFail 都用 HTTP200，分别 code=0 与 code=7；前端 requestApiV2Data 另验 code===0（transport.ts:117-132），draw-stream 测试414-426也约束这一点。\n更进一步，现有源码存在 code=0 也不充分的并发窗口：Go Cancel 先读到未完成任务，随后 claimTaskFinish 可能因另一路已成功/取消而返回 claimed=false、err=nil；Cancel 在此直接 return nil（comfy_service.go:573-583），API 会 javaOk。前端 requestCancel 在 cancelDraw 成功后无条件 cancelled(task)（425-428）。因此即使 HTTP200+code0，本地可显示已取消，而服务端实际胜出的状态可能是成功；不能据此断言 canceled 终态已经保存。现有 claimTaskFinish 按允许来源状态作条件更新，任务和原消息在同一事务保存，0行时不覆盖；这保护服务端竞态，却没有把最终胜出状态回传给当前前端取消调用（image_history.go:115-188）。此为源码揭示的限制，本轮不修复。\n取消只本地打 -2 还不保证上游计算已停：服务端只在监控确认目标是当前执行任务时调用节点级 Interrupt，排队/查询失败等情形仅保存取消状态并拦截结果（557-570）。业务取消终态与上游资源实际停止需分开验证。\n\n6. 应定位的验证入口与当前证据强度\n现有前端入口是 src/views/Chat/__tests__/image-tasks.test.mjs 与 src/api-v2/__tests__/draw-stream.test.mjs，使用 node:test；可按项目依赖环境用 node --test 指定这两个文件。package.json只有type-check、build/build-only等脚本，没有现成test脚本。本轮只是阅读测试，未运行，不能报告通过。\n门槛相关现有测试252-275直接断言第三轮暂停、暂停后不再自动查、人工 retry 后成功；改5时需改名及轮数预期，并补齐HTTP200空任务+空历史的未确认轮次、恢复成功非终态后连续计数归零、任务查询抛错但历史仅确认运行仍累计、两接口一轮失败仅加一、前四轮继续/第五轮暂停、retry清零后再次允许五轮、30分钟上限优先于次数的边界。现有测试277-309覆盖轮询间隔和30分钟人工再查。\n同文件196-249覆盖完整旧历史、任务接口失败从原历史取图、多消息分别更新；312-423覆盖在途查询与取消、取消失败后成功图片、迟到submitted、取消15秒超时、准备停止、60秒静默；425-462覆盖session/revision/conversation/removed/detach与迟到SSE；465-518覆盖失败后迟到成功、成功无图可重取。draw-stream测试343-411覆盖查询过滤和四种数字状态，414-426覆盖业务成功码。尚需针对“服务端claimed=false仍code0而前端已取消”的窗口做真正的行为/集成验证，现有读取到的前端取消mock成功不能证明后端终态；在lm_draw子目录检索未找到 *_test.go。页面级刷新、切换、取消竞态、鉴权失效及真实结果可展示，也需要后续浏览器/API/数据库或服务日志证据；本轮均未执行。\n当前能证明的是这份本地源码包含3轮门槛、恢复和取消实现，以及测试文件表达的预期；尚未实现5轮。生产是否已部署并运行这些行为：无答案。未读取生产版本、部署记录、服务日志、数据库或真实页面，也未访问任何API/网络；Go重构开发源码不能当原后端或生产实现的证明。",
+  "chosenPath": "父工程AGENTS入口 -> Vue src按图片/任务/恢复检索 -> useChatImageTasks.ts主状态机 -> draw.ts传输与严格身份过滤 -> ChatPage.vue刷新/路由/原消息绑定 -> 对应现有测试源码 -> Go lm_draw路由/API/服务/任务模型/事务落库源码。没有使用Wiki、Spec、Plan、历史验证答案或其他样本答案。",
+  "wikiActuallyUsed": false,
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "line": 1,
+      "lineEnd": 36,
+      "sha256": "a27c3e24d851343b217935dba6ed5658d261877321f8cf27caee1a2fbdb0b0a1"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+      "line": 91,
+      "lineEnd": 171,
+      "sha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+      "line": 173,
+      "lineEnd": 306,
+      "sha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+      "line": 324,
+      "lineEnd": 442,
+      "sha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/useChatImageTasks.ts",
+      "line": 444,
+      "lineEnd": 525,
+      "sha256": "68ea818ce13ab5c179ed7be33d5989f69df8714c6d7cc4e9d6961a1e0f326f5a"
+    },
+    {
+      "path": "ai-conv-plus/src/api-v2/draw.ts",
+      "line": 113,
+      "lineEnd": 282,
+      "sha256": "0a3c4dcd87e2b1676c1030969c95cde16ad9b6267fe765821fba24e171d155bd"
+    },
+    {
+      "path": "ai-conv-plus/src/api-v2/transport.ts",
+      "line": 117,
+      "lineEnd": 132,
+      "sha256": "c33f0d7bda360af2bab13d1e02c141448e48f897f33f735e3d8f6bba737b85d5"
+    },
+    {
+      "path": "ai-conv-plus/src/api-v2/conversation.ts",
+      "line": 46,
+      "lineEnd": 90,
+      "sha256": "45df6155915572d88fb883d6d773178ea62003fc10543aaf44c53975693ea75c"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/ChatPage.vue",
+      "line": 392,
+      "lineEnd": 491,
+      "sha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/ChatPage.vue",
+      "line": 520,
+      "lineEnd": 595,
+      "sha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/ChatPage.vue",
+      "line": 806,
+      "lineEnd": 847,
+      "sha256": "2207b7627a01fc723f31a933ba6af79f09625f69b404f9e8ab525a375cecd853"
+    },
+    {
+      "path": "ai-conv-plus/src/views/Chat/__tests__/image-tasks.test.mjs",
+      "line": 196,
+      "lineEnd": 531,
+      "sha256": "68fde329d71774c7b9dbc83796bf546da1d995809e03b167748a1e103c6a6e29"
+    },
+    {
+      "path": "ai-conv-plus/src/api-v2/__tests__/draw-stream.test.mjs",
+      "line": 343,
+      "lineEnd": 437,
+      "sha256": "1d77f4dbd35f34744d9da4060fcb520d7b28f460e915155204041bd289db8d24"
+    },
+    {
+      "path": "ai-conv-plus/package.json",
+      "line": 6,
+      "lineEnd": 13,
+      "sha256": "c23137a743812664d8ba356c73850c6a2b1b1bf3c02bd0f7e9acac47d9e775cb"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/api/comfy.go",
+      "line": 111,
+      "lineEnd": 143,
+      "sha256": "67ed7e16930dd938ad7d2810bd35f3f5a05fb55b5a226c4e04e28ab312613efb"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/api/result.go",
+      "line": 19,
+      "lineEnd": 35,
+      "sha256": "3dd29f6752ba146dd9d2006b62694985324bb47b95e0c2d5ef6b1ef6c3f7aa51"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/service/comfy_service.go",
+      "line": 404,
+      "lineEnd": 618,
+      "sha256": "5ca147e27affee2bbf172fe5bafac987cd2df904eab8e7a70e0f55e1eb68e7d0"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/service/image_history.go",
+      "line": 34,
+      "lineEnd": 188,
+      "sha256": "a5382b754de28aa773b4048a14452aaca56e5d62ba1a6de6f8b08e3694e2e39c"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/model/comfy_prompt_task.go",
+      "line": 5,
+      "lineEnd": 10,
+      "sha256": "109adf1ff8e2174ddf47bc58dc0747e2b91cddaa13376a0466ecc88eb4a55ac1"
+    },
+    {
+      "path": "gin-vue-admin/server/plugin/lm_draw/service/task_reconciler.go",
+      "line": 20,
+      "lineEnd": 89,
+      "sha256": "d7c859f6444283289acdaf053d2efd038153450efa3e16b6292923178b9b7375"
+    }
+  ],
+  "limits": [
+    "仅静态阅读当时工作树内容；sha256标识实际读取文件，不表示已提交、已推送或已部署。",
+    "没有运行测试或构建，没有访问API、网络、浏览器、生产进程、数据库、服务日志或部署系统；测试源码是预期证据而非本轮通过证据。",
+    "未获知生产版本及原后端实现；不能证明当前生产已部署运行3轮或5轮恢复行为。",
+    "取消HTTP200乃至code0不能单独证明服务端已保存-2终态；源码中claimed=false返回成功与前端无条件已取消存在需验证的竞态。",
+    "对lm_draw目录的*_test.go检索为空；不把该目录检索结果扩大为整个Go仓完全没有相关测试。",
+    "保持parent、Vue、Go业务、配置、Wiki与state只读；只创建本样本答案，首次答案使用排他创建，未覆盖已有答案。"
+  ]
+}

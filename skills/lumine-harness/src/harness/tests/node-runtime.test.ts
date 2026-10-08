@@ -1,0 +1,116 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { pathToFileURL } from "node:url";
+import path from "node:path";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import { spawnSync } from "node:child_process";
+import { assertNodeRuntime, inspectNodeRuntime, isSupportedNodeVersion, NodeRuntimeError, SUPPORTED_NODE_ENGINES } from "../core/node-runtime.ts";
+import { bootstrapLocale, isMainModule, loadNodeMain } from "../core/node-bootstrap.ts";
+import { resolveSkillPackageRoot } from "../core/runtime-layout.ts";
+
+test("maintenance engines match the runtime LTS branch policy", () => {
+  const skillRoot = resolveSkillPackageRoot(import.meta.url);
+  assert.ok(skillRoot);
+  const repositoryRoot = path.resolve(skillRoot, "../..");
+  const metadata = JSON.parse(readFileSync(path.join(repositoryRoot, "package.json"), "utf8"));
+  assert.equal(metadata.engines.node, SUPPORTED_NODE_ENGINES);
+});
+
+test("reviewed Node LTS branches have exact minimums and do not admit prereleases or future majors", () => {
+  for (const version of ["22.18.0", "v22.18.0", "22.18.1", "22.99.0", "24.11.0", "24.14.0"]) assert.equal(isSupportedNodeVersion(version), true, version);
+  for (const version of ["18.20.8", "20.19.0", "22.17.1", "24.10.9", "23.18.0", "25.11.0", "26.0.0", "22.18.0-rc.1", "24.11.0-rc.1", "22.018.0", "22.18", "", "not-a-version"]) {
+    assert.equal(isSupportedNodeVersion(version), false, version);
+  }
+  assert.throws(() => assertNodeRuntime("18.20.8"), (error) => error instanceof NodeRuntimeError && error.code === "UNSUPPORTED_NODE_RUNTIME");
+});
+
+test("early diagnostics include actual version, support range and an action in both locales", () => {
+  for (const locale of ["en", "zh-CN"] as const) {
+    const diagnostic = inspectNodeRuntime("20.19.0", locale);
+    assert.equal(diagnostic.ok, false);
+    assert.equal(diagnostic.currentVersion, "20.19.0");
+    assert.equal(diagnostic.code, "UNSUPPORTED_NODE_RUNTIME");
+    assert.match(diagnostic.supportedRange, /22\.18\.0/);
+    assert.match(diagnostic.supportedRange, /24\.11\.0/);
+    assert.match(diagnostic.message!, /20\.19\.0/);
+    assert.match(diagnostic.remediation!, /24.*LTS/);
+  }
+  assert.equal(bootstrapLocale(["--locale", "zh-CN"]), "zh-CN");
+  assert.equal(bootstrapLocale(["--locale", "en"]), "en");
+});
+
+test("bootstrap rejects before loading an implementation and preserves machine feedback", async () => {
+  let loads = 0, output = "";
+  const write = process.stderr.write, exitCode = process.exitCode;
+  try {
+    process.stderr.write = ((chunk: string | Uint8Array) => { output += String(chunk); return true; }) as typeof process.stderr.write;
+    const entryUrl = pathToFileURL(path.resolve(process.argv[1])).href;
+    const implementation = await loadNodeMain(async () => { loads++; return { changed: true }; }, { entryUrl, version: "18.20.8", args: ["--json", "--locale", "zh-CN"] });
+    assert.equal(implementation, undefined);
+    assert.equal(loads, 0, "no project implementation, Hook stdin or mutation can run");
+    assert.equal(process.exitCode, 2);
+    const diagnostic = JSON.parse(output);
+    assert.equal(diagnostic.code, "UNSUPPORTED_NODE_RUNTIME");
+    assert.equal(diagnostic.currentVersion, "18.20.8");
+    assert.match(diagnostic.message, /当前/);
+    const supported = await loadNodeMain(async () => { loads++; return { changed: false }; }, { entryUrl, version: "22.18.0", args: [] });
+    assert.deepEqual(supported, { changed: false });
+    assert.equal(loads, 1);
+  } finally {
+    process.stderr.write = write;
+    process.exitCode = exitCode;
+  }
+});
+
+test("unsupported public imports reject before implementation loading without a CLI side effect", async () => {
+  let loads = 0;
+  const exitCode = process.exitCode;
+  await assert.rejects(loadNodeMain(async () => { loads++; return {}; }, { entryUrl: "file:///not-the-main-module.mjs", version: "22.17.0", args: [] }), NodeRuntimeError);
+  assert.equal(loads, 0);
+  assert.equal(process.exitCode, exitCode);
+});
+
+test("real symlink entry invocation executes the main and retains early unsupported-version feedback", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "lumine-bootstrap-alias-"));
+  try {
+    const actual = path.join(root, "actual runtime"), alias = path.join(root, "runtime alias");
+    mkdirSync(actual);
+    symlinkSync(actual, alias, "dir");
+    const extension = import.meta.url.endsWith(".ts") ? "ts" : "mjs";
+    const helperUrl = new URL(`../core/node-bootstrap.${extension}`, import.meta.url).href;
+    writeFileSync(path.join(actual, "entry.mjs"), `
+import { isMainModule, loadNodeMain } from ${JSON.stringify(helperUrl)};
+const implementation = await loadNodeMain(async () => ({ run() { process.stdout.write("CLI_EXECUTED\\n"); } }), {
+  entryUrl: import.meta.url,
+  ...(process.argv[2] === "unsupported-policy-fixture" ? { version: "18.20.8", args: ["--json"] } : {})
+});
+if (implementation && isMainModule(import.meta.url)) implementation.run();
+`);
+    const loaders = extension === "ts" ? ["--import", "tsx"] : [];
+    const entry = path.join(alias, "entry.mjs");
+    const supported = spawnSync(process.execPath, [...loaders, entry], { encoding: "utf8" });
+    assert.equal(supported.status, 0, supported.stderr);
+    assert.equal(supported.stdout, "CLI_EXECUTED\n", "do not normalize the fixture invocation to hide alias handling");
+    const unsupported = spawnSync(process.execPath, [...loaders, entry, "unsupported-policy-fixture"], { encoding: "utf8" });
+    assert.equal(unsupported.status, 2, unsupported.stderr);
+    assert.equal(unsupported.stdout, "", "rejection must precede implementation execution");
+    assert.equal(JSON.parse(unsupported.stderr).code, "UNSUPPORTED_NODE_RUNTIME");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("main detection tolerates missing invocation files and non-file URLs", () => {
+  assert.equal(isMainModule("file:///missing-lumine-entry.mjs"), false);
+  assert.equal(isMainModule("https://example.invalid/entry.mjs"), false);
+  const original = process.argv[1];
+  try {
+    delete process.argv[1];
+    assert.equal(isMainModule(import.meta.url), false);
+    process.argv[1] = "/missing-lumine-invocation.mjs";
+    assert.equal(isMainModule(import.meta.url), false);
+  } finally {
+    process.argv[1] = original;
+  }
+});

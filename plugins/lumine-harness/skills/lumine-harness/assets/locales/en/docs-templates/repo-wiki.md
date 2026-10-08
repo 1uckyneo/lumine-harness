@@ -5,19 +5,6 @@ summary: "{{summary}}"
 type: architecture
 status: current
 locale: en
-tags: []
-aliases: []
-repositories: ["{{repo_id}}"]
-sources:
-  - id: source-1
-    repoId: "{{repo_id}}"
-    path: "{{relative_source_path}}"
-relations: []
-sections: []
-watchScopes:
-  - repoId: "{{repo_id}}"
-    path: "{{module_relative_path}}"
-diagrams: []
 ---
 
 # {{title}}
@@ -44,4 +31,21 @@ diagrams: []
 
 ## Sources and related work
 
-<!-- Cite specific sources and related Wiki, Specs, and Plans. Distinguish source implementation, observed operation, and deployment conclusions. -->
+<!-- Cite specific sources and related Wiki, Specs, and Plans. Distinguish source implementation, observed operation, and deployment conclusions. The structured block below is for source lookup, not displayed body text. -->
+
+<!-- lumine-wiki-metadata:v1
+{
+  "tags": [],
+  "aliases": [],
+  "repositories": ["{{repo_id}}"],
+  "sources": [
+    { "id": "source-1", "repoId": "{{repo_id}}", "path": "{{relative_source_path}}" }
+  ],
+  "relations": [],
+  "sections": [],
+  "watchScopes": [
+    { "repoId": "{{repo_id}}", "path": "{{module_relative_path}}" }
+  ],
+  "diagrams": []
+}
+-->

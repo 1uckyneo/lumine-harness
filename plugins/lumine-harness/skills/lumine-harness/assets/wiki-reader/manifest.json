@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "files": {
-    "THIRD-PARTY-LICENSES.txt": "86948f547742b26ec3881c899aa789879f70480ede70d844546e69d2dae367ea",
+    "THIRD-PARTY-LICENSES.txt": "da6018673d32cfb36ed0c61b0175874a22af9193686159ceaa24e488225cfa78",
     "chunks/abnfDiagram-N423BO3Z-I7S2MPMJ.js": "af75b60a5a8fb8132b4df3b25ae3c8eb42b51a82b10d6b2016e6ca3dd9e85f82",
     "chunks/architecture-7GRP2DOG-SNEBEUMC.js": "978ea7106fc62502e79f8e2a92abb05c85bc3ca9ca9bf7a144103e824b5ec3cc",
     "chunks/architectureDiagram-T3A2C74G-RHCVRE37.js": "9ae49af7d43583771f819a74a00704fc1b35c6b6b3b03eaab88301d04ca556d3",
@@ -114,8 +114,9 @@
     "chunks/wardley-WFR3VGLG-BKYSONI2.js": "24b9f67296054de2b643901bb1273511a1a948e0c7eaf02b23b56db7008f7df1",
     "chunks/wardleyDiagram-T6FBY63Y-KKUMDRM4.js": "494e8193c3af6690f2a003555bb5ed01d382ada87936b214dff6c3f472c315bb",
     "chunks/xychartDiagram-ELKLHX3M-LYJFFWX4.js": "a1cfbf1fc0e1452396632da2f0dad478ce4f655b5ab7a9f41d846365653234d8",
-    "index.html": "f9fde41fc21424fabaa117e1c41fee253e4a967eba1050065d3fcf02afe66c4b",
-    "reader.js": "04c914c02d0aa767c0638685b0aa58b0d4a52b597b56a03d53eb54d87b394c24",
-    "styles.css": "6e2580c56c09ee66b6e04880de620797758a940738defa5403dc4ae792f13b7a"
+    "index.html": "56f92da80a93a5bc14867b4ee6b7db2c1a8bfa1ff3c250a68000b6324189dc7a",
+    "reader.js": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+    "reader.js.LEGAL.txt": "7dff61d0cd5b7cff2403db6cf5c586b1218c9e663784caeda7fd06916c997d46",
+    "styles.css": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
   }
 }

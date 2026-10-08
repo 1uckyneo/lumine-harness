@@ -6,7 +6,7 @@ import path from 'node:path';
 import { serveWiki } from '../wiki/server.ts';
 import { parseSections } from '../wiki/sections.ts';
 import { applyUpdate, prepareUpdate, scanWiki } from '../wiki/engine.ts';
-import { coverageSummary, headingSections, topicForDocument, topicPath, topicTree } from '../wiki/reader-model.ts';
+import { coverageSummary, headingSections, shouldResetProject, topicForDocument, topicPath, topicTree } from '../wiki/reader-model.ts';
 import type { CoverageMap } from '../wiki/types.ts';
 
 const coverage: CoverageMap = { schemaVersion: 1, revision: 'fixture', unmappedDocumentIds: [], topics: [
@@ -23,6 +23,16 @@ test('reader derives navigation and partial/missing progress from the sole cover
   assert.deepEqual(coverageSummary(coverage, new Set(['overview', 'session'])), { total: 3, covered: 1, partial: 1, planned: 1, deferred: 0, missing: ['missing-document'] });
   const broken = { ...coverage, topics: [...coverage.topics, { ...coverage.topics[0], id: 'orphan', parentId: 'absent' }] };
   assert.deepEqual(topicTree(broken).unresolved.map((topic) => topic.id), ['orphan']);
+});
+
+test('reader resets a loaded unknown identity and clears a remembered project switch', () => {
+  assert.equal(shouldResetProject(false, null, 'project-a'), false, 'a first direct link remains usable');
+  assert.equal(shouldResetProject(false, 'project-a', 'project-a'), false);
+  assert.equal(shouldResetProject(false, 'project-a', null), true);
+  assert.equal(shouldResetProject(true, 'project-a', null), true);
+  assert.equal(shouldResetProject(true, null, null), true, 'an unknown identity cannot prove a same-project refresh');
+  assert.equal(shouldResetProject(true, 'project-a', 'project-b'), true);
+  assert.equal(shouldResetProject(true, 'project-a', 'project-a'), false);
 });
 
 test('reader reuses parser-owned stable heading identities including duplicates and Chinese labels', () => {
@@ -123,6 +133,38 @@ test('reader API preserves shared outlines, typed reverse links and source obser
     assert.equal(evidenceLines.kind, 'source'); assert.equal(evidenceLines.sourceId, 'evidence-source');
     assert.equal((await fetch(`${reader.url}/api/catalog`, { method: 'POST' })).status, 405);
     assert.equal((await fetch(`${reader.url}/api/catalog`, { headers: { Origin: 'https://other.example' } })).status, 403);
+  } finally { await reader?.close(); data.close(); }
+});
+
+test('reader API resolves moved deep links while returning the full canonical document', async () => {
+  const data = fixture(); let reader: Awaited<ReturnType<typeof serveWiki>> | undefined;
+  try {
+    writeFileSync(path.join(data.root, '.lumine/wiki-state/document-aliases.json'), JSON.stringify({
+      'legacy-guide': 'overview',
+      'legacy-guide#previous': 'session#renewal',
+      'docs/repo-wiki/old-session.md': 'session',
+    }));
+    reader = await serveWiki(data.root, { port: 0, assetsRoot: data.assetsRoot });
+    const get = async (reference: string) => {
+      const response = await fetch(`${reader!.url}/api/document?id=${encodeURIComponent(reference)}&full=1`);
+      assert.equal(response.status, 200, reference);
+      return response.json() as Promise<any>;
+    };
+    const moved = await get('legacy-guide#previous');
+    assert.equal(moved.id, 'session');
+    assert.equal(moved.canonicalReference, 'session#renewal');
+    assert.match(moved.body, /# Session mechanism/);
+    assert.ok(moved.sections.some((section: any) => section.id === 'renewal'));
+    assert.equal((await get('legacy-guide')).canonicalReference, 'overview');
+    assert.equal((await get('docs/repo-wiki/old-session.md#renewal')).canonicalReference, 'session#renewal');
+    assert.equal((await get('session#gone')).canonicalReference, 'session#gone', 'invalid sections remain available for the reader to explain');
+    const separateFragment = await fetch(`${reader.url}/api/document?${new URLSearchParams({ id: 'legacy-guide', fragment: 'previous', full: '1' })}`);
+    assert.equal(separateFragment.status, 200);
+    assert.equal((await separateFragment.json() as any).canonicalReference, 'session#renewal');
+    const legacy = await fetch(`${reader.url}/api/document?id=${encodeURIComponent('legacy-guide#previous')}`);
+    assert.equal(legacy.status, 200);
+    assert.deepEqual((await legacy.json() as any).selection, { kind: 'section', id: 'renewal' }, 'the default API retains its section selection contract');
+    assert.equal((await fetch(`${reader.url}/api/document?id=${encodeURIComponent('session#gone')}`)).status, 400, 'the default API retains its non-success response for invalid sections');
   } finally { await reader?.close(); data.close(); }
 });
 

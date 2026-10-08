@@ -1,5 +1,6 @@
 import test from "node:test";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { cpSync } from "node:fs";
 import { resolveSkillPackageRoot } from "../core/runtime-layout.ts";
 import assert from "node:assert/strict";
@@ -74,6 +75,54 @@ test("proposal integrity rejects locale tampering", () => {
   } finally {
     f.clean();
   }
+});
+test("reader upgrade preserves older managed chunks and writes the entry after its assets", () => {
+  const f = fixture();
+  try {
+    applyProposal(f.save(createProposal(f.root, { locale: "en" })));
+    const oldChunk = ".lumine/wiki-reader/chunks/reader-older-only.js";
+    const oldContent = "export const olderReaderChunk = true;\n";
+    const oldNotice = oldChunk + ".LEGAL.txt";
+    const oldNoticeContent = "Older chunk legal notice.\n";
+    mkdirSync(path.dirname(path.join(f.root, oldChunk)), { recursive: true });
+    writeFileSync(path.join(f.root, oldChunk), oldContent);
+    writeFileSync(path.join(f.root, oldNotice), oldNoticeContent);
+    const managedPath = path.join(f.root, ".lumine/managed.json");
+    const managed = JSON.parse(readFileSync(managedPath, "utf8"));
+    const oldHash = createHash("sha256").update(oldContent).digest("hex");
+    managed.files[oldChunk] = { hash: oldHash, source: "lumine-harness" };
+    const noticeHash = createHash("sha256").update(oldNoticeContent).digest("hex");
+    managed.files[oldNotice] = { hash: noticeHash, source: "lumine-harness" };
+    const licensePath = path.join(f.root, ".lumine/wiki-reader/THIRD-PARTY-LICENSES.txt");
+    const olderNotice = "older-reader-package@1.0.0 (MIT)\nOlder reader license.";
+    const olderLicenses = readFileSync(licensePath, "utf8") + "\n\n--------------------\n\n" + olderNotice;
+    writeFileSync(licensePath, olderLicenses);
+    managed.files[".lumine/wiki-reader/THIRD-PARTY-LICENSES.txt"].hash = createHash("sha256").update(olderLicenses).digest("hex");
+    writeFileSync(managedPath, JSON.stringify(managed));
+
+    const proposal = createProposal(f.root, { locale: "en", mode: "upgrade" });
+    assert.equal(proposal.operations.some((op) => op.path === oldChunk), false);
+    assert.equal(proposal.operations.some((op) => op.path === oldNotice), false);
+    const paths = proposal.operations.map((op) => op.path);
+    const entry = paths.indexOf(".lumine/wiki-reader/reader.js");
+    assert.ok(entry > paths.indexOf(".lumine/wiki-reader/styles.css"));
+    assert.ok(entry > Math.max(...paths.map((rel, index) => rel.startsWith(".lumine/wiki-reader/chunks/") ? index : -1)));
+    const upgradeFile = f.save(proposal);
+    writeFileSync(path.join(f.root, oldChunk), "changed after planning");
+    assert.throws(() => applyProposal(upgradeFile), /Retained reader asset changed/);
+    writeFileSync(path.join(f.root, oldChunk), oldContent);
+    applyProposal(upgradeFile);
+    assert.equal(readFileSync(path.join(f.root, oldChunk), "utf8"), oldContent);
+    assert.equal(readFileSync(path.join(f.root, oldNotice), "utf8"), oldNoticeContent);
+    assert.match(readFileSync(licensePath, "utf8"), /older-reader-package@1\.0\.0/);
+    const upgraded = JSON.parse(readFileSync(managedPath, "utf8"));
+    assert.deepEqual(upgraded.files[oldChunk], { hash: oldHash, source: "lumine-harness" });
+    assert.deepEqual(upgraded.files[oldNotice], { hash: noticeHash, source: "lumine-harness" });
+    writeFileSync(path.join(f.root, oldNotice), "changed after upgrade");
+    assert.throws(() => rollbackProposal(upgradeFile), /Retained reader asset changed/);
+    writeFileSync(path.join(f.root, oldNotice), oldNoticeContent);
+    assert.deepEqual(rollbackProposal(upgradeFile).conflicts, []);
+  } finally { f.clean(); }
 });
 test("interrupted migration resumes and rollback preserves edits after application", () => {
   const f = fixture();
@@ -280,6 +329,8 @@ test("deselecting managed adapters removes only unchanged installer-owned entry 
   try {
     applyProposal(f.save(createProposal(f.root, { locale: "en", adapters: Object.keys(ROOT_ADAPTER_FIXTURES).join(",") })));
     assert.ok(existsSync(path.join(f.root, ".lumine/adapters/trae/hooks/session-start.mjs")));
+    assert.ok(existsSync(path.join(f.root, ".lumine/adapters/opencode/plugin-main.mjs")));
+    assert.equal(existsSync(path.join(f.root, ".opencode/plugins/harness.main.mjs")), false);
     const originals = Object.fromEntries(Object.values(ROOT_ADAPTER_FIXTURES).map((file) => [file, readFileSync(path.join(f.root, file), "utf8")]));
     const userFiles = [".trae/settings.json", ".qoder/user.json", ".opencode/plugins/user.mjs"];
     for (const file of userFiles) writeFileSync(path.join(f.root, file), "user-owned sibling");
@@ -294,6 +345,7 @@ test("deselecting managed adapters removes only unchanged installer-owned entry 
       assert.equal(existsSync(path.join(f.root, file)), adapter === "codex", file);
     }
     assert.equal(existsSync(path.join(f.root, ".lumine/adapters/trae/hooks/session-start.mjs")), false);
+    assert.equal(existsSync(path.join(f.root, ".lumine/adapters/opencode/plugin-main.mjs")), false);
     for (const file of userFiles) assert.equal(readFileSync(path.join(f.root, file), "utf8"), "user-owned sibling");
     assert.deepEqual(rollbackProposal(proposalFile).conflicts, []);
     for (const [file, original] of Object.entries(originals)) assert.equal(readFileSync(path.join(f.root, file), "utf8"), original);

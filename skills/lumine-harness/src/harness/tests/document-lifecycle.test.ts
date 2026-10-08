@@ -31,7 +31,7 @@ test("archive and restore preserve Chinese plan IDs, task references and accepta
     const original = readFileSync(path.join(root, active), "utf8");
     const specBaseline = acceptanceSections(resolveDocument(root, "product-test"));
     const planBaseline = acceptanceSections(resolveDocument(root, "plan-test"));
-    saveTaskRecord(root, { schemaVersion: 2, taskId: "lifecycle", mode: "diagnose", goal: "Verify lifecycle", scope: "documents only", specRef: "product-test", planRef: "plan-test", acceptanceRefs: [], evidence: [] });
+    saveTaskRecord(root, { schemaVersion: 3, taskId: "lifecycle", mode: "diagnose", goal: "Verify lifecycle", scope: "documents only", specRef: "product-test", planRef: "plan-test", acceptanceRefs: [], evidence: [] });
     const result = runTaskCommand(["doc-archive", "plan-test", "--expect", hashFile(root, active), "--root", root]) as { status: string };
     assert.equal(result.status, "complete");
     assert.equal(existsSync(path.join(root, active)), false);

@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "@lumine-hook:adapters/cursor/hooks/session-start.mjs",
+        "timeout": 30
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "@lumine-hook:adapters/cursor/hooks/after-agent-response.mjs",
+        "timeout": 10
+      }
+    ],
+    "stop": [
+      {
+        "command": "@lumine-hook:adapters/cursor/hooks/stop.mjs",
+        "timeout": 120,
+        "loop_limit": 20
+      }
+    ]
+  }
+}

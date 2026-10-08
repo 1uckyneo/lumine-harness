@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-wiki-knowledge-verify-20261008",
+  "mode": "verify",
+  "goal": "在既有Run中补验独立知识使用对照与普通文本create/update/query生命周期",
+  "scope": "源仓validation、独立tmp夹具及本轮任务记录可写；真实两个项目代码/Wiki/状态只读，不修改Vue/Go、用户配置或Node环境，不提交推送发布。四份固定对照首答与一个既有来源演进后的独立首答均保留首次结果与未知；当前评审完成即收口，不追加样本。",
+  "specRef": "lumine-wiki-product-experience",
+  "planRef": "lumine-wiki-react-execution",
+  "selectedSkills": [
+    "lumine-run",
+    "lumine-knowledge"
+  ],
+  "acceptanceRefs": [
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-003",
+      "baselineHash": "9733d2fa5822449452454f227f289a378fe70b911485a77f8cf0a8567b6cdf10"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-010",
+      "baselineHash": "ad3ec3a3feb9e987bdd8ac7ed831a71b2b550c8a36ce183eb3a0b4a6eb1bed03"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-013",
+      "baselineHash": "cea64be04baccb75eb2a7adf673aa18e2408b74f0bb211bbadfdeaba70b7b74a"
+    }
+  ],
+  "evidence": [
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/text-lifecycle-result.json",
+      "sha256": "2bf9a33b461d03b40ef870a99c6dcf606f205d94e58b24cd4600266b439e698f",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T05:02:14.873378+00:00",
+      "command": "Plugin-only formal text create/update/query/show lifecycle; 51 assertions",
+      "environment": "macOS arm64; actual Node24.14.0; independent read-only samples and isolated text fixtures; no production or actual parent Hook proof",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+          "sha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/text-lifecycle-parent-result.json",
+      "sha256": "6665f96bf9fa4025072b4a7d2260e3c08af6073438c0ac4259a3528ca03a7ce6",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T05:02:14.874419+00:00",
+      "command": "Isolated adopting-project config and installed runtime text lifecycle; 71 assertions",
+      "environment": "macOS arm64; actual Node24.14.0; independent read-only samples and isolated text fixtures; no production or actual parent Hook proof",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+          "sha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/knowledge-use/independent-review.json",
+      "sha256": "fa7055ced9bd957a8a474d3203e3738714b41b7463fa64f7d974bdb61a69e99a",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T05:02:14.874467+00:00",
+      "command": "Independent complete-semantics review of four first-answer controls and actual source-evolution reuse",
+      "environment": "macOS arm64; actual Node24.14.0; independent read-only samples and isolated text fixtures; no production or actual parent Hook proof",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+          "sha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/knowledge-use/baseline-recheck.json",
+      "sha256": "271eee8bbd2ef3e0fca64d000147dc60a6e48e017f916c5c04b31ac0262ba5bc",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T05:02:14.874491+00:00",
+      "command": "Per-file unchanged baseline audit: source385 and adopting-parent1871",
+      "environment": "macOS arm64; actual Node24.14.0; independent read-only samples and isolated text fixtures; no production or actual parent Hook proof",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+          "sha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/knowledge-use/gates.json",
+      "sha256": "7b90e26be0ae697a1469ed95a42c45c6797c676005a1dbd8e5748b25c787651d",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T05:02:14.874515+00:00",
+      "command": "Required repository runtime/package/distribution gates",
+      "environment": "macOS arm64; actual Node24.14.0; independent read-only samples and isolated text fixtures; no production or actual parent Hook proof",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+          "sha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/validation/lumine-wiki-react/2026-10-08/知识验证与交付边界.md",
+      "sha256": "5951290314c21edf69d74f049b5877a58199bc4a2c6fadf9f64e2337d1f91d37",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T05:02:14.874541+00:00",
+      "command": "Bounded verification delivery and explicit unobserved host/long-term limits",
+      "environment": "macOS arm64; actual Node24.14.0; independent read-only samples and isolated text fixtures; no production or actual parent Hook proof",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
+          "sha256": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/search.ts",
+          "sha256": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4"
+        }
+      ]
+    }
+  ],
+  "knowledge": {
+    "required": false,
+    "status": "not_applicable",
+    "refs": []
+  },
+  "summary": "本轮具体知识补验完成：两个项目四份独立对照首答、一个真实表格来源演进后的再次使用、两组普通文本create/update/query闭环。固定问题、初始判据与首答保留；代码与知识基线无变化，无需写回真实Wiki。用户指出验收过严，按实际影响交付Wiki成果；父仓真实Hook/Node宿主与finalize单列待验证，长期Token/人类/生产未观测项不作为Wiki总阻塞；不宣称整项AC已通过。 独立评审5份首答22项核心判据通过；父仓source-only原始计量落盘少4283字节，事件/summary一致，保留限制，不重跑或推算收益。"
+}

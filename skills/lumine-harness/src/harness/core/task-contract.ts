@@ -15,10 +15,17 @@ export interface TaskEvidence {
   outcome: "passed" | "failed" | "not_verified";
   observedAt: string; command: string; environment: string; codeRefs: CodeReference[];
 }
+export interface KnowledgeSync {
+  contractVersion: 2;
+  assessedAt: string;
+  changedSources: CodeReference[];
+  verifiedScope: string[];
+  decisions: Array<{ ref: string; action: "created" | "revised" | "retained" | "deferred"; sha256: string; reason: string }>;
+}
 export interface TaskRecord {
-  schemaVersion: 2; taskId: string; mode: TaskMode; goal: string; scope: string;
+  schemaVersion: 2 | 3; taskId: string; mode: TaskMode; goal: string; scope: string;
   specRef?: string; planRef?: string; selectedSkills?: string[]; acceptanceRefs: AcceptanceReference[]; evidence: TaskEvidence[];
-  knowledge?: { required: boolean; status: "synchronized" | "pending" | "not_applicable"; refs: string[] };
+  knowledge?: { required: boolean; status: "synchronized" | "pending" | "not_applicable"; refs: string[]; sync?: KnowledgeSync };
   summary?: string;
 }
 export interface TaskCheckResult { ok: boolean; issues: ContractIssue[]; taskId?: string; mode?: TaskMode; output: string; }
@@ -30,10 +37,11 @@ export function taskRecordPath(root: string, taskId: string): string {
 export function validateTaskShape(value: unknown): TaskRecord {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Task must be an object");
   const task = value as TaskRecord;
-  if (task.schemaVersion !== 2 || !MODES.has(task.mode)) throw new Error("Task schemaVersion or mode is invalid");
+  if (![2, 3].includes(task.schemaVersion) || !MODES.has(task.mode)) throw new Error("Task schemaVersion or mode is invalid");
   if (typeof task.taskId !== "string" || typeof task.goal !== "string" || !task.goal.trim() || typeof task.scope !== "string" || !task.scope.trim()) throw new Error("Task requires taskId, goal and scope");
   if (task.selectedSkills !== undefined && (!Array.isArray(task.selectedSkills) || task.selectedSkills.some((name) => typeof name !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)))) throw new Error("selectedSkills must contain actual selected canonical Skill names");
   if (!Array.isArray(task.acceptanceRefs) || !Array.isArray(task.evidence)) throw new Error("Task requires acceptanceRefs and evidence arrays");
+  if (task.knowledge?.sync && (task.knowledge.sync.contractVersion !== 2 || !Array.isArray(task.knowledge.sync.changedSources) || !Array.isArray(task.knowledge.sync.verifiedScope) || !Array.isArray(task.knowledge.sync.decisions))) throw new Error("Knowledge sync contract is invalid");
   return task;
 }
 export function readTaskRecord(root: string, taskId: string): TaskRecord {
@@ -52,9 +60,16 @@ export function saveTaskRecord(root: string, value: unknown, expectedHash?: stri
   const temp = `${file}.${process.pid}.tmp`;
   try {
     writeFileSync(descriptor, JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }));
-    const current = existsSync(file) ? contentHash(readFileSync(file)) : null;
+    const currentBytes = existsSync(file) ? readFileSync(file) : null;
+    const current = currentBytes ? contentHash(currentBytes) : null;
     if (current && current !== expectedHash) throw new Error("Task record changed or exists; supply --expect with its current sha256 before updating");
     if (!current && expectedHash) throw new Error("Task record was deleted after reading");
+    if (!currentBytes && task.schemaVersion !== 3) throw new Error("TASK_SCHEMA_V3_REQUIRED: New task records must use schemaVersion 3");
+    if (currentBytes) {
+      const previous = validateTaskShape(JSON.parse(currentBytes.toString("utf8")));
+      if (previous.taskId !== task.taskId) throw new Error("Task filename and identity disagree");
+      if (previous.schemaVersion === 3 && task.schemaVersion !== 3) throw new Error("TASK_SCHEMA_DOWNGRADE_FORBIDDEN");
+    }
     mkdirSync(path.dirname(file), { recursive: true });
     writeFileSync(temp, `${JSON.stringify(task, null, 2)}\n`, "utf8");
     renameSync(temp, file);
@@ -147,8 +162,33 @@ export function checkTask(root: string, taskId: string, modeOverride?: TaskMode)
       if (!validEvidence) add("MISSING_IMPLEMENTATION_EVIDENCE", "Implementation completion requires actual validation evidence");
       for (const key of required) if (!passed.has(key)) add("AC_NOT_VERIFIED", `No current passed evidence for ${key}`);
       if (!required.size && !task.evidence.some((item) => item.outcome === "passed")) add("NO_PASSED_VALIDATION", "A scoped repair requires at least one passed validation result");
+      if (task.schemaVersion === 3 && !task.knowledge) add("KNOWLEDGE_ASSESSMENT_MISSING", "Current tasks must assess whether knowledge synchronization is required");
       if (task.knowledge?.required && task.knowledge.status !== "synchronized") add("KNOWLEDGE_PENDING", "Task-related knowledge synchronization is incomplete");
       if (task.knowledge?.required && !task.knowledge.refs?.length) add("KNOWLEDGE_REFS_MISSING", "Knowledge synchronization needs its document or disposition references");
+      if (task.schemaVersion === 3 && task.knowledge?.required && task.knowledge.status === "synchronized" && !task.knowledge.sync) add("KNOWLEDGE_SYNC_MISSING", "Current synchronized tasks must record the versioned knowledge assessment");
+      if (task.knowledge?.sync && task.knowledge.required && task.knowledge.status === "synchronized") {
+        const sync = task.knowledge.sync;
+        if (!Number.isFinite(Date.parse(sync.assessedAt)) || Date.parse(sync.assessedAt) > Date.now() + 60000 || !sync.verifiedScope.length || sync.verifiedScope.some((item) => typeof item !== "string" || !item.trim()) || !sync.decisions.length) add("KNOWLEDGE_SYNC_INCOMPLETE", "Knowledge sync requires an assessment time, verified scope and documented decisions");
+        for (const source of sync.changedSources) {
+          const repo = config.repositories.find((item) => item.id === source.repoId);
+          if (!repo) { add("KNOWLEDGE_SOURCE_UNKNOWN", `Unknown knowledge impact repository: ${source.repoId}`); continue; }
+          try {
+            const file = resolveProjectPath(resolveProjectPath(root, repo.path), source.path, "knowledge impact source");
+            if (contentHash(readFileSync(file)) !== source.sha256) add("KNOWLEDGE_SOURCE_CHANGED", `Knowledge impact source changed: ${source.repoId}/${source.path}`);
+          } catch { add("KNOWLEDGE_SOURCE_MISSING", `Knowledge impact source is missing: ${source.repoId}/${source.path}`); }
+        }
+        for (const decision of sync.decisions) {
+          if (!decision || !["created", "revised", "retained", "deferred"].includes(decision.action) || !decision.reason?.trim() || !/^[a-f0-9]{64}$/.test(decision.sha256)) { add("KNOWLEDGE_DECISION_INVALID", "Knowledge decision needs an action, reason and content hash"); continue; }
+          let source: string;
+          try { source = resolveCurrentDocument(root, decision.ref).source; }
+          catch {
+            try { source = readFileSync(resolveProjectPath(root, decision.ref, "knowledge disposition"), "utf8"); }
+            catch { add("KNOWLEDGE_DECISION_MISSING", `Knowledge decision reference is missing: ${decision.ref}`); continue; }
+          }
+          if (contentHash(source) !== decision.sha256) add("KNOWLEDGE_DECISION_CHANGED", `Knowledge decision version changed: ${decision.ref}`);
+          if (!task.knowledge.refs?.includes(decision.ref)) add("KNOWLEDGE_DECISION_UNLINKED", `Knowledge decision is absent from task refs: ${decision.ref}`);
+        }
+      }
       for (const reference of task.knowledge?.refs ?? []) {
         // Stable document IDs and rename aliases survive readable path changes.
         try { resolveCurrentDocument(root, reference); continue; } catch { /* A disposition or validation file need not be a structured document. */ }

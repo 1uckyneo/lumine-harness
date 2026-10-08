@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T04:10:43.906758+00:00",
+  "authorization": "User explicitly changed product scope on 2026-10-08: narrow-screen use is not required, not merely deferred verification.",
+  "currentProductScope": "Desktop Repo Wiki reader. No mandatory medium/narrow/mobile usage matrix. Existing adaptive styles may remain without a narrow-screen support commitment.",
+  "retainedDesktopGoals": [
+    "1440px desktop window",
+    "keyboard operations",
+    "desktop browser 200 percent zoom",
+    "readable Chinese and English content, long paths, local scrolling for wide code and tables"
+  ],
+  "changedAcceptanceBaselines": [
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-009",
+      "before": "7895f6a023a89e98796f4810282d70c7f43104c55930dee2ac39928ab7534e35",
+      "after": "530f7a691137b70ff30bfc1938bc0ed8b16a4843207dd647ad990e46339ab722"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-reader",
+      "before": "bf6bb66cbe88cefd2445909adea74d9a679d6d5572b8a93c9fdd37d830c46a91",
+      "after": "e0a77c2667ecf9dff6b9f3fec2c737e7262f448394d66b3bb7c1d6be9ca56537"
+    }
+  ],
+  "otherAcceptanceBaselinesChanged": false,
+  "historicalEvidencePolicy": "Old narrow-screen observations remain historical diagnostics. Initial report metadata predates this explicit product correction; this scope record and current Spec supersede those delivery-scope descriptions. Observed results and timestamps are not rewritten.",
+  "completionLimit": "Desktop technical samples do not prove human understanding or all AC-009/AC-reader requirements. The local repair task carries scoped validation rather than a full acceptance pass. Older refactor tasks remain historical.",
+  "taskContractPolicy": {
+    "activeWikiTask": "Only confirmed AC-009 baseline and current summary updated; historical evidence and knowledge hashes preserved.",
+    "boundedVerifyTask": "AC-009 and AC-011 references retained with current baselines; evidence stays scoped and does not claim full acceptance.",
+    "scopedRepairTask": "Uses the Runtime scoped-repair contract with acceptanceRefs empty, explicit Spec/Plan and bounded goal. Passed validation and knowledge.sync required; full AC-009 remains on active Wiki task.",
+    "historicalGlobalRefactorTask": "Not rewritten; its old AC-reader identity remains historical."
+  }
+}

@@ -1,0 +1,4002 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-node-runtime-run-20260930",
+  "mode": "implement",
+  "goal": "实施整个Lumine Harness的Node支持基线，并验证两种分发及父仓受管升级",
+  "scope": "按已确认lumine-node-runtime-execution：规范TS与分发可写，父仓仅受管Harness资产；Vue/Go只读；不修改系统Node、业务引擎、用户profile；不提交推送部署",
+  "specRef": "lumine-refactor-product",
+  "planRef": "lumine-node-runtime-execution",
+  "selectedSkills": [
+    "lumine-run",
+    "lumine-knowledge"
+  ],
+  "acceptanceRefs": [
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-runtime",
+      "baselineHash": "87ccae8d29935e83677b6fb34a26fcffad7172aebeadc6e9256f4ff42d4a1c6c"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-distribution",
+      "baselineHash": "12e470ec3f91c16deeb288deba722bb9fa99e181eb5702337de5dfbab13e19a2"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-012",
+      "baselineHash": "fdc7e2202aed2934be558b5ff37bbc115a2a37a76b3191cd672a0540978e66e1"
+    }
+  ],
+  "evidence": [
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/实施与验收.md",
+      "sha256": "aa0b32a6fc09a1268d4355d7edc34401b80279f190471c4ecccf49ad9886a785",
+      "observedAt": "2026-09-30T07:23:00.245881+00:00",
+      "command": "Final Node policy implementation, required gates, actual process matrices, browser request isolation and protected adopting-parent upgrade",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "specId": "lumine-refactor-product",
+      "acId": "AC-runtime",
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/实施与验收.md",
+      "sha256": "aa0b32a6fc09a1268d4355d7edc34401b80279f190471c4ecccf49ad9886a785",
+      "observedAt": "2026-09-30T07:23:00.245881+00:00",
+      "command": "Final Node policy implementation, required gates, actual process matrices, browser request isolation and protected adopting-parent upgrade",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "specId": "lumine-refactor-product",
+      "acId": "AC-distribution",
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/实施与验收.md",
+      "sha256": "aa0b32a6fc09a1268d4355d7edc34401b80279f190471c4ecccf49ad9886a785",
+      "observedAt": "2026-09-30T07:23:00.245881+00:00",
+      "command": "AC-012 current Node baseline: same-source isolated distributions, request-isolated text/query/five Mermaid kinds, Unicode stable references, service restart and protected existing assets",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-diagrams.tsx",
+          "sha256": "69bbe1e49497dad3955cef18c39908bb4dd3d40caedbeb2c4a7de301835a25c6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
+          "sha256": "c6cd3097124ffe9e48bf51ffcc5ec86786fea5618a923636e1da37cb9b1483c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/reader-model.ts",
+          "sha256": "000bab29b9e97e3537e4ddd72347ceea7809b675a6190c8fc81901e45a3e1178"
+        }
+      ],
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-012",
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/actual-node-matrix.json",
+      "sha256": "e1c42d9ec29b208585c3499307209a8b6655cc07c58aa6fd616c57a787058090",
+      "observedAt": "2026-09-30T07:05:25.242814+00:00",
+      "command": "341 actual process operations and 8 full supported distribution combinations plus current24 smoke",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/config-launchers-actual.json",
+      "sha256": "3d659f07a9be4c060886fcbf478ac3909b160bfed4b0a6567580a740f63ef511",
+      "observedAt": "2026-09-30T07:05:25.242814+00:00",
+      "command": "69 actual Node operations for final generated config launchers",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/browser-node22.json",
+      "sha256": "9cfa57629d675c8f0e1762a1af3e29395b90ac4992e90b0fe2147b41e433c5dc",
+      "observedAt": "2026-09-30T07:05:25.242814+00:00",
+      "command": "Actual22.18 browser text, query and five diagrams under request isolation",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/browser-node24.json",
+      "sha256": "003519ee44a128a6a195db2725670caf69a92f86010f7c082111ce749e829eab",
+      "observedAt": "2026-09-30T07:05:25.242814+00:00",
+      "command": "Actual24.11 browser text, query and five diagrams under request isolation",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/parent-protection-final.json",
+      "sha256": "f83f015e7e6584f58f8b404e08778994733f9b15030580cbfd2648f9bdd44843",
+      "observedAt": "2026-09-30T07:05:25.242814+00:00",
+      "command": "Independent read-only parent ownership/post-hash and child-protection review",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/old-tool-recovery.json",
+      "sha256": "bcd4aaf06984ad0ee8bf3e8677250688d8e5767961ed4e6c12e1f0ec73509adc",
+      "observedAt": "2026-09-30T07:05:25.242814+00:00",
+      "command": "Retained independent old tool inspect/adopt/rollback under actual18.20.8",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/final-gates.json",
+      "sha256": "3d0fefc3b9a6782314c3437e11909006818cdba6d151735d2e3fba69ea1bf7b5",
+      "observedAt": "2026-09-30T07:05:25.242814+00:00",
+      "command": "Final required source/build/distribution gates",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact": "docs/validation/lumine-node-runtime/2026-09-30/unicode-stable-lifecycle.json",
+      "sha256": "14e01a6e837b360c59cb55f108f8eec7ec7156cf75cbeab372773b1c02658aac",
+      "observedAt": "2026-09-30T07:23:00.245881+00:00",
+      "command": "Actual22.18/24.11 Unicode path and stable ID CLI/HTTP checks, two service start-stop cycles, protected-file hashes",
+      "environment": "macOS arm64; actual22.18.0/24.11.0 full Skill/Plugin fixtures, actual24.14.0 narrower smoke; negative18.20.8/20.19.0/22.17.0; real parent Hook not observed",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "outcome": "passed"
+    }
+  ],
+  "knowledge": {
+    "required": true,
+    "status": "synchronized",
+    "refs": [
+      "lumine-architecture",
+      "lumine-adoption",
+      "lumine-task-check",
+      "lumine-adapters"
+    ],
+    "sync": {
+      "contractVersion": 2,
+      "assessedAt": "2026-09-30T07:05:25.242814+00:00",
+      "changedSources": [
+        {
+          "repoId": "project",
+          "path": "package.json",
+          "sha256": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/harness/cli",
+          "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli-main.ts",
+          "sha256": "7e6de10094b871639d9a3b981f915e44ecd8713b3b28553a31c1a0487c051ab9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-cli.ts",
+          "sha256": "dbc8c1b8135e9f558f1e21e36c9d07359af8f0c8ed57f00cd5298d46fd497759"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "sha256": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "sha256": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "sha256": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts",
+          "sha256": "f092f957dc5fa52b2790b46dff9fafd89277b9b686bb5c7380f62d5a2c3e4109"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "sha256": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "sha256": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "sha256": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts",
+          "sha256": "422dffa2f3762239366ff0892694a0bcb27e6c4429f52b3b190a59fb791c9a01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts",
+          "sha256": "e5d474d0f54f35e71cdc70ce73ddeb71f830bb7ed600193177645b3415993a0f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "sha256": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "sha256": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts",
+          "sha256": "ba954d3f3c702680ba4c46a2b3893e08b5ab6ccad818ae2f01901d53220f291a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts",
+          "sha256": "0dacf03e9deb8e876edbef9112517203af5ccf1fa11c87975aec6688407bbe61"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "sha256": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "sha256": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "sha256": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "sha256": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "sha256": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "sha256": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "sha256": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "sha256": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "sha256": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "sha256": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "sha256": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "sha256": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts",
+          "sha256": "24859ba223ac6bde49ee6c7800162e8ff3fdcd292cca5e4e5adb542a975b7235"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts",
+          "sha256": "1c80344058ac58f409179f716405e69f3a9014f12fbc68f694f406a483f3dd68"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts",
+          "sha256": "6f284fc1a24bc3111059af2c848bb3d57c2174b6778894d0a2d82c2e7a6f5870"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts",
+          "sha256": "4dc0e95f729c58745db417bbd24d4d4537f25d471a6d8fb5305eb0eb2789164f"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts",
+          "sha256": "e199091cb4896774ddafaf6ab9bb72aeb935bd4b1b9ad9d0fda59b4e5b55ad0c"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts",
+          "sha256": "6ef7a1f7e8de8f4b14ae2cb7f766d7afe698da19e3ef514c08302b6f8b99701a"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "sha256": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "sha256": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "sha256": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "sha256": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "sha256": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check-main.ts",
+          "sha256": "e3bb76c89a9b7f915a6c16882a7c66c21db2fb595b96161823b3856ab50cdb4d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/check.ts",
+          "sha256": "8db61984f1d9663ab709acc6cb7d496648cff98c0dff75ed6ac911396761e163"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "sha256": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+          "sha256": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
+          "sha256": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "sha256": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki-main.ts",
+          "sha256": "c0b7dd4fc926030085020ccc2c726d013319031d52e40aeb515a6eed66f70449"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki.ts",
+          "sha256": "34bc6d6745c9bf005a8081c724827a5933924e13d620fb38111c1696485e59fe"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "sha256": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+        }
+      ],
+      "verifiedScope": [
+        "Node22.18/24.11 support and old-version rejection before project operations",
+        "CLI/Hook config and actual-process versus host receipt boundaries",
+        "Protected migration and retained old recovery tool scope",
+        "Four revised text pages; no full library, human acceptance, real parent Hook or Bun acceptance claim"
+      ],
+      "decisions": [
+        {
+          "ref": "lumine-architecture",
+          "action": "revised",
+          "sha256": "890cf6a1cf5a854475a234b98335ba8ef6e446220ecdd5bcbaa9fff3a2c2ddc6",
+          "reason": "Verified current Node policy, entry/source split and actual-process evidence limits; revised protected text and source/watch scope, independently reviewed only this Node change."
+        },
+        {
+          "ref": "lumine-adoption",
+          "action": "revised",
+          "sha256": "c94b3868035cf44f6dcc47a4cc914d4e048d093449df0a5da31e9f15d39fe0db",
+          "reason": "Verified current Node policy, entry/source split and actual-process evidence limits; revised protected text and source/watch scope, independently reviewed only this Node change."
+        },
+        {
+          "ref": "lumine-task-check",
+          "action": "revised",
+          "sha256": "6a7c1c3e1fc769f5b345414663c92782fe3c4e344f05e8c6cd4e6fe7263076c0",
+          "reason": "Verified current Node policy, entry/source split and actual-process evidence limits; revised protected text and source/watch scope, independently reviewed only this Node change."
+        },
+        {
+          "ref": "lumine-adapters",
+          "action": "revised",
+          "sha256": "c4505f7da8323b9a4fb62b161c27fba387cd6c0dbaf3b6bcd44b6a5d7d9c258d",
+          "reason": "Verified current Node policy, entry/source split and actual-process evidence limits; revised protected text and source/watch scope, independently reviewed only this Node change."
+        }
+      ]
+    }
+  },
+  "summary": "全局Node实现与两种分发、341+69项真实进程矩阵、两版请求隔离浏览器、中文稳定引用/服务生命周期补验和父仓受管同步完成；文件保护通过，四页知识同步及限定独立复核完成。三项适用AC的本次要求通过；原Wiki其他AC及人类接受不升级。正式父仓最近实际记录均早于最终升级，等待真实新入口Hook与实际Node事件后finalize，非阶段授权问题；未提交、推送或发布。"
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-08T04:57:26.400865+00:00",
+  "projects": {
+    "adopting-parent": {
+      "checkedFiles": 1871,
+      "changedOrMissing": [],
+      "unchanged": true
+    },
+    "lumine-source": {
+      "checkedFiles": 385,
+      "changedOrMissing": [],
+      "unchanged": true
+    }
+  },
+  "scope": "预固定385/1871份文件逐项核对，验证正文另存；查询本机缓存未列入基线。"
+}

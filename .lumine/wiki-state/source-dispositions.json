@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "entries": {
+    "project:scripts/build-reader.test.ts": {
+      "file": "project:scripts/build-reader.test.ts",
+      "topicId": "lumine-knowledge-reader",
+      "scope": {
+        "repoId": "project",
+        "path": "scripts"
+      },
+      "fingerprint": "0feb15abdb03c21abadbe8b8dc307ec92d918ee1acf97055af74db6c193ac59f",
+      "topicFingerprint": "aa4bb5d5f55c0018106e10adb5a1b15ab246c1abf2d68d7d25ba9a7211acc8f1",
+      "scopeFingerprint": "3968d601fd9275278e6a709c884868426db7c616934205dff07a693b2b97dd4b",
+      "action": "covered",
+      "reason": "构建资源和许可保护由阅读器现有主题解释；此文件是专项回归证据。",
+      "decidedAt": "2026-09-30T04:47:24.397Z"
+    },
+    "project:scripts/reader-diagram-recovery.test.ts": {
+      "file": "project:scripts/reader-diagram-recovery.test.ts",
+      "topicId": "lumine-knowledge-reader",
+      "scope": {
+        "repoId": "project",
+        "path": "scripts"
+      },
+      "fingerprint": "1541dbff2afc061bcb9e105503feb2f5a6ff24de69497999b39fa2002dc72baf",
+      "topicFingerprint": "aa4bb5d5f55c0018106e10adb5a1b15ab246c1abf2d68d7d25ba9a7211acc8f1",
+      "scopeFingerprint": "3968d601fd9275278e6a709c884868426db7c616934205dff07a693b2b97dd4b",
+      "action": "covered",
+      "reason": "动态图解失败和整页恢复由阅读器现有主题解释；此文件是专项回归证据。",
+      "decidedAt": "2026-09-30T04:47:24.495Z"
+    },
+    "project:skills/lumine-harness/src/browser/index.html": {
+      "file": "project:skills/lumine-harness/src/browser/index.html",
+      "topicId": "lumine-knowledge-reader",
+      "scope": {
+        "repoId": "project",
+        "path": "skills/lumine-harness/src"
+      },
+      "fingerprint": "56f92da80a93a5bc14867b4ee6b7db2c1a8bfa1ff3c250a68000b6324189dc7a",
+      "topicFingerprint": "aa4bb5d5f55c0018106e10adb5a1b15ab246c1abf2d68d7d25ba9a7211acc8f1",
+      "scopeFingerprint": "3968d601fd9275278e6a709c884868426db7c616934205dff07a693b2b97dd4b",
+      "action": "covered",
+      "reason": "阅读器入口壳属于现有组件与本地分发主题，没有新增业务机制。",
+      "decidedAt": "2026-09-30T04:47:24.593Z"
+    }
+  }
+}

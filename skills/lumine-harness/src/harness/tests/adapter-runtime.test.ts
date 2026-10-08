@@ -1,0 +1,147 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { adapterStatus, formatAdapterResult } from "../adapter-manager.ts";
+import { observeRuntimeProcess } from "../core/runtime-environment.ts";
+import { resolveHarnessRuntimeRoot } from "../core/runtime-layout.ts";
+import { appendVerificationEvent, beginVerificationRun, verifyRuntimeEvidence } from "../core/verification.ts";
+import { initializeSessionState } from "../core/work-status.ts";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const HARNESS = resolveHarnessRuntimeRoot(import.meta.url);
+
+function writeJson(file: string, value: unknown): void {
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, `${JSON.stringify(value)}\n`, "utf8");
+}
+
+function fixture(): string {
+  const root = mkdtempSync(path.join(os.tmpdir(), "lumine-adapter-runtime-"));
+  writeJson(path.join(root, ".lumine/root.json"), { schemaVersion: 2, kind: "lumine-root" });
+  writeJson(path.join(root, ".lumine/project.json"), { schemaVersion: 2, selectedAdapters: ["qoder"], locale: "zh-CN" });
+  writeJson(path.join(root, ".lumine/adapter-capabilities.json"), JSON.parse(readFileSync(path.join(HARNESS, "adapter-capabilities.json"), "utf8")));
+  writeJson(path.join(root, ".qoder/settings.json"), {});
+  return root;
+}
+
+function receipt(root: string): { file: string; event: NonNullable<ReturnType<typeof appendVerificationEvent>> } {
+  beginVerificationRun(root, "qoder", { verificationRunId: "runtime-fixture" });
+  const input = { product: "qoder" as const, event: "session_start" as const, sessionId: "runtime-test", cwd: root };
+  initializeSessionState(root, input);
+  const event = appendVerificationEvent(root, input, {
+    // A Hook payload cannot supply or override the observed process runtime.
+    raw: { processRuntime: { runtime: "node", version: "18.20.8", support: "supported" } }
+  });
+  assert.ok(event);
+  return { file: path.join(root, ".lumine/local/runtime/probes/runtime-fixture/events.jsonl"), event };
+}
+
+test("probe fixtures record the actual current process separately from the product host version", () => {
+  const root = fixture();
+  try {
+    const { event } = receipt(root);
+    assert.deepEqual(event.processRuntime, observeRuntimeProcess());
+    assert.equal(event.processRuntime?.version, process.versions.node);
+    const result = adapterStatus("qoder", { cwd: root });
+    assert.deepEqual(result.products[0].environment.checkProcess, observeRuntimeProcess());
+    assert.equal(result.products[0].environment.hostProcess.status, "observed");
+    assert.equal(result.products[0].environment.hostProcess.runtime?.version, process.versions.node);
+    assert.equal(result.products[0].evidence.hostVersion, "unknown");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("legacy receipt fixtures never infer the Hook runtime from the terminal", () => {
+  const root = fixture();
+  try {
+    const { file, event } = receipt(root);
+    delete event.processRuntime;
+    writeFileSync(file, `${JSON.stringify(event)}\n`, "utf8");
+    assert.equal(verifyRuntimeEvidence(root, "qoder").processRuntime, undefined);
+    const result = adapterStatus("qoder", { cwd: root });
+    assert.equal(result.products[0].environment.hostProcess.status, "not_observed");
+    assert.equal(result.products[0].environment.hostProcess.runtime, null);
+    assert.equal(result.products[0].environment.checkProcess.version, process.versions.node);
+    assert.match(formatAdapterResult(result), /终端版本不能代表宿主 Hook/);
+    const english = adapterStatus("qoder", { cwd: root, locale: "en" });
+    assert.match(formatAdapterResult(english), /terminal version does not establish the host Hook runtime/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("synthetic unsupported Hook receipts cannot inherit readiness from a supported terminal or stored pass label", () => {
+  const root = fixture();
+  try {
+    const { file, event } = receipt(root);
+    event.processRuntime = { source: "actual_process", runtime: "node", version: "20.19.0", support: "supported" };
+    writeFileSync(file, `${JSON.stringify(event)}\n`, "utf8");
+    const result = adapterStatus("qoder", { cwd: root, locale: "en" });
+    assert.equal(result.products[0].environment.hostProcess.runtime?.support, "unsupported");
+    assert.equal(result.products[0].environment.checkProcess.support, "supported");
+    assert.equal(result.readiness, "connection_error");
+    assert.match(result.nextSteps[0], /Node.js 24 LTS/);
+    assert.doesNotMatch(result.nextSteps[0], /[\u4e00-\u9fff]/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("Bun observations keep the Node compatibility field separate and unverified", () => {
+  for (const node of ["20.19.0", "22.18.0", "24.11.0"]) {
+    const result = observeRuntimeProcess({ bun: "1.3.0", node });
+    assert.equal(result.runtime, "bun");
+    assert.equal(result.version, "1.3.0");
+    assert.equal(result.nodeCompatibilityVersion, node);
+    assert.equal(result.support, "unverified");
+  }
+});
+
+test("standalone installed dispatcher fixtures find the current lumine-root marker", () => {
+  const source = import.meta.url.endsWith(".ts");
+  const entries = [
+    ["kimi", "adapters/kimi/installed-dispatcher"],
+    ["zcode", "adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher"]
+  ];
+  for (const [product, relative] of entries) {
+    const root = fixture();
+    try {
+      const dispatch = path.join(root, ".lumine/adapters", product, "hooks/dispatch.mjs");
+      mkdirSync(path.dirname(dispatch), { recursive: true });
+      const handler = product === "kimi" ? "handleKimiHook" : "handleZCodeHook";
+      writeFileSync(dispatch, `export async function ${handler}() { return { exitCode: 0, stdout: "found-current-root" }; }\n`, "utf8");
+      const entry = path.resolve(HERE, "..", `${relative}.${source ? "ts" : "mjs"}`);
+      const result = spawnSync(process.execPath, [...(source ? ["--import", "tsx"] : []), entry], {
+        cwd: source ? process.cwd() : root, input: JSON.stringify({ cwd: root }), encoding: "utf8"
+      });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(result.stdout, "found-current-root");
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  }
+});
+
+
+test("OpenCode adapter fixture preserves context hooks and records audit-only idle events", async () => {
+  const root = fixture();
+  try {
+    const module = import.meta.url.endsWith(".ts")
+      ? await import("../../opencode/plugins/harness.ts")
+      : await import("../adapters/opencode/plugin-main.ts");
+    const plugin = await module.HarnessPlugin({ directory: root });
+    const system = { system: [] as string[] };
+    const compact = { context: [] as string[] };
+    assert.ok(plugin["experimental.chat.system.transform"]);
+    assert.ok(plugin["experimental.session.compacting"]);
+    assert.ok(plugin.event);
+    await plugin["experimental.chat.system.transform"]({}, system);
+    await plugin["experimental.chat.system.transform"]({}, system);
+    await plugin["experimental.session.compacting"]({}, compact);
+    assert.equal(system.system.length, 1);
+    assert.deepEqual(compact.context, system.system);
+    await plugin.event({ event: { type: "session.idle" } });
+    const audit = JSON.parse(readFileSync(path.join(root, ".lumine/local/runtime/opencode/latest-audit.json"), "utf8"));
+    assert.equal(audit.action, "audit_only");
+    assert.equal(audit.stopGate, "unsupported");
+    assert.equal(audit.continuationDelivery, "manual_required");
+    assert.deepEqual(audit.processRuntime, observeRuntimeProcess());
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});

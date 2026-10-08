@@ -1,0 +1,725 @@
+{
+  "scope": "Final generated host locator increment; actual Node binaries, isolated fixtures only. Does not establish real host acceptance.",
+  "at": "2026-09-30T06:52:32.211177+00:00",
+  "recordCount": 69,
+  "allPassed": true,
+  "inputs": {
+    "scripts/build-hook-configs.ts": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6",
+    "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884",
+    "skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+    "skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+    "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b",
+    "skills/lumine-harness/src/adapter-launchers/codex-hooks.json": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156",
+    "skills/lumine-harness/src/adapter-launchers/trae-hooks.json": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725",
+    "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+  },
+  "records": [
+    {
+      "config": "codex/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "stop-gate",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "prompt-submit",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-before",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-after",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "stop",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "after-agent-response",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "missing-root-localized-preflight",
+      "actualNodeVersion": "18.20.8",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "stop-gate",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "prompt-submit",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-before",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-after",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "stop",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "after-agent-response",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "missing-root-localized-preflight",
+      "actualNodeVersion": "20.19.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "stop-gate",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "prompt-submit",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-before",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-after",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "stop",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "after-agent-response",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true,
+      "diagnosticCode": "UNSUPPORTED_NODE_RUNTIME"
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "missing-root-localized-preflight",
+      "actualNodeVersion": "22.17.0",
+      "outcome": "passed",
+      "noRootRead": true,
+      "stdinUntouched": true,
+      "projectUnchanged": true
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "hookSpecificOutput"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "stop-gate",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "prompt-submit",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "hookSpecificOutput"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-before",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-after",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "stop",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "hookSpecificOutput"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "additional_context"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "after-agent-response",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "22.18.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "hookSpecificOutput"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "stop-gate",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "prompt-submit",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "hookSpecificOutput"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-before",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-after",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "stop",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "hookSpecificOutput"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "additional_context"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "after-agent-response",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "24.11.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "hookSpecificOutput"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "codex/hooks.json",
+      "operation": "stop-gate",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "prompt-submit",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "hookSpecificOutput"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-before",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "tool-after",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "qoder/settings.json",
+      "operation": "stop",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "hookSpecificOutput"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "trae/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "session-start",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [
+        "additional_context"
+      ],
+      "businessUnchanged": true
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "after-agent-response",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    },
+    {
+      "config": "cursor/hooks.json",
+      "operation": "stop",
+      "actualNodeVersion": "24.14.0",
+      "outcome": "passed",
+      "protocol": "native Core Hook in isolated fixture",
+      "stdoutKeys": [],
+      "businessUnchanged": true
+    }
+  ],
+  "generatedConfigHashes": {
+    "codex/hooks.json": "3eec72eac2e2abaaa48f7380f9d49e0ae0c352e0dab1d66fac5884ef12504ba0",
+    "qoder/settings.json": "a8537c8386f30c58be3baf0afd3ca42b741fe82a1167878bb9000cf0ec7c41ab",
+    "trae/hooks.json": "72d9eaf702015af118497100ebf353480c63a36243ac5dd65c2a1350366f6cbb",
+    "cursor/hooks.json": "5590222322324f7210fef4d2cf649cef1c2c48190c63bfdeb5a7cb96478f5214"
+  },
+  "testedRuntime": {
+    "scope": "Compiled Core and Hook assets copied before locator generation; unchanged implementation baseline",
+    "fileCount": 107,
+    "treeSha256": "6412e6ddb42bccd4884fbc673ce4e5b811f2920971a62ae329d4ac1cdd3cffe4",
+    "entrypoints": {
+      "adapters/codebuddy/hooks/dispatch.mjs": "6e996c9e052e5580d6b040658223e7990292d29ffebcd910b944115ccafba783",
+      "adapters/codex/hooks/session-start.mjs": "f3c9dd985ca6f7d1197a1889537ec16ca0c7bda3a7d4b21664577eb5dd2dd76e",
+      "adapters/codex/hooks/stop-gate.mjs": "6002c1c0c3ebf16bfdfcfe8ba8b1557ffc1b01fa4defc88571bf50ee4541a073",
+      "adapters/cursor/hooks/after-agent-response.mjs": "f5139001219cec8b1b377f69dcb3d3d26db5877cecf09b63d7ba2bef3b3dcf98",
+      "adapters/cursor/hooks/session-start.mjs": "34fa135c3074161a5e5a57c65593b796a7ec8ac0dc8e5537773f3f84e98c89e1",
+      "adapters/cursor/hooks/stop.mjs": "55205adf8c62b6f754b0b86ef23e2c134b5401a654004b2a98130b81b0c34e5c",
+      "adapters/deepseek-harness/hooks/dispatch.mjs": "51db917a42c9dea0644a419fa2de4901771b04a1d96670e62ef94073eb6793a1",
+      "adapters/kimi/hooks/dispatch.mjs": "28bae52117c4bbc07dfbe3d5d8d317ccf1daf153979e308e88585105652447c9",
+      "adapters/qoder/hooks/prompt-submit.mjs": "5823d9d261501e9d7cc4f89a52ed899ffe2c16a88b8894c70d8a7cb5bba6c2f5",
+      "adapters/qoder/hooks/stop.mjs": "fa1beca57d5a2a418c92c89b9c4f5b14bf51d0c7e3a50d09301ba8cda1923cf3",
+      "adapters/qoder/hooks/tool-after.mjs": "e7dfa565080aace493fe7e23ee16d71318a1ee4b2a1f442cabf96cbbfc5e981b",
+      "adapters/qoder/hooks/tool-before.mjs": "76d9aa2f4b72b401cadb34f5607bd1e84ff58b9680eebfe5f7736eb29d665bfc",
+      "adapters/trae/hooks/session-start.mjs": "f65ac0eeaabfee59ad2b7dfd92afe6ab3ef62da573fa0d40f9a1890f0ee512a7",
+      "adapters/trae/hooks/stop.mjs": "93bc6262be2c4bc8d9878ddcb0da997019d6f2da8b68af12a0d76155a681d42e",
+      "adapters/zcode/hooks/dispatch.mjs": "8233f39e1d56d057e7c52a4bb15bdd68f46386e37c4c2f805323f140b58d7917",
+      "adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.mjs": "eb12b79979974903ad7b6f2e0f390490a17f2abbb390b8c89e7b0c446719cf15"
+    }
+  }
+}

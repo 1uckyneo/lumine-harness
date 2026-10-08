@@ -5,19 +5,6 @@ summary: "{{summary}}"
 type: architecture
 status: current
 locale: zh-CN
-tags: []
-aliases: []
-repositories: ["{{repo_id}}"]
-sources:
-  - id: source-1
-    repoId: "{{repo_id}}"
-    path: "{{relative_source_path}}"
-relations: []
-sections: []
-watchScopes:
-  - repoId: "{{repo_id}}"
-    path: "{{module_relative_path}}"
-diagrams: []
 ---
 
 # {{title}}
@@ -44,4 +31,21 @@ diagrams: []
 
 ## 来源与关联
 
-<!-- 引用具体来源及相关 Wiki、Spec、Plan；源码、运行观察和部署结论分开。 -->
+<!-- 引用具体来源及相关 Wiki、Spec、Plan；源码、运行观察和部署结论分开。文末结构化块用于机器定位，不作为正文展示。 -->
+
+<!-- lumine-wiki-metadata:v1
+{
+  "tags": [],
+  "aliases": [],
+  "repositories": ["{{repo_id}}"],
+  "sources": [
+    { "id": "source-1", "repoId": "{{repo_id}}", "path": "{{relative_source_path}}" }
+  ],
+  "relations": [],
+  "sections": [],
+  "watchScopes": [
+    { "repoId": "{{repo_id}}", "path": "{{module_relative_path}}" }
+  ],
+  "diagrams": []
+}
+-->

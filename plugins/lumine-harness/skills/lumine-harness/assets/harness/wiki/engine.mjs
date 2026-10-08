@@ -4,9 +4,10 @@ import { atomicWrite, configFingerprint, containedPath, hash, readJson, relative
 import { applyTransaction, diskText, jsonText, pendingTransactions, recoverTransactions, statePath, visibleJson } from "./transactions.mjs";
 import { COVERAGE_PATH, readCoverage, validateCoverage } from "./coverage.mjs";
 import { resolveAliasReference } from "./references.mjs";
-import { assertId, baselineFor, findDocument, listDocuments, parseDocument } from "./documents.mjs";
+import { assertId, baselineFor, findDocument, formatWikiDocument, isStructuredWikiDocument, listDocuments, parseDocument } from "./documents.mjs";
 import { threeWayMerge } from "./merge.mjs";
 import { searchKnowledge } from "./search.mjs";
+import { sourceDispositionStatuses } from "./dispositions.mjs";
 import { existsSync, readdirSync, realpathSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 
@@ -135,11 +136,11 @@ function queryKnowledge(root, query, options = {}) {
 	const documents = listKnowledge(root, [options.collection ?? "wiki"]).filter((document) => (!options.repoId || document.repositories.includes(options.repoId)) && (!options.type || document.type === options.type) && (!options.freshness || document.freshness === options.freshness));
 	return searchKnowledge(documents, query, Math.min(options.limit ?? config.maxCards, 30), Math.min(options.maxChars ?? config.maxContextChars, 2e5));
 }
-function resolveReference(root, reference) {
+function resolveKnowledgeReference(root, reference) {
 	return resolveAliasReference(reference, visibleJson(root, ".lumine/wiki-state/document-aliases.json", {}));
 }
 function showKnowledge(root, reference) {
-	const resolved = resolveReference(root, reference), [id, fragment] = resolved.split("#");
+	const resolved = resolveKnowledgeReference(root, reference), [id, fragment] = resolved.split("#");
 	const document = observed(root, findDocument(root, id), conflictIds(root));
 	if (!fragment) return document;
 	const section = document.sections.find((item) => item.id === fragment);
@@ -210,7 +211,7 @@ function relatedKnowledge(root, reference, options = {}) {
 		});
 	}
 	const selected = edges.flatMap((edge) => {
-		const outgoing = edge.from === document.id, incoming = resolveReference(root, edge.target).split("#")[0] === document.id;
+		const outgoing = edge.from === document.id, incoming = resolveKnowledgeReference(root, edge.target).split("#")[0] === document.id;
 		if (!(outgoing && direction !== "in") && !(incoming && direction !== "out")) return [];
 		const target = outgoing ? edge.target : edge.from;
 		try {
@@ -248,6 +249,8 @@ function scanWiki(root) {
 		const config = wikiConfig(root), documents = listKnowledge(root), referenced = new Set(documents.flatMap((document) => document.sources.map((source) => `${source.repoId}:${source.path}`))), cache = new Map();
 		const environment = localObservationContext(root).environment, observations = [];
 		const all = snapshotSources(root, [], config.watchScopes, cache), checkedAt = new Date().toISOString();
+		const unreferenced = Object.fromEntries(Object.entries(all.files).filter(([key]) => !referenced.has(key)));
+		const classification = sourceDispositionStatuses(root, unreferenced), sourceDispositions = classification.statuses;
 		const scanned = documents.map((document) => {
 			const baseline = baselineFor(root, document.id), current = snapshotSources(root, document.sources, scopesFor(root, document), cache);
 			const freshness = current.missing.length ? "missing-source" : !baseline ? "unverified" : !snapshotEqual(baseline.sources, current) ? "stale" : baseline.appliedRevision !== document.revision ? "unverified" : "current";
@@ -275,13 +278,34 @@ function scanWiki(root) {
 		return {
 			checkedAt,
 			documents: scanned,
-			unclassifiedFiles: Object.keys(all.files).filter((key) => !referenced.has(key)),
+			unclassifiedFiles: sourceDispositions.filter((item) => item.status !== "current").map((item) => item.file),
+			sourceDispositions,
+			classificationIssues: classification.issues,
 			missingScopes: all.missing
 		};
 	});
 }
 function uniqueScopes(scopes) {
 	return [...new Map(scopes.map((scope) => [`${scope.repoId}:${scope.path}`, scope])).values()];
+}
+function sameSourceRefs(left, right) {
+	const ordered = (refs) => refs.map((ref) => ({
+		id: ref.id,
+		repoId: ref.repoId,
+		path: ref.path,
+		startLine: ref.startLine ?? null,
+		endLine: ref.endLine ?? null,
+		kind: ref.kind ?? null,
+		note: ref.note ?? null
+	})).sort((a, b) => a.id.localeCompare(b.id));
+	return JSON.stringify(ordered(left)) === JSON.stringify(ordered(right));
+}
+function sameWatchScopes(left, right) {
+	const ordered = (scopes) => scopes.map((scope) => ({
+		repoId: scope.repoId,
+		path: scope.path
+	})).sort((a, b) => `${a.repoId}:${a.path}`.localeCompare(`${b.repoId}:${b.path}`));
+	return JSON.stringify(ordered(left)) === JSON.stringify(ordered(right));
 }
 function prepareUpdate(root, references = [], manifest) {
 	return withWikiLock(root, () => {
@@ -300,6 +324,10 @@ function prepareUpdate(root, references = [], manifest) {
 			if (selected.has(change.id) || !["create", "update"].includes(change.kind)) throw new Error("CHANGE_DUPLICATE_OR_INVALID");
 			selected.add(change.id);
 			if (change.group !== undefined && !/^[\p{L}\p{N}_.:-]{1,120}$/u.test(change.group)) throw new Error("CHANGE_GROUP_INVALID");
+			if (change.replaceSources !== undefined && typeof change.replaceSources !== "boolean" || change.replaceWatchScopes !== undefined && typeof change.replaceWatchScopes !== "boolean") throw new Error("CHANGE_REPLACE_INVALID");
+			if ((change.replaceSources || change.replaceWatchScopes) && change.kind !== "update") throw new Error("CHANGE_REPLACE_UPDATE_ONLY");
+			if (change.replaceSources && (!Array.isArray(change.sourceRefs) || !change.sourceRefs.length)) throw new Error("CHANGE_REPLACE_SOURCES_REQUIRED");
+			if (change.replaceWatchScopes && (!Array.isArray(change.watchScopes) || !change.watchScopes.length)) throw new Error("CHANGE_REPLACE_SCOPES_REQUIRED");
 			const document = change.kind === "update" ? findDocument(root, change.id, ["wiki"]) : null;
 			if (change.kind === "create" && ids.has(change.id)) throw new Error("DOCUMENT_ID_DUPLICATE");
 			const target = document?.path ?? relativePath(change.path ?? "");
@@ -310,9 +338,9 @@ function prepareUpdate(root, references = [], manifest) {
 				paths.add(target.normalize("NFC").toLowerCase());
 			}
 			if (document && change.path && change.path !== document.path) throw new Error("RENAME_SEPARATELY");
-			const refs = [...new Map([...document?.sources ?? [], ...change.sourceRefs ?? []].map((source) => [source.id, source])).values()];
+			const refs = [...new Map([...change.replaceSources ? [] : document?.sources ?? [], ...change.sourceRefs ?? []].map((source) => [source.id, source])).values()];
 			if (!refs.length) throw new Error("UPDATE_SOURCES_REQUIRED");
-			const scopes = uniqueScopes([...document ? scopesFor(root, document) : change.watchScopes?.length ? [] : wikiConfig(root).watchScopes, ...change.watchScopes ?? []]);
+			const scopes = uniqueScopes([...change.replaceWatchScopes ? [] : document ? scopesFor(root, document) : change.watchScopes?.length ? [] : wikiConfig(root).watchScopes, ...change.watchScopes ?? []]);
 			const sources = snapshotSources(root, refs, scopes, cache);
 			if (sources.missing.length) throw new Error(`UPDATE_SOURCES_MISSING:${sources.missing.join(",")}`);
 			return {
@@ -325,7 +353,9 @@ function prepareUpdate(root, references = [], manifest) {
 				baseline: document ? baselineFor(root, document.id) : null,
 				sources,
 				sourceRefs: refs,
-				watchScopes: scopes
+				watchScopes: scopes,
+				replaceSources: change.replaceSources,
+				replaceWatchScopes: change.replaceWatchScopes
 			};
 		});
 		const packet = {
@@ -437,9 +467,12 @@ function candidateMutations(root, unit, candidate, candidatePath) {
 		},
 		mutations: []
 	});
-	const parsed = parseDocument(candidate.markdown, unit.path);
+	const candidateMarkdown = unit.kind === "create" || isStructuredWikiDocument(unit.currentMarkdown ?? "") ? formatWikiDocument(candidate.markdown, unit.path) : candidate.markdown;
+	const parsed = parseDocument(candidateMarkdown, unit.path);
 	if (parsed.id !== unit.id || candidate.path && candidate.path !== unit.path) return result("invalid", "Identity or path changed; rename separately.");
 	if (parsed.issues.length) return result("invalid", parsed.issues.join(", "));
+	if (unit.replaceSources && !sameSourceRefs(parsed.sources, unit.sourceRefs)) return result("invalid", "Candidate sources differ from the explicit replacement.");
+	if (unit.replaceWatchScopes && !sameWatchScopes(scopesFor(root, parsed), unit.watchScopes)) return result("invalid", "Candidate watch scopes differ from the explicit replacement.");
 	const currentSources = snapshotSources(root, unit.sourceRefs, unit.watchScopes);
 	if (!snapshotEqual(unit.sources, currentSources)) return result("source-drift", "Sources changed after preparation; preserve the candidate and prepare again.");
 	const scopes = scopesFor(root, parsed);
@@ -452,27 +485,33 @@ function candidateMutations(root, unit, candidate, candidatePath) {
 	const current = diskText(root, unit.path);
 	if (unit.kind === "create" && current !== null) return result("conflict", "Another writer created this path.");
 	if (unit.kind !== "create" && current === null) return result("conflict", "The document was removed after preparation.");
-	if (unit.kind !== "create" && !baseline && candidate.markdown !== current) return result("protected", "Existing document has no generation baseline; preserve it and review it first.");
+	if (unit.kind !== "create" && !baseline && candidateMarkdown !== current) return result("protected", "Existing document has no generation baseline; preserve it and review it first.");
 	const merged = unit.kind === "create" ? {
 		clean: true,
-		content: candidate.markdown
-	} : threeWayMerge(baseline?.generatedMarkdown ?? current, current, candidate.markdown);
+		content: candidateMarkdown
+	} : threeWayMerge(baseline?.generatedMarkdown ?? current, current, candidateMarkdown);
 	if (!merged.clean) return result("conflict", "Human changes overlap the candidate. Both versions remain available.");
 	const applied = parseDocument(merged.content, unit.path);
 	if (applied.id !== unit.id) return result("conflict", "Merged identity changed; preserve the human version and prepare the correct document again.");
 	if (applied.issues.length) return result("conflict", applied.issues.join(", "));
+	if (unit.replaceSources && !sameSourceRefs(applied.sources, unit.sourceRefs)) return result("conflict", "Merged sources differ from the explicit replacement.");
+	if (unit.replaceWatchScopes && !sameWatchScopes(scopesFor(root, applied), unit.watchScopes)) return result("conflict", "Merged watch scopes differ from the explicit replacement.");
 	if (scopesFor(root, applied).some((scope) => !unit.watchScopes.some((old) => old.repoId === scope.repoId && old.path === scope.path))) return result("conflict", "Merged source scope was not prepared.");
 	const sources = snapshotSources(root, applied.sources, scopesFor(root, applied));
 	if (sources.missing.length) return result("conflict", "Merged human changes contain missing sources.");
 	for (const [key, fingerprint] of Object.entries(sources.fingerprints)) if ((unit.sources.fingerprints[key] ?? unit.sources.files[key]) !== fingerprint) return result("conflict", `Merged source was not prepared: ${key}`);
-	if (candidate.review) validateReview(candidate.review, parsed, candidateSources);
+	const review = candidate.review && candidateMarkdown !== candidate.markdown && candidate.review.revision === hash(candidate.markdown) ? {
+		...candidate.review,
+		revision: hash(candidateMarkdown)
+	} : candidate.review;
+	if (review) validateReview(review, parsed, candidateSources);
 	const checkedAt = new Date().toISOString();
 	const nextBaseline = {
 		schemaVersion: 2,
 		id: unit.id,
 		path: unit.path,
 		generation: (baseline?.generation ?? 0) + 1,
-		generatedMarkdown: candidate.markdown,
+		generatedMarkdown: candidateMarkdown,
 		appliedRevision: applied.revision,
 		sources,
 		updatedAt: checkedAt
@@ -503,12 +542,12 @@ function candidateMutations(root, unit, candidate, candidatePath) {
 			after: jsonText(observation)
 		}
 	];
-	if (candidate.review) {
+	if (review) {
 		const reviewPath = statePath("reviews", unit.id);
 		mutations.push({
 			path: reviewPath,
 			before: diskText(root, reviewPath),
-			after: jsonText(candidate.review)
+			after: jsonText(review)
 		});
 	}
 	return {
@@ -777,4 +816,4 @@ function checkWiki(root) {
 }
 
 //#endregion
-export { applyUpdate, checkWiki, inspectKnowledge, listKnowledge, loadWikiConfig, mapKnowledge, outlineKnowledge, prepareUpdate, queryKnowledge, recordSemanticReview, recordUpdateDecision, recoverWiki, relatedKnowledge, scanWiki, showKnowledge, sourceFingerprint };
+export { applyUpdate, checkWiki, inspectKnowledge, listKnowledge, loadWikiConfig, mapKnowledge, outlineKnowledge, prepareUpdate, queryKnowledge, recordSemanticReview, recordUpdateDecision, recoverWiki, relatedKnowledge, resolveKnowledgeReference, scanWiki, showKnowledge, sourceFingerprint };

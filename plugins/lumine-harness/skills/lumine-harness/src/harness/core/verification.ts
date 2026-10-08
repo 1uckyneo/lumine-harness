@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { observeRuntimeProcess, recordedRuntimeProcess, type RuntimeProcessObservation } from "./runtime-environment.ts";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { resolveProjectPath } from "./project-config.ts";
@@ -52,6 +53,7 @@ interface VerificationEvent {
   challengeHash: string | null;
   hostVersion: string | null;
   hostVersionSource: string;
+  processRuntime?: RuntimeProcessObservation;
   statusProtocolVersion?: number;
   userTurnRevision?: number;
   userTurnIdHash?: string | null;
@@ -104,6 +106,7 @@ export interface RuntimeVerificationResult {
   verificationRunId?: string;
   hostVersion?: string;
   hostVersionSource?: string;
+  processRuntime?: RuntimeProcessObservation;
   verifiedAt?: string;
   evidence?: string;
   message?: string;
@@ -248,6 +251,7 @@ export function appendVerificationEvent(
     challengeHash: challenge ? sha256(JSON.stringify(challenge)) : null,
     hostVersion: challenge?.hostVersion ?? null,
     hostVersionSource: challenge?.hostVersionSource ?? "unknown",
+    processRuntime: observeRuntimeProcess(),
     observations: Array.isArray(details.observations)
       ? [...new Set(details.observations.filter((item): item is AdapterCapabilityName => (
         typeof item === "string" && ADAPTER_CAPABILITIES.includes(item as AdapterCapabilityName)
@@ -400,6 +404,7 @@ export function verifyRuntimeEvidence(
     hostVersion: challenge.hostVersion,
     hostVersionSource: challenge.hostVersionSource ?? "unknown",
     verifiedAt: latestEvent.at,
+    processRuntime: recordedRuntimeProcess(latestEvent.processRuntime) ?? undefined,
     evidence,
     capabilities: summarizeCapabilities(product, run.events, evidence),
     messages: ["安全探针已经观察到真实会话事件；这只证明对应能力被观察到，不代表整个 Agent 已通过完整兼容性认证。"]

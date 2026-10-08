@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "fixedAt": "2026-10-08T04:52:39.569813+00:00",
+  "caseId": "source-evolution-table",
+  "question": "本轮只调查：桌面阅读一篇有18列表格、长代码标识符和长路径的Wiki时，应该让页面整体横向滚动，还是怎样定位当前实现的阅读方式？若仍出现单元格逐字竖排，应检查什么最小实现入口，正文长路径与表格文字必须使用同样的换行策略吗？请查当前知识与源码给出修改定位、机制及限制；能否据此宣称手机场景和任意列数的表格都已验收？",
+  "rubric": [
+    "准确定位prose表格外层局部overflow与单元格可读性样式；正文长路径与表格不必同策略。",
+    "指出当前min-width和normal换行规则已存在，不把调查建议当实施，定位回归范围。",
+    "能在来源演进后的当前Wiki找到新增认识并由源码核对；不靠历史答案复述。",
+    "当前桌面支持范围、源码与运行验收区分，不扩张为手机或任意表格保证。"
+  ],
+  "before": {
+    "source": {
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "sha256": "038808f71284659f1ebd5dc50c25497984dede2574780201e34265e7418f20dc",
+      "excerpt": [
+        ".prose th, .prose td { border: 1px solid var(--line); padding: 8px 10px; vertical-align: top; }"
+      ]
+    },
+    "knowledge": {
+      "id": "lumine-wiki-reader",
+      "generation": 11,
+      "sha256": "29a5ca0e658609126c5effbb72c31c300d47ed0ab5164dfcb2fcaba038eefa90",
+      "tableReadabilityParagraphPresent": false
+    }
+  },
+  "after": {
+    "source": {
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+      "excerpt": [
+        ".prose th, .prose td { min-width: 10ch; overflow-wrap: normal; word-break: normal; border: 1px solid var(--line); padding: 8px 10px; vertical-align: top; }"
+      ]
+    },
+    "knowledge": {
+      "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+      "sha256": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+      "tableReadabilityParagraphPresent": true
+    },
+    "protectedUpdates": [
+      "cd8ee2ed-dccf-4594-8198-ccc9fcaac5c8",
+      "d42c0af4-c2aa-466f-96dc-a9ebefb7f29e"
+    ]
+  },
+  "limits": [
+    "既有真实桌面表格修复及知识增量，未为本次样本制造源码变更。",
+    "旧CSS来自先前保留副本，不能证明副本中所有TS或README均为更早版本。",
+    "此处只核对明确不同的CSS规则及知识正文版本，不宣称长期可靠或人类接受。"
+  ]
+}

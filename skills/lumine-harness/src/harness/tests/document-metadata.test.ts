@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { contentHash, parseDocumentMetadata } from "../core/documents.ts";
 import { resolveCurrentDocument } from "../core/document-operations.ts";
-import { checkTask, saveTaskRecord } from "../core/task-contract.ts";
+import { checkTask } from "../core/task-contract.ts";
 
 const frontmatter = (metadata: string, body = "# 正文\nid: body-only\n") => `---\n${metadata}\n---\n${body}`;
 const json = JSON.stringify({ id: "knowledge-session", title: "会话与身份恢复", type: "mechanism", status: "current", aliases: ["登录恢复", "session: recovery"], specIds: [], priority: 2, enabled: false }, null, 2);
@@ -68,11 +68,11 @@ test("task knowledge refs resolve JSON Wiki IDs through current documents", () =
     write(".lumine/project.json", JSON.stringify({ schemaVersion: 2, workflowVersion: 2, locale: "zh-CN", repositories: [{ id: "root", path: "." }], wiki: { root: "docs/knowledge", watchScopes: [] } }));
     write("src/session.ts", code);
     write("docs/validation/metadata.txt", artifact);
-    saveTaskRecord(root, {
+    write(".lumine/tasks/metadata.json", `${JSON.stringify({
       schemaVersion: 2, taskId: "metadata", mode: "implement", goal: "Resolve stable knowledge identity", scope: "src/session.ts", acceptanceRefs: [],
       evidence: [{ artifact: "docs/validation/metadata.txt", sha256: contentHash(artifact), outcome: "passed", observedAt: new Date().toISOString(), command: "metadata fixture", environment: "local fixture", codeRefs: [{ repoId: "root", path: "src/session.ts", sha256: contentHash(code) }] }],
       knowledge: { required: true, status: "synchronized", refs: ["knowledge-session"] }
-    });
+    }, null, 2)}\n`);
     for (const metadata of [json, yaml]) {
       write(wikiFile, frontmatter(metadata));
       assert.equal(resolveCurrentDocument(root, "knowledge-session").file, wikiFile);

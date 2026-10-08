@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "scope": "independent_read_only_parent_codex_post_upgrade_host_evidence",
+  "checkedAt": "2026-09-30T07:19:45.586417Z",
+  "operation": "adapter status codex --root <adopting-project-root> --details --json",
+  "finalUpgrade": {
+    "proposalId": "d8ab1262-c961-4aaa-8bc0-e40ecc0bfcd7",
+    "appliedAt": "2026-09-30T06:52:41.944Z",
+    "journalStatus": "awaiting_host_verification",
+    "journalHostEvidenceSubmitted": false,
+    "selectedAdapters": [
+      "codex"
+    ]
+  },
+  "statusObservation": {
+    "generatedAt": "2026-09-30T07:12:10.254Z",
+    "configurationReadiness": "ready",
+    "runtimeEvidenceStatus": "failed",
+    "runtimeObservedAt": null,
+    "hostVersion": "unknown",
+    "environment": {
+      "checkProcess": {
+        "source": "actual_process",
+        "runtime": "node",
+        "version": "24.14.0",
+        "support": "supported"
+      },
+      "hostProcess": {
+        "status": "not_observed",
+        "runtime": null,
+        "observedAt": null
+      }
+    }
+  },
+  "existingActualReceiptMetadata": {
+    "codexProbes": [
+      {
+        "issuedAt": "2026-09-28T12:01:29.897Z",
+        "expiresAt": "2026-09-29T12:01:29.897Z",
+        "hostVersion": "26.924.22138",
+        "hostVersionSource": "local_bundle_metadata"
+      }
+    ],
+    "codexEventCount": 35,
+    "latestEventAt": "2026-09-29T10:34:16.441Z",
+    "latestSessionStartAt": "2026-09-29T09:57:30.529Z",
+    "postFinalApplyEventCount": 0,
+    "eventsContainingProcessRuntime": 0,
+    "eventsContainingEntryHash": 0,
+    "latestSessionStateUpdatedAt": "2026-09-29T10:34:16.440Z",
+    "postFinalApplySessionStateCount": 0
+  },
+  "currentEntryHashes": [
+    {
+      "relativePath": ".lumine/adapters/codex/hooks/session-start.mjs",
+      "currentSHA256": "f3c9dd985ca6f7d1197a1889537ec16ca0c7bda3a7d4b21664577eb5dd2dd76e",
+      "proposalSHA256": "f3c9dd985ca6f7d1197a1889537ec16ca0c7bda3a7d4b21664577eb5dd2dd76e",
+      "matchesFinalProposal": true
+    },
+    {
+      "relativePath": ".lumine/adapters/codex/hooks/stop-gate.mjs",
+      "currentSHA256": "6002c1c0c3ebf16bfdfcfe8ba8b1557ffc1b01fa4defc88571bf50ee4541a073",
+      "proposalSHA256": "6002c1c0c3ebf16bfdfcfe8ba8b1557ffc1b01fa4defc88571bf50ee4541a073",
+      "matchesFinalProposal": true
+    },
+    {
+      "relativePath": ".lumine/core/node-bootstrap.mjs",
+      "currentSHA256": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605",
+      "proposalSHA256": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605",
+      "matchesFinalProposal": true
+    },
+    {
+      "relativePath": ".codex/hooks.json",
+      "currentSHA256": "3eec72eac2e2abaaa48f7380f9d49e0ae0c352e0dab1d66fac5884ef12504ba0",
+      "proposalSHA256": "3eec72eac2e2abaaa48f7380f9d49e0ae0c352e0dab1d66fac5884ef12504ba0",
+      "matchesFinalProposal": true
+    }
+  ],
+  "existingArtifactSearch": {
+    "scans": [
+      {
+        "relativeRoot": ".lumine/local",
+        "jsonFilesChecked": 759,
+        "parsedFiles": 742
+      },
+      {
+        "relativeRoot": "docs/validation",
+        "jsonFilesChecked": 111,
+        "parsedFiles": 111
+      }
+    ],
+    "hostArtifactCandidates": [],
+    "postApplyCodexRecords": [],
+    "entryHashRecords": []
+  },
+  "criteria": {
+    "statusReadyMeans": "Configuration is ready; it does not certify post-upgrade host execution.",
+    "runtimeReceiptVerification": [
+      "A product/root-matched, unexpired probe is required.",
+      "A matching real event and session identity are required.",
+      "Latest event processRuntime is read from its actual-process observation; terminal runtime cannot fill it."
+    ],
+    "maintenanceFinalizeRequires": [
+      "Selected adapter evidence contains sessionId, observedAt, and artifact.",
+      "observedAt must be at or after this final proposal appliedAt and not in the future.",
+      "Existing artifact JSON must have schemaVersion 2 and matching product, sessionId, and harnessRoot."
+    ],
+    "entryHashLimit": "Current VerificationEvent schema does not emit entryHash, and current finalize criteria do not require entryHash or processRuntime. Current distribution hashes prove installed bytes only, not which bytes a real host executed.",
+    "sources": [
+      {
+        "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+        "startLine": 635,
+        "endLine": 675
+      },
+      {
+        "path": "skills/lumine-harness/src/harness/core/verification.ts",
+        "startLine": 224,
+        "endLine": 272
+      },
+      {
+        "path": "skills/lumine-harness/src/harness/core/verification.ts",
+        "startLine": 361,
+        "endLine": 410
+      },
+      {
+        "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+        "startLine": 874,
+        "endLine": 900
+      }
+    ]
+  },
+  "conclusion": {
+    "usablePostFinalUpgradeHostEvidenceObserved": false,
+    "finalizeCanProceedWithCurrentObservedEvidence": false,
+    "basis": [
+      "Existing Codex probe expired before the final upgrade.",
+      "All observed Codex probe events and session state updates predate final appliedAt.",
+      "Observed receipts contain no actual processRuntime; supported checkProcess cannot prove the Hook runtime.",
+      "No existing post-apply Codex records or schemaVersion 2 project/session-matched host artifact were found in the inspected evidence roots."
+    ],
+    "nextConcreteStep": "Observe a normal real Codex session in the upgraded adopting project, using a current probe to capture supported actual Hook runtime and post-apply events; bind the real artifact before migration finalization."
+  },
+  "limitations": [
+    "This reports available captured evidence, not a claim that no unrecorded host event ever happened.",
+    "Artifact inspection covered JSON/JSONL in .lumine/local and docs/validation; unparseable files cannot satisfy the current JSON artifact contract.",
+    "No Hook, probe, session, host-evidence artifact, or finalization action was synthesized or executed.",
+    "No parent file was written; report paths use public relative labels and omit session identity and local paths."
+  ]
+}

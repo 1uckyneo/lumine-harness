@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-08T04:00:15.816134+00:00",
+  "product": "codex",
+  "status": "challenge_issued",
+  "issuedAt": "2026-10-08T04:00:15.812Z",
+  "expiresAt": "2026-10-09T04:00:15.812Z",
+  "hostVersion": "unknown",
+  "hostVersionSource": "unknown",
+  "previousActivePointerPreserved": true,
+  "previousActivePointerSha256": "e9b144c7b299f1f24a3256d95a1162479491b8105cb6428939f2435226ad1703",
+  "newEventsPresent": false,
+  "invokedHook": false,
+  "finalized": false,
+  "writeScope": [
+    ".lumine/local/runtime/probes/active/codex.json",
+    ".lumine/local/runtime/probes/<new-run>/probe.json",
+    ".lumine/local/node-runtime-change/2026-10-08/previous-codex-probe-active.json"
+  ],
+  "note": "CLI intentionally leaves hostVersion unknown; no unverified bundle-to-host mapping or synthetic host observation."
+}

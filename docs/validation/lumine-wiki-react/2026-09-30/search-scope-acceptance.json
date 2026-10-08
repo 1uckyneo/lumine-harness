@@ -1,0 +1,290 @@
+{
+  "recordedAt": "2026-09-30",
+  "session": "wiki-search-accept",
+  "browser": "Playwright CLI real Chromium; fresh independent browser profile",
+  "services": {
+    "source": "http://127.0.0.1:4334",
+    "parent": "http://127.0.0.1:4335",
+    "parentRuntime": "Existing Node 18 service; runtime provenance verified by root agent"
+  },
+  "scope": "Read-only source and parent Wiki UI; no configuration, document, or code changes by this agent",
+  "source": {
+    "query": "Repo Wiki",
+    "wikiResults": 8,
+    "allResults": 11,
+    "productSpecFiltered": 2,
+    "executionPlanFiltered": 1,
+    "filteredThreeFields": {
+      "repository": "project",
+      "type": "product-spec",
+      "freshness": "unverified",
+      "results": 0,
+      "note": "Specs have no matching repository identity; zero was valid filter intersection"
+    },
+    "cleared": {
+      "results": 11,
+      "selectValues": [
+        "",
+        "",
+        ""
+      ],
+      "chips": 0,
+      "allScopeRetained": true
+    },
+    "openedSpec": {
+      "id": "lumine-wiki-product-experience",
+      "bodyAvailable": true,
+      "visibleH1Count": 1,
+      "focus": "MAIN#workspace",
+      "back": {
+        "query": "Repo Wiki",
+        "type": "product-spec",
+        "results": 2
+      }
+    },
+    "openedPlan": {
+      "id": "lumine-wiki-react-execution",
+      "bodyAvailable": true,
+      "visibleH1Count": 1,
+      "focus": "MAIN#workspace",
+      "back": {
+        "query": "Repo Wiki",
+        "type": "exec-plan",
+        "results": 1
+      }
+    },
+    "englishScope": {
+      "wikiResults": 8,
+      "allResults": 11,
+      "planResults": 1
+    },
+    "englishClear": {
+      "results": 11,
+      "selectValues": [
+        "",
+        "",
+        ""
+      ],
+      "allScopeRetained": true
+    },
+    "zero": {
+      "query": "no-match-acceptance-9b8c42",
+      "cards": 0,
+      "zhStatus": "已显示 0 / 0 项结果",
+      "enStatus": "Showing 0 / 0 results",
+      "zhPrompt": "未找到相关知识。试试其他关键词，或查看知识目录。",
+      "enPrompt": "No relevant knowledge found. Try other terms or explore the knowledge tree.",
+      "copyInvestigationButton": true,
+      "queryAndUrlPreservedOnLocaleChange": true
+    }
+  },
+  "parent": {
+    "initialWikiCatalog": 29,
+    "query": "Repo Wiki",
+    "wikiResults": 4,
+    "allResults": 6,
+    "productSpecFiltered": 2,
+    "executionPlanCatalogFiltered": 2,
+    "openedSpec": {
+      "id": "lumine-agentic-wiki-spec",
+      "bodyAvailable": true,
+      "visibleH1Count": 1,
+      "focus": "MAIN#workspace",
+      "back": {
+        "query": "Repo Wiki",
+        "type": "product-spec",
+        "results": 2
+      }
+    },
+    "openedPlan": {
+      "id": "go-api-migration-plan",
+      "bodyAvailable": true,
+      "visibleH1Count": 1,
+      "focus": "MAIN#workspace"
+    },
+    "filtered": {
+      "type": "product-spec",
+      "freshness": "unverified",
+      "results": 2
+    },
+    "cleared": {
+      "results": 6,
+      "selectValues": [
+        "",
+        "",
+        ""
+      ],
+      "chips": 0
+    },
+    "zero": {
+      "query": "no-match-acceptance-9b8c42",
+      "cards": 0,
+      "zhStatus": "已显示 0 / 0 项结果",
+      "enStatus": "Showing 0 / 0 results",
+      "zhPrompt": "未找到相关知识。试试其他关键词，或查看知识目录。",
+      "enPrompt": "No relevant knowledge found. Try other terms or explore the knowledge tree.",
+      "copyInvestigationButton": true,
+      "queryAndUrlPreservedOnLocaleChange": true
+    }
+  },
+  "mislabel": {
+    "firstObservationRetained": true,
+    "sourceSpecBefore": "Product specs · Current implementation",
+    "sourcePlanBefore": "Execution plans · Current implementation",
+    "parentSpecBefore": "产品方案 · 当前实现",
+    "parentPlanBefore": "Execution plans · Current implementation",
+    "rootFix": "Only Wiki may use default Current implementation; spec/plan retain collection identity unless explicit proposed/historical",
+    "sourceAfter": {
+      "spec": {
+        "zh": "产品方案",
+        "en": "Product specs"
+      },
+      "plan": {
+        "zh": "执行计划",
+        "en": "Execution plans"
+      }
+    },
+    "parentAfter": {
+      "spec": {
+        "zh": "产品方案",
+        "en": "Product specs"
+      },
+      "plan": {
+        "zh": "执行计划",
+        "en": "Execution plans"
+      }
+    },
+    "finalParentProposal": "d09beb5a-2481-4f28-8b5b-95395e9481bd",
+    "duplicateH1FalseAlarm": {
+      "domCount": 2,
+      "readerVisible": true,
+      "markdownClass": "duplicate-title",
+      "markdownVisible": false,
+      "actualVisibleCount": 1
+    }
+  },
+  "diagramClipboard": {
+    "project": "parent",
+    "document": "workspace-system-boundaries",
+    "diagramTitle": "三个仓库与两个前端",
+    "zh": {
+      "button": "复制 Mermaid 源码",
+      "visible": true,
+      "equalToDiagramCode": true,
+      "characters": 252
+    },
+    "en": {
+      "button": "Copy Mermaid source",
+      "visible": true,
+      "equalToDiagramCode": true,
+      "characters": 252
+    },
+    "mechanism": "Real navigator.clipboard.writeText/readText after context clipboard-read/clipboard-write permission grant",
+    "stub": false,
+    "urlPreserved": true,
+    "dialogRemainedOpen": true,
+    "limitation": "Permission-granted automated Chromium clipboard; does not certify an ungranted human macOS session"
+  },
+  "mediumViewport": {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "sourceSpec": {
+      "bodyClient": 1024,
+      "bodyScroll": 1024,
+      "rootClient": 1024,
+      "rootScroll": 1024,
+      "proseWidth": 728,
+      "visibleH1Count": 1,
+      "tables": 8,
+      "eachTableClient": 728,
+      "eachTableScroll": 728,
+      "tableOverflowX": "auto",
+      "inlineCodeCount": 3
+    },
+    "sourcePlan": {
+      "bodyClient": 1024,
+      "bodyScroll": 1024,
+      "rootScroll": 1024,
+      "proseWidth": 728,
+      "tables": 3,
+      "eachTableClient": 728,
+      "eachTableScroll": 728,
+      "tableOverflowX": "auto",
+      "inlineCodeCount": 61,
+      "longestInlineCodeCharacters": 62
+    },
+    "parentPlan": {
+      "bodyClient": 1024,
+      "bodyScroll": 1024,
+      "rootScroll": 1024,
+      "proseWidth": 728,
+      "visibleH1Count": 1,
+      "tables": 1,
+      "tableClient": 728,
+      "tableScroll": 728,
+      "tableOverflowX": "auto",
+      "inlineCodeCount": 1,
+      "longestInlineCodeCharacters": 16
+    },
+    "parentSystemBoundaries": {
+      "bodyClient": 1024,
+      "bodyScroll": 1024,
+      "rootScroll": 1024,
+      "proseWidth": 728,
+      "mermaidPre": [
+        {
+          "client": 698,
+          "scroll": 698,
+          "overflowX": "auto",
+          "longestLine": 30
+        },
+        {
+          "client": 698,
+          "scroll": 698,
+          "overflowX": "auto",
+          "longestLine": 34
+        }
+      ],
+      "inlineCodeCount": 3,
+      "longestInlineCodeCharacters": 24
+    },
+    "limitation": "Observed existing content had no actual overwide block at 1024; this proves no page-wide overflow for these pages, not actual horizontal scrolling of oversized code/table content"
+  },
+  "console": {
+    "cliErrorMessages": 0,
+    "cliWarnings": 0,
+    "limitation": "CLI console report; no separately accumulated cross-page pageerror trace"
+  },
+  "limitations": [
+    "Agent six-card budget and pagination were not repeated here; root retains prior evidence",
+    "No human readability/acceptance scoring",
+    "No genuine target Codex post-apply Hook verification"
+  ],
+  "cleanup": {
+    "ownBrowserClosed": true,
+    "existingServicesStopped": false
+  },
+  "agentBudget": {
+    "query": "用户",
+    "total": 26,
+    "cards": 3,
+    "contextChars": 10450,
+    "maxCards": 6,
+    "maxContextChars": 12000,
+    "noAnswer": false,
+    "environment": "parent CLI Node 18.20.8",
+    "observedBuildBoundary": "CLI query engine unchanged by subsequent reader layout-only upgrade"
+  },
+  "buildBoundary": {
+    "observedReaderPrefixes": [
+      "fa56",
+      "80ad"
+    ],
+    "provenance": "Root task build-stage record; browser subtask did not independently hash assets at each action",
+    "laterReaderSHA": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+    "laterChangeScope": "Layout positioning change; search, document identity and copy paths unchanged",
+    "recheckBoundary": "Search and parent-copy observations retain prior-build scope; final five-class gallery and bilingual clipboard permission paths independently rerun on 6c8b assets"
+  }
+}

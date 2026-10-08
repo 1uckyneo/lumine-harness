@@ -1,0 +1,1099 @@
+{
+  "schemaVersion": 2,
+  "id": "363dd63a-9d3f-4598-9df7-be47b6de0f41",
+  "createdAt": "2026-09-30T06:55:42.518Z",
+  "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+  "scope": [
+    "lumine-architecture",
+    "lumine-adapters"
+  ],
+  "units": [
+    {
+      "kind": "update",
+      "id": "lumine-architecture",
+      "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+      "currentMarkdown": "---\nid: \"lumine-architecture\"\ntitle: \"Core、Skill、Adapter 与构建分发\"\nsummary: \"Lumine 保存项目理解与执行依据；规范资源通过独立服务端、浏览器和迁移构建进入同一安装与 Plugin 分发。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"coreskilladapter-与构建分发\"></a>\n# Core、Skill、Adapter 与构建分发\n\n<a id=\"project-harness-purpose\"></a>\n## 为什么需要项目级 Harness\n\nAgent 产品的 Harness 提供模型与工具循环、上下文管理、权限和生命周期。Lumine 提供项目级环境：目标、工程边界、方法、知识、进度和证据留在项目里，使换会话、换 Agent 后仍能恢复。二者互补；项目资产不会因为某个产品有更强模型就自动出现，也不能由安装一组脚本替代模型理解。\n\n人通过 README、架构地图和知识树理解工程；Agent 按任务选择规则、知识、源码与证据。Product Spec 保存目标，Exec Plan 保存本次技术变化，Wiki 解释现状，Validation 保存实际观测。共享资产减少重复调查，但不把整个知识库固定塞入每次上下文。\n\n<a id=\"canonical-source\"></a>\n## 哪一层可以修改\n\n唯一规范包是 `skills/lumine-harness/`。TypeScript 在 `src/`，日常 Skills、双语模板与资产在 assets；`.mjs` 由构建生成。Plugin wrapper 通过 rsync 同步规范包，不是第二套实现。源仓维护者修改规范源码后构建与同步，不能只修项目 Runtime 或 wrapper，否则下一次升级会丢失修正并造成安装方式分叉。\n\n```mermaid\nflowchart TB\n  T[规范 TypeScript] --> B[服务端实现构建为 Node 22 ESM]\n  T --> G[薄入口先核对实际 Node]\n  G -->|支持版本才加载实现| C\n  B --> C[公共 Core 和 CLI]\n  B --> A[Adapter 协议转换]\n  B --> M[独立维护迁移器]\n  R[浏览器 React 与 TypeScript] --> E[Markdown Mermaid 清洗与样式打包]\n  L[选定语言规范 Skills] --> P[目标项目工具环境]\n  C --> P\n  A --> P\n  E --> P\n  M -->|提案与保护性转换| P\n  P --> K[项目自己的知识 任务 证据]\n  N[规范分发包] --> W[Plugin 同步副本]\n```\n\nCore 统一任务、身份、工作报告和停止条件；Adapter 只翻译宿主输入输出。四个 Skills 提供理解和判断方法，不能把关键词命中当授权或把检查结果当语义正确。阅读器只负责展示与文本定位，不内置模型聊天和任务管理。\n\n<a id=\"server-browser-boundary\"></a>\n## 服务端与阅读器为何分别构建\n\n维护工具链与正式 Runtime 共用支持策略：推荐 Node 24 LTS，支持 Node 22.x 从 22.18.0 起、Node 24.x 从 24.11.0 起；Node 18、20、其他主版本及预发布版不在范围内。服务端实现以 Node 22 为构建目标，Node 类型约束使用 22 系列；最低实际版本的可运行性仍由版本矩阵验证。\n\nCLI、维护入口和外部 Node Hook 先在低语法薄层核对实际进程，支持时才动态导入内部实现。薄层与纯预检以 Node 18 语法生成，只为让旧环境收到版本、支持范围和升级动作，不代表继续支持 Node 18。公开函数仍从原入口导出，内部 `*-main`／`*.main` 文件不作为新的用户入口。入口身份对实际运行文件做真实路径归一，避免目录符号链接让合法 CLI 被误认为普通导入。\n\n`runtime-artifacts.ts` 将规范 TypeScript 映射成正式 `.mjs` 和类型合同；`build-runtime.ts` 在临时目录编译、添加生成标记、改写本地 vendor 引用并检查清单覆盖，避免漏分发或无源文件残留。Kimi 与 ZCode 的安装后 dispatcher 会连同版本预检打包，复制单文件后不依赖源码仓或相邻预检模块。\n\nYAML 与忽略规则打包成本地 vendor。Mermaid 的绘图依赖由 `build-reader.ts` 用浏览器目标打包，不由 Node 服务端导入。阅读器的动态 chunk、CSS、HTML、许可和内容指纹 manifest 一并分发；只复制主 reader.js 会导致离线打开某类图时缺 chunk。构建一致性检查比较实际内容而非只看文件存在。\n\n浏览器入口是 `reader.tsx`，React 只负责本地阅读界面；Markdown 清洗、Mermaid 渲染和资源仍在浏览器包内。构建先核对并保留旧清单登记的 chunk 与许可旁文件，合并既有许可汇总后生成完整清单；先原子写入依赖，再切换入口，最后更新清单。安装器同样保留未修改且有所有权的旧 chunk，避免已经打开的旧页面立即断图；资源随版本累积会增加体积。回滚可以删除升级新建的 chunk，已打开的新入口若随后请求它，会保留文字并提示重载当前阅读器。采用与回滚细节见[迁移恢复](lumine-adoption#cas-and-recovery)。\n\n知识正文不属于 Runtime 模板。升级不能用旧受管文件淘汰逻辑删除 `.lumine/wiki-state/`、任务与项目检查扩展。模型撰写的知识、人工决定和恢复候选都可能是唯一资产，不能当作可重新下载的工具副本。\n\n<a id=\"locales-and-installation\"></a>\n## 中英文与两种安装保持同一行为\n\n中文规范在 assets，英文条目用 `SKILL.md.template` 避免递归发现重复 Skill。安装时选定一种语言，去掉 template 后缀，目标项目只有四个日常入口。行为标记、Runtime 和验收共用，语言切换不应引入另一套状态或授权逻辑。维护入口 lumine-harness 负责采用与升级，不成为第五个日常阶段。\n\n源仓自用 root manifest 将 skills 指向规范资产、runtime 指向构建目录；采用项目则指向自己的 `.agents/skills` 与 `.lumine`。两者的项目状态仍各自保存，不能根据当前 cwd 猜资源根。详情见配置与根解析专题。\n\n<a id=\"build-failures-verification\"></a>\n## 构建故障与修改验证\n\n新增服务端模块或迁移模块后，需要检查清单映射、生成物 import 路径和正式分发测试。源码测试能从源码仓依赖解析的模块，在安装包中未必存在；本轮就以分发回归覆盖共享阅读模型和 YAML AST 导出，避免只在开发环境可运行。\n\n维护顺序是 typecheck、Runtime build、源码与分发测试、build consistency、Skill 包检查、Plugin sync 与一致性检查。涉及阅读交互另做浏览器验收；涉及宿主生命周期另看真实事件。正式包脱离源码仓依赖、无缓存和无模型调用仍应可阅读检索已有 Wiki 并绘图。此页说明构建与职责，不声称当前改动已发布、所有宿主已运行或用户已接受。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"architecture\",\n    \"架构\",\n    \"build distribution\",\n    \"分发\"\n  ],\n  \"aliases\": [\n    \"architecture\",\n    \"架构\",\n    \"build distribution\",\n    \"分发\",\n    \"Agent Harness\",\n    \"Project Harness\",\n    \"runtimeArtifacts\",\n    \"offline\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"position\",\n      \"repoId\": \"project\",\n      \"path\": \"README.zh-CN.md\",\n      \"startLine\": 1,\n      \"endLine\": 175,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"core\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\",\n      \"startLine\": 1,\n      \"endLine\": 61,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"routing\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/phase-router.ts\",\n      \"startLine\": 1,\n      \"endLine\": 152,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"build\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-runtime.ts\",\n      \"startLine\": 1,\n      \"endLine\": 239,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manifest\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/runtime-artifacts.ts\",\n      \"startLine\": 1,\n      \"endLine\": 73,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"reader\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-reader.ts\",\n      \"startLine\": 1,\n      \"endLine\": 199,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"wrapper\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/sync-plugin-wrapper.sh\",\n      \"startLine\": 1,\n      \"endLine\": 15,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"sync-check\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/check-repo-sync.sh\",\n      \"startLine\": 1,\n      \"endLine\": 38,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manager\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager-main.ts\",\n      \"startLine\": 1,\n      \"endLine\": 1050,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"node-policy\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-runtime.ts\",\n      \"startLine\": 1,\n      \"endLine\": 59,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"node-bootstrap\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-bootstrap.ts\",\n      \"startLine\": 1,\n      \"endLine\": 56,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manager-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\",\n      \"startLine\": 1,\n      \"endLine\": 10,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"runtime-types\",\n      \"repoId\": \"project\",\n      \"path\": \"package.json\",\n      \"startLine\": 1,\n      \"endLine\": 32,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"build-target\",\n      \"repoId\": \"project\",\n      \"path\": \"tsdown.config.ts\",\n      \"startLine\": 1,\n      \"endLine\": 43,\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-root-config\",\n      \"kind\": \"depends_on\",\n      \"note\": \"所有运行与来源以登记根和身份定位\"\n    },\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"related\",\n      \"note\": \"模型工作方法与文档职责\"\n    },\n    {\n      \"target\": \"lumine-adapters\",\n      \"kind\": \"related\",\n      \"note\": \"宿主具体协议和能力边界\"\n    },\n    {\n      \"target\": \"lumine-adoption\",\n      \"kind\": \"related\",\n      \"note\": \"安装与升级如何选择这些资源\"\n    },\n    {\n      \"target\": \"lumine-wiki\",\n      \"kind\": \"related\",\n      \"note\": \"知识生产与确定性工具的分工\"\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"README.zh-CN.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/phase-router.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-runtime.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/runtime-artifacts.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-reader.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/sync-plugin-wrapper.sh\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/check-repo-sync.sh\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager-main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-runtime.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-bootstrap.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"package.json\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"tsdown.config.ts\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"layers\",\n      \"title\": \"从规范源码到项目环境\",\n      \"caption\": \"服务端与浏览器分别打包，知识和任务保存在项目，不由工具升级重新生成。\",\n      \"sources\": [\n        \"build\",\n        \"manifest\",\n        \"reader\",\n        \"wrapper\",\n        \"manager\",\n        \"node-policy\",\n        \"node-bootstrap\"\n      ]\n    }\n  ]\n}\n-->\n",
+      "currentRevision": "22d63c25a44b4aa200075b7ebcf6c68b2a79de70f53c64fbf9055f87ffab16fc",
+      "baseline": {
+        "schemaVersion": 2,
+        "id": "lumine-architecture",
+        "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+        "generation": 7,
+        "generatedMarkdown": "---\nid: \"lumine-architecture\"\ntitle: \"Core、Skill、Adapter 与构建分发\"\nsummary: \"Lumine 保存项目理解与执行依据；规范资源通过独立服务端、浏览器和迁移构建进入同一安装与 Plugin 分发。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"coreskilladapter-与构建分发\"></a>\n# Core、Skill、Adapter 与构建分发\n\n<a id=\"project-harness-purpose\"></a>\n## 为什么需要项目级 Harness\n\nAgent 产品的 Harness 提供模型与工具循环、上下文管理、权限和生命周期。Lumine 提供项目级环境：目标、工程边界、方法、知识、进度和证据留在项目里，使换会话、换 Agent 后仍能恢复。二者互补；项目资产不会因为某个产品有更强模型就自动出现，也不能由安装一组脚本替代模型理解。\n\n人通过 README、架构地图和知识树理解工程；Agent 按任务选择规则、知识、源码与证据。Product Spec 保存目标，Exec Plan 保存本次技术变化，Wiki 解释现状，Validation 保存实际观测。共享资产减少重复调查，但不把整个知识库固定塞入每次上下文。\n\n<a id=\"canonical-source\"></a>\n## 哪一层可以修改\n\n唯一规范包是 `skills/lumine-harness/`。TypeScript 在 `src/`，日常 Skills、双语模板与资产在 assets；`.mjs` 由构建生成。Plugin wrapper 通过 rsync 同步规范包，不是第二套实现。源仓维护者修改规范源码后构建与同步，不能只修项目 Runtime 或 wrapper，否则下一次升级会丢失修正并造成安装方式分叉。\n\n```mermaid\nflowchart TB\n  T[规范 TypeScript] --> B[服务端实现构建为 Node 22 ESM]\n  T --> G[薄入口先核对实际 Node]\n  G -->|支持版本才加载实现| C\n  B --> C[公共 Core 和 CLI]\n  B --> A[Adapter 协议转换]\n  B --> M[独立维护迁移器]\n  R[浏览器 React 与 TypeScript] --> E[Markdown Mermaid 清洗与样式打包]\n  L[选定语言规范 Skills] --> P[目标项目工具环境]\n  C --> P\n  A --> P\n  E --> P\n  M -->|提案与保护性转换| P\n  P --> K[项目自己的知识 任务 证据]\n  N[规范分发包] --> W[Plugin 同步副本]\n```\n\nCore 统一任务、身份、工作报告和停止条件；Adapter 只翻译宿主输入输出。四个 Skills 提供理解和判断方法，不能把关键词命中当授权或把检查结果当语义正确。阅读器只负责展示与文本定位，不内置模型聊天和任务管理。\n\n<a id=\"server-browser-boundary\"></a>\n## 服务端与阅读器为何分别构建\n\n维护工具链与正式 Runtime 共用支持策略：推荐 Node 24 LTS，支持 Node 22.x 从 22.18.0 起、Node 24.x 从 24.11.0 起；Node 18、20、其他主版本及预发布版不在范围内。服务端实现以 Node 22 为构建目标，Node 类型约束使用 22 系列；最低实际版本的可运行性仍由版本矩阵验证。\n\nCLI、维护入口和外部 Node Hook 先在低语法薄层核对实际进程，支持时才动态导入内部实现。薄层与纯预检以 Node 18 语法生成，只为让旧环境收到版本、支持范围和升级动作，不代表继续支持 Node 18。公开函数仍从原入口导出，内部 `*-main`／`*.main` 文件不作为新的用户入口。入口身份对实际运行文件做真实路径归一，避免目录符号链接让合法 CLI 被误认为普通导入。\n\n`runtime-artifacts.ts` 将规范 TypeScript 映射成正式 `.mjs` 和类型合同；`build-runtime.ts` 在临时目录编译、添加生成标记、改写本地 vendor 引用并检查清单覆盖，避免漏分发或无源文件残留。Kimi 与 ZCode 的安装后 dispatcher 会连同版本预检打包，复制单文件后不依赖源码仓或相邻预检模块。\n\nYAML 与忽略规则打包成本地 vendor。Mermaid 的绘图依赖由 `build-reader.ts` 用浏览器目标打包，不由 Node 服务端导入。阅读器的动态 chunk、CSS、HTML、许可和内容指纹 manifest 一并分发；只复制主 reader.js 会导致离线打开某类图时缺 chunk。构建一致性检查比较实际内容而非只看文件存在。\n\n浏览器入口是 `reader.tsx`，React 只负责本地阅读界面；Markdown 清洗、Mermaid 渲染和资源仍在浏览器包内。构建先核对并保留旧清单登记的 chunk 与许可旁文件，合并既有许可汇总后生成完整清单；先原子写入依赖，再切换入口，最后更新清单。安装器同样保留未修改且有所有权的旧 chunk，避免已经打开的旧页面立即断图；资源随版本累积会增加体积。回滚可以删除升级新建的 chunk，已打开的新入口若随后请求它，会保留文字并提示重载当前阅读器。采用与回滚细节见[迁移恢复](lumine-adoption#cas-and-recovery)。\n\n知识正文不属于 Runtime 模板。升级不能用旧受管文件淘汰逻辑删除 `.lumine/wiki-state/`、任务与项目检查扩展。模型撰写的知识、人工决定和恢复候选都可能是唯一资产，不能当作可重新下载的工具副本。\n\n<a id=\"locales-and-installation\"></a>\n## 中英文与两种安装保持同一行为\n\n中文规范在 assets，英文条目用 `SKILL.md.template` 避免递归发现重复 Skill。安装时选定一种语言，去掉 template 后缀，目标项目只有四个日常入口。行为标记、Runtime 和验收共用，语言切换不应引入另一套状态或授权逻辑。维护入口 lumine-harness 负责采用与升级，不成为第五个日常阶段。\n\n源仓自用 root manifest 将 skills 指向规范资产、runtime 指向构建目录；采用项目则指向自己的 `.agents/skills` 与 `.lumine`。两者的项目状态仍各自保存，不能根据当前 cwd 猜资源根。详情见配置与根解析专题。\n\n<a id=\"build-failures-verification\"></a>\n## 构建故障与修改验证\n\n新增服务端模块或迁移模块后，需要检查清单映射、生成物 import 路径和正式分发测试。源码测试能从源码仓依赖解析的模块，在安装包中未必存在；本轮就以分发回归覆盖共享阅读模型和 YAML AST 导出，避免只在开发环境可运行。\n\n维护顺序是 typecheck、Runtime build、源码与分发测试、build consistency、Skill 包检查、Plugin sync 与一致性检查。涉及阅读交互另做浏览器验收；涉及宿主生命周期另看真实事件。正式包脱离源码仓依赖、无缓存和无模型调用仍应可阅读检索已有 Wiki 并绘图。此页说明构建与职责，不声称当前改动已发布、所有宿主已运行或用户已接受。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"architecture\",\n    \"架构\",\n    \"build distribution\",\n    \"分发\"\n  ],\n  \"aliases\": [\n    \"architecture\",\n    \"架构\",\n    \"build distribution\",\n    \"分发\",\n    \"Agent Harness\",\n    \"Project Harness\",\n    \"runtimeArtifacts\",\n    \"offline\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"position\",\n      \"repoId\": \"project\",\n      \"path\": \"README.zh-CN.md\",\n      \"startLine\": 1,\n      \"endLine\": 175,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"core\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\",\n      \"startLine\": 1,\n      \"endLine\": 61,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"routing\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/phase-router.ts\",\n      \"startLine\": 1,\n      \"endLine\": 152,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"build\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-runtime.ts\",\n      \"startLine\": 1,\n      \"endLine\": 239,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manifest\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/runtime-artifacts.ts\",\n      \"startLine\": 1,\n      \"endLine\": 73,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"reader\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-reader.ts\",\n      \"startLine\": 1,\n      \"endLine\": 199,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"wrapper\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/sync-plugin-wrapper.sh\",\n      \"startLine\": 1,\n      \"endLine\": 15,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"sync-check\",\n      \"repoId\": \"project\",\n      \"path\": \"scripts/check-repo-sync.sh\",\n      \"startLine\": 1,\n      \"endLine\": 38,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manager\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager-main.ts\",\n      \"startLine\": 1,\n      \"endLine\": 1050,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"node-policy\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-runtime.ts\",\n      \"startLine\": 1,\n      \"endLine\": 59,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"node-bootstrap\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-bootstrap.ts\",\n      \"startLine\": 1,\n      \"endLine\": 56,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"manager-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\",\n      \"startLine\": 1,\n      \"endLine\": 10,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"runtime-types\",\n      \"repoId\": \"project\",\n      \"path\": \"package.json\",\n      \"startLine\": 1,\n      \"endLine\": 32,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"build-target\",\n      \"repoId\": \"project\",\n      \"path\": \"tsdown.config.ts\",\n      \"startLine\": 1,\n      \"endLine\": 43,\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-root-config\",\n      \"kind\": \"depends_on\",\n      \"note\": \"所有运行与来源以登记根和身份定位\"\n    },\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"related\",\n      \"note\": \"模型工作方法与文档职责\"\n    },\n    {\n      \"target\": \"lumine-adapters\",\n      \"kind\": \"related\",\n      \"note\": \"宿主具体协议和能力边界\"\n    },\n    {\n      \"target\": \"lumine-adoption\",\n      \"kind\": \"related\",\n      \"note\": \"安装与升级如何选择这些资源\"\n    },\n    {\n      \"target\": \"lumine-wiki\",\n      \"kind\": \"related\",\n      \"note\": \"知识生产与确定性工具的分工\"\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"README.zh-CN.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/phase-router.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-runtime.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/runtime-artifacts.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/build-reader.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/sync-plugin-wrapper.sh\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"scripts/check-repo-sync.sh\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/scripts/harness-manager-main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-runtime.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-bootstrap.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"package.json\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"tsdown.config.ts\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"layers\",\n      \"title\": \"从规范源码到项目环境\",\n      \"caption\": \"服务端与浏览器分别打包，知识和任务保存在项目，不由工具升级重新生成。\",\n      \"sources\": [\n        \"build\",\n        \"manifest\",\n        \"reader\",\n        \"wrapper\",\n        \"manager\",\n        \"node-policy\",\n        \"node-bootstrap\"\n      ]\n    }\n  ]\n}\n-->\n",
+        "appliedRevision": "22d63c25a44b4aa200075b7ebcf6c68b2a79de70f53c64fbf9055f87ffab16fc",
+        "sources": {
+          "fingerprints": {
+            "project:README.zh-CN.md": "c4ab93a21f8e408547abfbe95090697b4c8e26d455726626067635ff95e1d2e9",
+            "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+            "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
+            "project:scripts/build-runtime.ts": "68271dd5adb28c5ae4c81ae8ead972c32c3fb1ac024da561c75c1cdcb88f1738",
+            "project:scripts/runtime-artifacts.ts": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4",
+            "project:scripts/build-reader.ts": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+            "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+            "project:scripts/check-repo-sync.sh": "0a23aa61bf9d7de1deba7375bfb60b6b998c25745733489ce1333764fa2db058",
+            "project:skills/lumine-harness/src/scripts/harness-manager-main.ts": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+            "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+            "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+            "project:skills/lumine-harness/src/scripts/harness-manager.ts": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62",
+            "project:package.json": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a",
+            "project:tsdown.config.ts": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+          },
+          "scopeFingerprints": {
+            "project:README.zh-CN.md": "17ffac46ec9f1fc4f6fba000609288bfcda6596485a74efce4c809607d3dfdbb",
+            "project:skills/lumine-harness/src/harness/core/session-context.ts": "18d4ab343f35393d5a7dc571377dbe4a912523c4219cf92ef207ea095f20d95d",
+            "project:skills/lumine-harness/src/harness/core/phase-router.ts": "64fa2e9dab9922216f8760190d8077c25d18cf0c5d08f28651e2455ace438520",
+            "project:scripts/build-runtime.ts": "403fe2b5b6ae52fd0173841606192d59059ba2142d5878d867a8cbc96791d28b",
+            "project:scripts/runtime-artifacts.ts": "382cf322f2bac2085c9f8a37c7abcf756c450b43dc9f2ba0937c1e7ff9018b0c",
+            "project:scripts/build-reader.ts": "cf809c5e9aedcaf97a94551254adfbda4131cbddc60e447f6fa4816216a0a1d3",
+            "project:scripts/sync-plugin-wrapper.sh": "4726841156286e11e720a90ce23b1df720cdd24ddfa750f8a21f5cceec6c3ed1",
+            "project:scripts/check-repo-sync.sh": "fdd04081b8e64e1f5f49ee406b0bebfb6fe0f81f99f84c2ee7c55dbc0765f3c8",
+            "project:skills/lumine-harness/src/scripts/harness-manager.ts": "fd9abac13badeba65971a5f3d235c53365355017511756e4bf118f019be05469",
+            "project:skills/lumine-harness/src/scripts/harness-manager-main.ts": "d5fe6cd5b28dc7db05318074c057fdb87fca625324c7d57fa040c6da08820ab3",
+            "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "c9f100138deb735fe33fed32cab6e6c54b5d43d4e559409dadd18fa6008a4dfe",
+            "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "2372bb890e38c5c479fa5d932cf594d98e1a22dd27e44c677cf1b59c56f84540",
+            "project:package.json": "e9c61529af646ae5fa630611143042168be126f08ec142985eb4421044c35f6b",
+            "project:tsdown.config.ts": "495091c7adffd3dbcdc7ae53e3b65f803d2205ebb105c3c9e3f611b0ea83bbf4"
+          },
+          "files": {
+            "project:README.zh-CN.md": "c4ab93a21f8e408547abfbe95090697b4c8e26d455726626067635ff95e1d2e9",
+            "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+            "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
+            "project:scripts/build-runtime.ts": "68271dd5adb28c5ae4c81ae8ead972c32c3fb1ac024da561c75c1cdcb88f1738",
+            "project:scripts/runtime-artifacts.ts": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4",
+            "project:scripts/build-reader.ts": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+            "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+            "project:scripts/check-repo-sync.sh": "0a23aa61bf9d7de1deba7375bfb60b6b998c25745733489ce1333764fa2db058",
+            "project:skills/lumine-harness/src/scripts/harness-manager.ts": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62",
+            "project:skills/lumine-harness/src/scripts/harness-manager-main.ts": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+            "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+            "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+            "project:package.json": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a",
+            "project:tsdown.config.ts": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b"
+          },
+          "missing": []
+        },
+        "updatedAt": "2026-09-30T06:28:46.547Z"
+      },
+      "sources": {
+        "fingerprints": {
+          "project:README.zh-CN.md": "c4ab93a21f8e408547abfbe95090697b4c8e26d455726626067635ff95e1d2e9",
+          "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+          "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
+          "project:scripts/build-runtime.ts": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb",
+          "project:scripts/runtime-artifacts.ts": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4",
+          "project:scripts/build-reader.ts": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+          "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+          "project:scripts/check-repo-sync.sh": "0a23aa61bf9d7de1deba7375bfb60b6b998c25745733489ce1333764fa2db058",
+          "project:skills/lumine-harness/src/scripts/harness-manager-main.ts": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+          "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+          "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+          "project:skills/lumine-harness/src/scripts/harness-manager.ts": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62",
+          "project:package.json": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a",
+          "project:tsdown.config.ts": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b",
+          "project:scripts/build-hook-configs.ts": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6",
+          "project:skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        "scopeFingerprints": {
+          "project:README.zh-CN.md": "17ffac46ec9f1fc4f6fba000609288bfcda6596485a74efce4c809607d3dfdbb",
+          "project:skills/lumine-harness/src/harness/core/session-context.ts": "18d4ab343f35393d5a7dc571377dbe4a912523c4219cf92ef207ea095f20d95d",
+          "project:skills/lumine-harness/src/harness/core/phase-router.ts": "64fa2e9dab9922216f8760190d8077c25d18cf0c5d08f28651e2455ace438520",
+          "project:scripts/build-runtime.ts": "22bdc9e4e5e312948425eb5e49e00297e9b3a71f168948c9cd56914641feb1df",
+          "project:scripts/runtime-artifacts.ts": "382cf322f2bac2085c9f8a37c7abcf756c450b43dc9f2ba0937c1e7ff9018b0c",
+          "project:scripts/build-reader.ts": "cf809c5e9aedcaf97a94551254adfbda4131cbddc60e447f6fa4816216a0a1d3",
+          "project:scripts/sync-plugin-wrapper.sh": "4726841156286e11e720a90ce23b1df720cdd24ddfa750f8a21f5cceec6c3ed1",
+          "project:scripts/check-repo-sync.sh": "fdd04081b8e64e1f5f49ee406b0bebfb6fe0f81f99f84c2ee7c55dbc0765f3c8",
+          "project:skills/lumine-harness/src/scripts/harness-manager.ts": "fd9abac13badeba65971a5f3d235c53365355017511756e4bf118f019be05469",
+          "project:skills/lumine-harness/src/scripts/harness-manager-main.ts": "d5fe6cd5b28dc7db05318074c057fdb87fca625324c7d57fa040c6da08820ab3",
+          "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "c9f100138deb735fe33fed32cab6e6c54b5d43d4e559409dadd18fa6008a4dfe",
+          "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "2372bb890e38c5c479fa5d932cf594d98e1a22dd27e44c677cf1b59c56f84540",
+          "project:package.json": "e9c61529af646ae5fa630611143042168be126f08ec142985eb4421044c35f6b",
+          "project:tsdown.config.ts": "495091c7adffd3dbcdc7ae53e3b65f803d2205ebb105c3c9e3f611b0ea83bbf4",
+          "project:scripts/build-hook-configs.ts": "448ef2cb55fcdfe385046b5b62bacdec906dc80c3a95656b6fd73636841838b3",
+          "project:skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts": "b8b366ca94120864f3c83926fbaa46c38cee1d8e3b484900426eed02703b46d1"
+        },
+        "files": {
+          "project:README.zh-CN.md": "c4ab93a21f8e408547abfbe95090697b4c8e26d455726626067635ff95e1d2e9",
+          "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+          "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
+          "project:scripts/build-runtime.ts": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb",
+          "project:scripts/runtime-artifacts.ts": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4",
+          "project:scripts/build-reader.ts": "95a2d38681cab422ae61f137f28655124a890b8101d446e769f10ea6fdd8265d",
+          "project:scripts/sync-plugin-wrapper.sh": "0d39a8d12c5ef07d04b2deeea2da6a03889ea5f4597f3ffdf9daaae85c870fa7",
+          "project:scripts/check-repo-sync.sh": "0a23aa61bf9d7de1deba7375bfb60b6b998c25745733489ce1333764fa2db058",
+          "project:skills/lumine-harness/src/scripts/harness-manager.ts": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62",
+          "project:skills/lumine-harness/src/scripts/harness-manager-main.ts": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+          "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+          "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+          "project:package.json": "82104d452ea8e3f493f3c4c45bfcb1f419255c1552d1fc8ca30d0f9200ce899a",
+          "project:tsdown.config.ts": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b",
+          "project:scripts/build-hook-configs.ts": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6",
+          "project:skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        "missing": []
+      },
+      "sourceRefs": [
+        {
+          "id": "position",
+          "repoId": "project",
+          "path": "README.zh-CN.md",
+          "startLine": 1,
+          "endLine": 175,
+          "kind": "source"
+        },
+        {
+          "id": "core",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+          "startLine": 1,
+          "endLine": 61,
+          "kind": "source"
+        },
+        {
+          "id": "routing",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
+          "startLine": 1,
+          "endLine": 152,
+          "kind": "source"
+        },
+        {
+          "id": "build",
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts",
+          "startLine": 1,
+          "endLine": 241,
+          "kind": "source"
+        },
+        {
+          "id": "manifest",
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts",
+          "startLine": 1,
+          "endLine": 73,
+          "kind": "source"
+        },
+        {
+          "id": "reader",
+          "repoId": "project",
+          "path": "scripts/build-reader.ts",
+          "startLine": 1,
+          "endLine": 199,
+          "kind": "source"
+        },
+        {
+          "id": "wrapper",
+          "repoId": "project",
+          "path": "scripts/sync-plugin-wrapper.sh",
+          "startLine": 1,
+          "endLine": 15,
+          "kind": "source"
+        },
+        {
+          "id": "sync-check",
+          "repoId": "project",
+          "path": "scripts/check-repo-sync.sh",
+          "startLine": 1,
+          "endLine": 38,
+          "kind": "source"
+        },
+        {
+          "id": "manager",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "startLine": 1,
+          "endLine": 1050,
+          "kind": "source"
+        },
+        {
+          "id": "node-policy",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "startLine": 1,
+          "endLine": 59,
+          "kind": "source"
+        },
+        {
+          "id": "node-bootstrap",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "startLine": 1,
+          "endLine": 56,
+          "kind": "source"
+        },
+        {
+          "id": "manager-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+          "startLine": 1,
+          "endLine": 10,
+          "kind": "source"
+        },
+        {
+          "id": "runtime-types",
+          "repoId": "project",
+          "path": "package.json",
+          "startLine": 1,
+          "endLine": 32,
+          "kind": "source"
+        },
+        {
+          "id": "build-target",
+          "repoId": "project",
+          "path": "tsdown.config.ts",
+          "startLine": 1,
+          "endLine": 43,
+          "kind": "source"
+        },
+        {
+          "id": "hook-config-build",
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "startLine": 1,
+          "endLine": 53,
+          "kind": "source"
+        },
+        {
+          "id": "hook-root-dispatch",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "startLine": 1,
+          "endLine": 29,
+          "kind": "source"
+        }
+      ],
+      "watchScopes": [
+        {
+          "repoId": "project",
+          "path": "README.zh-CN.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/phase-router.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-runtime.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/runtime-artifacts.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-reader.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/sync-plugin-wrapper.sh"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/check-repo-sync.sh"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "package.json"
+        },
+        {
+          "repoId": "project",
+          "path": "tsdown.config.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts"
+        }
+      ],
+      "replaceSources": true,
+      "replaceWatchScopes": true
+    },
+    {
+      "kind": "update",
+      "id": "lumine-adapters",
+      "path": "docs/repo-wiki/Adapter 公共协议与各宿主差异.md",
+      "currentMarkdown": "---\nid: \"lumine-adapters\"\ntitle: \"Adapter 公共协议与各宿主差异\"\nsummary: \"各宿主共用根、Skill、任务和停止策略，Adapter 仅转换事件与输出；设置就绪、协议回归、真实调用和自动续跑分别留证。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"lumine-adapters-overview\"></a>\n# Adapter 公共协议与各宿主差异\n\n<a id=\"adapters-answer\"></a>\n## 共用工程规则，不假设所有应用一样\n\nLumine 的公共 Core 决定任务模式、证据、Skill 读取关联和停止策略。Adapter 接收某个 Agent 应用的事件，转换为 Core 能理解的输入，再把结果转换回该应用支持的输出。它不会成为另一份工程规则，也不会复制业务 Skill 正文。\n\n外部 Node Hook 使用与 CLI 相同的版本策略：支持 Node 22.x 从 22.18.0 起、Node 24.x 从 24.11.0 起，推荐 Node 24 LTS。低语法入口在读取事件输入、查找项目根与动态加载实现之前拒绝不支持的进程；不会为失败的入口写入新的宿主执行证据。Hook 的错误返回仍受各宿主失败行为约束，宿主放行不等于 Harness 已执行。\n\nOpenCode 在宿主进程中嵌入 Core，入口先区分实际 runtime：真正的 Node 遵循 Node 策略，Bun 的兼容 Node 版本不用于硬拒绝 Bun，也不用于宣称 Bun 已验证。内部插件实现放在 `.lumine/adapters/opencode/`，插件发现目录只保留薄入口；共同 Core 被导入时不全局硬拦截嵌入宿主。\n\n这是一条重要的可维护性边界：增加宿主应主要增加协议转换与能力声明，而不是再实现一套“什么算完成”。但共用 Core 不能让宿主凭空提供事件。没有停止前控制点的应用只能做审计；没有工具读取事件的应用不能证明 Skill 已读；需要用户启用 Hook 的应用也不能因为项目里已有配置就视为接入完成。\n\n<a id=\"adapters-lifecycle\"></a>\n## 一次事件怎样穿过公共层\n\n输入规范化保留宿主、会话、工作目录、用户轮次、事件 ID、回答 ID、最终文本，以及可选的结构化报告和续跑回执。**事件 ID 与回答 ID 分开**：同一个回答可能导致多次 Hook 调用，不能把传输重试当成 Agent 又完成了一轮工作。\n\n进入项目后，共用根解析确定规范规则、Skill 和 Runtime。会话开始或提交提示时注入简短工程地图；提供工具事件的宿主还能记录规范 Skill 读取，并对已选择但未读取的能力设置修改前提醒或门禁。结束事件进入同一个 Stop Policy：它判断本轮完成、可继续或阻塞，并在预算及去重后决定是否投递下一步。\n\n```mermaid\nflowchart LR\n  H[宿主原始事件] --> N[Adapter 规范化身份和输入]\n  N --> R[公共根解析及会话状态]\n  R --> C[工程上下文]\n  R -.工具事件可用.-> K[已选 Skill 读取检查]\n  R --> S[公共停止策略]\n  S --> D[宿主交付能力判断]\n  D --> O[Adapter 输出宿主协议]\n  O --> A[宿主决定实际行为]\n```\n\n图中“公共停止策略”只生成受约束的跟进请求，不直接调用模型。`automatic` 是这条 Adapter 代码选择的交付方式，仍需实际事件证明宿主接受并执行。\n\n<a id=\"adapters-hosts\"></a>\n## 各宿主在当前实现中的关键差异\n\n| 宿主 | 当前实现接入点 | 继续工作的输出或行为 | 不能据此推断的事 |\n|---|---|---|---|\n| Codex | SessionStart 注入；Stop 读取结束报告 | `decision: block` 加原因，阻止本次停止 | 不证明规范 Skill 实际全文读取，也不证明新版本自动续跑已完成 |\n| Qoder | 提示提交、工具前后和 Stop | Stop 使用 `decision: block`；工具事件核对已选 Skill 读取 | Lumine 的 Wiki 不是调用 Qoder 内置 Repo Wiki，两个系统没有自动同步关系 |\n| Trae | 会话开始与 Stop | `decision: block` 加原因 | 项目文件不能替代应用内导入规则、Skill 和 Hook 设置 |\n| Cursor | 会话开始、回答后事件及 Stop | `followup_message`；明确为非 completed 的 Stop 会跳过；缺少 status 时仍处理 | 回答缓存和 transcript 回退不是自动续跑的独立证据 |\n| Kimi Code | 用户级 dispatcher 接 SessionStart／Stop | 需要继续时退出码 2，并把原因写入 stderr | Hook 失败默认放行，不能作唯一安全门禁；状态需显式记录 |\n| CodeBuddy | SessionStart、提示提交、工具前后和 Stop | Stop 的 `continue: false` 加原因，表示阻止停止 | 同名字段在别的宿主可能不同，不能全仓统一替换 JSON |\n| ZCode | 本地 Hook Plugin 提供完整事件分派 | `decision: block`；Core 限制连续最多 3 次 | 本地插件已存在不等于已加入并启用 |\n| DeepSeek Harness | profile Hook bridge 与原生 Skill 读取线索 | `decision: block`，工具前检查已选能力 | 仓库回归仅覆盖注明的协议版本，开发预览不等于全部发布版兼容 |\n| OpenCode | system transform、压缩上下文、工具审计、`session.idle` | 没有对等 Stop Gate；需要人发起下一轮 | idle 已发生在停止之后，不能宣称能阻止过早结束 |\n\n这张表以当前仓库实现为准。CodeBuddy 的 Stop 字段还核对了[官方 Hook 参考](https://www.codebuddy.ai/docs/cli/hooks)：该事件的 `continue: false` 用来阻止停止；不能照搬其他事件或产品对 `continue` 的解释。它只补足协议依据，不构成本地真实运行验收。\n\nQoder、CodeBuddy 和 ZCode 使用 Adapter 定位规范 Skill 文件；DeepSeek 的工具后事件还接收原生 Skill 加载线索。读取判断针对实际选择的 Skill 与当前文件内容，不能用关键词搜索结果替代已读记录。所有宿主使用相同项目资料，不生成各自可编辑的 Skill 副本。\n\n<a id=\"adapters-setup\"></a>\n## 设置就绪和能力证据怎样分别看\n\nAdapter 诊断先看项目是否选择了该宿主、所需资产是否存在、产品设置是否仍待完成。Trae 的应用内导入、Cursor 的工程信任、CodeBuddy 的 `/hooks` 审核、ZCode 的插件启用和 DeepSeek 的 profile 安装都属于宿主设置，不是新的任务完成状态。\n\nKimi 需要用户级配置：安装器先构造临时 TOML、调用可用校验、保留原文件备份，再写入受管块与 dispatcher；无关配置保留。此操作需要单独授权，不能把普通项目采用扩展为静默更改用户环境。卸载同样只退出自己的受管部分，并先校验候选配置。\n\n`adapter status`、`doctor` 和 `verify` 回答不同问题：能否开始使用、配置或设置哪里有缺口、真实记录证明了哪些能力。输出中 `repository_checked` 只表示仓库实现检查；`runtime_observed` 才表示在具体会话中观察到事件；`behavior_verified` 需要适用行为证据。`not_tested`、`not_observable` 和 `not_applicable` 不应显示成通过。\n\n`adapter status` 还分别返回检查命令进程和已有宿主事件的实际 runtime。验证事件记录 `processRuntime`，读取时重新核对 Node 支持策略；缺少实际进程记录仍为未观察，最新宿主事件使用不支持的 Node 则返回连接问题与升级动作。仅在终端运行新 Node、保存配置或旧事件中标记通过，都不能替代当前宿主版本证据。Bun 与未知 runtime 的正式支持保持未验证。\n\nSkill 选择声明与宿主观察分开。任务绑定的 `readObservability: not_observable` 明确表达协议缺口，`read: false` 只表示未观察到；Codex 不会仅因此阻塞证据充分的任务完成。探针也不会把 Agent 自报的读取标签升成该宿主的真实读取能力证明。\n\n“需要人工设置”是 Adapter 就绪诊断的一种情况，不属于公共 `WORK_STATUS` 的新状态；若阻塞当前任务，Agent 用 `blocked` 并解释具体设置步骤。\n\n<a id=\"adapters-evidence\"></a>\n## 真实续跑证据必须关联到原请求\n\n```mermaid\nsequenceDiagram\n  participant Host as Agent 宿主\n  participant Adapter as Adapter\n  participant Core as 公共 Core\n  participant Probe as 运行探针\n  Host->>Adapter: 本轮 Stop 与回答身份\n  Adapter->>Core: 规范化报告\n  Core-->>Adapter: 请求 ID 与首次投递决定\n  Adapter->>Probe: 记录请求、会话和用户轮次\n  Adapter-->>Host: 宿主继续协议\n  Host->>Adapter: 后续事件及匹配请求回执\n  Adapter->>Probe: 记录相同会话和轮次的确认\n  Note over Probe: 没有匹配回执时，自动续跑仍未证实\n```\n\n探针只在明确的验证运行内记录事件，不把所有聊天正文复制进公开文档。自动续跑的判定要求后续非 Stop 事件带回正确请求 ID，并且会话、用户轮次一致、不是新的用户输入。普通后续事件不够；手动发“继续”不够；直接给探针写一个能力标签也不够。\n\n当前大多数 Adapter 输出不会让宿主自动回传这个内部请求 ID。因此仓库测试能验证关联规则，真实能力仍可能是未证实。不能为了让面板变绿而自行伪造回执；后续应在宿主提供可信关联机制时适配，并用真实会话验证。\n\n现有历史验收明确：父项目刷新 Codex 后观察到 SessionStart，源仓在真实 Codex 会话运行新 CLI；独立源仓完整 SessionStart／Stop 链、自动续跑及社区应用行为没有因此全部验证。此页保留这一边界；本次三态升级的测试也不能追溯改写旧探针为新协议实测通过。\n\n<a id=\"adapters-failure\"></a>\n## 异常与恢复先定位在哪一层\n\n没有上下文时先核对根与设置，再看宿主是否调用入口；读取门禁异常时先看当前选中的规范 Skill 及其内容版本；停止后没有继续时，再区分 Core 已暂停、预算耗尽、重复事件被去重，还是宿主没有接受输出。不要从“没有下一条消息”直接推断模型不遵守规则。\n\nCursor 的回答后事件保存最后文本，Stop 可从会话缓存或 transcript 回退。恢复时要注意文本来自哪一轮；这条回退并不提供用户轮次或续跑关联的完整证明。OpenCode 的 idle 审计同样只能说明空闲事件发生，不能恢复已经结束的本轮动作。\n\nHook 执行失败、路径错误或残留锁属于不同失败；先保留输入身份、错误和状态，再修正当前层。可以刷新或重新开启宿主会话加载新入口，但不能把刷新本身当作自动续跑验收。社区 Adapter 没有在本机安装时，报告协议和分发回归即可，不要求为了普通业务任务安装所有应用。\n\n<a id=\"adapters-change\"></a>\n## 增加或修改 Adapter 时怎样验收\n\n公共修改优先在 Core 完成，再检查每种输出映射。至少覆盖缺失会话身份、从子仓启动、重复回答、多会话并行、新用户轮次、已选 Skill 读取、三态转换、报告修正共享预算和宿主不支持的情况。不能让某个 Adapter 为 `reject_completion` 绕过公共预算再发一次。\n\n源码与正式分发都要执行协议回归；真实宿主测试另行记录应用版本、事件、适用范围和未观察能力。扩大公开支持声明前核对官方协议及当前宿主版本。这里的机制与差异由源码和注明的官方资料支持；关于设计收益的解释属于工程推断，不是所有宿主均已成功运行的结论。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"Adapter\",\n    \"宿主兼容\",\n    \"Codex\",\n    \"Qoder\",\n    \"Trae\",\n    \"Cursor\",\n    \"Kimi\",\n    \"CodeBuddy\",\n    \"ZCode\",\n    \"DeepSeek\",\n    \"OpenCode\",\n    \"hooks\",\n    \"host protocol\"\n  ],\n  \"aliases\": [\n    \"Adapter\",\n    \"宿主兼容\",\n    \"Codex\",\n    \"Qoder\",\n    \"Trae\",\n    \"Cursor\",\n    \"Kimi\",\n    \"CodeBuddy\",\n    \"ZCode\",\n    \"DeepSeek\",\n    \"OpenCode\",\n    \"hooks\",\n    \"host protocol\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"normalization\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/hook-io.ts\",\n      \"startLine\": 42,\n      \"endLine\": 70,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"context\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\",\n      \"startLine\": 20,\n      \"endLine\": 58,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"delivery\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/continuation-delivery.ts\",\n      \"startLine\": 3,\n      \"endLine\": 23,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codex-start\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts\",\n      \"startLine\": 14,\n      \"endLine\": 27,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codex-stop\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts\",\n      \"startLine\": 10,\n      \"endLine\": 25,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"qoder-prompt\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts\",\n      \"startLine\": 8,\n      \"endLine\": 29,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"qoder-stop\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts\",\n      \"startLine\": 7,\n      \"endLine\": 24,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"trae-stop\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts\",\n      \"startLine\": 7,\n      \"endLine\": 24,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"cursor-response\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts\",\n      \"startLine\": 5,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"cursor-stop\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts\",\n      \"startLine\": 9,\n      \"endLine\": 42,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"kimi-dispatch\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts\",\n      \"startLine\": 12,\n      \"endLine\": 32,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"kimi-install\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\",\n      \"startLine\": 887,\n      \"endLine\": 955,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codebuddy-dispatch\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts\",\n      \"startLine\": 51,\n      \"endLine\": 132,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"zcode-dispatch\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts\",\n      \"startLine\": 45,\n      \"endLine\": 145,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"deepseek-dispatch\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts\",\n      \"startLine\": 45,\n      \"endLine\": 131,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"opencode-plugin\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts\",\n      \"startLine\": 13,\n      \"endLine\": 44,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"setup-diagnostics\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\",\n      \"startLine\": 418,\n      \"endLine\": 515,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"probe-evidence\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\",\n      \"startLine\": 219,\n      \"endLine\": 412,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"host-history\",\n      \"repoId\": \"project\",\n      \"path\": \"docs/validation/lumine-refactor/2026-09-29/README.md\",\n      \"startLine\": 20,\n      \"endLine\": 28,\n      \"kind\": \"source\",\n      \"note\": \"历史验收范围；不是当前协议的自动续跑证明\"\n    },\n    {\n      \"id\": \"skill-observability\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\",\n      \"startLine\": 378,\n      \"endLine\": 393,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"node-policy\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-runtime.ts\",\n      \"startLine\": 1,\n      \"endLine\": 59,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"node-bootstrap\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-bootstrap.ts\",\n      \"startLine\": 1,\n      \"endLine\": 56,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codex-start-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"qoder-prompt-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"qoder-stop-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"trae-stop-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"cursor-response-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"cursor-stop-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"kimi-dispatch-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts\",\n      \"startLine\": 1,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codebuddy-dispatch-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts\",\n      \"startLine\": 1,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"zcode-dispatch-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts\",\n      \"startLine\": 1,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"deepseek-dispatch-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts\",\n      \"startLine\": 1,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"opencode-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/opencode/plugins/harness.ts\",\n      \"startLine\": 1,\n      \"endLine\": 11,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"runtime-process\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/runtime-environment.ts\",\n      \"startLine\": 1,\n      \"endLine\": 42,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"runtime-status\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\",\n      \"startLine\": 636,\n      \"endLine\": 685,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"hook-bootstrap\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts\",\n      \"startLine\": 1,\n      \"endLine\": 12,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"kimi-installed\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts\",\n      \"startLine\": 1,\n      \"endLine\": 35,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"zcode-installed\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts\",\n      \"startLine\": 1,\n      \"endLine\": 35,\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-architecture\",\n      \"kind\": \"related\",\n      \"note\": \"回到 Core、Skill、Adapter 的整体职责\"\n    },\n    {\n      \"target\": \"lumine-root-config\",\n      \"kind\": \"depends_on\",\n      \"note\": \"Hook 与 CLI 共用项目根解析\"\n    },\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"related\",\n      \"note\": \"实际选择与读取规范 Skill\"\n    },\n    {\n      \"target\": \"lumine-task-check\",\n      \"kind\": \"depends_on\",\n      \"note\": \"所有宿主共用三态停止策略\"\n    },\n    {\n      \"target\": \"lumine-adoption\",\n      \"kind\": \"related\",\n      \"note\": \"设置、升级和恢复入口\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"adapter-lifecycle\",\n      \"title\": \"统一 Core 与宿主协议之间的边界\",\n      \"caption\": \"不同宿主提供不同事件，虚线表示有些宿主没有该观察点。所有继续请求先通过 Core，输出本身不证明宿主已经执行。\",\n      \"sources\": [\n        \"normalization\",\n        \"context\",\n        \"codex-stop\",\n        \"codebuddy-dispatch\",\n        \"delivery\"\n      ]\n    },\n    {\n      \"id\": \"continuation-proof\",\n      \"title\": \"怎样证明一次自动续跑\",\n      \"caption\": \"只有后续事件带回与当前会话和用户轮次一致的请求回执，才能把“请求继续”提升为“观察到继续”；手动新轮次不算。\",\n      \"sources\": [\n        \"probe-evidence\",\n        \"delivery\"\n      ]\n    }\n  ],\n  \"sections\": [\n    {\n      \"id\": \"adapters-answer\",\n      \"sources\": [\n        \"normalization\",\n        \"context\"\n      ]\n    },\n    {\n      \"id\": \"adapters-lifecycle\",\n      \"sources\": [\n        \"normalization\",\n        \"context\",\n        \"delivery\"\n      ]\n    },\n    {\n      \"id\": \"adapters-hosts\",\n      \"sources\": [\n        \"codex-start\",\n        \"codex-stop\",\n        \"qoder-prompt\",\n        \"qoder-stop\",\n        \"trae-stop\",\n        \"cursor-response\",\n        \"cursor-stop\",\n        \"kimi-dispatch\",\n        \"codebuddy-dispatch\",\n        \"zcode-dispatch\",\n        \"deepseek-dispatch\",\n        \"opencode-plugin\"\n      ]\n    },\n    {\n      \"id\": \"adapters-setup\",\n      \"sources\": [\n        \"setup-diagnostics\",\n        \"kimi-install\",\n        \"skill-observability\"\n      ]\n    },\n    {\n      \"id\": \"adapters-evidence\",\n      \"sources\": [\n        \"probe-evidence\",\n        \"host-history\"\n      ]\n    },\n    {\n      \"id\": \"adapters-failure\",\n      \"sources\": [\n        \"cursor-stop\",\n        \"opencode-plugin\",\n        \"setup-diagnostics\"\n      ]\n    },\n    {\n      \"id\": \"adapters-change\",\n      \"sources\": [\n        \"normalization\",\n        \"delivery\",\n        \"probe-evidence\"\n      ]\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/hook-io.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/continuation-delivery.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/opencode/plugins/harness.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"docs/validation/lumine-refactor/2026-09-29/README.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-runtime.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-bootstrap.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/runtime-environment.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts\"\n    }\n  ]\n}\n-->\n",
+      "currentRevision": "2f22246ad69da91689a6fdd99512eb7ff367d9d1ff5198373836cfa6871f5efe",
+      "baseline": {
+        "schemaVersion": 2,
+        "id": "lumine-adapters",
+        "path": "docs/repo-wiki/Adapter 公共协议与各宿主差异.md",
+        "generation": 3,
+        "generatedMarkdown": "---\nid: \"lumine-adapters\"\ntitle: \"Adapter 公共协议与各宿主差异\"\nsummary: \"各宿主共用根、Skill、任务和停止策略，Adapter 仅转换事件与输出；设置就绪、协议回归、真实调用和自动续跑分别留证。\"\ntype: \"mechanism\"\nstatus: \"current\"\nlocale: \"zh-CN\"\n---\n\n<a id=\"lumine-adapters-overview\"></a>\n# Adapter 公共协议与各宿主差异\n\n<a id=\"adapters-answer\"></a>\n## 共用工程规则，不假设所有应用一样\n\nLumine 的公共 Core 决定任务模式、证据、Skill 读取关联和停止策略。Adapter 接收某个 Agent 应用的事件，转换为 Core 能理解的输入，再把结果转换回该应用支持的输出。它不会成为另一份工程规则，也不会复制业务 Skill 正文。\n\n外部 Node Hook 使用与 CLI 相同的版本策略：支持 Node 22.x 从 22.18.0 起、Node 24.x 从 24.11.0 起，推荐 Node 24 LTS。低语法入口在读取事件输入、查找项目根与动态加载实现之前拒绝不支持的进程；不会为失败的入口写入新的宿主执行证据。Hook 的错误返回仍受各宿主失败行为约束，宿主放行不等于 Harness 已执行。\n\nOpenCode 在宿主进程中嵌入 Core，入口先区分实际 runtime：真正的 Node 遵循 Node 策略，Bun 的兼容 Node 版本不用于硬拒绝 Bun，也不用于宣称 Bun 已验证。内部插件实现放在 `.lumine/adapters/opencode/`，插件发现目录只保留薄入口；共同 Core 被导入时不全局硬拦截嵌入宿主。\n\n这是一条重要的可维护性边界：增加宿主应主要增加协议转换与能力声明，而不是再实现一套“什么算完成”。但共用 Core 不能让宿主凭空提供事件。没有停止前控制点的应用只能做审计；没有工具读取事件的应用不能证明 Skill 已读；需要用户启用 Hook 的应用也不能因为项目里已有配置就视为接入完成。\n\n<a id=\"adapters-lifecycle\"></a>\n## 一次事件怎样穿过公共层\n\n输入规范化保留宿主、会话、工作目录、用户轮次、事件 ID、回答 ID、最终文本，以及可选的结构化报告和续跑回执。**事件 ID 与回答 ID 分开**：同一个回答可能导致多次 Hook 调用，不能把传输重试当成 Agent 又完成了一轮工作。\n\n进入项目后，共用根解析确定规范规则、Skill 和 Runtime。会话开始或提交提示时注入简短工程地图；提供工具事件的宿主还能记录规范 Skill 读取，并对已选择但未读取的能力设置修改前提醒或门禁。结束事件进入同一个 Stop Policy：它判断本轮完成、可继续或阻塞，并在预算及去重后决定是否投递下一步。\n\n```mermaid\nflowchart LR\n  H[宿主原始事件] --> N[Adapter 规范化身份和输入]\n  N --> R[公共根解析及会话状态]\n  R --> C[工程上下文]\n  R -.工具事件可用.-> K[已选 Skill 读取检查]\n  R --> S[公共停止策略]\n  S --> D[宿主交付能力判断]\n  D --> O[Adapter 输出宿主协议]\n  O --> A[宿主决定实际行为]\n```\n\n图中“公共停止策略”只生成受约束的跟进请求，不直接调用模型。`automatic` 是这条 Adapter 代码选择的交付方式，仍需实际事件证明宿主接受并执行。\n\n<a id=\"adapters-hosts\"></a>\n## 各宿主在当前实现中的关键差异\n\n| 宿主 | 当前实现接入点 | 继续工作的输出或行为 | 不能据此推断的事 |\n|---|---|---|---|\n| Codex | SessionStart 注入；Stop 读取结束报告 | `decision: block` 加原因，阻止本次停止 | 不证明规范 Skill 实际全文读取，也不证明新版本自动续跑已完成 |\n| Qoder | 提示提交、工具前后和 Stop | Stop 使用 `decision: block`；工具事件核对已选 Skill 读取 | Lumine 的 Wiki 不是调用 Qoder 内置 Repo Wiki，两个系统没有自动同步关系 |\n| Trae | 会话开始与 Stop | `decision: block` 加原因 | 项目文件不能替代应用内导入规则、Skill 和 Hook 设置 |\n| Cursor | 会话开始、回答后事件及 Stop | `followup_message`；明确为非 completed 的 Stop 会跳过；缺少 status 时仍处理 | 回答缓存和 transcript 回退不是自动续跑的独立证据 |\n| Kimi Code | 用户级 dispatcher 接 SessionStart／Stop | 需要继续时退出码 2，并把原因写入 stderr | Hook 失败默认放行，不能作唯一安全门禁；状态需显式记录 |\n| CodeBuddy | SessionStart、提示提交、工具前后和 Stop | Stop 的 `continue: false` 加原因，表示阻止停止 | 同名字段在别的宿主可能不同，不能全仓统一替换 JSON |\n| ZCode | 本地 Hook Plugin 提供完整事件分派 | `decision: block`；Core 限制连续最多 3 次 | 本地插件已存在不等于已加入并启用 |\n| DeepSeek Harness | profile Hook bridge 与原生 Skill 读取线索 | `decision: block`，工具前检查已选能力 | 仓库回归仅覆盖注明的协议版本，开发预览不等于全部发布版兼容 |\n| OpenCode | system transform、压缩上下文、工具审计、`session.idle` | 没有对等 Stop Gate；需要人发起下一轮 | idle 已发生在停止之后，不能宣称能阻止过早结束 |\n\n这张表以当前仓库实现为准。CodeBuddy 的 Stop 字段还核对了[官方 Hook 参考](https://www.codebuddy.ai/docs/cli/hooks)：该事件的 `continue: false` 用来阻止停止；不能照搬其他事件或产品对 `continue` 的解释。它只补足协议依据，不构成本地真实运行验收。\n\nQoder、CodeBuddy 和 ZCode 使用 Adapter 定位规范 Skill 文件；DeepSeek 的工具后事件还接收原生 Skill 加载线索。读取判断针对实际选择的 Skill 与当前文件内容，不能用关键词搜索结果替代已读记录。所有宿主使用相同项目资料，不生成各自可编辑的 Skill 副本。\n\n<a id=\"adapters-setup\"></a>\n## 设置就绪和能力证据怎样分别看\n\nAdapter 诊断先看项目是否选择了该宿主、所需资产是否存在、产品设置是否仍待完成。Trae 的应用内导入、Cursor 的工程信任、CodeBuddy 的 `/hooks` 审核、ZCode 的插件启用和 DeepSeek 的 profile 安装都属于宿主设置，不是新的任务完成状态。\n\nKimi 需要用户级配置：安装器先构造临时 TOML、调用可用校验、保留原文件备份，再写入受管块与 dispatcher；无关配置保留。此操作需要单独授权，不能把普通项目采用扩展为静默更改用户环境。卸载同样只退出自己的受管部分，并先校验候选配置。\n\n`adapter status`、`doctor` 和 `verify` 回答不同问题：能否开始使用、配置或设置哪里有缺口、真实记录证明了哪些能力。输出中 `repository_checked` 只表示仓库实现检查；`runtime_observed` 才表示在具体会话中观察到事件；`behavior_verified` 需要适用行为证据。`not_tested`、`not_observable` 和 `not_applicable` 不应显示成通过。\n\n`adapter status` 还分别返回检查命令进程和已有宿主事件的实际 runtime。验证事件记录 `processRuntime`，读取时重新核对 Node 支持策略；缺少实际进程记录仍为未观察，最新宿主事件使用不支持的 Node 则返回连接问题与升级动作。仅在终端运行新 Node、保存配置或旧事件中标记通过，都不能替代当前宿主版本证据。Bun 与未知 runtime 的正式支持保持未验证。\n\nSkill 选择声明与宿主观察分开。任务绑定的 `readObservability: not_observable` 明确表达协议缺口，`read: false` 只表示未观察到；Codex 不会仅因此阻塞证据充分的任务完成。探针也不会把 Agent 自报的读取标签升成该宿主的真实读取能力证明。\n\n“需要人工设置”是 Adapter 就绪诊断的一种情况，不属于公共 `WORK_STATUS` 的新状态；若阻塞当前任务，Agent 用 `blocked` 并解释具体设置步骤。\n\n<a id=\"adapters-evidence\"></a>\n## 真实续跑证据必须关联到原请求\n\n```mermaid\nsequenceDiagram\n  participant Host as Agent 宿主\n  participant Adapter as Adapter\n  participant Core as 公共 Core\n  participant Probe as 运行探针\n  Host->>Adapter: 本轮 Stop 与回答身份\n  Adapter->>Core: 规范化报告\n  Core-->>Adapter: 请求 ID 与首次投递决定\n  Adapter->>Probe: 记录请求、会话和用户轮次\n  Adapter-->>Host: 宿主继续协议\n  Host->>Adapter: 后续事件及匹配请求回执\n  Adapter->>Probe: 记录相同会话和轮次的确认\n  Note over Probe: 没有匹配回执时，自动续跑仍未证实\n```\n\n探针只在明确的验证运行内记录事件，不把所有聊天正文复制进公开文档。自动续跑的判定要求后续非 Stop 事件带回正确请求 ID，并且会话、用户轮次一致、不是新的用户输入。普通后续事件不够；手动发“继续”不够；直接给探针写一个能力标签也不够。\n\n当前大多数 Adapter 输出不会让宿主自动回传这个内部请求 ID。因此仓库测试能验证关联规则，真实能力仍可能是未证实。不能为了让面板变绿而自行伪造回执；后续应在宿主提供可信关联机制时适配，并用真实会话验证。\n\n现有历史验收明确：父项目刷新 Codex 后观察到 SessionStart，源仓在真实 Codex 会话运行新 CLI；独立源仓完整 SessionStart／Stop 链、自动续跑及社区应用行为没有因此全部验证。此页保留这一边界；本次三态升级的测试也不能追溯改写旧探针为新协议实测通过。\n\n<a id=\"adapters-failure\"></a>\n## 异常与恢复先定位在哪一层\n\n没有上下文时先核对根与设置，再看宿主是否调用入口；读取门禁异常时先看当前选中的规范 Skill 及其内容版本；停止后没有继续时，再区分 Core 已暂停、预算耗尽、重复事件被去重，还是宿主没有接受输出。不要从“没有下一条消息”直接推断模型不遵守规则。\n\nCursor 的回答后事件保存最后文本，Stop 可从会话缓存或 transcript 回退。恢复时要注意文本来自哪一轮；这条回退并不提供用户轮次或续跑关联的完整证明。OpenCode 的 idle 审计同样只能说明空闲事件发生，不能恢复已经结束的本轮动作。\n\nHook 执行失败、路径错误或残留锁属于不同失败；先保留输入身份、错误和状态，再修正当前层。可以刷新或重新开启宿主会话加载新入口，但不能把刷新本身当作自动续跑验收。社区 Adapter 没有在本机安装时，报告协议和分发回归即可，不要求为了普通业务任务安装所有应用。\n\n<a id=\"adapters-change\"></a>\n## 增加或修改 Adapter 时怎样验收\n\n公共修改优先在 Core 完成，再检查每种输出映射。至少覆盖缺失会话身份、从子仓启动、重复回答、多会话并行、新用户轮次、已选 Skill 读取、三态转换、报告修正共享预算和宿主不支持的情况。不能让某个 Adapter 为 `reject_completion` 绕过公共预算再发一次。\n\n源码与正式分发都要执行协议回归；真实宿主测试另行记录应用版本、事件、适用范围和未观察能力。扩大公开支持声明前核对官方协议及当前宿主版本。这里的机制与差异由源码和注明的官方资料支持；关于设计收益的解释属于工程推断，不是所有宿主均已成功运行的结论。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"Adapter\",\n    \"宿主兼容\",\n    \"Codex\",\n    \"Qoder\",\n    \"Trae\",\n    \"Cursor\",\n    \"Kimi\",\n    \"CodeBuddy\",\n    \"ZCode\",\n    \"DeepSeek\",\n    \"OpenCode\",\n    \"hooks\",\n    \"host protocol\"\n  ],\n  \"aliases\": [\n    \"Adapter\",\n    \"宿主兼容\",\n    \"Codex\",\n    \"Qoder\",\n    \"Trae\",\n    \"Cursor\",\n    \"Kimi\",\n    \"CodeBuddy\",\n    \"ZCode\",\n    \"DeepSeek\",\n    \"OpenCode\",\n    \"hooks\",\n    \"host protocol\"\n  ],\n  \"repositories\": [\n    \"project\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"normalization\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/hook-io.ts\",\n      \"startLine\": 42,\n      \"endLine\": 70,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"context\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\",\n      \"startLine\": 20,\n      \"endLine\": 58,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"delivery\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/continuation-delivery.ts\",\n      \"startLine\": 3,\n      \"endLine\": 23,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codex-start\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts\",\n      \"startLine\": 14,\n      \"endLine\": 27,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codex-stop\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts\",\n      \"startLine\": 10,\n      \"endLine\": 25,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"qoder-prompt\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts\",\n      \"startLine\": 8,\n      \"endLine\": 29,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"qoder-stop\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts\",\n      \"startLine\": 7,\n      \"endLine\": 24,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"trae-stop\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts\",\n      \"startLine\": 7,\n      \"endLine\": 24,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"cursor-response\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts\",\n      \"startLine\": 5,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"cursor-stop\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts\",\n      \"startLine\": 9,\n      \"endLine\": 42,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"kimi-dispatch\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts\",\n      \"startLine\": 12,\n      \"endLine\": 32,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"kimi-install\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\",\n      \"startLine\": 887,\n      \"endLine\": 955,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codebuddy-dispatch\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts\",\n      \"startLine\": 51,\n      \"endLine\": 132,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"zcode-dispatch\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts\",\n      \"startLine\": 45,\n      \"endLine\": 145,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"deepseek-dispatch\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts\",\n      \"startLine\": 45,\n      \"endLine\": 131,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"opencode-plugin\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts\",\n      \"startLine\": 13,\n      \"endLine\": 44,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"setup-diagnostics\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\",\n      \"startLine\": 418,\n      \"endLine\": 515,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"probe-evidence\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\",\n      \"startLine\": 219,\n      \"endLine\": 412,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"host-history\",\n      \"repoId\": \"project\",\n      \"path\": \"docs/validation/lumine-refactor/2026-09-29/README.md\",\n      \"startLine\": 20,\n      \"endLine\": 28,\n      \"kind\": \"source\",\n      \"note\": \"历史验收范围；不是当前协议的自动续跑证明\"\n    },\n    {\n      \"id\": \"skill-observability\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\",\n      \"startLine\": 378,\n      \"endLine\": 393,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"node-policy\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-runtime.ts\",\n      \"startLine\": 1,\n      \"endLine\": 59,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"node-bootstrap\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-bootstrap.ts\",\n      \"startLine\": 1,\n      \"endLine\": 56,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codex-start-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"qoder-prompt-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"qoder-stop-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"trae-stop-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"cursor-response-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"cursor-stop-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts\",\n      \"startLine\": 1,\n      \"endLine\": 6,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"kimi-dispatch-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts\",\n      \"startLine\": 1,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"codebuddy-dispatch-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts\",\n      \"startLine\": 1,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"zcode-dispatch-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts\",\n      \"startLine\": 1,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"deepseek-dispatch-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts\",\n      \"startLine\": 1,\n      \"endLine\": 19,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"opencode-entry\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/opencode/plugins/harness.ts\",\n      \"startLine\": 1,\n      \"endLine\": 11,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"runtime-process\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/runtime-environment.ts\",\n      \"startLine\": 1,\n      \"endLine\": 42,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"runtime-status\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\",\n      \"startLine\": 636,\n      \"endLine\": 685,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"hook-bootstrap\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts\",\n      \"startLine\": 1,\n      \"endLine\": 12,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"kimi-installed\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts\",\n      \"startLine\": 1,\n      \"endLine\": 35,\n      \"kind\": \"source\"\n    },\n    {\n      \"id\": \"zcode-installed\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts\",\n      \"startLine\": 1,\n      \"endLine\": 35,\n      \"kind\": \"source\"\n    }\n  ],\n  \"relations\": [\n    {\n      \"target\": \"lumine-architecture\",\n      \"kind\": \"related\",\n      \"note\": \"回到 Core、Skill、Adapter 的整体职责\"\n    },\n    {\n      \"target\": \"lumine-root-config\",\n      \"kind\": \"depends_on\",\n      \"note\": \"Hook 与 CLI 共用项目根解析\"\n    },\n    {\n      \"target\": \"lumine-workflow\",\n      \"kind\": \"related\",\n      \"note\": \"实际选择与读取规范 Skill\"\n    },\n    {\n      \"target\": \"lumine-task-check\",\n      \"kind\": \"depends_on\",\n      \"note\": \"所有宿主共用三态停止策略\"\n    },\n    {\n      \"target\": \"lumine-adoption\",\n      \"kind\": \"related\",\n      \"note\": \"设置、升级和恢复入口\"\n    }\n  ],\n  \"diagrams\": [\n    {\n      \"id\": \"adapter-lifecycle\",\n      \"title\": \"统一 Core 与宿主协议之间的边界\",\n      \"caption\": \"不同宿主提供不同事件，虚线表示有些宿主没有该观察点。所有继续请求先通过 Core，输出本身不证明宿主已经执行。\",\n      \"sources\": [\n        \"normalization\",\n        \"context\",\n        \"codex-stop\",\n        \"codebuddy-dispatch\",\n        \"delivery\"\n      ]\n    },\n    {\n      \"id\": \"continuation-proof\",\n      \"title\": \"怎样证明一次自动续跑\",\n      \"caption\": \"只有后续事件带回与当前会话和用户轮次一致的请求回执，才能把“请求继续”提升为“观察到继续”；手动新轮次不算。\",\n      \"sources\": [\n        \"probe-evidence\",\n        \"delivery\"\n      ]\n    }\n  ],\n  \"sections\": [\n    {\n      \"id\": \"adapters-answer\",\n      \"sources\": [\n        \"normalization\",\n        \"context\"\n      ]\n    },\n    {\n      \"id\": \"adapters-lifecycle\",\n      \"sources\": [\n        \"normalization\",\n        \"context\",\n        \"delivery\"\n      ]\n    },\n    {\n      \"id\": \"adapters-hosts\",\n      \"sources\": [\n        \"codex-start\",\n        \"codex-stop\",\n        \"qoder-prompt\",\n        \"qoder-stop\",\n        \"trae-stop\",\n        \"cursor-response\",\n        \"cursor-stop\",\n        \"kimi-dispatch\",\n        \"codebuddy-dispatch\",\n        \"zcode-dispatch\",\n        \"deepseek-dispatch\",\n        \"opencode-plugin\"\n      ]\n    },\n    {\n      \"id\": \"adapters-setup\",\n      \"sources\": [\n        \"setup-diagnostics\",\n        \"kimi-install\",\n        \"skill-observability\"\n      ]\n    },\n    {\n      \"id\": \"adapters-evidence\",\n      \"sources\": [\n        \"probe-evidence\",\n        \"host-history\"\n      ]\n    },\n    {\n      \"id\": \"adapters-failure\",\n      \"sources\": [\n        \"cursor-stop\",\n        \"opencode-plugin\",\n        \"setup-diagnostics\"\n      ]\n    },\n    {\n      \"id\": \"adapters-change\",\n      \"sources\": [\n        \"normalization\",\n        \"delivery\",\n        \"probe-evidence\"\n      ]\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/hook-io.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/session-context.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/continuation-delivery.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapter-manager.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/opencode/plugins/harness.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/verification.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"docs/validation/lumine-refactor/2026-09-29/README.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/work-status.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-runtime.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/node-bootstrap.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/core/runtime-environment.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts\"\n    }\n  ]\n}\n-->\n",
+        "appliedRevision": "2f22246ad69da91689a6fdd99512eb7ff367d9d1ff5198373836cfa6871f5efe",
+        "sources": {
+          "fingerprints": {
+            "project:skills/lumine-harness/src/harness/core/hook-io.ts": "78ce689468264bff5f6ece5ffa2f2316e84d5e711d96a406abf0d1bb89ed6818",
+            "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+            "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+            "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f",
+            "project:skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78",
+            "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855",
+            "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b",
+            "project:skills/lumine-harness/src/harness/adapter-manager.ts": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d",
+            "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e",
+            "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9",
+            "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc",
+            "project:skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac",
+            "project:skills/lumine-harness/src/harness/core/verification.ts": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08",
+            "project:docs/validation/lumine-refactor/2026-09-29/README.md": "641170cd46c797a2b477ab3610fc59867f8fb8e11bea0873d43512c3121791ac",
+            "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+            "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+            "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+            "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027",
+            "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413",
+            "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488",
+            "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152",
+            "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea",
+            "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78",
+            "project:skills/lumine-harness/src/opencode/plugins/harness.ts": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735",
+            "project:skills/lumine-harness/src/harness/core/runtime-environment.ts": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6",
+            "project:skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0",
+            "project:skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566",
+            "project:skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+          },
+          "scopeFingerprints": {
+            "project:skills/lumine-harness/src/harness/core/hook-io.ts": "35701fa076026d6fe33b7e2d8f4eb6455ce57dc786dee5fa3e2f6bfabb0d5fb7",
+            "project:skills/lumine-harness/src/harness/core/session-context.ts": "18d4ab343f35393d5a7dc571377dbe4a912523c4219cf92ef207ea095f20d95d",
+            "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "fcf865b6b40c753dc57a1e0e88c9a8bb7a701f4ed43f51f03569a37e760804c4",
+            "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts": "c1907332e4240c90091c50d7b530da7ca94f241130d3d23de6c640442b39d0b0",
+            "project:skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts": "5ab34fbab97c36d8e3b898420ee5bdf2141425d3c467262a29fef12eb310cb55",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts": "f75f1802c27cb769efac023a4883796d8f9f48212d46733c082624dd66cf1f94",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts": "51f6f2bafaabe3f14f5ddf285545e3b1c479bca65a740c2d98caea9cb75fbd8d",
+            "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts": "21ea9cf1580dcbc44ec2d3a00e2380c1c7a6eb574f4ef017d11dddaeaf7d020b",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts": "32b4ad3bbadd5556e4388e21e962f310caae3109d873ed894bbc29f55a51f513",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts": "ad11ab91002aa4709f03eef9c6f7c45d3ad4575d9fd0d5ae2ae7052a0ad1736d",
+            "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts": "ebe3de702a6324e372b178d560b288556315fb38a785ef98a3dce791a7e5f69c",
+            "project:skills/lumine-harness/src/harness/adapter-manager.ts": "02b784385923286199a43b7a674ba8623d0852a93bae8000b642d4957f051081",
+            "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts": "359b73996dbebf80e96709bd09cd494cc4dedcc3523f899cdfab25aef2c6b5e6",
+            "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts": "59341fc93d51e5b7143fb7f65dbb394133a14b4fbedd4aae944c1e24d68fec5b",
+            "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts": "d2592dae42c69d310d020f38a8a76fbffa73e4bbdf08e6a10d9d86ee7ff980b9",
+            "project:skills/lumine-harness/src/opencode/plugins/harness.ts": "ebc2a18b9d36200d4224289d0becb5c8864bdf10438e35df64d8b59572b4ebba",
+            "project:skills/lumine-harness/src/harness/core/verification.ts": "e1fcfc7d27f7af52a9f8a8fc80e09cb090a4ad79292ac206a564b46e8cd4bc2c",
+            "project:docs/validation/lumine-refactor/2026-09-29/README.md": "01af1b263dc58e404aa6c4afc79ec0ae38831df35eb0dc61eba0d08d9ab07a9f",
+            "project:skills/lumine-harness/src/harness/core/work-status.ts": "772b312f2e95a5008bbd0b5300a035fc0a47beef90143105d3eef1fd092d422d",
+            "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts": "243535e224167adda21e8eb62a0fe171e1369bd3284a851b4a571452e134d58e",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts": "b4a77bdd7589b255a1929b53554be2b16dd9c16cf7d1d2805213d7f336e26514",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts": "edb3a1300d4d274be91bb6dc0f2d304b192313aec5eb61f370f2f076809f371c",
+            "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts": "eda16205cf4307190ff1dc500e2c357443e4283e4799c04530cc8127c53b97cd",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts": "fafd56fb99fc4c63f9235d6231cccfb60c67b084d71c0cf9327695ac520f4d05",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts": "e25c66fbcecb2e04c16e78abcbcb6d2d6f389fcc1da504a51e456fc74b17e061",
+            "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts": "d0bdbf9ae0af378cca909fa76bdc1c7273e04e40ae92524ae085027aebb9b444",
+            "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts": "870db304e1261fcff876297d57b19893bd2902340a5f94614e7ed9b41af326b0",
+            "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts": "66a6319ceb4cc4062bc349c7dc3bb56156b4130b1c4ec573115622c488049585",
+            "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts": "12f33bafdcb4969dc712475d83616132150c8ee095e4fbae5787464852a6b33d",
+            "project:skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts": "2e832f235e1c90e8adf7c05ecdffd25f0a150368be99e18c000c8e317e46530b",
+            "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "c9f100138deb735fe33fed32cab6e6c54b5d43d4e559409dadd18fa6008a4dfe",
+            "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "2372bb890e38c5c479fa5d932cf594d98e1a22dd27e44c677cf1b59c56f84540",
+            "project:skills/lumine-harness/src/harness/core/runtime-environment.ts": "ef76d54f0a470397999b6bdb68b875987f370929edb22727bdd6dcf19d287de1",
+            "project:skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts": "64edc22ca2c48f6f69e35c2a3471e2cf0e077a089ba39eb008c1cb2b6dd6e7c9",
+            "project:skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts": "1fbd0988fb8f5d143583643a9b43da90cce455b522f5065561b4612a3098b4ac",
+            "project:skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts": "bf7a0da53fb1c176012ba7762efc2dfd704a5d8896489bd9df57be5e01861f63"
+          },
+          "files": {
+            "project:skills/lumine-harness/src/harness/core/hook-io.ts": "78ce689468264bff5f6ece5ffa2f2316e84d5e711d96a406abf0d1bb89ed6818",
+            "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+            "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+            "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def",
+            "project:skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027",
+            "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413",
+            "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488",
+            "project:skills/lumine-harness/src/harness/adapter-manager.ts": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d",
+            "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152",
+            "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea",
+            "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78",
+            "project:skills/lumine-harness/src/opencode/plugins/harness.ts": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735",
+            "project:skills/lumine-harness/src/harness/core/verification.ts": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08",
+            "project:docs/validation/lumine-refactor/2026-09-29/README.md": "641170cd46c797a2b477ab3610fc59867f8fb8e11bea0873d43512c3121791ac",
+            "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+            "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a",
+            "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78",
+            "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74",
+            "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855",
+            "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b",
+            "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e",
+            "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9",
+            "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc",
+            "project:skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac",
+            "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+            "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+            "project:skills/lumine-harness/src/harness/core/runtime-environment.ts": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6",
+            "project:skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0",
+            "project:skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566",
+            "project:skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325"
+          },
+          "missing": []
+        },
+        "updatedAt": "2026-09-30T06:28:46.657Z"
+      },
+      "sources": {
+        "fingerprints": {
+          "project:skills/lumine-harness/src/harness/core/hook-io.ts": "78ce689468264bff5f6ece5ffa2f2316e84d5e711d96a406abf0d1bb89ed6818",
+          "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+          "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+          "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f",
+          "project:skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78",
+          "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855",
+          "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b",
+          "project:skills/lumine-harness/src/harness/adapter-manager.ts": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d",
+          "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e",
+          "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9",
+          "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc",
+          "project:skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac",
+          "project:skills/lumine-harness/src/harness/core/verification.ts": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08",
+          "project:docs/validation/lumine-refactor/2026-09-29/README.md": "641170cd46c797a2b477ab3610fc59867f8fb8e11bea0873d43512c3121791ac",
+          "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+          "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+          "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+          "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027",
+          "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413",
+          "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488",
+          "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152",
+          "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea",
+          "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78",
+          "project:skills/lumine-harness/src/opencode/plugins/harness.ts": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735",
+          "project:skills/lumine-harness/src/harness/core/runtime-environment.ts": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6",
+          "project:skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0",
+          "project:skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566",
+          "project:skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325",
+          "project:scripts/build-hook-configs.ts": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6",
+          "project:skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884",
+          "project:skills/lumine-harness/src/adapter-launchers/codex-hooks.json": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        "scopeFingerprints": {
+          "project:skills/lumine-harness/src/harness/core/hook-io.ts": "35701fa076026d6fe33b7e2d8f4eb6455ce57dc786dee5fa3e2f6bfabb0d5fb7",
+          "project:skills/lumine-harness/src/harness/core/session-context.ts": "18d4ab343f35393d5a7dc571377dbe4a912523c4219cf92ef207ea095f20d95d",
+          "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "fcf865b6b40c753dc57a1e0e88c9a8bb7a701f4ed43f51f03569a37e760804c4",
+          "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts": "c1907332e4240c90091c50d7b530da7ca94f241130d3d23de6c640442b39d0b0",
+          "project:skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts": "5ab34fbab97c36d8e3b898420ee5bdf2141425d3c467262a29fef12eb310cb55",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts": "f75f1802c27cb769efac023a4883796d8f9f48212d46733c082624dd66cf1f94",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts": "51f6f2bafaabe3f14f5ddf285545e3b1c479bca65a740c2d98caea9cb75fbd8d",
+          "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts": "21ea9cf1580dcbc44ec2d3a00e2380c1c7a6eb574f4ef017d11dddaeaf7d020b",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts": "32b4ad3bbadd5556e4388e21e962f310caae3109d873ed894bbc29f55a51f513",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts": "ad11ab91002aa4709f03eef9c6f7c45d3ad4575d9fd0d5ae2ae7052a0ad1736d",
+          "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts": "ebe3de702a6324e372b178d560b288556315fb38a785ef98a3dce791a7e5f69c",
+          "project:skills/lumine-harness/src/harness/adapter-manager.ts": "02b784385923286199a43b7a674ba8623d0852a93bae8000b642d4957f051081",
+          "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts": "359b73996dbebf80e96709bd09cd494cc4dedcc3523f899cdfab25aef2c6b5e6",
+          "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts": "59341fc93d51e5b7143fb7f65dbb394133a14b4fbedd4aae944c1e24d68fec5b",
+          "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts": "d2592dae42c69d310d020f38a8a76fbffa73e4bbdf08e6a10d9d86ee7ff980b9",
+          "project:skills/lumine-harness/src/opencode/plugins/harness.ts": "ebc2a18b9d36200d4224289d0becb5c8864bdf10438e35df64d8b59572b4ebba",
+          "project:skills/lumine-harness/src/harness/core/verification.ts": "e1fcfc7d27f7af52a9f8a8fc80e09cb090a4ad79292ac206a564b46e8cd4bc2c",
+          "project:docs/validation/lumine-refactor/2026-09-29/README.md": "01af1b263dc58e404aa6c4afc79ec0ae38831df35eb0dc61eba0d08d9ab07a9f",
+          "project:skills/lumine-harness/src/harness/core/work-status.ts": "772b312f2e95a5008bbd0b5300a035fc0a47beef90143105d3eef1fd092d422d",
+          "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts": "243535e224167adda21e8eb62a0fe171e1369bd3284a851b4a571452e134d58e",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts": "b4a77bdd7589b255a1929b53554be2b16dd9c16cf7d1d2805213d7f336e26514",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts": "edb3a1300d4d274be91bb6dc0f2d304b192313aec5eb61f370f2f076809f371c",
+          "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts": "eda16205cf4307190ff1dc500e2c357443e4283e4799c04530cc8127c53b97cd",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts": "fafd56fb99fc4c63f9235d6231cccfb60c67b084d71c0cf9327695ac520f4d05",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts": "e25c66fbcecb2e04c16e78abcbcb6d2d6f389fcc1da504a51e456fc74b17e061",
+          "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts": "d0bdbf9ae0af378cca909fa76bdc1c7273e04e40ae92524ae085027aebb9b444",
+          "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts": "870db304e1261fcff876297d57b19893bd2902340a5f94614e7ed9b41af326b0",
+          "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts": "66a6319ceb4cc4062bc349c7dc3bb56156b4130b1c4ec573115622c488049585",
+          "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts": "12f33bafdcb4969dc712475d83616132150c8ee095e4fbae5787464852a6b33d",
+          "project:skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts": "2e832f235e1c90e8adf7c05ecdffd25f0a150368be99e18c000c8e317e46530b",
+          "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "c9f100138deb735fe33fed32cab6e6c54b5d43d4e559409dadd18fa6008a4dfe",
+          "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "2372bb890e38c5c479fa5d932cf594d98e1a22dd27e44c677cf1b59c56f84540",
+          "project:skills/lumine-harness/src/harness/core/runtime-environment.ts": "ef76d54f0a470397999b6bdb68b875987f370929edb22727bdd6dcf19d287de1",
+          "project:skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts": "64edc22ca2c48f6f69e35c2a3471e2cf0e077a089ba39eb008c1cb2b6dd6e7c9",
+          "project:skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts": "1fbd0988fb8f5d143583643a9b43da90cce455b522f5065561b4612a3098b4ac",
+          "project:skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts": "bf7a0da53fb1c176012ba7762efc2dfd704a5d8896489bd9df57be5e01861f63",
+          "project:scripts/build-hook-configs.ts": "448ef2cb55fcdfe385046b5b62bacdec906dc80c3a95656b6fd73636841838b3",
+          "project:skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts": "b8b366ca94120864f3c83926fbaa46c38cee1d8e3b484900426eed02703b46d1",
+          "project:skills/lumine-harness/src/adapter-launchers/codex-hooks.json": "cf934deec750c1d11039d932ba7442286966ca5de02e5e2e02459839085801fe"
+        },
+        "files": {
+          "project:skills/lumine-harness/src/harness/core/hook-io.ts": "78ce689468264bff5f6ece5ffa2f2316e84d5e711d96a406abf0d1bb89ed6818",
+          "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
+          "project:skills/lumine-harness/src/harness/core/continuation-delivery.ts": "5f1b641f01303c2db869245fb1a053834ecd3caec9c0e34ad1455a85f4621988",
+          "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts": "0e6c56515c16060799dcf67892d289357fc771337e0d9a33736cfce2cfe64def",
+          "project:skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts": "9bb0ca14bf12cc965a9068f6157bdc1f9e492fcd7dcef11fd25dd2f37594cbc2",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts": "f754e00d17cb9a283ac82bc69652b141bf7ffdf969fb6fb92081f662951f1430",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts": "503b045ebe86ceecced57aa39e7d87c4d51a8c015c62045c850fe023f0b6f027",
+          "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts": "cc92f9b0da60720115597bbf664103cb09f334c208c8563bebd96e347d24b65d",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts": "e3aa7289a0ad5479a6bdd0c52a0821ea5b5ccdd98873c4b7d8ea7408c19760c9",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts": "88e4013e33283c2ac0d6315cced528517f8ee0454ef52a28abf71a47e4494413",
+          "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts": "6dd8d148af2ffd35d7c5c574239dc3f4630386907734126842c35c58da8fb488",
+          "project:skills/lumine-harness/src/harness/adapter-manager.ts": "172bdd33755dcdc7982b18ede978724df041e9e2d60e2698c8e3742c85fec11d",
+          "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts": "a8358a55dae5365ee4939c9668da5f42eb9b7b69bc53d93c1d8e5233dfee7152",
+          "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts": "d8d9628e764374d586c0d2a11a28743b2509bc9785f7e47535dfdf654f34bcea",
+          "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts": "734b0dcf61069a2525189b2227bbe84c85944fdac804a9b442e6ab270317aa78",
+          "project:skills/lumine-harness/src/opencode/plugins/harness.ts": "e124f4f088dc1a61e6c55f6a8c817630db44972be45d67910f646ea1212ef735",
+          "project:skills/lumine-harness/src/harness/core/verification.ts": "2b3815edcdc488b1d9a16a295dcd8461a128e324cc6964e782fbca41c9b27c08",
+          "project:docs/validation/lumine-refactor/2026-09-29/README.md": "641170cd46c797a2b477ab3610fc59867f8fb8e11bea0873d43512c3121791ac",
+          "project:skills/lumine-harness/src/harness/core/work-status.ts": "0fb30052ff8e0124a9127267a8b805919d3f65f3c464273d7cf1b0fb9c50b589",
+          "project:skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts": "84fae010b7013a3a63bd48a959c2112918bd95e36f14d0327148d9ec2a83e65f",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts": "6c2c9f56e316493b256fd82609334d251ef4b0928a02897dade058587ad6db0a",
+          "project:skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts": "950294333d6ce1d6cd97dd468e9b347428e3f204d7aaaa1fb229f7fb9de84c78",
+          "project:skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts": "25f7bbac67c20928dcd229c0f0433464ba533372259e5e78a5ba635dc168ff01",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts": "2938e9e754334878b04a22d4be2d77ef421336391c311f33335026949fefef74",
+          "project:skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts": "f19b68bcf5eeb40c739aa943c648b657906495821bf2949f0bedcf3118cab855",
+          "project:skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts": "8f543723ccade104ec19b173477f9747e912657af7cd3afcfc03e4ceef18de1b",
+          "project:skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts": "8601e8bd309c9eec0d49edf99e977f2380a3b0c8b828632355157930077b2e8e",
+          "project:skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts": "7089dc9140c9060a85550cc166366e150f63e7a1225f20de71010dd076ec8df9",
+          "project:skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts": "2bec73e974abd664f469d2e3d8c1fa1108a34486537d523ed542e9aa11f8cadc",
+          "project:skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts": "d97844c0d08259e5ac83e33aee2cb2deb63fb33f7252ef18f1d95f753fb981ac",
+          "project:skills/lumine-harness/src/harness/core/node-runtime.ts": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+          "project:skills/lumine-harness/src/harness/core/node-bootstrap.ts": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+          "project:skills/lumine-harness/src/harness/core/runtime-environment.ts": "9161db8f36bb4e4adfc3860ddd46d72e86fb5ed8eda3ca2b734978bbb05f15b6",
+          "project:skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0",
+          "project:skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts": "827a8a6f66dc08a26157dbde177a4430f34594869013cec772ec7740d7e74566",
+          "project:skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts": "fe743b3f993236ac9de343fb68f4d31d2a32d2b9a480a15893c2157857b9a325",
+          "project:scripts/build-hook-configs.ts": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6",
+          "project:skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884",
+          "project:skills/lumine-harness/src/adapter-launchers/codex-hooks.json": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        "missing": []
+      },
+      "sourceRefs": [
+        {
+          "id": "normalization",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/hook-io.ts",
+          "startLine": 42,
+          "endLine": 70,
+          "kind": "source"
+        },
+        {
+          "id": "context",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts",
+          "startLine": 20,
+          "endLine": 58,
+          "kind": "source"
+        },
+        {
+          "id": "delivery",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/continuation-delivery.ts",
+          "startLine": 3,
+          "endLine": 23,
+          "kind": "source"
+        },
+        {
+          "id": "codex-start",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts",
+          "startLine": 14,
+          "endLine": 27,
+          "kind": "source"
+        },
+        {
+          "id": "codex-stop",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts",
+          "startLine": 10,
+          "endLine": 25,
+          "kind": "source"
+        },
+        {
+          "id": "qoder-prompt",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts",
+          "startLine": 8,
+          "endLine": 29,
+          "kind": "source"
+        },
+        {
+          "id": "qoder-stop",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts",
+          "startLine": 7,
+          "endLine": 24,
+          "kind": "source"
+        },
+        {
+          "id": "trae-stop",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts",
+          "startLine": 7,
+          "endLine": 24,
+          "kind": "source"
+        },
+        {
+          "id": "cursor-response",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts",
+          "startLine": 5,
+          "endLine": 19,
+          "kind": "source"
+        },
+        {
+          "id": "cursor-stop",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts",
+          "startLine": 9,
+          "endLine": 42,
+          "kind": "source"
+        },
+        {
+          "id": "kimi-dispatch",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts",
+          "startLine": 12,
+          "endLine": 32,
+          "kind": "source"
+        },
+        {
+          "id": "kimi-install",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "startLine": 887,
+          "endLine": 955,
+          "kind": "source"
+        },
+        {
+          "id": "codebuddy-dispatch",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts",
+          "startLine": 51,
+          "endLine": 132,
+          "kind": "source"
+        },
+        {
+          "id": "zcode-dispatch",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts",
+          "startLine": 45,
+          "endLine": 145,
+          "kind": "source"
+        },
+        {
+          "id": "deepseek-dispatch",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts",
+          "startLine": 45,
+          "endLine": 131,
+          "kind": "source"
+        },
+        {
+          "id": "opencode-plugin",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+          "startLine": 13,
+          "endLine": 44,
+          "kind": "source"
+        },
+        {
+          "id": "setup-diagnostics",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "startLine": 418,
+          "endLine": 515,
+          "kind": "source"
+        },
+        {
+          "id": "probe-evidence",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts",
+          "startLine": 219,
+          "endLine": 412,
+          "kind": "source"
+        },
+        {
+          "id": "host-history",
+          "repoId": "project",
+          "path": "docs/validation/lumine-refactor/2026-09-29/README.md",
+          "startLine": 20,
+          "endLine": 28,
+          "kind": "source",
+          "note": "历史验收范围；不是当前协议的自动续跑证明"
+        },
+        {
+          "id": "skill-observability",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts",
+          "startLine": 378,
+          "endLine": 393,
+          "kind": "source"
+        },
+        {
+          "id": "node-policy",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+          "startLine": 1,
+          "endLine": 59,
+          "kind": "source"
+        },
+        {
+          "id": "node-bootstrap",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+          "startLine": 1,
+          "endLine": 56,
+          "kind": "source"
+        },
+        {
+          "id": "codex-start-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts",
+          "startLine": 1,
+          "endLine": 6,
+          "kind": "source"
+        },
+        {
+          "id": "qoder-prompt-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts",
+          "startLine": 1,
+          "endLine": 6,
+          "kind": "source"
+        },
+        {
+          "id": "qoder-stop-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts",
+          "startLine": 1,
+          "endLine": 6,
+          "kind": "source"
+        },
+        {
+          "id": "trae-stop-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts",
+          "startLine": 1,
+          "endLine": 6,
+          "kind": "source"
+        },
+        {
+          "id": "cursor-response-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts",
+          "startLine": 1,
+          "endLine": 6,
+          "kind": "source"
+        },
+        {
+          "id": "cursor-stop-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts",
+          "startLine": 1,
+          "endLine": 6,
+          "kind": "source"
+        },
+        {
+          "id": "kimi-dispatch-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts",
+          "startLine": 1,
+          "endLine": 19,
+          "kind": "source"
+        },
+        {
+          "id": "codebuddy-dispatch-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts",
+          "startLine": 1,
+          "endLine": 19,
+          "kind": "source"
+        },
+        {
+          "id": "zcode-dispatch-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts",
+          "startLine": 1,
+          "endLine": 19,
+          "kind": "source"
+        },
+        {
+          "id": "deepseek-dispatch-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts",
+          "startLine": 1,
+          "endLine": 19,
+          "kind": "source"
+        },
+        {
+          "id": "opencode-entry",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts",
+          "startLine": 1,
+          "endLine": 11,
+          "kind": "source"
+        },
+        {
+          "id": "runtime-process",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+          "startLine": 1,
+          "endLine": 42,
+          "kind": "source"
+        },
+        {
+          "id": "runtime-status",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts",
+          "startLine": 636,
+          "endLine": 685,
+          "kind": "source"
+        },
+        {
+          "id": "hook-bootstrap",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+          "startLine": 1,
+          "endLine": 12,
+          "kind": "source"
+        },
+        {
+          "id": "kimi-installed",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts",
+          "startLine": 1,
+          "endLine": 35,
+          "kind": "source"
+        },
+        {
+          "id": "zcode-installed",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts",
+          "startLine": 1,
+          "endLine": 35,
+          "kind": "source"
+        },
+        {
+          "id": "hook-config-build",
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts",
+          "startLine": 1,
+          "endLine": 53,
+          "kind": "source"
+        },
+        {
+          "id": "hook-root-dispatch",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "startLine": 1,
+          "endLine": 29,
+          "kind": "source"
+        },
+        {
+          "id": "hook-config-template",
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "startLine": 1,
+          "endLine": 27,
+          "kind": "source"
+        }
+      ],
+      "watchScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/hook-io.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-context.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/continuation-delivery.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapter-manager.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/opencode/plugins/harness.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/verification.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/validation/lumine-refactor/2026-09-29/README.md"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-runtime.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/runtime-environment.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/build-hook-configs.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json"
+        }
+      ],
+      "replaceSources": true,
+      "replaceWatchScopes": true
+    }
+  ],
+  "status": "applied",
+  "results": [
+    {
+      "id": "lumine-architecture",
+      "status": "applied",
+      "reason": "Text, source observation and generation baseline saved together.",
+      "candidatePath": ".lumine/wiki-state/updates/363dd63a-9d3f-4598-9df7-be47b6de0f41/candidates/ce9559b6bb68e6cf640171fe03f7722138038b72da987b33249c27d0fda324fb.md"
+    },
+    {
+      "id": "lumine-adapters",
+      "status": "applied",
+      "reason": "Text, source observation and generation baseline saved together.",
+      "candidatePath": ".lumine/wiki-state/updates/363dd63a-9d3f-4598-9df7-be47b6de0f41/candidates/6c9bf4aba1b6ca2b24f3c89c04df4e4616762e60d8ebb4a50afd3ed046cd0dbc.md"
+    }
+  ]
+}

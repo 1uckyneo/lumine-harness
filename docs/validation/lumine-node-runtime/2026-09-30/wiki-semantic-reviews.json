@@ -1,0 +1,90 @@
+[
+  {
+    "documentId": "lumine-architecture",
+    "revision": "890cf6a1cf5a854475a234b98335ba8ef6e446220ecdd5bcbaa9fff3a2c2ddc6",
+    "sourceFingerprint": "3fdfee733bbc665892ee6da5e2680de037a110545721d0182c3ae772b212df32",
+    "reviewedAt": "2026-09-30T07:02:26.264054Z",
+    "reviewer": {
+      "kind": "agent",
+      "role": "independent"
+    },
+    "outcome": "reviewed",
+    "scope": [
+      "Node 22.x >=22.18.0 与 Node 24.x >=24.11.0 的精确支持范围及低语法例外",
+      "入口版本拒绝先于事件读取、根查找与实现加载，包括共同生成的静态 Hook 定位器",
+      "迁移恢复工具与日志保留边界，恢复操作不绕过当前工具版本策略",
+      "终端进程与真实 Hook 进程证据区别，以及 Bun 嵌入运行环境的独立验证边界"
+    ],
+    "findings": [],
+    "limitations": [
+      "未验证真实宿主生命周期与自动续跑。",
+      "本次仅复核 Node 政策、入口顺序、恢复边界与 Bun；不代表全文所有语义已复核。"
+    ]
+  },
+  {
+    "documentId": "lumine-adoption",
+    "revision": "c94b3868035cf44f6dcc47a4cc914d4e048d093449df0a5da31e9f15d39fe0db",
+    "sourceFingerprint": "4348c0fb01b889da5ffeb2216f30245f8c7e6df7dba5e518ed836d860884014f",
+    "reviewedAt": "2026-09-30T07:02:26.264054Z",
+    "reviewer": {
+      "kind": "agent",
+      "role": "independent"
+    },
+    "outcome": "reviewed",
+    "scope": [
+      "Node 22.x >=22.18.0 与 Node 24.x >=24.11.0 的精确支持范围及低语法例外",
+      "入口版本拒绝先于事件读取、根查找与实现加载，包括共同生成的静态 Hook 定位器",
+      "迁移恢复工具与日志保留边界，恢复操作不绕过当前工具版本策略",
+      "终端进程与真实 Hook 进程证据区别，以及 Bun 嵌入运行环境的独立验证边界"
+    ],
+    "findings": [],
+    "limitations": [
+      "未验证真实宿主生命周期与自动续跑。",
+      "本次仅复核 Node 政策、入口顺序、恢复边界与 Bun；不代表全文所有语义已复核。"
+    ]
+  },
+  {
+    "documentId": "lumine-adapters",
+    "revision": "c4505f7da8323b9a4fb62b161c27fba387cd6c0dbaf3b6bcd44b6a5d7d9c258d",
+    "sourceFingerprint": "c25a950f8c69e54c50e12a7f2150607828979b87b389dc3012e43c0a1db88408",
+    "reviewedAt": "2026-09-30T07:02:26.264054Z",
+    "reviewer": {
+      "kind": "agent",
+      "role": "independent"
+    },
+    "outcome": "reviewed",
+    "scope": [
+      "Node 22.x >=22.18.0 与 Node 24.x >=24.11.0 的精确支持范围及低语法例外",
+      "入口版本拒绝先于事件读取、根查找与实现加载，包括共同生成的静态 Hook 定位器",
+      "迁移恢复工具与日志保留边界，恢复操作不绕过当前工具版本策略",
+      "终端进程与真实 Hook 进程证据区别，以及 Bun 嵌入运行环境的独立验证边界"
+    ],
+    "findings": [],
+    "limitations": [
+      "未验证真实宿主生命周期与自动续跑。",
+      "本次仅复核 Node 政策、入口顺序、恢复边界与 Bun；不代表全文所有语义已复核。"
+    ]
+  },
+  {
+    "documentId": "lumine-task-check",
+    "revision": "6a7c1c3e1fc769f5b345414663c92782fe3c4e344f05e8c6cd4e6fe7263076c0",
+    "sourceFingerprint": "1a107a33b30530016ed08c1ea1717dfd34bda6b284f85dc6cc7dd5f367097873",
+    "reviewedAt": "2026-09-30T07:02:26.264054Z",
+    "reviewer": {
+      "kind": "agent",
+      "role": "independent"
+    },
+    "outcome": "reviewed",
+    "scope": [
+      "Node 22.x >=22.18.0 与 Node 24.x >=24.11.0 的精确支持范围及低语法例外",
+      "入口版本拒绝先于事件读取、根查找与实现加载，包括共同生成的静态 Hook 定位器",
+      "迁移恢复工具与日志保留边界，恢复操作不绕过当前工具版本策略",
+      "终端进程与真实 Hook 进程证据区别，以及 Bun 嵌入运行环境的独立验证边界"
+    ],
+    "findings": [],
+    "limitations": [
+      "未验证真实宿主生命周期与自动续跑。",
+      "本次仅复核 Node 政策、入口顺序、恢复边界与 Bun；不代表全文所有语义已复核。"
+    ]
+  }
+]

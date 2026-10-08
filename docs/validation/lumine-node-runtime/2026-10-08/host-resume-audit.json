@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "auditDate": "2026-10-08",
+  "auditedAt": "2026-10-08T03:56:25.990765+00:00",
+  "scope": "Read-only final Node baseline parent upgrade and real host evidence metadata audit",
+  "proposalId": "d8ab1262-c961-4aaa-8bc0-e40ecc0bfcd7",
+  "selectedAdapters": [
+    "codex"
+  ],
+  "journal": {
+    "status": "awaiting_host_verification",
+    "appliedAt": "2026-09-30T06:52:41.944Z"
+  },
+  "marker": {
+    "schemaVersion": 2,
+    "kind": "lumine-root",
+    "distributionVersion": "2.0.0",
+    "migrationId": "d8ab1262-c961-4aaa-8bc0-e40ecc0bfcd7",
+    "migrationStatus": "applied"
+  },
+  "integrity": {
+    "operationCounts": {
+      "write": 200,
+      "preserve": 8
+    },
+    "postHashMismatches": [],
+    "managedCount": 198,
+    "managedMismatches": []
+  },
+  "adapterStatus": {
+    "command": "adapter status codex --details --json --root <parent>",
+    "exitCode": 0,
+    "readiness": "ready",
+    "runtimeStatus": "failed",
+    "hostVersion": "unknown",
+    "observedAt": null,
+    "checkProcess": {
+      "source": "actual_process",
+      "runtime": "node",
+      "version": "24.14.0",
+      "support": "supported"
+    },
+    "hostProcess": {
+      "status": "not_observed",
+      "runtime": null,
+      "observedAt": null
+    }
+  },
+  "sessionMetadata": [
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "statusProtocolVersion": 2,
+      "startedAt": "2026-09-28T08:31:46.125Z",
+      "updatedAt": "2026-09-28T08:50:22.426Z",
+      "resumedAt": null,
+      "cwdMatchesParent": true,
+      "hasHarnessRoot": false,
+      "hasSessionId": true,
+      "updatedAfterApply": false,
+      "processRuntimePresent": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "statusProtocolVersion": 2,
+      "startedAt": "2026-09-28T04:42:40.518Z",
+      "updatedAt": "2026-09-29T10:34:16.440Z",
+      "resumedAt": "2026-09-29T09:57:30.526Z",
+      "cwdMatchesParent": true,
+      "hasHarnessRoot": false,
+      "hasSessionId": true,
+      "updatedAfterApply": false,
+      "processRuntimePresent": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "statusProtocolVersion": 2,
+      "startedAt": "2026-09-28T09:53:47.905Z",
+      "updatedAt": "2026-09-28T10:11:04.860Z",
+      "resumedAt": null,
+      "cwdMatchesParent": true,
+      "hasHarnessRoot": false,
+      "hasSessionId": true,
+      "updatedAfterApply": false,
+      "processRuntimePresent": false
+    }
+  ],
+  "probeMetadata": [
+    {
+      "schemaVersion": 1,
+      "product": "codex",
+      "issuedAt": "2026-09-28T12:01:29.897Z",
+      "expiresAt": "2026-09-29T12:01:29.897Z",
+      "rootHashMatches": true,
+      "expiredAtAudit": true
+    },
+    {
+      "schemaVersion": 1,
+      "product": "trae",
+      "issuedAt": "2026-09-28T12:01:29.898Z",
+      "expiresAt": "2026-09-29T12:01:29.898Z",
+      "rootHashMatches": true,
+      "expiredAtAudit": true
+    }
+  ],
+  "probeEventMetadata": [
+    {
+      "product": "codex",
+      "count": 35,
+      "firstAt": "2026-09-28T12:20:18.611Z",
+      "lastAt": "2026-09-29T10:34:16.441Z",
+      "afterApplyCount": 0,
+      "cwdRelativeWithinRootCount": 35,
+      "processRuntimePresentCount": 0,
+      "eventTypes": {
+        "stop": 27,
+        "session_start": 8
+      }
+    }
+  ],
+  "priorHostEnvelopeMetadata": [
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatches": true,
+      "observedAt": "2026-09-29T04:10:36.069790+00:00",
+      "afterApply": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatches": true,
+      "observedAt": "2026-09-29T07:19:00.915Z",
+      "afterApply": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatches": true,
+      "observedAt": "2026-09-29T07:31:09.774Z",
+      "afterApply": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatches": true,
+      "observedAt": "2026-09-29T07:41:28.395Z",
+      "afterApply": false
+    },
+    {
+      "schemaVersion": 2,
+      "product": "codex",
+      "hasSessionId": true,
+      "harnessRootMatches": true,
+      "observedAt": "2026-09-29T08:09:39.631Z",
+      "afterApply": false
+    }
+  ],
+  "finalizationCriteria": {
+    "source": "skills/lumine-harness/src/scripts/harness-manager-main.ts:866",
+    "requiresSelectedAdapterArtifact": true,
+    "requiresObservationAfterFinalApply": true,
+    "requiresArtifactProductSessionRootAndSchema2Match": true,
+    "requiresManagedPostHashConsistency": true,
+    "note": "Probe expiration is a separate Runtime verification rule; finalize structurally validates a host artifact envelope and cannot authenticate a fabricated observation time."
+  },
+  "conclusion": {
+    "eligiblePostApplyHostEvidenceFound": false,
+    "integrityStatus": "unchanged",
+    "blocker": "Known SessionState, Probe events, and retained host envelopes all predate final application; no current-process Node observation for a real parent Hook is recorded.",
+    "nextStep": "In a real Codex session rooted at the parent, enable a fresh verification probe and perform a normal interaction; inspect newly created Hook receipt and actual processRuntime. Then prepare a schema2 matching host artifact and finalize the retained final proposal. Never refresh historical evidence timestamps or use this source-repo session as parent evidence.",
+    "authorizationLimit": "No Hook, probe, parent write, finalize, conversation body, or business child access was performed."
+  }
+}

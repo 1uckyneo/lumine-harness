@@ -1,8 +1,9 @@
 {
   "id": "lumine-workflow",
-  "revision": "83b4524c1f0a605213b8099c277e0b1c9fdc63c23ffcacedc83ab5f0ac30d18d",
-  "checkedAt": "2026-09-29T10:27:18.706Z",
-  "sourceFingerprint": "79a442cc882e7bdd8b0d1b32850580ae5f66d708d15031cfe3abea418a79a174",
+  "revision": "eba8f1b88753a089b7e5ba227407e0b2a59b2fac1eab8a172bb343c609558ca2",
+  "freshness": "current",
+  "checkedAt": "2026-09-30T04:48:00.244Z",
+  "sourceFingerprint": "776795118a65c940c90d5c0ed961f5af6939f9641abaa9e364d5261f1e9d29ac",
   "sources": {
     "fingerprints": {
       "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "01f8727acbc6b822af75ec5d8b52cdbba38bb607b51dfe4b3ced6a28fa50e37f",
@@ -11,7 +12,7 @@
       "project:skills/lumine-harness/assets/skills/lumine-design/SKILL.md": "8d417b9354458fe4aef74cc9e379ba29102756940bc1f117a6df6c9279bf8a77",
       "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
       "project:skills/lumine-harness/src/harness/core/documents.ts": "8716a6e582d67b467da1bc9b79b6732d1def8c8bdfa6626ba70caf1beecd438a",
-      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "5243a81165de92099d3aed9e29068331cd6a8683076ed6b128900ce39c2dadc2",
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "283ae153091aea0eb962add7d31eb6cb126d1de295478b462aa315e0a7d5e874",
       "project:skills/lumine-harness/src/harness/core/task-cli.ts": "ff2217cdfe53847ef145efe97fc2afbc1e7225628eb71b1b181c0e3bf4900745",
       "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
       "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "4ed5e34174e0020d859a5ae1b931ecb50547a7c46be28a22471b72905ec24f6e"
@@ -23,7 +24,7 @@
       "project:skills/lumine-harness/assets/skills/lumine-design/SKILL.md": "5c829faaf6961ab0d8637ee8d384885fea29acaffd1c17173b6e9e6483a921f3",
       "project:skills/lumine-harness/src/harness/core/phase-router.ts": "64fa2e9dab9922216f8760190d8077c25d18cf0c5d08f28651e2455ace438520",
       "project:skills/lumine-harness/src/harness/core/documents.ts": "911a57ed3192d66c54897807b0545d6d81931aee6f562ba4ce31c01ee1ea87d3",
-      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "8f43f781d10d8bbd89df7a2e5a999c896a43ebf703040fa7819798eb5559ddea",
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "1f63bf718d748f9bc4297c4f7847566c89f3f780b50830fbcb1d9c0524b6420c",
       "project:skills/lumine-harness/src/harness/core/task-cli.ts": "7d2f9e6057db70b470bceaee81d3fea06bd7409aff3415841c713dc303f5d058",
       "project:skills/lumine-harness/src/harness/core/session-context.ts": "18d4ab343f35393d5a7dc571377dbe4a912523c4219cf92ef207ea095f20d95d"
     },
@@ -34,11 +35,10 @@
       "project:skills/lumine-harness/assets/skills/lumine-design/SKILL.md": "8d417b9354458fe4aef74cc9e379ba29102756940bc1f117a6df6c9279bf8a77",
       "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
       "project:skills/lumine-harness/src/harness/core/documents.ts": "8716a6e582d67b467da1bc9b79b6732d1def8c8bdfa6626ba70caf1beecd438a",
-      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "5243a81165de92099d3aed9e29068331cd6a8683076ed6b128900ce39c2dadc2",
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "283ae153091aea0eb962add7d31eb6cb126d1de295478b462aa315e0a7d5e874",
       "project:skills/lumine-harness/src/harness/core/task-cli.ts": "ff2217cdfe53847ef145efe97fc2afbc1e7225628eb71b1b181c0e3bf4900745",
       "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903"
     },
     "missing": []
-  },
-  "freshness": "current"
+  }
 }

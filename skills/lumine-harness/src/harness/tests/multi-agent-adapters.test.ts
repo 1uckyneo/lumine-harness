@@ -391,7 +391,7 @@ test("repository keeps one canonical Skill source and capability boundaries rema
   assert.equal(cursorConfig.hooks.stop?.[0]?.loop_limit, 20);
   assert.equal(traeConfig.hooks.Stop?.[0]?.loop_limit, 20);
   if (existsSync(sourcePath(".opencode/plugins/harness.mjs"))) {
-    const plugin = readFileSync(sourcePath(".opencode/plugins/harness.mjs"), "utf8");
+    const plugin = readFileSync(sourcePath(".lumine/adapters/opencode/plugin-main.mjs"), "utf8");
     assert.match(plugin, /audit_only/);
     assert.match(plugin, /manual_required/);
     assert.doesNotMatch(plugin, /followup_message/);

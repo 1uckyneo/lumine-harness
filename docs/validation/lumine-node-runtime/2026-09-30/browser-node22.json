@@ -1,0 +1,233 @@
+{
+  "version": "22.18.0",
+  "diagrams": [
+    {
+      "id": "architecture",
+      "inlineSvg": 1,
+      "viewerSvg": 1,
+      "label": "Architecture"
+    },
+    {
+      "id": "sequence",
+      "inlineSvg": 1,
+      "viewerSvg": 1,
+      "label": "Sequence"
+    },
+    {
+      "id": "flow",
+      "inlineSvg": 1,
+      "viewerSvg": 1,
+      "label": "Flow"
+    },
+    {
+      "id": "state",
+      "inlineSvg": 1,
+      "viewerSvg": 1,
+      "label": "State"
+    },
+    {
+      "id": "er",
+      "inlineSvg": 1,
+      "viewerSvg": 1,
+      "label": "ER"
+    }
+  ],
+  "diagramErrors": 0,
+  "requestIsolation": {
+    "blocked": [
+      "http://example.invalid/node-acceptance-control"
+    ],
+    "requests": [
+      {
+        "url": "http://127.0.0.1:4341/?doc=five-diagrams",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/styles.css",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/reader.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-PQ6DSH24.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-QHDNOTBI.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/api/config",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/api/catalog",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/api/map",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/api/document?id=five-diagrams&fragment=architecture&full=1",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/api/related?id=five-diagrams",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/mermaid.core-BKOI5I3D.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-S3CGXTRJ.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-XXUKEYXA.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-TBV5XTGP.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-IVKHGDOE.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-VMNPMWRH.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-4PJNGS3V.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-WQ4ZWICK.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-ZA5KOOWO.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-5OJNVHMS.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-LDPZ6WLC.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-4LPMS5I3.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-GJGOXJO5.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-NCUBXNYU.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-5ERCSKIE.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-YYOVST5G.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-OT3T5U35.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/flowDiagram-UKHOOZJN-C5TGSOBS.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-FXIIJKVX.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-3ZIGILXN.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-G46N24PV.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-DIZ42OWK.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-YEYK5MQC.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/dagre-VZM6K2ZE-Z5ECMMKY.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-DB453Z6Q.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-MIQTORAF.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-ACC7BCQK.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/sequenceDiagram-SI44F4Z6-C5B7CY63.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-37A5HA4E.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/stateDiagram-v2-UEYNNEHI-H4LOAAZR.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/chunk-PRL4AVG3.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/chunks/erDiagram-JOGREHBK-B3A3YP63.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:4341/api/search?q=architecture&scope=wiki&limit=20",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "applicationRequestsOnly": true,
+    "externalNegativeControlBlocked": true,
+    "browserRouteDisablesHttpCache": true
+  },
+  "search": {
+    "version": "22.18.0",
+    "query": "architecture",
+    "results": 1,
+    "bodyExplanationVisible": true
+  },
+  "runtimeOutboundControls": {
+    "version": "22.18.0",
+    "blockedControls": 3
+  },
+  "limitations": [
+    "Request isolation covers browser requests and Node HTTP/HTTPS/fetch; no physical network disconnection is claimed.",
+    "Disposable Plugin-only fixture without source/node_modules; five valid Mermaid kinds and a text query, not human acceptance or real host lifecycle."
+  ]
+}

@@ -1771,6 +1771,12 @@
       "action": "keep-current",
       "reason": "新增engine来源需要重新准备工作包；保留当前正文，后续用包含来源的候选替代。",
       "at": "2026-09-29T07:39:53.581Z"
+    },
+    {
+      "id": "lumine-wiki-reader",
+      "action": "keep-current",
+      "reason": "React 阅读器已替换旧 reader.ts；原候选与旧来源快照仍保留，按当前源码另起受保护工作包修订，不把旧 source-drift 记录当成已应用。",
+      "at": "2026-09-29T19:55:04.827Z"
     }
   ]
 }

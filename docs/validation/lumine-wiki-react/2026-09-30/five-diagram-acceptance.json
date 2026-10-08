@@ -1,0 +1,873 @@
+{
+  "environment": {
+    "node": "24.14.0",
+    "browser": "Chromium 154.0.8037.58",
+    "service": "http://127.0.0.1:4338",
+    "fixture": "isolated representative text; no project knowledge claims"
+  },
+  "sourceFingerprints": {
+    "skills/lumine-harness/assets/wiki-reader/reader.js": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+    "skills/lumine-harness/assets/wiki-reader/manifest.json": "ea807052f23bf0f35fa75aab6e971a28621e06b0aafa381b0d8f01cf9bba3c77",
+    "skills/lumine-harness/src/browser/reader-diagrams.tsx": "69bbe1e49497dad3955cef18c39908bb4dd3d40caedbeb2c4a7de301835a25c6",
+    "skills/lumine-harness/src/browser/reader-common.ts": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e",
+    "skills/lumine-harness/src/browser/reader-markdown.tsx": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e",
+    "skills/lumine-harness/src/browser/reader.tsx": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+  },
+  "firstObservations": {
+    "copyButtonMissing": {
+      "time": "2026-09-30T04:19:28.965Z",
+      "diagrams": [
+        {
+          "id": "architecture",
+          "sourceCopyButtonCount": 0
+        },
+        {
+          "id": "sequence",
+          "sourceCopyButtonCount": 0
+        },
+        {
+          "id": "flow",
+          "sourceCopyButtonCount": 0
+        },
+        {
+          "id": "state",
+          "sourceCopyButtonCount": 0
+        },
+        {
+          "id": "er",
+          "sourceCopyButtonCount": 0
+        }
+      ],
+      "note": "Initial main viewer lacked active Mermaid source copy action; retained before root fix"
+    },
+    "localSyntaxAndRemoteClickFailures": [
+      {
+        "id": "broken",
+        "inlineError": "This diagram could not be displayed. Its explanation and Mermaid text remain available.",
+        "inlineSvgCount": 0,
+        "dialogError": "This diagram could not be displayed. Its explanation and Mermaid text remain available.",
+        "svgExportDisabled": true,
+        "sourceMatches": true,
+        "explanationReadable": true,
+        "validSvgCount": 5
+      },
+      {
+        "id": "unsafe",
+        "inlineError": "This diagram could not be displayed. Its explanation and Mermaid text remain available.",
+        "inlineSvgCount": 0,
+        "dialogError": "This diagram could not be displayed. Its explanation and Mermaid text remain available.",
+        "svgExportDisabled": true,
+        "sourceMatches": true,
+        "explanationReadable": true,
+        "validSvgCount": 5
+      }
+    ],
+    "layoutBeforeFix": {
+      "time": "2026-09-30T04:31:45.233Z",
+      "results": [
+        {
+          "id": "architecture",
+          "focus": "architecture",
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#architecture",
+          "top": 521,
+          "viewportHeight": 720,
+          "inlineSvg": 1,
+          "canvasText": null,
+          "svgWaitFailed": false
+        },
+        {
+          "id": "sequence",
+          "focus": "sequence",
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#sequence",
+          "top": 259.765625,
+          "viewportHeight": 720,
+          "inlineSvg": 1,
+          "canvasText": null,
+          "svgWaitFailed": false
+        },
+        {
+          "id": "flow",
+          "focus": "flow",
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#flow",
+          "top": 472.359375,
+          "viewportHeight": 720,
+          "inlineSvg": 1,
+          "canvasText": null,
+          "svgWaitFailed": false
+        },
+        {
+          "id": "state",
+          "focus": "state",
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#state",
+          "top": 712.953125,
+          "viewportHeight": 720,
+          "inlineSvg": 1,
+          "canvasText": null,
+          "svgWaitFailed": false
+        },
+        {
+          "id": "er",
+          "focus": "er",
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+          "top": 907.515625,
+          "viewportHeight": 720,
+          "inlineSvg": 0,
+          "canvasText": "正在载入…",
+          "svgWaitFailed": true
+        }
+      ]
+    },
+    "initialErTimeout": {
+      "focus": "er",
+      "top": 907.515625,
+      "viewportHeight": 720,
+      "inlineSvg": 0,
+      "canvasText": "正在载入…",
+      "note": "Initial ER fresh deep link left diagram below viewport; raw initial timeout and later pre-fix observation retained by verifier"
+    }
+  },
+  "finalInteractions": {
+    "time": "2026-09-30T04:43:27.828Z",
+    "diagrams": [
+      {
+        "id": "architecture",
+        "inlineSvg": true,
+        "position": {
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#architecture",
+          "focus": "architecture"
+        },
+        "fit": {
+          "text": "translate(20px, 114.281px) scale(1.47801)",
+          "scale": 1.47801,
+          "x": 20,
+          "y": 114.281
+        },
+        "zoomIn": {
+          "text": "translate(-81.8px, 90.3378px) scale(1.77361)",
+          "scale": 1.77361,
+          "x": -81.8,
+          "y": 90.3378
+        },
+        "zoomOut": {
+          "text": "translate(40.36px, 119.07px) scale(1.41889)",
+          "scale": 1.41889,
+          "x": 40.36,
+          "y": 119.07
+        },
+        "refit": {
+          "text": "translate(20px, 114.281px) scale(1.47801)",
+          "scale": 1.47801,
+          "x": 20,
+          "y": 114.281
+        },
+        "reset": {
+          "text": "translate(184.617px, 153px) scale(1)",
+          "scale": 1,
+          "x": 184.617,
+          "y": 153
+        },
+        "pan": {
+          "text": "translate(219.617px, 178px) scale(1)",
+          "scale": 1,
+          "x": 219.617,
+          "y": 178
+        },
+        "keyboardPan": {
+          "text": "translate(194.617px, 178px) scale(1)",
+          "scale": 1,
+          "x": 194.617,
+          "y": 178
+        },
+        "keyboardZoom": {
+          "text": "translate(127.741px, 166.8px) scale(1.2)",
+          "scale": 1.2,
+          "x": 127.741,
+          "y": 166.8
+        },
+        "keyboardFit": {
+          "text": "translate(20px, 114.281px) scale(1.47801)",
+          "scale": 1.47801,
+          "x": 20,
+          "y": 114.281
+        },
+        "reference": "five-diagrams#architecture",
+        "copiedSourceExact": true,
+        "sourceMatches": true,
+        "focusReturn": {
+          "id": "",
+          "diagram": "architecture",
+          "tag": "BUTTON"
+        },
+        "controlsPassed": true
+      },
+      {
+        "id": "sequence",
+        "inlineSvg": true,
+        "position": {
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#sequence",
+          "focus": "sequence"
+        },
+        "fit": {
+          "text": "translate(202.634px, 20px) scale(1.26254)",
+          "scale": 1.26254,
+          "x": 202.634,
+          "y": 20
+        },
+        "zoomIn": {
+          "text": "translate(137.361px, -22.8px) scale(1.51504)",
+          "scale": 1.51504,
+          "x": 137.361,
+          "y": -22.8
+        },
+        "zoomOut": {
+          "text": "translate(215.689px, 28.56px) scale(1.21204)",
+          "scale": 1.21204,
+          "x": 215.689,
+          "y": 28.56
+        },
+        "refit": {
+          "text": "translate(202.634px, 20px) scale(1.26254)",
+          "scale": 1.26254,
+          "x": 202.634,
+          "y": 20
+        },
+        "reset": {
+          "text": "translate(270.5px, 64.5px) scale(1)",
+          "scale": 1,
+          "x": 270.5,
+          "y": 64.5
+        },
+        "pan": {
+          "text": "translate(305.5px, 89.5px) scale(1)",
+          "scale": 1,
+          "x": 305.5,
+          "y": 89.5
+        },
+        "keyboardPan": {
+          "text": "translate(280.5px, 89.5px) scale(1)",
+          "scale": 1,
+          "x": 280.5,
+          "y": 89.5
+        },
+        "keyboardZoom": {
+          "text": "translate(230.8px, 60.6px) scale(1.2)",
+          "scale": 1.2,
+          "x": 230.8,
+          "y": 60.6
+        },
+        "keyboardFit": {
+          "text": "translate(202.634px, 20px) scale(1.26254)",
+          "scale": 1.26254,
+          "x": 202.634,
+          "y": 20
+        },
+        "reference": "five-diagrams#sequence",
+        "copiedSourceExact": true,
+        "sourceMatches": true,
+        "focusReturn": {
+          "id": "",
+          "diagram": "sequence",
+          "tag": "BUTTON"
+        },
+        "controlsPassed": true
+      },
+      {
+        "id": "flow",
+        "inlineSvg": true,
+        "position": {
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#flow",
+          "focus": "flow"
+        },
+        "fit": {
+          "text": "translate(442.376px, 20px) scale(0.661068)",
+          "scale": 0.661068,
+          "x": 442.376,
+          "y": 20
+        },
+        "zoomIn": {
+          "text": "translate(425.051px, -22.8px) scale(0.793281)",
+          "scale": 0.793281,
+          "x": 425.051,
+          "y": -22.8
+        },
+        "zoomOut": {
+          "text": "translate(445.841px, 28.56px) scale(0.634625)",
+          "scale": 0.634625,
+          "x": 445.841,
+          "y": 28.56
+        },
+        "refit": {
+          "text": "translate(442.376px, 20px) scale(0.661068)",
+          "scale": 0.661068,
+          "x": 442.376,
+          "y": 20
+        },
+        "reset": {
+          "text": "translate(397.963px, -89.7188px) scale(1)",
+          "scale": 1,
+          "x": 397.963,
+          "y": -89.7188
+        },
+        "pan": {
+          "text": "translate(432.963px, -64.7188px) scale(1)",
+          "scale": 1,
+          "x": 432.963,
+          "y": -64.7188
+        },
+        "keyboardPan": {
+          "text": "translate(407.963px, -64.7188px) scale(1)",
+          "scale": 1,
+          "x": 407.963,
+          "y": -64.7188
+        },
+        "keyboardZoom": {
+          "text": "translate(383.755px, -124.462px) scale(1.2)",
+          "scale": 1.2,
+          "x": 383.755,
+          "y": -124.462
+        },
+        "keyboardFit": {
+          "text": "translate(442.376px, 20px) scale(0.661068)",
+          "scale": 0.661068,
+          "x": 442.376,
+          "y": 20
+        },
+        "reference": "five-diagrams#flow",
+        "copiedSourceExact": true,
+        "sourceMatches": true,
+        "focusReturn": {
+          "id": "",
+          "diagram": "flow",
+          "tag": "BUTTON"
+        },
+        "controlsPassed": true
+      },
+      {
+        "id": "state",
+        "inlineSvg": true,
+        "position": {
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#state",
+          "focus": "state"
+        },
+        "fit": {
+          "text": "translate(373.54px, 20px) scale(0.990741)",
+          "scale": 0.990741,
+          "x": 373.54,
+          "y": 20
+        },
+        "zoomIn": {
+          "text": "translate(342.448px, -22.8px) scale(1.18889)",
+          "scale": 1.18889,
+          "x": 342.448,
+          "y": -22.8
+        },
+        "zoomOut": {
+          "text": "translate(379.758px, 28.56px) scale(0.951111)",
+          "scale": 0.951111,
+          "x": 379.758,
+          "y": 28.56
+        },
+        "refit": {
+          "text": "translate(373.54px, 20px) scale(0.990741)",
+          "scale": 0.990741,
+          "x": 373.54,
+          "y": 20
+        },
+        "reset": {
+          "text": "translate(372.087px, 18px) scale(1)",
+          "scale": 1,
+          "x": 372.087,
+          "y": 18
+        },
+        "pan": {
+          "text": "translate(407.087px, 43px) scale(1)",
+          "scale": 1,
+          "x": 407.087,
+          "y": 43
+        },
+        "keyboardPan": {
+          "text": "translate(382.087px, 43px) scale(1)",
+          "scale": 1,
+          "x": 382.087,
+          "y": 43
+        },
+        "keyboardZoom": {
+          "text": "translate(352.705px, 4.8px) scale(1.2)",
+          "scale": 1.2,
+          "x": 352.705,
+          "y": 4.8
+        },
+        "keyboardFit": {
+          "text": "translate(373.54px, 20px) scale(0.990741)",
+          "scale": 0.990741,
+          "x": 373.54,
+          "y": 20
+        },
+        "reference": "five-diagrams#state",
+        "copiedSourceExact": true,
+        "sourceMatches": true,
+        "focusReturn": {
+          "id": "",
+          "diagram": "state",
+          "tag": "BUTTON"
+        },
+        "controlsPassed": true
+      },
+      {
+        "id": "er",
+        "inlineSvg": true,
+        "position": {
+          "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+          "focus": "er"
+        },
+        "fit": {
+          "text": "translate(357.376px, 20px) scale(0.825458)",
+          "scale": 0.825458,
+          "x": 357.376,
+          "y": 20
+        },
+        "zoomIn": {
+          "text": "translate(323.051px, -22.8px) scale(0.99055)",
+          "scale": 0.99055,
+          "x": 323.051,
+          "y": -22.8
+        },
+        "zoomOut": {
+          "text": "translate(364.241px, 28.56px) scale(0.79244)",
+          "scale": 0.79244,
+          "x": 364.241,
+          "y": 28.56
+        },
+        "refit": {
+          "text": "translate(357.376px, 20px) scale(0.825458)",
+          "scale": 0.825458,
+          "x": 357.376,
+          "y": 20
+        },
+        "reset": {
+          "text": "translate(321.086px, -25.25px) scale(1)",
+          "scale": 1,
+          "x": 321.086,
+          "y": -25.25
+        },
+        "pan": {
+          "text": "translate(356.086px, -0.25px) scale(1)",
+          "scale": 1,
+          "x": 356.086,
+          "y": -0.25
+        },
+        "keyboardPan": {
+          "text": "translate(331.086px, -0.25px) scale(1)",
+          "scale": 1,
+          "x": 331.086,
+          "y": -0.25
+        },
+        "keyboardZoom": {
+          "text": "translate(291.503px, -47.1px) scale(1.2)",
+          "scale": 1.2,
+          "x": 291.503,
+          "y": -47.1
+        },
+        "keyboardFit": {
+          "text": "translate(357.376px, 20px) scale(0.825458)",
+          "scale": 0.825458,
+          "x": 357.376,
+          "y": 20
+        },
+        "reference": "five-diagrams#er",
+        "copiedSourceExact": true,
+        "sourceMatches": true,
+        "focusReturn": {
+          "id": "",
+          "diagram": "er",
+          "tag": "BUTTON"
+        },
+        "controlsPassed": true
+      }
+    ],
+    "nativeClipboard": "Real navigator.clipboard read/write after permissions grant; no DOM clipboard stub",
+    "remainingRemoteClickRefusal": [
+      {
+        "id": "unsafe",
+        "inlineError": "This diagram could not be displayed. Its explanation and Mermaid text remain available.",
+        "inlineSvgCount": 0,
+        "dialogError": "This diagram could not be displayed. Its explanation and Mermaid text remain available.",
+        "svgExportDisabled": true,
+        "copiedSourceExact": true,
+        "sourceMatches": true,
+        "explanationReadable": true,
+        "validSvgCount": 5
+      }
+    ],
+    "network": {
+      "requestCount": 240,
+      "methods": [
+        "GET"
+      ],
+      "origins": [
+        "http://127.0.0.1:4338"
+      ],
+      "outsideRequests": [],
+      "pageErrors": [],
+      "requestFailures": []
+    }
+  },
+  "clipboardPermissionChecks": {
+    "time": "2026-09-30T04:45:29.940Z",
+    "method": "Chrome CDP Browser.setPermission; navigator.permissions checked granted/denied",
+    "checks": [
+      {
+        "locale": "en",
+        "copyButton": "Copy Mermaid source",
+        "grantedState": "granted",
+        "nativeClipboardExact": true,
+        "deniedState": "denied",
+        "manualTitle": "Copy text manually",
+        "manualTextExact": true,
+        "deniedFeedback": "Clipboard unavailable. Copy manually from the open text window.",
+        "returnFocus": "Copy Mermaid source",
+        "diagramPreserved": true,
+        "restoredState": "granted"
+      },
+      {
+        "locale": "zh-CN",
+        "copyButton": "复制 Mermaid 源码",
+        "grantedState": "granted",
+        "nativeClipboardExact": true,
+        "deniedState": "denied",
+        "manualTitle": "手动复制文本",
+        "manualTextExact": true,
+        "deniedFeedback": "剪贴板不可用，请从打开的文本窗口手动复制。",
+        "returnFocus": "复制 Mermaid 源码",
+        "diagramPreserved": true,
+        "restoredState": "granted"
+      }
+    ],
+    "network": {
+      "requestCount": 1,
+      "methods": [
+        "GET"
+      ],
+      "origins": [
+        "http://127.0.0.1:4338"
+      ],
+      "outsideRequests": [],
+      "pageErrors": [],
+      "requestFailures": []
+    }
+  },
+  "finalDeepLinks": {
+    "time": "2026-09-30T04:38:06.069Z",
+    "results": [
+      {
+        "id": "architecture",
+        "focus": "architecture",
+        "url": "http://127.0.0.1:4338/?doc=five-diagrams#architecture",
+        "top": 20,
+        "viewportHeight": 720,
+        "inlineSvg": 1,
+        "canvasText": null,
+        "svgWaitFailed": false
+      },
+      {
+        "id": "sequence",
+        "focus": "sequence",
+        "url": "http://127.0.0.1:4338/?doc=five-diagrams#sequence",
+        "top": 19.765625,
+        "viewportHeight": 720,
+        "inlineSvg": 1,
+        "canvasText": null,
+        "svgWaitFailed": false
+      },
+      {
+        "id": "flow",
+        "focus": "flow",
+        "url": "http://127.0.0.1:4338/?doc=five-diagrams#flow",
+        "top": 27.359375,
+        "viewportHeight": 720,
+        "inlineSvg": 1,
+        "canvasText": null,
+        "svgWaitFailed": false
+      },
+      {
+        "id": "state",
+        "focus": "state",
+        "url": "http://127.0.0.1:4338/?doc=five-diagrams#state",
+        "top": 19.953125,
+        "viewportHeight": 720,
+        "inlineSvg": 1,
+        "canvasText": null,
+        "svgWaitFailed": false
+      },
+      {
+        "id": "er",
+        "focus": "er",
+        "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+        "top": 19.515625,
+        "viewportHeight": 720,
+        "inlineSvg": 1,
+        "canvasText": null,
+        "svgWaitFailed": false
+      }
+    ]
+  },
+  "layoutInteraction": {
+    "time": "2026-09-30T04:41:39.362Z",
+    "initial": {
+      "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+      "focus": "er",
+      "top": 19.515625,
+      "scroll": 3569,
+      "svg": 1
+    },
+    "afterUserWheel": {
+      "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+      "focus": "er",
+      "top": -430.484375,
+      "scroll": 4019,
+      "svg": 1
+    },
+    "afterInjectedHeightChange": {
+      "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+      "focus": "er",
+      "top": -430.484375,
+      "scroll": 4439,
+      "svg": 1
+    },
+    "didNotReclaimPosition": true,
+    "home": {
+      "url": "http://127.0.0.1:4338/",
+      "title": "项目首页 · Five diagram browser fixture"
+    },
+    "afterBackEarly": {
+      "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+      "focus": "er",
+      "top": 368.515625,
+      "scroll": 3220,
+      "svg": 1
+    },
+    "afterBack": {
+      "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+      "focus": "er",
+      "top": 28.515625,
+      "scroll": 3560,
+      "svg": 1
+    },
+    "afterReload": {
+      "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+      "focus": "er",
+      "top": 19.515625,
+      "scroll": 3569,
+      "svg": 1
+    },
+    "layoutFaultDescription": "After actual mouse wheel input, prepend a 420px temporary DOM spacer before Markdown content to simulate a later height change; remove afterwards.",
+    "network": {
+      "requestCount": 86,
+      "methods": [
+        "GET"
+      ],
+      "origins": [
+        "http://127.0.0.1:4338"
+      ],
+      "outsideRequests": [],
+      "pageErrors": [],
+      "requestFailures": []
+    }
+  },
+  "localRecovery": {
+    "before": {
+      "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+      "title": "Five representative diagrams · Five diagram browser fixture"
+    },
+    "after": {
+      "url": "http://127.0.0.1:4338/?doc=five-diagrams#er",
+      "title": "Five representative diagrams · Five diagram browser fixture"
+    },
+    "svgExportEnabled": true,
+    "downloadFailure": null,
+    "five": [
+      {
+        "id": "architecture",
+        "svgCount": 1
+      },
+      {
+        "id": "sequence",
+        "svgCount": 1
+      },
+      {
+        "id": "flow",
+        "svgCount": 1
+      },
+      {
+        "id": "state",
+        "svgCount": 1
+      },
+      {
+        "id": "er",
+        "svgCount": 1
+      }
+    ],
+    "originalParagraphReadable": true,
+    "revision": "b3f958e6755fb0672bf2788c15003ee589a4c4681879bebbb9ee35d1fdebdf86",
+    "correctedLabelsPresent": true,
+    "time": "2026-09-30T04:27:32.295Z",
+    "network": {
+      "requestCount": 5,
+      "methods": [
+        "GET"
+      ],
+      "origins": [
+        "http://127.0.0.1:4338"
+      ],
+      "outsideRequests": [],
+      "pageErrors": [],
+      "requestFailures": []
+    }
+  },
+  "exports": {
+    "totalUniqueArtifacts": 14,
+    "svgCount": 6,
+    "mermaidCount": 7,
+    "markdownCount": 1,
+    "audit": {
+      "svg": [
+        {
+          "id": "architecture",
+          "svgBytes": 15198,
+          "metadata": {
+            "title": "Architecture",
+            "status": "current",
+            "revision": "b3f958e6755fb0672bf2788c15003ee589a4c4681879bebbb9ee35d1fdebdf86",
+            "documentId": "five-diagrams",
+            "diagramId": "architecture"
+          },
+          "metadataRevisionExact": true,
+          "forbiddenTags": [],
+          "forbiddenAttributes": [],
+          "remoteCssUrl": false,
+          "machineOrTemporaryPath": false,
+          "sha256": "a004e2143ef73304de3040db204a5615ce301e78f0124c750322802c437f5481"
+        },
+        {
+          "id": "sequence",
+          "svgBytes": 24046,
+          "metadata": {
+            "title": "Sequence",
+            "status": "current",
+            "revision": "b3f958e6755fb0672bf2788c15003ee589a4c4681879bebbb9ee35d1fdebdf86",
+            "documentId": "five-diagrams",
+            "diagramId": "sequence"
+          },
+          "metadataRevisionExact": true,
+          "forbiddenTags": [],
+          "forbiddenAttributes": [],
+          "remoteCssUrl": false,
+          "machineOrTemporaryPath": false,
+          "sha256": "764070284dba656fda4ca2aae01a5fe9bd42b0c13d99c6b77043cc292a6b1418"
+        },
+        {
+          "id": "flow",
+          "svgBytes": 18164,
+          "metadata": {
+            "title": "Flow",
+            "status": "current",
+            "revision": "b3f958e6755fb0672bf2788c15003ee589a4c4681879bebbb9ee35d1fdebdf86",
+            "documentId": "five-diagrams",
+            "diagramId": "flow"
+          },
+          "metadataRevisionExact": true,
+          "forbiddenTags": [],
+          "forbiddenAttributes": [],
+          "remoteCssUrl": false,
+          "machineOrTemporaryPath": false,
+          "sha256": "5e64162dee290ee56924c65c08657b8388e4eb93dddc0edf2f96ffea42a30e7c"
+        },
+        {
+          "id": "state",
+          "svgBytes": 32796,
+          "metadata": {
+            "title": "State",
+            "status": "current",
+            "revision": "b3f958e6755fb0672bf2788c15003ee589a4c4681879bebbb9ee35d1fdebdf86",
+            "documentId": "five-diagrams",
+            "diagramId": "state"
+          },
+          "metadataRevisionExact": true,
+          "forbiddenTags": [],
+          "forbiddenAttributes": [],
+          "remoteCssUrl": false,
+          "machineOrTemporaryPath": false,
+          "sha256": "9da16c00a71041db17174cbc1107e3d045e5ad130a8052eeeaa86d6fc170fa30"
+        },
+        {
+          "id": "er",
+          "svgBytes": 31470,
+          "metadata": {
+            "title": "ER",
+            "status": "current",
+            "revision": "b3f958e6755fb0672bf2788c15003ee589a4c4681879bebbb9ee35d1fdebdf86",
+            "documentId": "five-diagrams",
+            "diagramId": "er"
+          },
+          "metadataRevisionExact": true,
+          "forbiddenTags": [],
+          "forbiddenAttributes": [],
+          "remoteCssUrl": false,
+          "machineOrTemporaryPath": false,
+          "sha256": "e30a024021bfed2ff77e64790a1a3d94e1fb940df0182bb2da1b76b15543eaab"
+        },
+        {
+          "id": "recovered-broken",
+          "svgBytes": 12233,
+          "metadata": {
+            "title": "Broken syntax",
+            "status": "current",
+            "revision": "b3f958e6755fb0672bf2788c15003ee589a4c4681879bebbb9ee35d1fdebdf86",
+            "documentId": "five-diagrams",
+            "diagramId": "broken"
+          },
+          "metadataRevisionExact": true,
+          "forbiddenTags": [],
+          "forbiddenAttributes": [],
+          "remoteCssUrl": false,
+          "machineOrTemporaryPath": false,
+          "sha256": "7f630a5165190af51b87fbcb5775be3495d6fbe43e237bcee8aa61eddbb461c0"
+        }
+      ],
+      "mermaid": {
+        "architecture": true,
+        "sequence": true,
+        "flow": true,
+        "state": true,
+        "er": true,
+        "broken": true,
+        "unsafe": true
+      },
+      "markdownExact": true
+    },
+    "stageBoundary": "Artifacts span initial invalid-code Mermaid export, corrected diagram SVG recovery, and final browser suite; Markdown exact check uses current fixture body"
+  },
+  "knowledgeFileInventory": {
+    "files": [
+      "docs/repo-wiki/five.md",
+      ".lumine/project.json",
+      ".lumine/root.json"
+    ],
+    "imagesOrPreviews": []
+  },
+  "limits": [
+    "Representative isolated small diagrams; not all Mermaid syntax, browsers or parent business diagrams",
+    "Temporary DOM spacer was layout fault injection, not Wiki knowledge edit",
+    "240 local browser GET requests do not prove all normal knowledge create/update/query workflows",
+    "Browser observation does not prove all host processes never use network or model calls",
+    "No genuine host Hook, human acceptance or long-term knowledge value evidence"
+  ],
+  "cleanup": {
+    "browserClosed": true,
+    "serverPort": 4338,
+    "serverExitCode": 0,
+    "listenerRemaining": false,
+    "otherPortsStopped": false,
+    "time": "2026-09-30T04:48:30.869148+00:00"
+  }
+}

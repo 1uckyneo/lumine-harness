@@ -10,10 +10,12 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
+    "jsx": "react-jsx",
     "types": ["node"]
   },
   "include": [
     "skills/lumine-harness/src/**/*.ts",
+    "skills/lumine-harness/src/**/*.tsx",
     "scripts/**/*.ts",
     "tsdown.config.ts"
   ]

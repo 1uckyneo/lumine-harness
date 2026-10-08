@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 LUMINE_RUNTIME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+node --input-type=module -e 'import path from "node:path"; import {pathToFileURL} from "node:url"; const {reportUnsupportedNodeRuntime}=await import(pathToFileURL(path.join(process.argv[1],"core/node-bootstrap.mjs")).href); reportUnsupportedNodeRuntime(process.argv.slice(2));' "$LUMINE_RUNTIME" "$@"
 case "${1:-}" in
  check) shift; exec node "$LUMINE_RUNTIME/check.mjs" "$@" ;;
  wiki) shift; exec node "$LUMINE_RUNTIME/wiki.mjs" "$@" ;;

@@ -1,0 +1,25 @@
+{
+  "actualNode": "18.20.8",
+  "independentOldToolInspectPassed": true,
+  "originalManagerMatchesPrebuildSHA256": true,
+  "migrationDependenciesRecoveredFromMatchingRetainedPackage": true,
+  "scope": "Retained original generated tool and its matched migration dependencies, on actual Node18.20.8 isolated non-Git fixture; no arbitrary history or formal parent rollback claim.",
+  "originalToolProposalApplyRollback": [
+    {
+      "operation": "proposal",
+      "status": "proposal_created",
+      "conflicts": []
+    },
+    {
+      "operation": "adopt",
+      "status": "applied",
+      "conflicts": []
+    },
+    {
+      "operation": "rollback",
+      "status": "rolled_back",
+      "conflicts": []
+    }
+  ],
+  "businessFixtureUnchanged": true
+}

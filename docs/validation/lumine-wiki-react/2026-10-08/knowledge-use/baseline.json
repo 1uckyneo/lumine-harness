@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "fixedAt": "2026-10-08T04:46:16.307839+00:00",
+  "projects": {
+    "lumine-source": {
+      "fileCount": 385,
+      "aggregateSha256": "10e1f79b398fe222ef4407ac0040b694f50f7b03ecd6fadb4ce83356752d5aea"
+    },
+    "adopting-parent": {
+      "fileCount": 1871,
+      "aggregateSha256": "044e9e831ac41fb54c05b28864c71d12b0a7d5b9ec830b75dfb9274f3b0e1ca9"
+    }
+  },
+  "meterSha256": "48eadc96527c8adabde44888ccd42f6f6647e6d3bdbdac26b584a0d8d22c6eae",
+  "scope": "Wiki Markdown and persistent state in both projects, source runtime/browser/scripts and tracked Vue/Go code. Temporary query caches excluded. No runtime/deployment claim."
+}

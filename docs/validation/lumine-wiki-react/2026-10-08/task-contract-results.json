@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T04:17:09.746936+00:00",
+  "results": {
+    "scopedRepair": {
+      "ok": true,
+      "issues": [],
+      "taskId": "lumine-wiki-table-fix-20261008",
+      "mode": "implement",
+      "output": ""
+    },
+    "boundedVerification": {
+      "ok": true,
+      "issues": [],
+      "taskId": "lumine-wiki-edge-verify-20261008",
+      "mode": "verify",
+      "output": ""
+    },
+    "nodeRun": {
+      "ok": true,
+      "issues": [],
+      "taskId": "lumine-node-runtime-run-20260930",
+      "mode": "implement",
+      "output": ""
+    },
+    "documents": {
+      "ok": true,
+      "scope": "docs",
+      "issues": [],
+      "evidenceLevel": "repository_checked"
+    },
+    "wiki": {
+      "status": "passed",
+      "issues": [],
+      "checked": [
+        "lumine-adapters",
+        "lumine-architecture",
+        "lumine-wiki",
+        "lumine-task-check",
+        "lumine-workflow",
+        "lumine-wiki-reader",
+        "lumine-root-config",
+        "lumine-adoption"
+      ],
+      "notVerified": [
+        "semantic accuracy",
+        "runtime behavior",
+        "human acceptance"
+      ]
+    }
+  },
+  "originalWikiTaskHistoricalDataPreserved": true,
+  "originalWikiTaskCurrentIssueCounts": {
+    "CODE_BASELINE_CHANGED": 1,
+    "AC_NOT_VERIFIED": 13,
+    "KNOWLEDGE_SOURCE_CHANGED": 2,
+    "KNOWLEDGE_DECISION_CHANGED": 4
+  },
+  "codeRefNormalization": "Browser reports use their own repository aliases; current Task codeRefs normalized to registered project ID after verifying identical file hashes. Observations and artifact hashes unchanged.",
+  "finalization": "Parent latest proposal remains awaiting actual host Hook; these checks do not authorize or prove finalize."
+}

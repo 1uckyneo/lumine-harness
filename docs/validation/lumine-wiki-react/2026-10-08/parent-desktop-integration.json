@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-08T04:14:23.862893+00:00",
+  "scope": "Read-only integration against an existing long document in the adopting parent project, after the protected CSS update. Desktop viewport 1440x1000, browser zoom 100% and 200%; no medium/narrow viewport matrix or mobile scenario. One existing artificial wide-content fixture at desktop 200% complements naturally fitting project content.",
+  "outcome": "passed_in_scope",
+  "runtime": {
+    "node": "24.14.0",
+    "browser": "Chrome 154.0.8037.98 headed, independent temporary profile"
+  },
+  "actualDocument": {
+    "label": "actual-long-document-A",
+    "markdownSha256": "dea28b5a4535511b7b86cf7b7fca6dae0faa04ae585568b5d060295d681d2bfc",
+    "bodyCharacters": 3717,
+    "tableCount": 2,
+    "sectionCount": 5
+  },
+  "cssAndReadOnlyContent": {
+    "servedCssSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+    "installedCssSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+    "sourceCssSha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e",
+    "protectedWikiFileCount": 402,
+    "protectedWikiContentUnchanged": true,
+    "protectedContentAggregateSha256": "89e7c169e35429403aa5596039cf3b416fe93c3a57f864ab6967dfeb020f771d"
+  },
+  "desktop100": {
+    "before": {
+      "viewport": {
+        "innerWidth": 1440,
+        "innerHeight": 1000,
+        "dpr": 1,
+        "visualScale": 1,
+        "cssZoom": "1"
+      },
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "windowScrollX": 0,
+      "bodyCharacters": 3717,
+      "sectionCount": 5,
+      "proseFontSize": "17px",
+      "tables": [
+        {
+          "clientWidth": 760,
+          "scrollWidth": 760,
+          "height": 241,
+          "cellCount": 12,
+          "firstCell": {
+            "characters": 5,
+            "width": 106,
+            "height": 65,
+            "textLines": 1,
+            "overflowWrap": "normal",
+            "minWidth": "88.1836px"
+          }
+        },
+        {
+          "clientWidth": 760,
+          "scrollWidth": 760,
+          "height": 341,
+          "cellCount": 14,
+          "firstCell": {
+            "characters": 11,
+            "width": 354,
+            "height": 41,
+            "textLines": 1,
+            "overflowWrap": "normal",
+            "minWidth": "88.1836px"
+          }
+        }
+      ],
+      "controls": [
+        {
+          "left": 1201.1953125,
+          "right": 1277.1953125,
+          "width": 76,
+          "height": 36,
+          "disabled": false,
+          "fontSize": "12px"
+        },
+        {
+          "left": 1283.1953125,
+          "right": 1335.1953125,
+          "width": 52,
+          "height": 36,
+          "disabled": false,
+          "fontSize": "12px"
+        },
+        {
+          "left": 1341.1953125,
+          "right": 1410,
+          "width": 68.8046875,
+          "height": 36,
+          "disabled": false,
+          "fontSize": "12px"
+        },
+        {
+          "left": 345,
+          "right": 413,
+          "width": 68,
+          "height": 34,
+          "disabled": false,
+          "fontSize": "12px"
+        },
+        {
+          "left": 421,
+          "right": 513,
+          "width": 92,
+          "height": 34,
+          "disabled": false,
+          "fontSize": "12px"
+        },
+        {
+          "left": 521,
+          "right": 613,
+          "width": 92,
+          "height": 34,
+          "disabled": false,
+          "fontSize": "12px"
+        },
+        {
+          "left": 621,
+          "right": 726.8046875,
+          "width": 105.8046875,
+          "height": 34,
+          "disabled": false,
+          "fontSize": "12px"
+        }
+      ],
+      "toc": {
+        "links": 5,
+        "visible": true
+      }
+    },
+    "interactions": {
+      "tocLandsVisible": true,
+      "refreshPreservesDocument": true,
+      "searchOpened": true,
+      "historyReturnedToDocument": true
+    },
+    "network": {
+      "requestMethods": [
+        "GET"
+      ],
+      "requestCount": 33,
+      "blockedExternalCount": 0
+    }
+  },
+  "desktop200": {
+    "physicalViewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "browserZoomSetting": "200%",
+    "metrics": {
+      "innerWidth": 720,
+      "innerHeight": 500,
+      "dpr": 2,
+      "visualScale": 1,
+      "cssZoom": "1",
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "scrollX": 0,
+      "proseFontSize": "16px",
+      "tables": [
+        {
+          "clientWidth": 686,
+          "scrollWidth": 686,
+          "height": 265,
+          "firstCell": {
+            "characters": 5,
+            "width": 104,
+            "height": 90,
+            "textLines": 1,
+            "overflowWrap": "normal"
+          }
+        },
+        {
+          "clientWidth": 686,
+          "scrollWidth": 686,
+          "height": 341,
+          "firstCell": {
+            "characters": 11,
+            "width": 321,
+            "height": 41,
+            "textLines": 1,
+            "overflowWrap": "normal"
+          }
+        }
+      ],
+      "normalCodeBlocks": 0,
+      "controls": [
+        {
+          "disabled": false,
+          "left": 617.14453125,
+          "right": 653.14453125,
+          "top": 11.5,
+          "bottom": 45.5,
+          "inside": true
+        },
+        {
+          "disabled": false,
+          "left": 656.14453125,
+          "right": 708,
+          "top": 11.5,
+          "bottom": 45.5,
+          "inside": true
+        },
+        {
+          "disabled": false,
+          "left": 17,
+          "right": 85,
+          "top": 390.43359375,
+          "bottom": 424.43359375,
+          "inside": true
+        },
+        {
+          "disabled": false,
+          "left": 93,
+          "right": 185,
+          "top": 390.43359375,
+          "bottom": 424.43359375,
+          "inside": true
+        },
+        {
+          "disabled": false,
+          "left": 193,
+          "right": 285,
+          "top": 390.43359375,
+          "bottom": 424.43359375,
+          "inside": true
+        },
+        {
+          "disabled": false,
+          "left": 293,
+          "right": 398.80078125,
+          "top": 390.43359375,
+          "bottom": 424.43359375,
+          "inside": true
+        }
+      ]
+    },
+    "tableScroll": [
+      {
+        "clientWidth": 686,
+        "scrollWidth": 686,
+        "scrollLeft": 0,
+        "documentScrollX": 0
+      },
+      {
+        "clientWidth": 686,
+        "scrollWidth": 686,
+        "scrollLeft": 0,
+        "documentScrollX": 0
+      }
+    ],
+    "sourceCode": {
+      "available": true,
+      "metrics": {
+        "clientWidth": 656,
+        "scrollWidth": 656,
+        "scrollLeft": 0,
+        "documentScrollX": 0,
+        "whiteSpace": "pre",
+        "overflow": "auto"
+      }
+    },
+    "tocLandsVisible": true,
+    "refreshPreservesDocument": true,
+    "globalWidthAfterInteractions": {
+      "innerWidth": 720,
+      "documentWidth": 720,
+      "scrollX": 0
+    }
+  },
+  "desktop200Navigation": {
+    "menuOpened": true,
+    "searchReachable": true,
+    "historyReturnedToDocument": true
+  },
+  "complementaryWideFixtureDesktop200": {
+    "physicalViewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "browserZoomSetting": "200%",
+    "before": {
+      "innerWidth": 720,
+      "innerHeight": 500,
+      "dpr": 2,
+      "visualScale": 1,
+      "cssZoom": "1",
+      "documentWidth": 720,
+      "bodyWidth": 720,
+      "table": {
+        "clientWidth": 686,
+        "scrollWidth": 4740,
+        "height": 84,
+        "firstCellTextLines": 1
+      },
+      "path": {
+        "characters": 995,
+        "lines": 14,
+        "inside": true
+      }
+    },
+    "wheel": {
+      "table": {
+        "clientWidth": 686,
+        "scrollWidth": 4740,
+        "scrollLeft": 250,
+        "documentScrollX": 0
+      },
+      "code": {
+        "clientWidth": 686,
+        "scrollWidth": 10039,
+        "scrollLeft": 250,
+        "documentScrollX": 0
+      }
+    }
+  },
+  "assertions": {
+    "servedInstalledAndSourceCssMatch": true,
+    "protectedWikiContentUnchanged": true,
+    "desktop100NoGlobalOverflow": true,
+    "desktop100NavigationAndControlsWork": true,
+    "realDesktopBrowserZoom200": true,
+    "desktop200NoGlobalOverflow": true,
+    "desktop200ActualTablesFitAndReadable": true,
+    "desktop200NavigationAndRefreshWork": true,
+    "desktop200MainControlsReachable": true,
+    "desktop200WideTableSingleLine": true,
+    "desktop200WideCodeAndTableScrollLocally": true,
+    "desktop200WideFixtureNoGlobalOverflow": true,
+    "desktop200LongPathWraps": true,
+    "observedProjectRequestsReadOnly": true
+  },
+  "codeRefs": [
+    {
+      "path": "skills/lumine-harness/src/browser/styles.css",
+      "sha256": "52915106b95e23c79a0f9affd9190954dbdc636dc74917b5020156d8480fa46e"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/reader.tsx",
+      "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+    },
+    {
+      "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+      "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+    },
+    {
+      "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+      "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+    }
+  ],
+  "visualReview": {
+    "actualProjectTable100": "Inspected transient viewport capture: natural multi-column text remains readable, paragraphs and navigation are visually distinct.",
+    "actualProjectTable200": "Inspected transient desktop 200% capture after scrolling settled; actual table text remains readable at increased browser scale.",
+    "screenshotsRetained": false
+  },
+  "limitations": [
+    "This proves a bounded desktop layout integration slice, not all product acceptance criteria, Wiki semantic correctness, or real Codex host lifecycle.",
+    "Actual project tables and expanded Mermaid source fit at 200%, so they do not establish an overflowing horizontal scroll case. The single existing synthetic wide-content fixture establishes that separately.",
+    "The selected actual page has no ordinary non-diagram fenced code blocks; its Mermaid source was expanded and inspected.",
+    "Desktop browser 200% zoom remains a product requirement; medium/narrow screen and mobile use are outside the product scope.",
+    "No model tool was called; no project Wiki content or child repository was edited."
+  ],
+  "cleanup": {
+    "browserClosed": true,
+    "bothOwnedServersStopped": true,
+    "ownedLoopbackPortsClosed": true,
+    "temporaryBrowserZoomRestored100": true,
+    "projectScreenshotsSnapshotsAndProfileRemoved": true
+  }
+}

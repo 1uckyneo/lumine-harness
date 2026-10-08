@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-30T06:48:04.463865+00:00",
+  "reviewer": {
+    "kind": "agent",
+    "role": "independent"
+  },
+  "scope": "N1/N2 implementation and public support claims; read-only review of source, planned contract, and recorded fixture evidence.",
+  "status": "reviewed_static_final_launcher",
+  "policy": {
+    "recommended": "Node 24 LTS",
+    "supported": "22.x >=22.18.0 || 24.x >=24.11.0",
+    "unsupported": [
+      "Node 18",
+      "Node 20",
+      "other major versions",
+      "prereleases"
+    ],
+    "engines": "^22.18.0 || ^24.11.0",
+    "consistency": "passed",
+    "evidence": [
+      "package.json",
+      "skills/lumine-harness/src/harness/core/node-runtime.ts",
+      "README.md",
+      "README.zh-CN.md",
+      "docs/adapter-compatibility.md",
+      "docs/adapter-compatibility.zh-CN.md",
+      "docs/exec-plans/active/Lumine Harness Node 支持基线调整.md"
+    ]
+  },
+  "findings": [
+    {
+      "id": "thin-entry-before-implementation",
+      "status": "reviewed",
+      "conclusion": "The public CLI/maintenance entry files defer implementation loading until actual process policy succeeds. Low syntax target is only for stable rejection, and Core imports do not impose a global Node gate.",
+      "evidence": [
+        "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+        "skills/lumine-harness/src/harness/check.ts",
+        "skills/lumine-harness/src/harness/wiki.ts",
+        "skills/lumine-harness/src/harness/core/task-cli.ts",
+        "skills/lumine-harness/src/harness/adapter-cli.ts",
+        "skills/lumine-harness/src/scripts/harness-manager.ts",
+        "scripts/runtime-artifacts.ts",
+        "scripts/build-runtime.ts"
+      ]
+    },
+    {
+      "id": "entry-symlink-alias",
+      "status": "reviewed",
+      "conclusion": "Main detection now compares real paths of the running files. The former alias mismatch cannot silently suppress the CLI. Missing argv/files and non-file URLs are handled. Regression tests invoke the actual symlink spelling and require CLI output; the recorded final actual-version matrix has no silent empty positive failures.",
+      "evidence": [
+        "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+        "skills/lumine-harness/src/harness/tests/node-runtime.test.ts",
+        "docs/validation/lumine-node-runtime/2026-09-30/actual-node-matrix.json",
+        "docs/validation/lumine-node-runtime/2026-09-30/actual-node-matrix-first-failure.json"
+      ]
+    },
+    {
+      "id": "actual-version-negative-matrix",
+      "status": "passed_in_recorded_scope",
+      "conclusion": "234 rejection operations across actual Node 18.20.8, 20.19.0, and 22.17.0 and both locales exit 2 with UNSUPPORTED_NODE_RUNTIME; target/recovery snapshots do not change and no proposal output is written. Hook stdin is empty in this fixture matrix.",
+      "evidence": [
+        "docs/validation/lumine-node-runtime/2026-09-30/actual-node-matrix.json"
+      ]
+    },
+    {
+      "id": "positive-distribution-matrix",
+      "status": "passed_in_recorded_scope",
+      "conclusion": "Actual Node 22.18.0 and 24.11.0 cover Skill/Plugin and Git/non-Git installations, CLI/read-only Wiki queries, loopback resource serving, resume, adapter-none finalization and rollback. Actual 24.14.0 supplies a narrower Skill/non-Git smoke path; it is not a full repetition of every installation and rollback combination.",
+      "evidence": [
+        "docs/validation/lumine-node-runtime/2026-09-30/actual-node-matrix.json"
+      ]
+    },
+    {
+      "id": "matrix-not-host-certification",
+      "status": "reviewed",
+      "conclusion": "341 recorded fixture operations do not establish browser/Mermaid interaction, physical network disconnection, real host lifecycle delivery, automatic continuation, Bun behavior, or human acceptance. Adapter-none fixture finalization supplies no host evidence.",
+      "evidence": [
+        "docs/validation/lumine-node-runtime/2026-09-30/actual-node-matrix.json"
+      ]
+    },
+    {
+      "id": "actual-runtime-observation",
+      "status": "reviewed",
+      "conclusion": "The actual check process and recorded host event process are displayed separately. Recorded Node versions are re-evaluated under the current policy; missing records remain unobserved, and an observed unsupported host Node yields a connection issue rather than readiness.",
+      "evidence": [
+        "skills/lumine-harness/src/harness/core/runtime-environment.ts",
+        "skills/lumine-harness/src/harness/core/verification.ts",
+        "skills/lumine-harness/src/harness/adapter-manager.ts"
+      ]
+    },
+    {
+      "id": "embedded-bun",
+      "status": "not_verified_real_host",
+      "conclusion": "OpenCode separates Node from Bun metadata before loading Core. Bun compatibility Node fields do not reject or certify Bun. Implementation is stored outside the plugin discovery directory; a real OpenCode/Bun lifecycle remains unverified.",
+      "evidence": [
+        "skills/lumine-harness/src/opencode/plugins/harness.ts",
+        "skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts",
+        "skills/lumine-harness/src/harness/core/runtime-environment.ts"
+      ]
+    },
+    {
+      "id": "parent-hook-handoff",
+      "status": "awaiting_host_verification",
+      "conclusion": "The current adopting parent root marker is applied and its matching migration journal is awaiting_host_verification, without host evidence. New CLI or fixture success must not be presented as a refreshed parent Codex Hook pass, and finalization must keep that boundary.",
+      "evidence": [
+        {
+          "context": "adopting-parent",
+          "path": ".lumine/root.json"
+        },
+        {
+          "context": "adopting-parent",
+          "path": ".lumine-migrations/<current-migration>/journal.json"
+        },
+        "docs/exec-plans/active/Lumine Harness Node 支持基线调整.md"
+      ]
+    },
+    {
+      "id": "published-history-boundary",
+      "status": "reviewed",
+      "conclusion": "Existing README/compatibility statements about Codex entry/CLI observations have limited historical scope and are not new Node-policy parent Hook or all-host certification. Their surrounding text retains unobserved lifecycle and community-host limits.",
+      "evidence": [
+        "README.md",
+        "docs/adapter-compatibility.md",
+        "docs/adapter-compatibility.zh-CN.md"
+      ]
+    },
+    {
+      "id": "configured-launcher-preflight",
+      "status": "reviewed_static",
+      "conclusion": "The final configured node -e dispatcher bundles the shared Node preflight and checks it before any project lookup, marker read, stdin access or child dispatch. The code is generated as Node 18-compatible IIFE only to deliver stable rejection. Four templates preserve protocol metadata and entry/event selection. The source integration uses the same generator for runtime:build write and runtime:check compare.",
+      "evidence": [
+        "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+        "scripts/build-hook-configs.ts",
+        "scripts/build-hook-configs.test.ts",
+        "scripts/build-runtime.ts"
+      ]
+    }
+  ],
+  "matrixSummary": {
+    "operations": 341,
+    "negativeOperations": 234,
+    "recordedRuntimeOperations": {
+      "22.18.0": 45,
+      "24.11.0": 45,
+      "24-current": 17,
+      "18.20.8": 78,
+      "20.19.0": 78,
+      "22.17.0": 78
+    },
+    "fullInstallationCombinations": 8,
+    "current24SmokeCombinations": 1,
+    "allNegativeSnapshotsUnchanged": true,
+    "noServersLeftRunning": true
+  },
+  "baselineChecks": [
+    {
+      "path": "skills/lumine-harness/assets/harness/core/node-runtime.mjs",
+      "sha256": "9c0643ecf080a2676b65fba85cde2c7b9143d51297552d71eb14542717950783",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/assets/harness/core/node-bootstrap.mjs",
+      "sha256": "848deeccfc08bfb3efcf002eef58af91a894b293f6069f431d3a24e2b477f605",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/scripts/harness-manager.mjs",
+      "sha256": "fe196c1b483740da0b9d5fd85ada14b5738ab1394c8330719b51c4612061ec94",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/assets/harness/cli",
+      "sha256": "7383071d6c78454e4631727ac1f946141c10915c82b8994bb18644eee5f0eda5",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/assets/wiki-reader/reader.js",
+      "sha256": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/assets/wiki-reader/manifest.json",
+      "sha256": "ea807052f23bf0f35fa75aab6e971a28621e06b0aafa381b0d8f01cf9bba3c77",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
+      "sha256": "3e5deeaa906e411e8255295cea0f96e6d6e045c15f9b3b0e05318c392ea63b86",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
+      "sha256": "bef3002f1e2cce2cbb45df447364a20f18cd43b80424ee0985875df404ad90f1",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts",
+      "sha256": "4bf280527c68b4791da638f198e8e983eb813034b6b3b4dea3cf86b8969d41e0",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
+      "sha256": "163d5cbda532174f107ee45340e2a276ee25903868746884c32140c77131cc62",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+      "sha256": "615d093a7f53cfa3a77996510f9f49cd2803d71b3afe3c7c65d860e016540ea3",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "scripts/runtime-artifacts.ts",
+      "sha256": "03e21983da7e9593a67b96f027905da2f1186e90bb25a78dde06ec5d6015d9a4",
+      "matchesCurrentContent": true
+    },
+    {
+      "path": "tsdown.config.ts",
+      "sha256": "d2ddb5d4bca1e8f6f528c3efb8349d5beecdf33981768a3d1e4ddf00c288215b",
+      "matchesCurrentContent": true
+    }
+  ],
+  "pendingReviewed": [
+    {
+      "id": "configured-node-e-root-locator-preflight",
+      "status": "reviewed_static",
+      "owner": "node_adapters",
+      "conclusion": "The final configured node -e dispatcher bundles the shared Node preflight and checks it before any project lookup, marker read, stdin access or child dispatch. The code is generated as Node 18-compatible IIFE only to deliver stable rejection. Four templates preserve protocol metadata and entry/event selection. The source integration uses the same generator for runtime:build write and runtime:check compare.",
+      "requiredNextStep": "Root records final build/check and specialized configured-launcher test results. Independent review did not run build/tests or certify a real host.",
+      "reviewedAt": "2026-09-30T06:53:50.592271+00:00",
+      "evidence": [
+        "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+        "scripts/build-hook-configs.ts",
+        "scripts/build-hook-configs.test.ts",
+        "scripts/build-runtime.ts",
+        "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+        "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+        "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+        "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+        "skills/lumine-harness/assets/codex/hooks.json",
+        "skills/lumine-harness/assets/qoder/settings.json",
+        "skills/lumine-harness/assets/trae/hooks.json",
+        "skills/lumine-harness/assets/cursor/hooks.json"
+      ],
+      "checks": {
+        "sharedPolicyReuse": "passed_static",
+        "oldParserTarget": "node18 IIFE",
+        "preflightBeforeProjectFs": "passed_static",
+        "preflightBeforeStdin": "passed_static; dispatcher inherits stdin without consuming it",
+        "childNodeIdentity": "process.execPath, after preflight",
+        "argumentForwarding": "entry fixed by validated template token; later argv forwarded unchanged",
+        "shellQuoting": "POSIX literal single-quote escaping protects quotes, whitespace and metacharacters",
+        "templateProtocolMetadata": "matches both current assets and HEAD after replacing command values only",
+        "entryAndEventSelection": "11 default Hook commands retain original events/matchers/timeouts/statusMessage/version/loop_limit",
+        "buildCheckGeneration": "same synchronizeHookConfigs called with write/check mode; check does not rewrite outputs",
+        "reportedSpecializedTests": "Parent reported 3 tests passed; reviewer inspected test definitions without rerunning"
+      },
+      "limitations": [
+        "Shell quoting is reviewed for the POSIX shell used by the fixtures; Windows cmd/PowerShell host command execution has not been established.",
+        "The recorded actual-node-matrix precedes this static launcher coverage addition and should not be reinterpreted as configured-command host evidence.",
+        "No new parent Hook receipt, actual Bun lifecycle or community host certification is supplied."
+      ],
+      "artifactBaselines": [
+        {
+          "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
+          "sha256": "95e88a547201e19f8b99f3f9eeb733c751ee1d4ac1d61d11c717be76d7fb9884"
+        },
+        {
+          "path": "scripts/build-hook-configs.ts",
+          "sha256": "2a720561eb4ceed8cb4d7f0f72a969b9667ea6cf3cfa2006b11a3770faf1fce6"
+        },
+        {
+          "path": "scripts/build-hook-configs.test.ts",
+          "sha256": "791556898dcbb46ec51e75557b9bc78e18c3566c5e7f1a816cbce686db82199f"
+        },
+        {
+          "path": "scripts/build-runtime.ts",
+          "sha256": "7d41c84f020aaaa9f072ffc1566ecc6ff6b84e86dab146c4d2bd93c1eb3200cb"
+        },
+        {
+          "path": "skills/lumine-harness/src/adapter-launchers/codex-hooks.json",
+          "sha256": "2308fddbe493cf1fa8cfd51c31c7f3df4dbab46605da22cc9db399108456d156"
+        },
+        {
+          "path": "skills/lumine-harness/src/adapter-launchers/qoder-hooks.json",
+          "sha256": "a1bf45a6bb2b3f8f41203cfd4aad68d77b7bcc823a617d449869c8ab6259b026"
+        },
+        {
+          "path": "skills/lumine-harness/src/adapter-launchers/trae-hooks.json",
+          "sha256": "047be8ab00dc7bb21dbacbb23c1e305de24b437e582d015574dfc73f5c084725"
+        },
+        {
+          "path": "skills/lumine-harness/src/adapter-launchers/cursor-hooks.json",
+          "sha256": "84715b89acf30f58d9bd0f872b49d95c32c1b57ed563609d0a8d049764f9807b"
+        },
+        {
+          "path": "skills/lumine-harness/assets/codex/hooks.json",
+          "sha256": "3eec72eac2e2abaaa48f7380f9d49e0ae0c352e0dab1d66fac5884ef12504ba0"
+        },
+        {
+          "path": "skills/lumine-harness/assets/qoder/settings.json",
+          "sha256": "a8537c8386f30c58be3baf0afd3ca42b741fe82a1167878bb9000cf0ec7c41ab"
+        },
+        {
+          "path": "skills/lumine-harness/assets/trae/hooks.json",
+          "sha256": "72d9eaf702015af118497100ebf353480c63a36243ac5dd65c2a1350366f6cbb"
+        },
+        {
+          "path": "skills/lumine-harness/assets/cursor/hooks.json",
+          "sha256": "5590222322324f7210fef4d2cf649cef1c2c48190c63bfdeb5a7cb96478f5214"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Loopback HTTP and static assets are tested here; browser rendering and Mermaid interaction require separate evidence.",
+    "Hook invocations test rejection before operations, not real host lifecycle delivery.",
+    "No physically disconnected network or real host acceptance is claimed.",
+    "Adapter-none finalization is valid fixture maintenance and supplies no host evidence.",
+    "Knowledge protection uses an already normalized Wiki fixture; initial legacy normalization is not retested as a Node invariant.",
+    "This review did not rerun a build, source tests, browser automation, or host lifecycle.",
+    "The final configured-launcher source was reviewed statically; root must record the completed generation/check gates and specialized fixture results separately."
+  ],
+  "requiredClaims": [
+    "Recommend Node 24 LTS and support only the reviewed 22.x/24.x branches.",
+    "Report fixture version/CLI/installation results with the recorded finite scope.",
+    "Keep parent Codex Hook, Bun and untested applications unverified until their own applicable actual evidence."
+  ]
+}

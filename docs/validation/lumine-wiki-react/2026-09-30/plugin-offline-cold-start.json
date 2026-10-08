@@ -1,0 +1,209 @@
+{
+  "installation": {
+    "node": "v18.20.8",
+    "initialProjectEmpty": true,
+    "adapters": [],
+    "proposalId": "554fc67a-c51c-4739-bfe9-35be11da3e91",
+    "result": {
+      "status": "applied",
+      "proposalId": "554fc67a-c51c-4739-bfe9-35be11da3e91",
+      "preserved": []
+    },
+    "finalization": {
+      "status": "complete",
+      "proposalId": "554fc67a-c51c-4739-bfe9-35be11da3e91"
+    },
+    "nodeModulesExists": false,
+    "installedManifestHash": "668ac45ef5f6e7e89bff503c6fe9555176390b8c2cfe09cf8e92907fd6ed8c76",
+    "wrapperManifestHash": "668ac45ef5f6e7e89bff503c6fe9555176390b8c2cfe09cf8e92907fd6ed8c76",
+    "installedReaderHash": "fa56c75902eeffe8e21b79bd7a526b0bf7e1639c0f6d63769bcd889389164d2e",
+    "wrapperReaderHash": "fa56c75902eeffe8e21b79bd7a526b0bf7e1639c0f6d63769bcd889389164d2e",
+    "socketAttempts": "",
+    "installerCreatedOnlyEmptyLockDirectory": true,
+    "wikiCacheExistsBeforeColdStart": false
+  },
+  "network": {
+    "search": {
+      "url": "http://127.0.0.1:4339/?search=1&q=Readable%20text",
+      "resultStatus": "Showing 1 / 1 results",
+      "resultLinkCount": 2,
+      "request": [
+        {
+          "url": "http://127.0.0.1:4339/api/search?q=Readable+text&scope=wiki&limit=20",
+          "status": 200
+        }
+      ]
+    },
+    "productNetwork": {
+      "blocked": [],
+      "pageErrors": [],
+      "requestCount": 38,
+      "responseCount": 38,
+      "responseStatusCounts": {
+        "200": 38
+      },
+      "requestPaths": [
+        "/?doc=rollback-long",
+        "/styles.css",
+        "/reader.js",
+        "/chunks/chunk-PQ6DSH24.js",
+        "/chunks/chunk-QHDNOTBI.js",
+        "/api/config",
+        "/api/catalog",
+        "/api/map",
+        "/api/document?id=rollback-long&fragment=long-text&full=1",
+        "/api/related?id=rollback-long",
+        "/chunks/mermaid.core-BKOI5I3D.js",
+        "/chunks/chunk-S3CGXTRJ.js",
+        "/chunks/chunk-XXUKEYXA.js",
+        "/chunks/chunk-TBV5XTGP.js",
+        "/chunks/chunk-IVKHGDOE.js",
+        "/chunks/chunk-VMNPMWRH.js",
+        "/chunks/chunk-4PJNGS3V.js",
+        "/chunks/chunk-WQ4ZWICK.js",
+        "/chunks/chunk-ZA5KOOWO.js",
+        "/chunks/chunk-5OJNVHMS.js",
+        "/chunks/chunk-LDPZ6WLC.js",
+        "/chunks/chunk-4LPMS5I3.js",
+        "/chunks/chunk-GJGOXJO5.js",
+        "/chunks/chunk-NCUBXNYU.js",
+        "/chunks/chunk-5ERCSKIE.js",
+        "/chunks/chunk-YYOVST5G.js",
+        "/chunks/chunk-OT3T5U35.js",
+        "/chunks/flowDiagram-UKHOOZJN-C5TGSOBS.js",
+        "/chunks/chunk-FXIIJKVX.js",
+        "/chunks/chunk-3ZIGILXN.js",
+        "/chunks/chunk-G46N24PV.js",
+        "/chunks/chunk-DIZ42OWK.js",
+        "/chunks/chunk-YEYK5MQC.js",
+        "/chunks/dagre-VZM6K2ZE-Z5ECMMKY.js",
+        "/chunks/chunk-DB453Z6Q.js",
+        "/chunks/chunk-MIQTORAF.js",
+        "/chunks/chunk-ACC7BCQK.js",
+        "/api/search?q=Readable+text&scope=wiki&limit=20"
+      ],
+      "requestOrigins": [
+        "http://127.0.0.1:4339"
+      ],
+      "requestMethods": [
+        "GET"
+      ]
+    },
+    "productOrigins": [
+      "http://127.0.0.1:4339"
+    ],
+    "productExternalTargets": [],
+    "negativeControl": {
+      "url": "https://offline-negative-control.invalid/guard-test",
+      "blocked": true,
+      "navigationError": "ERR_BLOCKED_BY_CLIENT"
+    },
+    "cacheDisabled": true,
+    "initialStorageEmpty": true,
+    "serviceWorkers": 0,
+    "after1024Followup": {
+      "externalProductTargets": [],
+      "negativeControlBlocked": true,
+      "pageErrors": [],
+      "requestCount": 40,
+      "responseCount": 40,
+      "responseStatusCounts": {
+        "200": 40
+      },
+      "requestPaths": [
+        "/?doc=rollback-long",
+        "/styles.css",
+        "/reader.js",
+        "/chunks/chunk-PQ6DSH24.js",
+        "/chunks/chunk-QHDNOTBI.js",
+        "/api/config",
+        "/api/catalog",
+        "/api/map",
+        "/api/document?id=rollback-long&fragment=long-text&full=1",
+        "/api/related?id=rollback-long",
+        "/chunks/mermaid.core-BKOI5I3D.js",
+        "/chunks/chunk-S3CGXTRJ.js",
+        "/chunks/chunk-XXUKEYXA.js",
+        "/chunks/chunk-TBV5XTGP.js",
+        "/chunks/chunk-IVKHGDOE.js",
+        "/chunks/chunk-VMNPMWRH.js",
+        "/chunks/chunk-4PJNGS3V.js",
+        "/chunks/chunk-WQ4ZWICK.js",
+        "/chunks/chunk-ZA5KOOWO.js",
+        "/chunks/chunk-5OJNVHMS.js",
+        "/chunks/chunk-LDPZ6WLC.js",
+        "/chunks/chunk-4LPMS5I3.js",
+        "/chunks/chunk-GJGOXJO5.js",
+        "/chunks/chunk-NCUBXNYU.js",
+        "/chunks/chunk-5ERCSKIE.js",
+        "/chunks/chunk-YYOVST5G.js",
+        "/chunks/chunk-OT3T5U35.js",
+        "/chunks/flowDiagram-UKHOOZJN-C5TGSOBS.js",
+        "/chunks/chunk-FXIIJKVX.js",
+        "/chunks/chunk-3ZIGILXN.js",
+        "/chunks/chunk-G46N24PV.js",
+        "/chunks/chunk-DIZ42OWK.js",
+        "/chunks/chunk-YEYK5MQC.js",
+        "/chunks/dagre-VZM6K2ZE-Z5ECMMKY.js",
+        "/chunks/chunk-DB453Z6Q.js",
+        "/chunks/chunk-MIQTORAF.js",
+        "/chunks/chunk-ACC7BCQK.js",
+        "/api/search?q=Readable+text&scope=wiki&limit=20",
+        "/api/document?id=rollback-long&fragment=&full=1"
+      ],
+      "requestOrigins": [
+        "http://127.0.0.1:4339"
+      ],
+      "requestMethods": [
+        "GET"
+      ]
+    }
+  },
+  "environment": {
+    "engine": "chromium",
+    "version": "154.0.8037.58",
+    "allProductResponses200": true,
+    "mainPageErrors": [],
+    "nodeModulesExists": false,
+    "wikiCacheExistsAfterReading": false,
+    "node18SocketAttempts": "",
+    "observedLongParagraph100": true,
+    "observedSvgCount": 1,
+    "initialStorage": {
+      "cookies": 0,
+      "origins": 0
+    },
+    "initialServiceWorkerCount": 0
+  },
+  "layout": {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "url": "http://127.0.0.1:4339/?doc=rollback-long",
+    "title": "Rollback long document · Project knowledge",
+    "lang": "en",
+    "bodyWidth": 1024,
+    "documentWidth": 1024,
+    "noHorizontalPageOverflow": true,
+    "article": {
+      "clientWidth": 728,
+      "scrollWidth": 728
+    },
+    "paragraph100Readable": true,
+    "tables": 0,
+    "longPathFixturePresent": false
+  },
+  "limits": [
+    "Node18 historical compatibility observation before final layout patch",
+    "Requests isolated; no physical network disconnect",
+    "Adapters disabled; no target host Hook proof",
+    "Fixture has no tables or long paths"
+  ],
+  "evidenceReduction": {
+    "removed": "Repeated per-request response arrays; only recorded counts, statuses, unique local paths and origins retained",
+    "versionBoundary": "Historical reader SHA fa56c75902eeffe8e21b79bd7a526b0bf7e1639c0f6d63769bcd889389164d2e includes Mermaid source copy button; before non-Wiki identity correction and final layout positioning changes",
+    "networkBoundary": "Browser external requests were rejected; physical host network was not disconnected",
+    "hostBoundary": "Adapter-free temporary installation; complete finalization is not genuine host Hook evidence"
+  }
+}

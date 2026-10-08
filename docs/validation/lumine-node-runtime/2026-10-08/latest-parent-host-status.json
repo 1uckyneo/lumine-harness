@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-08T04:13:24.793586+00:00",
+  "proposalId": "8c2059a8-f42b-4fb0-9425-13e7f86452db",
+  "appliedAt": "2026-10-08T04:07:32.928Z",
+  "journalStatus": "awaiting_host_verification",
+  "managedFilesChecked": 198,
+  "managedMismatches": [],
+  "probe": {
+    "issuedAt": "2026-10-08T04:00:15.812Z",
+    "expiresAt": "2026-10-09T04:00:15.812Z",
+    "eventCount": 0,
+    "eventsAfterLatestApply": 0
+  },
+  "adapterEvidence": {
+    "readiness": "ready",
+    "runtimeStatus": "not_tested",
+    "checkProcess": {
+      "source": "actual_process",
+      "runtime": "node",
+      "version": "24.14.0",
+      "support": "supported"
+    },
+    "hostProcess": {
+      "status": "not_observed",
+      "runtime": null,
+      "observedAt": null
+    }
+  },
+  "finalized": false
+}

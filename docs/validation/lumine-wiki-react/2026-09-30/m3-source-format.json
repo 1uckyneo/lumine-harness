@@ -1,0 +1,144 @@
+{
+  "checkedAt": "2026-09-29T19:23:25.013Z",
+  "project": "source",
+  "converted": 5,
+  "preserved": 3,
+  "items": [
+    {
+      "id": "lumine-adapters",
+      "path": "docs/repo-wiki/Adapter 公共协议与各宿主差异.md",
+      "converted": true,
+      "bodySame": true,
+      "modelSame": true,
+      "generatedBodySame": true,
+      "generatedModelSame": true,
+      "states": {
+        "observations": {
+          "timesUnchanged": true
+        },
+        "reviews": {
+          "timesUnchanged": true
+        }
+      }
+    },
+    {
+      "id": "lumine-architecture",
+      "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+      "converted": false,
+      "bodySame": true,
+      "modelSame": true,
+      "generatedBodySame": true,
+      "generatedModelSame": true,
+      "states": {
+        "observations": {
+          "timesUnchanged": true
+        },
+        "reviews": {
+          "timesUnchanged": true
+        }
+      }
+    },
+    {
+      "id": "lumine-wiki",
+      "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+      "converted": true,
+      "bodySame": true,
+      "modelSame": true,
+      "generatedBodySame": true,
+      "generatedModelSame": true,
+      "states": {
+        "observations": {
+          "timesUnchanged": true
+        },
+        "reviews": {
+          "timesUnchanged": true
+        }
+      }
+    },
+    {
+      "id": "lumine-task-check",
+      "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+      "converted": false,
+      "bodySame": true,
+      "modelSame": true,
+      "generatedBodySame": true,
+      "generatedModelSame": true,
+      "states": {
+        "observations": {
+          "timesUnchanged": true
+        },
+        "reviews": {
+          "timesUnchanged": true
+        }
+      }
+    },
+    {
+      "id": "lumine-workflow",
+      "path": "docs/repo-wiki/四个 Skill、产品方案与任务证据.md",
+      "converted": true,
+      "bodySame": true,
+      "modelSame": true,
+      "generatedBodySame": true,
+      "generatedModelSame": true,
+      "states": {
+        "observations": {
+          "timesUnchanged": true
+        },
+        "reviews": {
+          "timesUnchanged": true
+        }
+      }
+    },
+    {
+      "id": "lumine-wiki-reader",
+      "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+      "converted": false,
+      "bodySame": true,
+      "modelSame": true,
+      "generatedBodySame": true,
+      "generatedModelSame": true,
+      "states": {
+        "observations": {
+          "timesUnchanged": true
+        },
+        "reviews": {
+          "timesUnchanged": true
+        }
+      }
+    },
+    {
+      "id": "lumine-root-config",
+      "path": "docs/repo-wiki/项目配置、根解析与多仓身份.md",
+      "converted": true,
+      "bodySame": true,
+      "modelSame": true,
+      "generatedBodySame": true,
+      "generatedModelSame": true,
+      "states": {
+        "observations": {
+          "timesUnchanged": true
+        },
+        "reviews": {
+          "timesUnchanged": true
+        }
+      }
+    },
+    {
+      "id": "lumine-adoption",
+      "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+      "converted": true,
+      "bodySame": true,
+      "modelSame": true,
+      "generatedBodySame": true,
+      "generatedModelSame": true,
+      "states": {
+        "observations": {
+          "timesUnchanged": true
+        },
+        "reviews": {
+          "timesUnchanged": true
+        }
+      }
+    }
+  ]
+}

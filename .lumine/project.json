@@ -1,4 +1,5 @@
 {
+  "displayName": "Lumine Harness",
   "modules": [
     "workflow",
     "workers",

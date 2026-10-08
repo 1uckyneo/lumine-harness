@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T04:04:01.710129+00:00",
+  "kind": "bounded-browser-verification",
+  "outcome": "passed",
+  "scope": [
+    "AC-011 迟到文档响应的原生取消场景",
+    "AC-011 忽略 abort 信号的晚到 fetch Promise 压力场景",
+    "AC-011 无效章节 fragment 的提示、正文可读和有效导航恢复"
+  ],
+  "environment": {
+    "node": "24.14.0",
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "viewportCssPixels": {
+      "width": 1200,
+      "height": 953
+    },
+    "installation": "current Plugin generated assets copied into an isolated temporary fixture; no source or node_modules inside fixture"
+  },
+  "fixture": {
+    "documentIds": [
+      "race-a",
+      "race-b"
+    ],
+    "distinctBodyMarkers": [
+      "BODY_MARKER_A",
+      "BODY_MARKER_B"
+    ],
+    "stableFragmentIds": [
+      "a-target",
+      "b-target"
+    ],
+    "fillerParagraphsBeforeAndAfter": 30,
+    "sources": 0,
+    "sourceStatus": "unverified fixture sample, not product knowledge"
+  },
+  "scenarios": [
+    {
+      "name": "native-abort-with-held-A-response",
+      "controlledDelayMs": 1500,
+      "method": "Playwright route.fetch reads actual fixture response; hold A, navigate B, release A after B is delivered. Native AbortController remains unchanged.",
+      "result": {
+        "events": [
+          {
+            "event": "A_received_and_held",
+            "at": 1791432083653
+          },
+          {
+            "event": "requestfailed",
+            "url": "/api/document?id=race-a&fragment=a-target&full=1",
+            "error": "net::ERR_ABORTED",
+            "at": 1791432083681
+          },
+          {
+            "event": "B_delivered",
+            "at": 1791432083689
+          },
+          {
+            "event": "A_release_attempted",
+            "at": 1791432085156
+          }
+        ],
+        "url": "/?doc=race-b#b-target",
+        "title": "文档 B",
+        "selected": [
+          "文档 B"
+        ],
+        "bodyB": true,
+        "bodyA": false,
+        "focus": "b-target",
+        "anchorY": 19.90625,
+        "innerHeight": 953,
+        "alerts": []
+      },
+      "assertions": {
+        "A_cancelled_on_B_navigation": true,
+        "A_released_after_B": true,
+        "B_selection_body_url_anchor_preserved": true
+      }
+    },
+    {
+      "name": "late-fetch-promise-ignoring-abort",
+      "controlledDelayMs": 1500,
+      "method": "Browser-only init wrapper removes signal for document A, obtains real fixture response, delays returning fetch Promise; B uses normal fetch. This deliberately stresses the application stale-response checks.",
+      "result": {
+        "events": [
+          {
+            "event": "A_network_response_received",
+            "at": 1791432129243
+          },
+          {
+            "event": "B_fetch_delivered",
+            "at": 1791432129276
+          },
+          {
+            "event": "A_fetch_promise_delivered_after_delay",
+            "at": 1791432130743
+          }
+        ],
+        "url": "/?doc=race-b#b-target",
+        "title": "文档 B",
+        "selected": [
+          "文档 B"
+        ],
+        "bodyB": true,
+        "bodyA": false,
+        "focus": "b-target",
+        "anchorY": 19.90625,
+        "innerHeight": 953,
+        "alerts": []
+      },
+      "assertions": {
+        "A_promise_delivered_after_B": true,
+        "B_selection_body_url_anchor_preserved": true
+      }
+    },
+    {
+      "name": "invalid-fragment-and-recovery",
+      "method": "Directly open race-b#no-such-section, observe visible toast and readable B body; click actual TOC B target.",
+      "invalid": {
+        "url": "/?doc=race-b#no-such-section",
+        "title": "文档 B",
+        "bodyB": true,
+        "toast": "该章节或图解已不存在。请从目录选择有效内容。",
+        "alerts": [],
+        "headingExists": true,
+        "viewport": {
+          "width": 1200,
+          "height": 953
+        }
+      },
+      "recovery": {
+        "url": "/?doc=race-b#b-target",
+        "title": "文档 B",
+        "bodyB": true,
+        "focus": "b-target",
+        "anchorY": 19.90625,
+        "alerts": []
+      },
+      "assertions": {
+        "readable_body_retained": true,
+        "visible_recovery_hint": true,
+        "valid_TOC_navigation_recovers_url_focus_anchor": true
+      }
+    }
+  ],
+  "codeRefs": [
+    {
+      "repoId": "root",
+      "path": "skills/lumine-harness/src/browser/reader.tsx",
+      "sha256": "f4022a974262ae829d732758154924f1ea078847ef01387bafa7d0dad2edadbf"
+    },
+    {
+      "repoId": "root",
+      "path": "skills/lumine-harness/src/browser/reader-common.ts",
+      "sha256": "a6488db5aa2b4919d61ca65e9066cf6ab4b0bc5b1009ee9090fc9013bd215d9e"
+    },
+    {
+      "repoId": "root",
+      "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+      "sha256": "eb3c9a410c6b8e101913f8f70539f1e403e59eb48a32f0088a6f372a81d95d1e"
+    },
+    {
+      "repoId": "root",
+      "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+      "sha256": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800"
+    },
+    {
+      "repoId": "root",
+      "path": "skills/lumine-harness/src/harness/wiki/sections.ts",
+      "sha256": "3f425ecd340031fe058b499bf3bfabc93138e6376f5e3ea1c189842b8679e0c3"
+    },
+    {
+      "repoId": "root",
+      "path": "plugins/lumine-harness/skills/lumine-harness/assets/wiki-reader/reader.js",
+      "sha256": "6c8b1db63ba94c62b7a9c16e2d1a9394ad3bcbcbb67f72f807d200cc54c2a0d8"
+    },
+    {
+      "repoId": "root",
+      "path": "plugins/lumine-harness/skills/lumine-harness/assets/harness/wiki/server.mjs",
+      "sha256": "a1af446c8fa0b7523cb9816f4a288e0334b57ba63b97e88ed4ea92a05b070f6b"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "output/playwright/20261008-race-native-delay.png",
+      "sha256": "b80c6f75e7598e1ccff21a24644316258a25a7e4e322046696333b2dd47b37d0",
+      "visuallyInspected": true
+    },
+    {
+      "path": "output/playwright/20261008-race-ignored-abort.png",
+      "sha256": "3fc904d7f3d78c4d1acd2b8d7fc51d65d85c84f2cb3f244fac22a0d1d17b82dc",
+      "visuallyInspected": true
+    },
+    {
+      "path": "output/playwright/20261008-race-invalid-fragment.png",
+      "sha256": "a355c4550a7934523eea31c66e421aa4ccf7e68666d8207f2b3072650fb46f3e",
+      "visuallyInspected": true
+    },
+    {
+      "path": "output/playwright/20261008-race-fragment-recovered.png",
+      "sha256": "fb2ccf36553f0a803f46264933da7a2c4dae659544ece26d41867d55a09acffa",
+      "visuallyInspected": true
+    }
+  ],
+  "boundaries": [
+    "Only these bounded AC-011 cases were tested; this does not accept all of AC-011.",
+    "One Chromium desktop viewport was used; mobile, browser history matrix, all fault types, actual host integration, human acceptance and physical offline execution are outside this result.",
+    "The ignored-abort scenario changes only the test browser fetch delivery; native cancellation evidence is recorded separately.",
+    "No source, generated assets, parent workspace, task record or plan was modified by this verifier.",
+    "No model call was used for reader execution or diagram drawing."
+  ],
+  "cleanup": {
+    "browserClosed": true,
+    "fixtureServerExited": true,
+    "fixtureServerExitCode": 0
+  },
+  "regressionsFound": []
+}
