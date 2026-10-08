@@ -24,9 +24,9 @@ if grep -n -E "卢米安的[^[:space:]]*[[:space:]]*Harness|Lumine(['’]s).*Har
   exit 1
 fi
 
-lumine_chinese_link='Lumine 中文写作“[卢米安](https://weibo.com/u/3316905545)”'
+lumine_chinese_link='Lumine 中文写作“[卢米安](https://www.zhihu.com/people/thrulife2gether)”'
 if ! grep -Fq "$lumine_chinese_link" "$repo_root/README.zh-CN.md" || ! grep -Fq "$lumine_chinese_link" "$canonical/SKILL.md"; then
-  echo "Chinese public materials must link 卢米安 to the configured Weibo profile." >&2
+  echo "Chinese public materials must link 卢米安 to the configured Zhihu profile." >&2
   exit 1
 fi
 

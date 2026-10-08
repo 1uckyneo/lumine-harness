@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-profile-link-20261008",
+  "mode": "implement",
+  "goal": "将 Lumine 公开材料中现有的个人主页链接更新为用户指定的知乎地址",
+  "scope": "用户明确授权的链接维护：README.zh-CN.md、规范 SKILL.md、生成 Plugin 副本及配套一致性检查；保留名称和正文。用户随后明确授权提交和 push，按仓库规则发布相同 main 提交至 GitHub 与 Gitee。AGENTS.md 无需修改；不包含无关未跟踪目录。",
+  "selectedSkills": [
+    "lumine-run"
+  ],
+  "acceptanceRefs": [],
+  "evidence": [
+    {
+      "artifact": "docs/validation/lumine-profile-link-20261008.json",
+      "sha256": "8b9d34dd9cffd0c1377b3a4629458280e376d422c258eff8b69f6b22f1a647fa",
+      "outcome": "passed",
+      "observedAt": "2026-10-08T11:50:08.970Z",
+      "command": "pnpm runtime:typecheck; pnpm runtime:build; pnpm runtime:check; pnpm runtime:test; bash skills/lumine-harness/scripts/check-skill-package.sh; bash scripts/check-repo-sync.sh; git diff --check; 全部受版本控制文件旧地址零匹配、四个文件新地址断言",
+      "environment": "macOS; Node 24.14.0; local repository validation",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "README.zh-CN.md",
+          "sha256": "9f608e71931f394ac5afdccdb8105c8f9395a310a4ce4bf285bb3eed6def1b19"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/SKILL.md",
+          "sha256": "b14b0b8d319c7a7f474e031e4214976233218d82483337ad6b550d913dd8b25c"
+        },
+        {
+          "repoId": "project",
+          "path": "plugins/lumine-harness/skills/lumine-harness/SKILL.md",
+          "sha256": "b14b0b8d319c7a7f474e031e4214976233218d82483337ad6b550d913dd8b25c"
+        },
+        {
+          "repoId": "project",
+          "path": "scripts/check-repo-sync.sh",
+          "sha256": "938779411c000188ab759e122f1e9bb3b4654e16f3b4d6f2067f4dafde3d1cf0"
+        }
+      ]
+    }
+  ],
+  "knowledge": {
+    "required": false,
+    "status": "not_applicable",
+    "refs": []
+  },
+  "summary": "三处个人主页链接及检查脚本已更新。全部规定检查通过，Runtime 测试 235 通过、1 跳过；无 Wiki 知识增量。验证证据已转存可随仓库分发的文档，用户追加授权提交和双远端推送。"
+}

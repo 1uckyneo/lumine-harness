@@ -5,7 +5,7 @@ description: Adopt, migrate, or upgrade Lumine Harness in a single- or multi-rep
 
 # Lumine Harness
 
-Lumine Harness helps people and Agents understand a project, preserve boundaries, resume work, and verify delivery. Lumine 中文写作“[卢米安](https://weibo.com/u/3316905545)”。
+Lumine Harness helps people and Agents understand a project, preserve boundaries, resume work, and verify delivery. Lumine 中文写作“[卢米安](https://www.zhihu.com/people/thrulife2gether)”。
 
 ## Choose the project language / 选择项目语言
 

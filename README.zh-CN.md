@@ -14,7 +14,7 @@ Agent 产品自带的 Harness 解决 **“Agent 怎么运行”**，提供模型
 
 **会话会结束，但工程上下文必须留下。**
 
-Lumine 中文写作“[卢米安](https://weibo.com/u/3316905545)”。
+Lumine 中文写作“[卢米安](https://www.zhihu.com/people/thrulife2gether)”。
 
 ## 什么时候值得使用
 

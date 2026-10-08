@@ -1,0 +1,50 @@
+{
+  "observedAt": "2026-10-08T11:50:08.970Z",
+  "checks": [
+    {
+      "command": "pnpm runtime:typecheck",
+      "outcome": "passed"
+    },
+    {
+      "command": "pnpm runtime:build",
+      "outcome": "passed"
+    },
+    {
+      "command": "pnpm runtime:check",
+      "outcome": "passed"
+    },
+    {
+      "command": "pnpm runtime:test",
+      "outcome": "passed"
+    },
+    {
+      "command": "bash skills/lumine-harness/scripts/check-skill-package.sh",
+      "outcome": "passed"
+    },
+    {
+      "command": "bash scripts/check-repo-sync.sh",
+      "outcome": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "outcome": "passed"
+    },
+    {
+      "command": "全部受版本控制文件旧地址零匹配、四个文件新地址断言",
+      "outcome": "passed"
+    }
+  ],
+  "runtimeTests": {
+    "total": 236,
+    "passed": 235,
+    "skipped": 1,
+    "failed": 0
+  },
+  "scope": [
+    "README.zh-CN.md",
+    "skills/lumine-harness/SKILL.md",
+    "plugins/lumine-harness/skills/lumine-harness/SKILL.md",
+    "scripts/check-repo-sync.sh"
+  ],
+  "notes": "本地文档与分发一致性验证；未验证外部个人主页可访问性。该记录产生于用户追加提交推送授权之前。"
+}
