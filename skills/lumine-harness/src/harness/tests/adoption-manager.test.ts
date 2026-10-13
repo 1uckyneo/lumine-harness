@@ -80,6 +80,40 @@ test("locale is pinned before proposal content; clean installation has four new 
     }
   }
 });
+test("root instructions use the configured Wiki and declare only existing standards without duplicate repository maps", () => {
+  for (const locale of ["zh-CN", "en"] as const) {
+    const f = fixture();
+    try {
+      const config = { schemaVersion: 2, workflowVersion: 2, locale, repositories: [{ id: "child-repo", path: "child" }], wiki: { root: "knowledge" } };
+      const options = { locale, overrides: { ".lumine/project.json": Buffer.from(JSON.stringify(config)).toString("base64") } };
+      const pending = createProposal(f.root, options);
+      const instructions = (proposal: typeof pending) => Buffer.from(proposal.operations.find((operation) => operation.path === "AGENTS.md")!.content!, "base64").toString();
+      const initial = instructions(pending);
+      assert.ok(initial.includes("](<knowledge>)"));
+      assert.ok(!initial.includes("knowledge/README.md"));
+      assert.ok(!initial.includes("docs/repo-wiki/README.md"));
+      assert.equal(initial.split("- child-repo: `child`").length - 1, 1);
+      assert.doesNotMatch(initial, /\]\((?:<)?AGENTS\.md(?:>)?\)/);
+      assert.ok(!initial.includes("knowledge/engineering/README.md"));
+      assert.equal(existsSync(path.join(f.root, "knowledge/engineering/README.md")), false);
+      mkdirSync(path.join(f.root, "knowledge/engineering"), { recursive: true });
+      writeFileSync(path.join(f.root, "knowledge/engineering/README.md"), "# Standards\nUse applicable project rules.\n");
+      writeFileSync(path.join(f.root, "knowledge/README.md"), "# Project Wiki\nCurrent navigation.\n");
+      const ready = instructions(createProposal(f.root, options));
+      assert.ok(ready.includes("knowledge/engineering/README.md"));
+      assert.ok(ready.includes("](<knowledge/README.md>)"));
+    } finally { f.clean(); }
+  }
+});
+test("health checks declared standards routes while allowing pending Wiki content", () => {
+  const f = fixture();
+  try {
+    applyProposal(f.save(createProposal(f.root, { locale: "en" })));
+    assert.equal(runChecks(f.root, "health").ok, true);
+    writeFileSync(path.join(f.root, "AGENTS.md"), "# Project\n## Required standards\n[Missing policy](docs/missing-policy.md#rules)\n");
+    assert.ok(runChecks(f.root, "health").issues.some((issue) => issue.code === "INSTRUCTIONS_LINK_MISSING"));
+  } finally { f.clean(); }
+});
 test("upgrade preserves human-edited bundled methods and existing root architecture without claiming integrity", () => {
   const f = fixture();
   try {

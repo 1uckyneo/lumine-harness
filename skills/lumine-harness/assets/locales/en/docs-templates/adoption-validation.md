@@ -15,7 +15,14 @@
 
 ## Content acceptance
 
+| Original rule and source | Applicable task and authority | Authoritative body and required-reading route | Disposition and review result |
+| --- | --- | --- | --- |
+
+<!-- Account for each former root rule: retain, move, rewrite, or remove with reasons. Preserve unique rules and project-specific permission before deletion. Do not copy full standards here; preserve means only file protection. -->
+
 <!-- Link project-specific collaboration/operation guides, service extensions, major modules, complete domain language/contexts, and necessary lasting decisions. Record actual standards-authority, navigation, independent-review, and cold-start results and gaps. Coverage and task knowledge bind scope, dispositions, source, and body versions rather than duplicating content. -->
+
+<!-- Begin representative applicable cold-start tasks at AGENTS. Verify complete standards/template/example reading, pre-edit gates, and authorization boundaries. Index access or a search match alone is insufficient. Independent review compares original rules for loss, duplicate bodies, and divergent authority. -->
 
 ## Actual operations and evidence
 

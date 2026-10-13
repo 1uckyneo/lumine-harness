@@ -8,6 +8,7 @@ import { checkDocumentContracts, resolveDocument } from "./core/documents.mjs";
 import { checkTask } from "./core/task-contract.mjs";
 import { checkProjectContracts } from "./core/project-checks.mjs";
 import { checkMethodModuleIntegrity } from "./core/method-modules.mjs";
+import { checkInstructionEntrypoints } from "./core/instruction-entrypoints.mjs";
 import path from "node:path";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 
@@ -70,6 +71,7 @@ function runChecks(root, command = "health", target) {
 	const checkHealth = () => {
 		required(".lumine/project.json");
 		required(manifest.instructions);
+		issues.push(...checkInstructionEntrypoints(root, manifest.instructions));
 		const raw = JSON.parse(read(".lumine/project.json"));
 		if (raw.schemaVersion !== 2 || raw.workflowVersion !== 2) fail("Project configuration must declare version 2", "Complete the reviewed project migration.", "CONFIG_VERSION");
 		const inspection = inspectSharedSkillCatalog(root);

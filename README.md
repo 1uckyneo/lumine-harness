@@ -94,8 +94,8 @@ Built-in `grilling` and `domain-modeling` modules support planning when material
 
 ## Engineering records for people and Agents
 
-- **Product Spec:** product problems, scenarios, rules, scope, and stable acceptance items.
-- **Exec Plan:** this technical change, current progress, next action, and evidence summaries; references the Spec instead of duplicating requirements.
+- **Product Spec:** the product proposal’s goals, scope, scenarios, rules, and stable acceptance criteria.
+- **Exec Plan:** technical approach, tradeoffs, execution/verification arrangements, progress, and implementation records derived from applicable Specs/AC items; links detailed evidence rather than duplicating requirements.
 - **Repo Wiki:** existing mechanisms, architecture, confirmed domain language and lasting decisions, project guides, authorized standards, and examples, each with clear authority and implementation status.
 - **Validation:** actual actions and outcomes, separating tests, runtime behavior, deployment, and user acceptance.
 
@@ -103,7 +103,7 @@ Lead with current conclusions before technical detail and history. New prose and
 
 Ask the Agent to archive a completed Plan or restore it when work resumes. For current-format plans, `task doc-archive` and `task doc-restore` move the document between `active/` and `completed/`, retain its stable ID, update current links, and record recoverable operations. They require the current content hash to protect intervening edits; historical evidence stays unchanged.
 
-Root AGENTS keeps minimal mandatory rules and direct links to authorized standards and Wiki. Architecture maps and detailed engineering material belong in Wiki rather than a second root architecture document. Standards explicitly authorized by AGENTS retain their authority; explanatory examples and implementation facts do not silently override them.
+Root AGENTS retains basic boundaries, minimal stage gates, and explicit standards routing. Before editing, read the standards index and applicable complete bodies, templates, and examples. Technical details live only in their owning standards. Framework-maintenance explanations stay in Harness; architecture maps and usage guidance belong in Wiki rather than another root architecture document. Standards, examples, and implementation facts have distinct authority; legacy code does not override standards. Adoption and upgrades map existing rules and valid permissions, then verify routing with cold-start tasks. Preserving files does not establish reconciliation.
 
 ## Project knowledge, Agentic Search, and continuous learning
 

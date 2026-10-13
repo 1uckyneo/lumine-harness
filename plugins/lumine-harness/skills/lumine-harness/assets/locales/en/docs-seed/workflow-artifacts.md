@@ -4,8 +4,8 @@ Lumine keeps goals, technical plans, existing knowledge, and actual evidence in 
 
 | Artifact | Question answered | Maintenance |
 | --- | --- | --- |
-| Product Spec | Whose problem is solved, what behavior and scope are intended, and how is acceptance judged? | Evolve the product proposal in place: overview, scenarios, rules, and stable AC items. |
-| Exec Plan | How will this change be implemented, where are we now, and what is next? | Reference applicable Specs/AC items; maintain current approach, progress, and evidence summaries. |
+| Product Spec | Whose problem is solved, what behavior and scope are intended, and how is acceptance judged? | Maintain product goals, scope, scenarios, rules, and stable acceptance criteria in the same product proposal. |
+| Exec Plan | How will this change be implemented, where are we now, and what is next? | Derive technical approach, tradeoffs, execution/verification arrangements, progress, and implementation records from applicable Specs/AC items; link detailed evidence. |
 | Repo Wiki | What are the existing mechanisms, confirmed domain language and lasting decisions, standards, and usage? | Distinguish current facts, standards, examples, and guides by authority and implementation status; maintain one body with source and valid decisions. |
 | Validation | What actually happened, with what outcome and evidentiary scope? | Preserve date, actions, code/environment applicability, and original evidence without rewriting historical conclusions. |
 
@@ -28,7 +28,7 @@ Project language controls defaults for new content; existing documents retain th
 
 ## Knowledge and implementation
 
-A proposed Plan does not become Wiki implementation fact prematurely. Store confirmed domain language and lasting decisions in relevant Wiki topics with confirmation evidence, contexts, and unimplemented boundaries; complete terms and necessary ADRs need no separate domain/decisions ledger. AGENTS may directly authorize Wiki standards. Standards, explanatory examples, and implementation facts have different authority; ordinary synchronization cannot relax rules. Architecture maps belong in Wiki rather than another default root ARCHITECTURE. Distinguish source, observed behavior, and deployment scope.
+A proposed Plan does not become Wiki implementation fact prematurely. Store confirmed domain language and lasting decisions in relevant Wiki topics with confirmation evidence, contexts, and unimplemented boundaries; complete terms and necessary ADRs need no separate domain/decisions ledger. AGENTS explicitly designates Wiki or equivalent existing standards through a required-reading entry; read applicable bodies in full before editing without copying their details to the root. Standards, explanatory examples, and implementation facts have different authority; ordinary synchronization cannot relax rules. Update details in their owning standard, changing the root only when applicability or routing changes. Architecture maps belong in Wiki rather than another default root ARCHITECTURE. Distinguish source, observed behavior, and deployment scope.
 
 The Agent maintains knowledge after understanding sources. Organize the hierarchy around actual capabilities and cover major modules at initial setup by default. During tasks, choose Wiki, source, or both without mandatory queries. After verifying gaps, stale explanations, or contradictions, preserve reusable findings in affected topics within authorization; explicit read-only requests receive reports only. Tools support search, change clues, and safe saving, not semantic understanding.
 

@@ -19,6 +19,8 @@ Project diagnosis can invoke health/docs checks directly without creating an imp
 
 ## Knowledge and hosts
 
+`check health/all` validates local standards links explicitly declared in the “规范入口” or “Required standards” section of root AGENTS: local targets, section anchors, and self-links. This is a structural check. Other custom section titles remain within content review; content acceptance must still detect undeclared standards, missing task routes or rule bodies, and divergent responsibilities. Installation or readable links alone do not establish adoption completion.
+
 wiki check validates knowledge structure and relationships; semantic truth still requires source review. adapter check current reports current host/setup state; adapter status selected summarizes selected integrations. Report static Doctor checks, real Hook events, actual Skill reads, and continuation evidence separately. Not observable does not mean passed.
 
 ## Evidence quality
@@ -28,5 +30,7 @@ Evidence identifies actions, outcomes, time, code/environment scope, and uncover
 ## Adoption delivery acceptance
 
 Use docs/templates/adoption-validation.md to record artifact destinations, retirement or preservation of old entry points, project-specific collaboration/operation guides, service extensions, major-module coverage, independent semantic review, and cold-start questions in Validation. Coverage represents topics and gaps. Task schemaVersion 3 knowledge binds this request's required/status/refs/sync, source baselines, created/revised/retained/deferred decisions, and content hashes. No additional adoption status or change to migration complete is needed.
+
+For each rule, retain its original source, applicability, authoritative body, required-reading route, and disposition reason. Move unique root-held rules and project-specific permission before removing duplicates. Starting from AGENTS, use representative applicable cold-start tasks to verify complete standards/template/example reading and gate comprehension. Independent review compares original and migrated rules for loss, duplication, and divergent authority; preserve does not replace this acceptance.
 
 wiki check verifies structure, references, and incomplete writes; it does not prove guide applicability, term completeness, correct standards authority, or usable guidance. The Agent checks these against actual material. Record reader navigation/search, service health, and real host operation separately with actions, results, and limits. Mark unperformed work unverified; preserve content gaps in existing coverage/task/Plan recovery rather than treating installation as delivery.

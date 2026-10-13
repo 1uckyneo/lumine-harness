@@ -1,7 +1,7 @@
 # Technical execution plan
 
 <!-- LH-EXEC-01 -->
-An Exec Plan turns an understood goal into work that can be implemented, recovered, and verified. Use a stable id, type: exec-plan, its own locale, and truthful status; reference product specifications with specId or specIds. Acceptance references identify applicable AC items and baselines rather than copying product text. Multiple Plans may cover different parts of one Spec.
+An Exec Plan derives technical approach, tradeoffs, execution/verification arrangements, progress, and implementation records from relevant Product Spec goals, rules, and acceptance, making work implementable, recoverable, and verifiable. Use a stable id, type: exec-plan, its own locale, and truthful status; reference product specifications with specId or specIds. Acceptance references identify applicable AC items and baselines rather than copying product text. Multiple Plans may cover different parts of one Spec.
 
 <!-- LH-EXEC-02 -->
 Keep one current overview at the top: delivered results, remaining work, next action, and blockers. Then record material technical choices and reasons, affected repositories/modules, dependencies, outcome-based milestones, and verification. Provide enough entry points and context for another Agent to resume without reproducing source documentation or accumulating chronological updates.

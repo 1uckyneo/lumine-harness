@@ -1,49 +1,30 @@
 # AGENTS.md - {{project_name}}
 
-## Scope and boundaries
+## Scope and basic constraints
 
 {{implementation_surface}}
 
-Run code, verification, and Git operations in the actual implementation repository. Resolve the Harness root using .lumine/root.json and project identity, not the nearest Git root. Preserve write/read-only boundaries and existing changes. Do not automatically commit, push, deploy, switch branches, or rewrite history.
+Run code, verification, and Git operations in the actual implementation repository. Resolve the Harness root using .lumine/root.json and project identity, not the nearest Git root. Preserve write/read-only boundaries, existing changes, and unique recovery material. Do not automatically commit, push, deploy, switch branches, or rewrite history. Keep secrets, private addresses, and customer material out of public documents, logs, and screenshots. `.lumine/` contains tasks, knowledge state, and private material; do not clear it as a cache.
 
-## Read as needed
+## Required standards
 
-- README.md: setup and usage.
-- docs/repo-wiki/README.md: architecture, implementation entry points, domain language, engineering material, and Lumine guides; .lumine/project.json selects the knowledge root.
-- docs/workflow-artifacts.md: Spec, Plan, Wiki, and Validation responsibilities.
-- docs/product-specs/ and docs/exec-plans/active/: product requirements and this technical change; completed/ retains execution history.
-- docs/validation/: verification and adoption acceptance; .lumine/: configuration, tasks, and maintenance state.
-- .agents/skills/: the sole public location of canonical Skills.
-- {{repo_rules_entry}}
+{{standards_entry}}
 
-{{directory_map}}
+Before editing code, tests, or engineering rules, read the declared standards index in full, then read applicable standards, current templates, and examples and follow their pre-edit requirements. Search matches and excerpts do not replace required reading. If an index lacks this task, check existing rules and sources rather than treating the gap as unrestricted permission.
 
-{{fact_index_targets}}
+This file and the standards explicitly designated here govern actions. Standards, explanatory examples, and implementation facts have different authority; legacy code does not override standards. Maintain one body per rule. Ordinary documentation or knowledge synchronization cannot change standards or authorization. Update detailed rules in their owning standard; update this file only when scope or routing changes.
 
-## Everyday work
+## Work and artifact entry points
 
-Read applicable Skills: lumine-plan for product/technical planning, lumine-design for visual/interaction choices, lumine-run for implementation, recovery, verification, and diagnosis, and lumine-knowledge for knowledge and its reader. A name match or directory does not establish a read. Use existing project service extensions; distinguish business services from the Wiki reader.
+- [README](README.md): project setup and usage.
+- [Project Wiki](<{{wiki_entry}}>): architecture, current implementation, domain language, lasting decisions, and guides.
+- [Work artifact responsibilities](docs/workflow-artifacts.md): Product Spec owns the product proposal and acceptance; Exec Plan derives technical approach, execution arrangements, and records from the Spec; Validation retains actual evidence.
+- .agents/skills/: actually read the applicable lumine-plan, lumine-design, lumine-run, or lumine-knowledge Skill. Read project service extensions for service operations and distinguish business services from the Wiki reader.
 
-Product work follows Spec → (necessary design → update the same Spec) → Exec Plan → Run. The Agent assesses readiness and the next step; each handoff requires explicit human confirmation of concrete deliverables. Work autonomously within a stage without repeating confirmation. Readiness questions, document status, and early broad intent do not authorize the next stage. See [Stage handoffs](.agents/skills/lumine-plan/references/stage-handoff.md). Verification during or after Run needs no separate confirmation. Bounded maintenance, verification-only work, and diagnosis retain their scope; diagnosis does not authorize repair.
-
-Checks are Runtime tools, not a fifth Skill. Use ./.lumine/cli --help for interfaces. Structural checks do not replace semantic review, actual operation, or user acceptance.
-
-## Standards, knowledge, and facts
-
-- Keep minimal mandatory rules here and link applicable authorized standards directly. Read relevant standards in full, not retrieval snippets. Maintain one body per standard, example, and implementation topic. These rules and authorized attachments take precedence; legacy code does not override standards.
-- Spec owns intended behavior; Plan owns this technical change and progress. Wiki holds current knowledge, confirmed lasting domain language and decisions, usage guides, and authorized standards. State authority and implementation status. Unimplemented proposals are not current facts; distinguish source, tests, operation, deployment, and user acceptance.
-- Ordinary knowledge synchronization cannot change standards or authorization. Explain rule changes and review affected content. Relate Wiki pages through prose and relations, not source snapshots; relations do not automatically invalidate freshness.
-- Choose Wiki, source, or both for the question; preserve verified findings within authorization and honor explicit read-only requests. Search ranking and card budgets never limit authoritative rules.
-- New prose and topic filenames follow project locale by default, retaining README, template names, and necessary technical terms. Stable IDs, AC items, and sections are independent of filenames. Do not bulk-rename existing files; use Windows-compatible names.
-- Markdown, Mermaid, and text sources are canonical knowledge. Knowledge maintenance creates no images or vision-model input. Keep secrets, private addresses, and customer material out of public documents, logs, and screenshots.
-- .lumine/wiki-state/, tasks, and evidence are durable assets; only .lumine/local/wiki/ holds rebuildable caches and machine state. Preserve human content, useful candidates, conflicts, and unique recovery material.
+Product work follows Product Spec → (necessary design → update the same Spec) → Exec Plan → Run, with explicit human confirmation of concrete deliverables at each handoff. Work autonomously within a stage without repeating confirmation for the same scope. See [Stage handoffs](.agents/skills/lumine-plan/references/stage-handoff.md). Bounded maintenance, verification-only work, and diagnosis retain their authorization scope; diagnosis does not authorize repair.
 
 ## Collaboration and closeout
 
-Give parallel writers exclusive ownership and integrate serially. Store evidence in Validation and current summaries/links in the Plan. Required task-related knowledge synchronization belongs to completion; unrelated debt does not block it.
+Give parallel writers exclusive ownership and integrate serially. Maintain affected artifacts within this task's authorization and honor explicit read-only requests. Structural checks do not replace semantic review, actual operation, or user acceptance. Report evidence and unverified scope separately.
 
-Emit exactly one WORK_STATUS: done|continue|blocked, meaning this request is complete, autonomous work can continue, or a concrete condition is needed. Explain the reason and next action. Status grants no authorization; a completed diagnosis can include failures. Report installation, content completion, and actual verification separately.
-
-## Project conventions and authorized standards
-
-{{project_specific_rules}}
+Emit exactly one WORK_STATUS: done|continue|blocked, meaning this request is complete, autonomous work can continue, or a concrete condition is needed. Explain the reason and next action separately. Status grants no authorization; installation does not establish content completion or actual-usage acceptance.

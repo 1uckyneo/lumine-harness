@@ -6,7 +6,7 @@ description: Implement or resume authorized work, recover execution context, ver
 # Implementation, recovery, and verification
 
 <!-- LH-RUN-01 -->
-Read AGENTS.md, applicable implementation rules, the existing Spec/Plan, and current authorization; confirm the actual repository and existing changes. Choose Wiki, source, or both according to the goal. A precisely located repair can start in code; cross-module questions can use the hierarchy and sections. Do not impose a query sequence or infer actions from isolated words such as check or run.
+Read AGENTS.md and its standards index, then read applicable complete standards, templates, and examples and follow pre-edit gates. Check the existing Spec/Plan and current authorization; confirm the actual repository and existing changes. Choose Wiki, source, or both according to the goal. A precisely located repair can start in code; cross-module questions can use the hierarchy and sections. Do not impose a query sequence or infer actions from isolated words such as check or run.
 
 <!-- LH-RUN-02 -->
 Identify the requested outcome:

@@ -1,20 +1,20 @@
 {
   "documentId": "lumine-adoption",
-  "revision": "5b69861915ccf60dc289c87de1955813bde089e9eab7630367bb40ad9e27ecaa",
-  "sourceFingerprint": "ddf143cfc21bd97fb5c72afffaac90b17ce9b11905ef0fd8e79c0868efb1e2fe",
-  "reviewedAt": "2026-10-13T10:38:56.111Z",
+  "revision": "a4a3aacac31d8cb138f381e4d2d065de6095c04b8bdafaabf90f5a0e1fe9395f",
+  "sourceFingerprint": "356b898b2908006e682ceb1d3b7e70f144b38849bac515e975279f5f2ccf4aeb",
+  "reviewedAt": "2026-10-13T11:48:21.064Z",
   "reviewer": {
     "kind": "agent",
     "role": "independent"
   },
   "outcome": "reviewed",
   "scope": [
-    "本轮修订的资料角色、直接来源、提问回写与确认边界",
-    "架构入口、采用分发和指南与已声明规范相符"
+    "本轮采用与工作流Wiki增量对照双语模板、资料职责、采用/迁移/交付指导及实际源码的静态比对",
+    "根入口职责与规则归位、安装和内容验收、首次待建规范、最小阶段门禁及特殊授权保全"
   ],
   "findings": [],
   "limitations": [
-    "独立reviewer未撰写被审阅页面；相关修正已增量复核",
-    "不替代业务全库审阅、真实宿主Hook、自动续跑或用户接受"
+    "审阅者未撰写这两篇Wiki正文，但参与了所引用的Runtime checker实现；本记录不构成该代码的独立代码审阅。",
+    "不证明新宿主Hook、实际阅读器、服务运行或用户接受。"
   ]
 }

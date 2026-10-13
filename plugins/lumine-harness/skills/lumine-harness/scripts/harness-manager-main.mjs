@@ -160,25 +160,19 @@ function sourceMap(locale, adapters) {
 	}
 	return map;
 }
-function renderRootTemplate(content, root, project, inspect, locale) {
+function renderRootTemplate(content, root, project, locale) {
 	const zh = locale === "zh-CN", map = project.repositories.map((r) => "- " + r.id + ": `" + r.path + "`").join("\n");
-	const unverified = zh ? "尚未核实；按当前任务从登记仓库的源码、配置和验证记录确认，不将目录信号当作运行证明。" : "Not yet verified. Inspect registered source, configuration and evidence for the current task; directory signals do not establish runtime behavior.";
+	const wikiIndex = slash(path.join(project.wiki.root, "README.md"));
+	const wikiFile = target(root, wikiIndex);
+	const wikiEntry = existsSync(wikiFile) && lstatSync(wikiFile).isFile() && readFileSync(wikiFile, "utf8").trim() ? wikiIndex : slash(project.wiki.root);
+	const standardsEntry = slash(path.join(project.wiki.root, "engineering/README.md"));
+	const standardsFile = target(root, standardsEntry);
+	const hasStandards = existsSync(standardsFile) && lstatSync(standardsFile).isFile() && readFileSync(standardsFile, "utf8").trim();
 	const values = {
 		project_name: path.basename(root),
-		topology: inspect.topology,
-		repo_rules_entry: "AGENTS.md",
-		directory_map: map,
-		detailed_directory_map: map,
-		fact_index_targets: "- " + project.wiki.root,
-		tech_signals: JSON.stringify(inspect.signals),
-		implementation_surface: zh ? "登记仓库及其相对位置：\n" + map : "Registered repositories and their relative locations:\n" + map,
-		implementation_surfaces: project.repositories.map((r) => r.id).join(", "),
-		project_specific_rules: zh ? "保留既有项目规则及当前请求明确的写入范围。首次采用不会为业务代码或外部操作增加授权。" : "Preserve existing project rules and the write scope of the current request. Adoption does not grant permission for business changes or external actions.",
-		implementation_paths: unverified,
-		domain_map: unverified,
-		architecture_invariants: zh ? "每个登记仓库保持独立边界；源码、历史证据与部署状态分别判断。" : "Keep registered repository boundaries separate; distinguish source, historical evidence and deployed behavior.",
-		verification_entry_points: "`./.lumine/cli check health` · `./.lumine/cli wiki check`",
-		known_gaps: unverified
+		wiki_entry: wikiEntry,
+		standards_entry: hasStandards ? `[${zh ? "工程规范与按任务必读" : "Engineering standards and required reading"}](<${standardsEntry}>)` : zh ? "本项目尚未声明规范附件；已有仓库／子仓规则按其适用范围执行。" : "No standards attachment is declared here yet; existing repository and child-repository rules retain their scope.",
+		implementation_surface: zh ? "登记仓库及其相对位置：\n" + map : "Registered repositories and their relative locations:\n" + map
 	};
 	const rendered = content.replace(/{{([a-z_]+)}}/g, (_, key) => {
 		if (!(key in values)) throw new Error("Unknown template field: " + key);
@@ -227,6 +221,13 @@ function createProposal(input, options = {}) {
 		maxCards: 6,
 		maxContextChars: 12e3
 	};
+	const overrides = options.overrides ?? {};
+	if (overrides[".lumine/project.json"]) {
+		const custom = JSON.parse(Buffer.from(overrides[".lumine/project.json"], "base64").toString());
+		if (custom.locale !== locale || custom.schemaVersion !== 2) throw new Error("Config override must match proposal language and version");
+		Object.assign(project, custom);
+		project.selectedAdapters = adapters;
+	}
 	const previousFile = path.join(root, ".lumine/managed.json");
 	const previous = existsSync(previousFile) ? readJson(previousFile).files ?? {} : legacy.managed;
 	const operations = [];
@@ -263,18 +264,11 @@ function createProposal(input, options = {}) {
 			if (oldHash && previous[rel]?.hash === oldHash) body = Buffer.from(mergeReaderLicenses(body.toString("utf8"), readFileSync(oldLicense, "utf8")));
 		}
 		if (rel === "AGENTS.md" || rel === "ARCHITECTURE.md") {
-			body = Buffer.from(renderRootTemplate(body.toString(), root, project, inspect, locale));
+			body = Buffer.from(renderRootTemplate(body.toString(), root, project, locale));
 		}
 		add(rel, body, f, rel.endsWith("/cli") ? 493 : 420);
 	}
 	if (options.sourceSelfUse) add(".lumine/cli", Buffer.from("#!/usr/bin/env bash\nset -euo pipefail\nLUMINE_SOURCE_ROOT=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\"\nexec \"$LUMINE_SOURCE_ROOT/skills/lumine-harness/assets/harness/cli\" \"$@\"\n"), undefined, 493, true);
-	const overrides = options.overrides ?? {};
-	if (overrides[".lumine/project.json"]) {
-		const custom = JSON.parse(Buffer.from(overrides[".lumine/project.json"], "base64").toString());
-		if (custom.locale !== locale || custom.schemaVersion !== 2) throw new Error("Config override must match proposal language and version");
-		Object.assign(project, custom);
-		project.selectedAdapters = adapters;
-	}
 	for (const [rel, content] of Object.entries(overrides)) {
 		if ([
 			".lumine/project.json",

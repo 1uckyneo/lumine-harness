@@ -8,6 +8,7 @@ import { checkProjectContracts } from "./core/project-checks.ts";
 import { commandLocale, formatCommandError, formatHumanIssue } from "./core/messages.ts";
 import { checkTask } from "./core/task-contract.ts";
 import { checkMethodModuleIntegrity } from "./core/method-modules.ts";
+import { checkInstructionEntrypoints } from "./core/instruction-entrypoints.ts";
 
 const REQUIRED_SKILLS = ["lumine-plan", "lumine-run", "lumine-knowledge", "lumine-design"];
 const CAPABILITIES = ["project_instructions", "session_context", "skill_discovery", "skill_read", "pre_mutation_gate", "stop_gate", "automatic_continuation", "work_status_matrix", "session_isolation"];
@@ -31,6 +32,7 @@ export function runChecks(root: string, command = "health", target?: string): Ch
   const checkHealth = () => {
     required(".lumine/project.json");
     required(manifest.instructions);
+    issues.push(...checkInstructionEntrypoints(root, manifest.instructions));
     const raw = JSON.parse(read(".lumine/project.json"));
     if (raw.schemaVersion !== 2 || raw.workflowVersion !== 2) fail("Project configuration must declare version 2", "Complete the reviewed project migration.", "CONFIG_VERSION");
     const inspection = inspectSharedSkillCatalog(root);

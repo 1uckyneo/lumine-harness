@@ -2,8 +2,8 @@
 // Source: skills/lumine-harness/src/harness/wiki/server.ts
 import { loadProjectConfig } from "../core/project-config.mjs";
 import { resolveHarnessRuntimeRoot } from "../core/runtime-layout.mjs";
-import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConfig } from "./files.mjs";
 import { parseSections } from "./sections.mjs";
+import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConfig } from "./files.mjs";
 import { baselineFor } from "./documents.mjs";
 import { searchKnowledgePage } from "./search.mjs";
 import { inspectKnowledge, mapKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from "./engine.mjs";
