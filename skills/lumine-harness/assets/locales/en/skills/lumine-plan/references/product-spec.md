@@ -17,3 +17,6 @@ Review whether the proposal solves the stated problem, normal/failure behavior i
 
 <!-- LH-SPEC-06 -->
 Use [Stage readiness and handoff](stage-handoff.md) to assess readiness, whether design is needed, and the recommended next step. After confirmation of the initial Spec, follow the confirmed design branch. Bring confirmed design decisions back into the same Spec, show what changed, and obtain user confirmation before the Exec Plan. Skipping design still requires confirmation of the Spec and entry into technical planning. A document, status field, or question about next-step readiness is not confirmation.
+
+<!-- LH-SPEC-07 -->
+For consequential rule, terminology, or boundary questions, use [Bundled grilling and writeback](grill.md) to maintain the same Spec after every reply round. Capture settled shared language and important enduring decisions promptly in authoritative Wiki material and link them. Not every answer is an enduring decision, and confirmed product direction is not implemented behavior. Update affected AC when domain material changes acceptance meaning; detailed implementation waits for the confirmed Exec Plan stage.

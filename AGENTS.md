@@ -71,9 +71,9 @@ bash scripts/check-repo-sync.sh
 - 公共流程中禁止绑定具体模型 ID，或把 Codex、Claude、Gemini 等产品写成固定执行主体。
 - 模型负责语义理解、判断和内容生成；Agent 负责组装上下文、选择 Skill、调用工具并推进阶段；Adapter 和宿主负责生命周期与协议转换。
 - 产品名称可以出现在 Adapter、官方路径、依赖包名、兼容性说明和真实验证记录中。
-- 生成到目标工程的根 `AGENTS.md` 是 Agent 入口地图，`ARCHITECTURE.md` 是架构地图。
+- 目标工程根 `AGENTS.md` 保留最小硬规则与直达规范附件／Wiki 的入口，架构地图、详细规范与使用指南进入 Wiki，不默认生成根 `ARCHITECTURE.md`；旧文件先归位独有内容并修复引用，无法安全退休则保留报告。
 - 生成到目标工程的 `.agents/skills` 是唯一公共 Skill 内容真源；不要生成产品级 Rules、Skill 正文副本或产品级 Skill 投影。无法原生发现该目录的宿主由 Adapter 按需路由并要求实际读取规范文件。
-- Repo Wiki 是带来源的现状解释，不能替代源码、测试、运行态验证或 Validation 证据。
+- Repo Wiki 按职责区分现状、已确认领域语言与长期决定、使用指南、AGENTS 授权规范和示例；确认的语言不证明实现。Spec／Plan／Wiki／Validation 各维护一处正文，不另建 domain/decisions 台账；Wiki 不能替代源码、测试、运行或验收证据。
 
 ## 首次采用安全边界
 
@@ -122,7 +122,7 @@ bash scripts/check-repo-sync.sh
 
 - 本仓配置与运行入口在 `.lumine/`，中文优先；`.lumine/cli` 运行构建后的 Runtime。
 - 四个日常 Skill 直接读取 `skills/lumine-harness/assets/skills/lumine-*/SKILL.md`，由 root manifest 的 skills 字段定位，不创建另一套可编辑副本。
-- `docs/product-specs/` 维护产品要求，`docs/exec-plans/active/` 维护实施及证据，`docs/repo-wiki/` 维护源码关联的架构和机制。
+- `docs/product-specs/` 维护产品要求，`docs/exec-plans/active/` 维护实施及证据，`docs/repo-wiki/` 维护来源关联的架构、机制、规范、指南及已确认长期语言和决定。
 - 产品需求直接在 Spec 内迭代，技术方案和进度放 Plan；本仓同样遵循[阶段交接指导](skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md)：产品 Spec、必要设计及 Spec 回写、Exec Plan、Run 的交接需人的明确确认，阶段内自主，已确认的同一范围不重复询问。Agent 自主判断下一步，询问就绪不等于授权；Run 中或之后的验证不另设确认。明确的局部修复、规则维护和仅诊断按自身范围处理，不强制完整产品流程；仅诊断不自动修复。
 - 知识只维护 Markdown、Mermaid 与持久文本状态；浏览器阅读和绘图不调用模型。按目标自主选择 Wiki、源码或组合，不强制查询；核实缺口、过期或矛盾后，在授权内写回可复用结论，明确只读时只报告。目录按真实能力维护，知识查询不自动开始全量改写。
 - `.lumine/wiki-state/`、`.lumine/tasks/`、`.lumine/project-checks/` 是项目资产；`.lumine/local/` 含本机态与受保护私有材料，不能整体当作随意清理的缓存。

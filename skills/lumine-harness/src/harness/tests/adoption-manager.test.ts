@@ -15,6 +15,9 @@ import {
 import os from "node:os";
 import path from "node:path";
 import { getSessionStatePath } from "../core/work-status.ts";
+import { discoverSharedSkills } from "../core/skill-catalog.ts";
+import { checkMethodModuleIntegrity } from "../core/method-modules.ts";
+import { runChecks } from "../check.ts";
 import {
   createProposal,
   applyProposal,
@@ -45,7 +48,7 @@ test("locale is pinned before proposal content; clean installation has four new 
         readFileSync(path.join(f.root, ".lumine/project.json"), "utf8"),
       );
       assert.equal(cfg.locale, locale);
-      for (const rootDoc of ["AGENTS.md", "ARCHITECTURE.md"])
+      for (const rootDoc of ["AGENTS.md"])
         assert.doesNotMatch(
           readFileSync(path.join(f.root, rootDoc), "utf8"),
           /\{\{[a-z_]+\}\}/,
@@ -56,6 +59,17 @@ test("locale is pinned before proposal content; clean installation has four new 
             path.join(f.root, ".agents/skills/lumine-" + name + "/SKILL.md"),
           ),
         );
+      assert.equal(existsSync(path.join(f.root, "ARCHITECTURE.md")), false);
+      assert.deepEqual(discoverSharedSkills(f.root).map((skill) => skill.name), ["lumine-design", "lumine-knowledge", "lumine-plan", "lumine-run"]);
+      const vendor = path.join(f.root, ".agents/skills/lumine-plan/vendor");
+      assert.deepEqual(checkMethodModuleIntegrity(vendor), []);
+      const sourceVendor = path.join(resolveSkillPackageRoot(import.meta.url)!, "assets/skills/lumine-plan/vendor");
+      const methodManifest = JSON.parse(readFileSync(path.join(sourceVendor, "manifest.json"), "utf8"));
+      for (const entry of [{ path: "manifest.json" }, ...methodManifest.files]) {
+        assert.deepEqual(readFileSync(path.join(vendor, entry.path)), readFileSync(path.join(sourceVendor, entry.path)));
+        assert.equal(p.operations.find((operation) => operation.path === ".agents/skills/lumine-plan/vendor/" + entry.path)?.source, path.join(sourceVendor, entry.path));
+      }
+      assert.equal(runChecks(f.root, "health").ok, true);
       assert.equal(existsSync(path.join(f.root, ".harness")), false);
       assert.equal(
         existsSync(path.join(f.root, ".agents/skills/lumine-harness-plan")),
@@ -65,6 +79,24 @@ test("locale is pinned before proposal content; clean installation has four new 
       f.clean();
     }
   }
+});
+test("upgrade preserves human-edited bundled methods and existing root architecture without claiming integrity", () => {
+  const f = fixture();
+  try {
+    applyProposal(f.save(createProposal(f.root, { locale: "zh-CN" })));
+    const relative = ".agents/skills/lumine-plan/vendor/grilling/INSTRUCTIONS.md";
+    const edited = readFileSync(path.join(f.root, relative), "utf8") + "\nHuman customization; preserve this change.\n";
+    writeFileSync(path.join(f.root, relative), edited);
+    const architecture = "# Existing project architecture\nPreserve the independently maintained map.\n";
+    writeFileSync(path.join(f.root, "ARCHITECTURE.md"), architecture);
+    const proposal = createProposal(f.root, { locale: "en", mode: "upgrade" });
+    assert.equal(proposal.operations.find((operation) => operation.path === relative)?.action, "preserve");
+    assert.equal(proposal.operations.some((operation) => operation.path === "ARCHITECTURE.md"), false);
+    applyProposal(f.save(proposal));
+    assert.equal(readFileSync(path.join(f.root, relative), "utf8"), edited);
+    assert.equal(readFileSync(path.join(f.root, "ARCHITECTURE.md"), "utf8"), architecture);
+    assert.ok(runChecks(f.root, "health").issues.some((issue) => issue.code === "METHOD_FILE_CHANGED" && issue.path === relative));
+  } finally { f.clean(); }
 });
 test("proposal integrity rejects locale tampering", () => {
   const f = fixture();

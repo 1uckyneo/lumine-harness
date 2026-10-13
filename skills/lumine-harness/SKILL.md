@@ -28,6 +28,6 @@ Install the [stage handoff guidance](assets/locales/en/skills/lumine-plan/refere
 
 安装[阶段交接指导](assets/skills/lumine-plan/references/stage-handoff.md)：先产品 Spec，按需要设计并回写 Spec，再 Exec Plan、Run。Agent 判断就绪程度并选择 Skill，各阶段交接由人确认；Run 中或之后的验证不另设确认。采用或升级时对齐项目活跃指引中的冲突规则，保留有效项目约束和历史证据。
 
-After first adoption, the current Agent continues with `lumine-knowledge` to understand the project and build a project-specific Wiki covering its major modules, unless the user narrows or defers that work. Tools do not create semantic knowledge. Report installation, knowledge coverage, and content verification separately; preserve progress for resumption.
+After first adoption, continue with `lumine-knowledge` for project-specific collaboration and operation guides, artifact integration, and major-module knowledge. Keep minimal root rules with direct Wiki/standards links; do not generate root ARCHITECTURE by default. Reuse or generate service extensions from project facts. Users may narrow or defer work. Report installation, content completion, and actual verification separately using existing Validation, coverage, and task knowledge; preserve recovery positions. Upgrades address affected guidance and gaps rather than regenerating the whole library.
 
-首次采用后，当前 Agent 接续 `lumine-knowledge`，理解项目、规划适用目录并深入覆盖主要模块；用户可以缩小范围或延后。工具不承担知识理解与撰写。安装、知识覆盖和内容核实分别报告，未完成工作保存恢复位置。
+首次采用后接续 `lumine-knowledge`，交付项目化协作／操作指南、资料归位与主要模块知识。根规则保持最小并直达 Wiki／规范，不默认生成根 ARCHITECTURE；服务扩展按项目事实复用或生成。用户可缩小或延后。用已有 Validation、coverage 和 task knowledge 分别报告安装、内容完成、实际验证，保留恢复位置；升级处理受影响指引与缺口，不重新全库生成。

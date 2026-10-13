@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 2,
+  "id": "lumine-collaboration-guide",
+  "path": "docs/repo-wiki/guides/Lumine协作开发指南.md",
+  "generation": 2,
+  "generatedMarkdown": "---\nid: lumine-collaboration-guide\ntitle: \"Lumine 协作开发指南\"\nsummary: \"Lumine 协作开发指南：本仓实际能力、使用入口和验证边界。\"\ntype: guide\nstatus: current\nlocale: zh-CN\n---\n\n# Lumine 协作开发指南\n\n本仓维护 Lumine Harness，日常 Skill 直接读取规范资产，而不是复制另一套项目 Skill。先读[根规则](../../../AGENTS.md)，按目标选择规划、设计、实施或知识能力；[四个 Skill 与任务证据](../四个 Skill、产品方案与任务证据.md)解释详细机制。\n\n## 从一个目标开始\n\n可以说：“先梳理需求和验收，暂不实现。”Agent 用 lumine-plan 理解来源，必要时提问并逐轮回写；领域语言和重要长期决定在 Wiki 有稳定位置。回答问题不会自动批准实施。Product Spec → 必要设计并回写同一 Spec → Exec Plan → Run 的交接由用户确认具体成果，已有效确认的同一范围不重复询问。技术规划和视觉设计按任务需要区分。\n\n确认产品方案后，可以说“无需设计，开始编写执行计划”；确认已展示计划后说“按此计划实施并验证”。只诊断可说“只找原因，不修复”；只核实知识可说“核对来源并解释这个机制”。明确局部维护依自身范围处理，不强制建立长期方案。\n\n## 回答与成果\n\n产品规则及验收进入 Spec，本次实现选择和进度进入 Plan，实际操作进入 Validation。Wiki 维护稳定领域语言、重要长期决策、工程说明和已核实实现，并注明各自性质；不能用决定已确认证明功能已落地。没有重要歧义时不强制 grill，也不为资料齐全造空文档。\n\n## 继续与完成\n\n换会话可以说“继续这项任务，先核对计划、当前修改和确认范围”。Runtime 协助检查基线与证据，Agent 负责判断语义；测试、实际阅读器、宿主 Hook、部署和用户接受分别报告。提交与推送需要其自身授权。常用操作见[常用指令与阅读器](常用指令与阅读器.md)。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"Lumine\",\n    \"使用指南\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"rules\",\n      \"repoId\": \"project\",\n      \"path\": \"AGENTS.md\"\n    },\n    {\n      \"id\": \"plan\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-plan/SKILL.md\"\n    },\n    {\n      \"id\": \"handoff\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md\"\n    },\n    {\n      \"id\": \"run\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-run/SKILL.md\"\n    },\n    {\n      \"id\": \"writeback\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-plan/references/grill.md\"\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"AGENTS.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-plan/SKILL.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-plan/references/grill.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-run/SKILL.md\"\n    }\n  ],\n  \"relations\": []\n}\n-->\n",
+  "appliedRevision": "3449fedfef59f49e45f783edc539d0bda35ce48f577526bf7c42b03e62895b04",
+  "sources": {
+    "fingerprints": {
+      "project:AGENTS.md": "d10313e443abdfe811b33abd660400a3ad62c721ad6622b3aeb70ed451c44622",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "09a5530d8082e2f021985bf6dfffeca48f1237143d86c0dfe47918fed45c4035",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "3977308a20b7e7fd16766ff072a1f5089d2aa17930d67429ab7b59faab3a546b",
+      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "3e966c5bf55eb4962d1cf83d0578fcd7d648cd1bda3f09071af038f22e426364",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "a8a65577010720cdd6dba9e14cd876912d8ea874033985bd5bc9a09729147cc1"
+    },
+    "scopeFingerprints": {
+      "project:AGENTS.md": "5924a52361a1192c183a5605914fe6266bd3e9f79c523940d6afe47855888bfa",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "3ca598ecb6f06ff82c1a5101fae83bbb4444f0a23787fe207c20fdfa1b20cd13",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "d6cc110e6114f5a0f8fe75183086a0136dcf5b50e365824fae7effb00dc24e7e",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "42eb71a85713446b62bf0eac1fe042d04cc0d4513586f3a8fda1debdfd102838",
+      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "600cc587e0aadc5cd5a7d6a6677b833aac29640d5590b90d706bfdf3e11d886e"
+    },
+    "files": {
+      "project:AGENTS.md": "d10313e443abdfe811b33abd660400a3ad62c721ad6622b3aeb70ed451c44622",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "09a5530d8082e2f021985bf6dfffeca48f1237143d86c0dfe47918fed45c4035",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "a8a65577010720cdd6dba9e14cd876912d8ea874033985bd5bc9a09729147cc1",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "3977308a20b7e7fd16766ff072a1f5089d2aa17930d67429ab7b59faab3a546b",
+      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "3e966c5bf55eb4962d1cf83d0578fcd7d648cd1bda3f09071af038f22e426364"
+    },
+    "missing": []
+  },
+  "updatedAt": "2026-10-13T10:36:22.654Z"
+}

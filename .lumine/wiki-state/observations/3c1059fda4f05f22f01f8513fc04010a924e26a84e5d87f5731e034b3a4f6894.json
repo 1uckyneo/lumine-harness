@@ -1,0 +1,25 @@
+{
+  "id": "lumine-command-guide",
+  "revision": "4f054e5780b579cf8db86dacefedad3995b3aeba755c4aecc1291857b5e6013b",
+  "checkedAt": "2026-10-13T10:38:56.245Z",
+  "sourceFingerprint": "4b09e9dbcc0885b16e9b94c8eec96028f673771f9ec90a9d2ecd9a1efa104fcd",
+  "sources": {
+    "fingerprints": {
+      "project:AGENTS.md": "d10313e443abdfe811b33abd660400a3ad62c721ad6622b3aeb70ed451c44622",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/references/reader.md": "44de7d69e5b4aa4df0b72d2f03e7c1657452c83cd6fceb8d55a2eb243d73b3ab",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1f5d8701de27420423d8b0844772590691632cd6334cb86919681271f544e61f"
+    },
+    "scopeFingerprints": {
+      "project:AGENTS.md": "5924a52361a1192c183a5605914fe6266bd3e9f79c523940d6afe47855888bfa",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "60265cd4b4593a63f5a32d265612b90d7542f8fabd4bec45809faeae404c042c",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/references/reader.md": "49f8f1bbbe8fd785bded4543e7c9287ef467aa6a3e67b3ed5675e40a884390f4"
+    },
+    "files": {
+      "project:AGENTS.md": "d10313e443abdfe811b33abd660400a3ad62c721ad6622b3aeb70ed451c44622",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1f5d8701de27420423d8b0844772590691632cd6334cb86919681271f544e61f",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/references/reader.md": "44de7d69e5b4aa4df0b72d2f03e7c1657452c83cd6fceb8d55a2eb243d73b3ab"
+    },
+    "missing": []
+  },
+  "freshness": "current"
+}

@@ -48,3 +48,9 @@
 纯语义审阅可用 `wiki update review --file review.json`，记录 `documentId/revision/sourceFingerprint/reviewedAt/reviewer/outcome/scope/findings/limitations`，不强迫重写正文。`reviewer` 记录真实的 agent 或 human、author 或 independent；不可把作者自检写成独立审阅。来源核对、语义审阅、运行验证分别说明。
 
 只有实际保存且能够恢复的内容才算基线；新建采用“预期不存在”检查，更新采用三方比较。拆页同时维护总览、子页与引用。冲突和中断通过 `wiki update decide/recover` 处理，按命令帮助提供精确对象与原因，不强制覆盖人工修改。
+
+## 资料效力与稳定语言
+
+AGENTS 明确授权的规范附件必须按任务完整读取，不由普通检索预算限制。规范、示例、实现知识和用户指南分别标明职责；旧代码不同不构成放宽规范的依据。规范变更说明有效依据并复核受影响内容，不能将普通知识同步变成政策修改。
+
+已确认的领域语言、上下文和长期决定可以是 Wiki 当前知识，但必须标明“已确认概念／规则”与“实现事实”的区别。完整术语、同词多上下文及必要 ADR 在相关主题保存并链接有效 Spec／Plan 依据；尚未确认方向留在当前 Spec／Plan。Wiki 内部使用正文链接及 relations，不登记彼此为 sources/watchScopes；关系不能自动触发来源过期。长期决定替代时保留形成依据和被替代身份。

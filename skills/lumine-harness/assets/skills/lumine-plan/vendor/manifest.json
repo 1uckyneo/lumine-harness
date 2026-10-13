@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "upstream": {
+    "repository": "https://github.com/mattpocock/skills",
+    "commit": "49dd158d1076134a641b33efb035946536778336"
+  },
+  "entrypoints": [
+    "grilling/INSTRUCTIONS.md",
+    "domain-modeling/INSTRUCTIONS.md"
+  ],
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "upstreamPath": "LICENSE",
+      "upstreamSha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"
+    },
+    {
+      "path": "SOURCE.md",
+      "sha256": "24903d420b379e9dacf1d84d9582fb955cd3b1839facbf64d234f1b927ea10fa"
+    },
+    {
+      "path": "domain-modeling/ADR-FORMAT.md",
+      "sha256": "b238f8531398a26f8d6f742f059dacf18ad31ef2cab5f060b50d44c321313baa",
+      "upstreamPath": "skills/engineering/domain-modeling/ADR-FORMAT.md",
+      "upstreamSha256": "944c92aa790e8fbdc9199640b170979abb8a34ba8d0fe18c2a01a63bce140ca0"
+    },
+    {
+      "path": "domain-modeling/GLOSSARY-FORMAT.md",
+      "sha256": "6ca9cf6f10ecbce5de5ae81d2672a9455b24ffbec9c0bcac750566ee33571e52",
+      "upstreamPath": "skills/engineering/domain-modeling/GLOSSARY-FORMAT.md",
+      "upstreamSha256": "21dcc40cdec8e151a829b98ab1517c1867bc444e3665134a98c6983411996801"
+    },
+    {
+      "path": "domain-modeling/INSTRUCTIONS.md",
+      "sha256": "8c7dcbc0ce04f6d1311c2679ad2835edcba069d5c931c8331e9b59a5565aba5d",
+      "upstreamPath": "skills/engineering/domain-modeling/SKILL.md",
+      "upstreamSha256": "7b925d7b1e341a2eeae33ad68a8a8c0ab889a38ddd22a7598e4c240e5a7556a3"
+    },
+    {
+      "path": "grilling/INSTRUCTIONS.md",
+      "sha256": "d28120599720db27300a8cd10587ecd5166360ff2bdc8703370488b0a7d6b107",
+      "upstreamPath": "skills/productivity/grilling/SKILL.md",
+      "upstreamSha256": "befdff1e27a1dfe2a294d5871169ac1afe16d983911daa4f32627514a48c1e15"
+    }
+  ]
+}

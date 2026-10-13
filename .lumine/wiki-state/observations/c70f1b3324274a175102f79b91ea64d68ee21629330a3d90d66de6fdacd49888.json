@@ -1,0 +1,31 @@
+{
+  "id": "lumine-collaboration-guide",
+  "revision": "3449fedfef59f49e45f783edc539d0bda35ce48f577526bf7c42b03e62895b04",
+  "checkedAt": "2026-10-13T10:38:56.205Z",
+  "sourceFingerprint": "48fe2729d6e517a02a878cf52e2ba5bf8fb528bdeb51e4f33caf79020134e542",
+  "sources": {
+    "fingerprints": {
+      "project:AGENTS.md": "d10313e443abdfe811b33abd660400a3ad62c721ad6622b3aeb70ed451c44622",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "09a5530d8082e2f021985bf6dfffeca48f1237143d86c0dfe47918fed45c4035",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "3977308a20b7e7fd16766ff072a1f5089d2aa17930d67429ab7b59faab3a546b",
+      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "3e966c5bf55eb4962d1cf83d0578fcd7d648cd1bda3f09071af038f22e426364",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "a8a65577010720cdd6dba9e14cd876912d8ea874033985bd5bc9a09729147cc1"
+    },
+    "scopeFingerprints": {
+      "project:AGENTS.md": "5924a52361a1192c183a5605914fe6266bd3e9f79c523940d6afe47855888bfa",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "3ca598ecb6f06ff82c1a5101fae83bbb4444f0a23787fe207c20fdfa1b20cd13",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "d6cc110e6114f5a0f8fe75183086a0136dcf5b50e365824fae7effb00dc24e7e",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "42eb71a85713446b62bf0eac1fe042d04cc0d4513586f3a8fda1debdfd102838",
+      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "600cc587e0aadc5cd5a7d6a6677b833aac29640d5590b90d706bfdf3e11d886e"
+    },
+    "files": {
+      "project:AGENTS.md": "d10313e443abdfe811b33abd660400a3ad62c721ad6622b3aeb70ed451c44622",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "09a5530d8082e2f021985bf6dfffeca48f1237143d86c0dfe47918fed45c4035",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "a8a65577010720cdd6dba9e14cd876912d8ea874033985bd5bc9a09729147cc1",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "3977308a20b7e7fd16766ff072a1f5089d2aa17930d67429ab7b59faab3a546b",
+      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "3e966c5bf55eb4962d1cf83d0578fcd7d648cd1bda3f09071af038f22e426364"
+    },
+    "missing": []
+  },
+  "freshness": "current"
+}

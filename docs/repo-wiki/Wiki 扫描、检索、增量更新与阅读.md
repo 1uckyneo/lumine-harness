@@ -28,7 +28,7 @@ flowchart LR
   K --> N[后续会话按需复用]
 ```
 
-重要缺口、过期或矛盾应在核实后形成相关知识增量；显式只读请求不写文件，没有新认识的小修可以零更新。检索不到已有内容时先考虑别名、关键词或结构，不立即复制另一篇。Wiki 保留现状，Spec 维护目标，Plan 保留本次技术变化，运行证据仍在 Validation。
+重要缺口、过期或矛盾应在核实后形成相关知识增量；显式只读请求不写文件，没有新认识的小修可以零更新。检索不到已有内容时先考虑别名、关键词或结构，不立即复制另一篇。Wiki 分别维护已确认的领域语言、长期决策与已核实现状，Spec 维护目标，Plan 保留本次技术变化，运行证据仍在 Validation。
 
 <a id="hierarchy-and-sections"></a>
 ## 一份目录，多种阅读粒度
@@ -216,6 +216,16 @@ flowchart TB
       "startLine": 1,
       "endLine": 19,
       "kind": "source"
+    },
+    {
+      "id": "knowledge-contract",
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md"
+    },
+    {
+      "id": "document-contract",
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/docs-seed/workflow-artifacts.md"
     }
   ],
   "relations": [
@@ -243,6 +253,26 @@ flowchart TB
   "watchScopes": [
     {
       "repoId": "project",
+      "path": "skills/lumine-harness/assets/docs-seed/workflow-artifacts.md"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/wiki/coverage.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/wiki/dispositions.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/wiki/documents.ts"
+    },
+    {
+      "repoId": "project",
       "path": "skills/lumine-harness/src/harness/wiki/engine.ts"
     },
     {
@@ -255,15 +285,7 @@ flowchart TB
     },
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/wiki/documents.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/wiki/sections.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/wiki/coverage.ts"
+      "path": "skills/lumine-harness/src/harness/wiki/references.ts"
     },
     {
       "repoId": "project",
@@ -271,11 +293,7 @@ flowchart TB
     },
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/wiki/transactions.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md"
+      "path": "skills/lumine-harness/src/harness/wiki/sections.ts"
     },
     {
       "repoId": "project",
@@ -283,15 +301,11 @@ flowchart TB
     },
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/wiki/dispositions.ts"
+      "path": "skills/lumine-harness/src/harness/wiki/transactions.ts"
     },
     {
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/wiki/validation-documents.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/wiki/references.ts"
     }
   ],
   "diagrams": [

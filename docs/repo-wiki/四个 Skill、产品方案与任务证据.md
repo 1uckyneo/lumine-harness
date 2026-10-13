@@ -55,7 +55,7 @@ flowchart TB
 |---|---|---|
 | 用户为什么需要它，成功是什么 | Product Spec：问题、场景、业务规则、范围、验收 | 逐步执行日志和实现任务清单 |
 | 本次具体怎样改变系统 | Exec Plan：技术取舍、实现顺序、当前进度、验证和恢复 | 整份产品正文 |
-| 当前系统实际上怎样工作 | Repo Wiki：机制、关系、限制、来源 | 尚未落地方案冒充现状 |
+| 当前系统实际上怎样工作 | Repo Wiki：已确认领域语言、长期决策及带来源的实现机制 | 尚未落地方案冒充现状 |
 | 什么操作真的执行过，适用于哪版实现 | Validation：操作、环境、时间、结果、证据 | 仅有“通过”的结论自述 |
 
 Spec 可包含影响产品选择的技术约束、接口行为和数据要求，详细架构与迁移路径归 Plan。设计附件解决具体呈现选择，产品承诺仍归 Spec。只讨论产品时，Spec 应能单独阅读，不为凑流程创建空 Plan。
@@ -115,6 +115,18 @@ flowchart LR
 
 任务实施后，已核实且可复用的现状知识按授权写回 Wiki，临时排错日志留在验证记录或执行历史。没有稳定增量可以零更新；只读查询不自动开启全量改写。这里的语义责任由四个 Skill 承担，Runtime 只维护可确定的约束，因此不需要再复制一份完整检查规则作为第五个日常 Skill。
 
+
+<a id="grilling-writeback"></a>
+## 提问后的回答写到哪里
+
+lumine-plan 遇到关键歧义、规则冲突和重要取舍时读取内置 grilling；领域词语与边界需要澄清时再读 domain-modeling。当前可回答的完整问题面按依赖组织，给出推荐，事实问题由 Agent 调查；部分回答保留剩余未决项，不能默认全部同意。每轮用户回答后先写回当前成果，再继续提问。只讨论产品时，技术约束仍可留在 Spec，不提前创建 Plan。
+
+普通产品回答原位进入 Spec，本次实施选择进入 Plan。确定的共享术语、避免混用的近义词、实体边界和多上下文关系进入 Wiki 的领域语言专题或稳定章节。长期决策只收同时满足难逆转、缺少背景难理解、确有备选方案的选择，并保留理由、形成依据与替代关系；普通回答不受该门槛阻止写回。专题按实际内容创建，不生成空词表、决策页或 domain/decisions/adr 目录。
+
+领域语言与已确认决定的 current 表示该记录仍有效；实现页的 current 表示它描述登记来源对应的现状。两者都不是运行或部署验收。Spec/Plan 链接稳定资料，避免多份全文维护。词语或决定改变产品语义时，要更新受影响的产品规则/AC 并重评对应确认：当前 AC 指纹不会递归监测所有外链正文，不能只改 Wiki 然后宣称产品基线自动同步。
+
+用户回答、共享理解确认和阶段批准分别记录。恢复时从已有成果找出已确认、未回答及待核实项；不把自动落盘、yes 的推荐选择或空问题面当作进入下一阶段的授权。完整交接规则仍由阶段指导管理。
+
 <!-- lumine-wiki-metadata:v1
 {
   "tags": [
@@ -147,96 +159,72 @@ flowchart LR
       "id": "plan-skill",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md",
-      "startLine": 6,
-      "endLine": 24,
       "kind": "source"
     },
     {
       "id": "run-skill",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
-      "startLine": 6,
-      "endLine": 26,
       "kind": "source"
     },
     {
       "id": "knowledge-skill",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
-      "startLine": 6,
-      "endLine": 24,
       "kind": "source"
     },
     {
       "id": "design-skill",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-design/SKILL.md",
-      "startLine": 6,
-      "endLine": 24,
       "kind": "source"
     },
     {
       "id": "routing",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
-      "startLine": 16,
-      "endLine": 67,
       "kind": "source"
     },
     {
       "id": "skill-read",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
-      "startLine": 78,
-      "endLine": 151,
       "kind": "source"
     },
     {
       "id": "doc-identity",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/documents.ts",
-      "startLine": 31,
-      "endLine": 98,
       "kind": "source"
     },
     {
       "id": "acceptance",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/documents.ts",
-      "startLine": 100,
-      "endLine": 165,
       "kind": "source"
     },
     {
       "id": "task-storage",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
-      "startLine": 10,
-      "endLine": 85,
       "kind": "source"
     },
     {
       "id": "task-evidence",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
-      "startLine": 87,
-      "endLine": 170,
       "kind": "source"
     },
     {
       "id": "task-cli",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
-      "startLine": 12,
-      "endLine": 34,
       "kind": "source"
     },
     {
       "id": "session-guidance",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/session-context.ts",
-      "startLine": 20,
-      "endLine": 58,
       "kind": "source"
     },
     {
@@ -249,9 +237,27 @@ flowchart LR
       "id": "knowledge-sync",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
-      "startLine": 160,
-      "endLine": 196,
       "kind": "source"
+    },
+    {
+      "id": "grilling",
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/grilling/INSTRUCTIONS.md"
+    },
+    {
+      "id": "domain-modeling",
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/domain-modeling/INSTRUCTIONS.md"
+    },
+    {
+      "id": "document-contract",
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/docs-seed/workflow-artifacts.md"
+    },
+    {
+      "id": "writeback",
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/references/grill.md"
     }
   ],
   "relations": [
@@ -367,15 +373,7 @@ flowchart LR
   "watchScopes": [
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md"
+      "path": "skills/lumine-harness/assets/docs-seed/workflow-artifacts.md"
     },
     {
       "repoId": "project",
@@ -383,7 +381,31 @@ flowchart LR
     },
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/core/phase-router.ts"
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/references/grill.md"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/domain-modeling/INSTRUCTIONS.md"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/grilling/INSTRUCTIONS.md"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md"
     },
     {
       "repoId": "project",
@@ -391,7 +413,11 @@ flowchart LR
     },
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/core/task-contract.ts"
+      "path": "skills/lumine-harness/src/harness/core/phase-router.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/session-context.ts"
     },
     {
       "repoId": "project",
@@ -399,7 +425,7 @@ flowchart LR
     },
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/core/session-context.ts"
+      "path": "skills/lumine-harness/src/harness/core/task-contract.ts"
     }
   ]
 }

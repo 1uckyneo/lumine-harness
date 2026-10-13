@@ -21,3 +21,11 @@ Resume only from expected old or already-applied states; any third content state
 ## Hosts and external actions
 
 Install selected adapters only, respecting host requirements for user configuration, project permissions, and plugin installation. Source, standalone Skill, and Plugin distribution share canonical content without host-specific rule copies. Without real Hook or read evidence, report static readiness only. Adoption does not automatically commit, publish, or change global user configuration.
+
+## Artifact integration and retiring old entry points
+
+The proposal identifies each existing artifact's role, current destination, preservation/migration/archive/deletion action, and reason. Goals belong in Spec; this technical change and progress in Plan; stable language, lasting decisions, architecture, standards, examples, and guides in Wiki; actual results in Validation; original evidence in references; read-only history in archives; personal and private originals in ignored local storage. Preserve valid constraints and historical evidence. Old active/done states, memory, or code inference do not become current confirmation.
+
+Do not generate root ARCHITECTURE by default. Identify unique content and its Wiki destination, repair document/rule/other active references, and verify historical preservation and recovery before removal through an authorized proposal. Preserve and report files that cannot be integrated safely, have valid remaining references, or conflict with another session. Never delete just to match a new layout. Likewise, preserve recoverable originals, map current material, and check active entry points before retiring an old documentation layer; avoid permanent double maintenance.
+
+Renames preserve stable identities and necessary aliases, with link and cross-platform name checks. Upgrades review only affected content, do not reopen other business requirements, and preserve Specs, tasks, and untracked material added by concurrent sessions.

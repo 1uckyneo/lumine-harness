@@ -3,25 +3,36 @@
 ## Shared entry points and storage
 
 - .lumine/root.json identifies the project root; .lumine/project.json controls language, repositories, capabilities, and knowledge configuration.
-- .agents/skills/ distributes four canonical daily capabilities: lumine-plan, lumine-run, lumine-knowledge, and lumine-design. Initialization and maintenance still use lumine-harness.
-- AGENTS.md contains host-neutral engineering rules and the map; ARCHITECTURE.md is the architecture overview. Root rules do not carry host configuration navigation or community Adapter compatibility notes; maintain actual adapter configuration separately. Mandatory rules cannot depend solely on knowledge retrieval.
-- Specs default to docs/product-specs/, Plans to docs/exec-plans/active/, execution history to completed/, and evidence to docs/validation/.
-- Knowledge body defaults to docs/repo-wiki/, with one authoritative configured root. .lumine/wiki-state/ preserves durable maintenance state; .lumine/local/wiki/ holds only rebuildable caches and machine state.
+- .agents/skills/ distributes four daily capabilities: lumine-plan, lumine-run, lumine-knowledge, and lumine-design. Questioning and domain-modeling modules ship inside planning. Reuse or generate project extensions as needed without global installation. Initialization and maintenance use lumine-harness.
+- AGENTS.md keeps minimal mandatory rules and direct links to authorized standards and Wiki. Rules cannot depend solely on retrieval. Keep business root rules host-neutral and maintain actual Adapter configuration separately.
+- Keep architecture maps and detailed standards in Wiki rather than generating root ARCHITECTURE.md by default. Migrate unique content and repair references before retiring old files under [Migration policy](migration-policy.md); preserve and report them when retirement is unsafe.
+- Specs default to docs/product-specs/, Plans to docs/exec-plans/active/, execution history to completed/, evidence to docs/validation/, and Wiki to one configured root, normally docs/repo-wiki/. Do not create separate docs/domain/ or docs/decisions/ ledgers.
+- .lumine/wiki-state/ preserves durable knowledge state. Only .lumine/local/wiki/ holds rebuildable caches and machine state; other local material may be protected private input.
+
+## Artifact roles and authority
+
+Spec owns this goal, product rules, acceptance, and open questions. Plan references applicable Specs and owns technical choices, tradeoffs, implementation, and verification. After necessary questioning, write each round of answers into the applicable Spec/Plan, distinguishing decisions, directions, assumptions, and open choices. An answer is not stage-handoff confirmation.
+
+Wiki holds verified implementation and confirmed reusable domain language, context boundaries, lasting decisions, standards, examples, and guides. Preserve complete terms with meanings and relevant aliases, relationships, and invariants; distinguish overloaded terms by context. Keep necessary ADR context, alternatives, decision, and consequences in the relevant Wiki topic, linked to its originating Spec/Plan. Proposed choices for this change remain in the Plan. Confirmed language or policy does not prove implementation; state that distinction in prose and diagrams.
+
+AGENTS may explicitly authorize Wiki standards as rule attachments. Distinguish standards, explanatory examples, and factual knowledge. Ordinary synchronization cannot relax standards or authorization based on legacy source. Review affected content when standards change. Relate Wiki pages through prose and relations rather than source snapshots.
+
+Put original material in references, retired material in archives, and personal configuration or private originals in ignored local storage. Maintain one current body per item without parallel business-memory ledgers.
 
 ## Identity and language
 
-Specs/Plans use id and type; Wiki units use stable IDs defined by the knowledge interface. Separate titles, filenames, and identity; readable names may contain Chinese characters and spaces. AC headings use explicit IDs such as AC-001; diagrams and important sections have stable references. Resolve CLI targets by ID, path, or unambiguous name, never by guessing between duplicates.
+Specs/Plans use stable id and type; Wiki uses stable IDs from its knowledge interface. AC headings use explicit AC-001 IDs, with stable references for important sections and diagrams. Resolve CLI targets by ID, path, or unambiguous name.
 
-Project locale is zh-CN or en and is resolved before proposals and fingerprints. New content follows the default; existing documents keep their own language. Interface or temporary response-language changes do not translate bodies. Language resources share semantics; protocol fields, status values, and technical Skill names are not translated.
+Project locale is zh-CN or en, resolved before proposals and fingerprints. New prose and topic filenames follow locale by default, retaining README, template names, and necessary technical terms. Do not bulk-translate or rename existing documents. Use Windows-compatible names: no reserved names, control characters, or `< > : " / \ | ? *`, no trailing dot/space, and no case/Unicode-normalization collisions. Renames preserve stable identities and necessary old path/section redirects. Protocol fields, status values, and technical Skill names are not translated.
 
 ## Work and evidence
 
-Planning may produce a Spec only; complete feature work normally uses Spec and Plan. The Plan owns the technical change, stable implemented knowledge moves into Wiki, and intended behavior never overwrites current facts prematurely. The Agent selects among the four capabilities using the goal and repository facts, assesses design needs, and judges readiness; users need not invoke each Skill. Product Spec, optional design and Spec update, Exec Plan, and Run handoffs require explicit human confirmation under the [stage handoff guidance](../../assets/locales/en/skills/lumine-plan/references/stage-handoff.md). Work autonomously within a stage and do not request the same confirmation again. Verification during or after Run needs no separate confirmation; verification-only work does not repair.
+Complete product work uses Spec → (necessary design → update Spec) → Exec Plan → Run with explicit human confirmation at [stage handoffs](../../assets/locales/en/skills/lumine-plan/references/stage-handoff.md). Work autonomously within a stage without repeating confirmation. A Spec-only change needs no Plan. Verification during or after Run needs no separate confirmation; verification-only work does not repair.
 
-Runtime supplies deterministic checks; the four capabilities own their semantic reviews. Completion evidence matches the current request, applicable acceptance subset, content baseline, and actual operations. Distinguish tests, runtime behavior, deployment, and user acceptance. Task records under .lumine/tasks/ bind the current session and mode; see [Checks and evidence](runtime-checks.md).
+Runtime supplies deterministic checks; the four capabilities own semantic judgment. Adoption delivery reuses Validation, Wiki coverage, and versioned knowledge evidence in .lumine/tasks/. Report installation, content completion, and actual verification separately without changing migration complete or adding another state machine. See [Checks and evidence](runtime-checks.md).
 
-Use done, continue, and blocked as public control states; explain the specific blocker and next action separately. Status grants no authorization, and automatic follow-ups share budgets and deduplication. Diagnostic done may include failing findings. Only knowledge synchronization explicitly within the current task affects its completion.
+Use done, continue, and blocked as public control states, explaining the cause and next action separately. Status grants no authorization. Diagnostic done may include failing findings; only knowledge synchronization promised in this request affects completion.
 
 ## Knowledge presentation
 
-Markdown and Mermaid text are one content source, with HTML DOM cards. Models process text only; diagrams render on demand in the browser without images, thumbnails, or vision-model input. Explain real mechanisms and cite sources while preserving prose reading and text copy/export.
+Markdown and Mermaid text are one content source, with HTML DOM cards. Models process text only; browsers render diagrams on demand without knowledge images, thumbnails, or vision-model input. Explain actual mechanisms or confirmed concepts and their status while preserving prose reading and text copy/export.

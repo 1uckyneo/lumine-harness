@@ -11,9 +11,15 @@ locale: en
 
 <!-- Explain whose problem this solves and the intended change. Remove authoring hints and irrelevant sections. -->
 
+<!-- New prose/topic filenames follow project locale; stable id/AC identities do not derive from filenames. -->
+
 ## Goals and scope
 
 <!-- Include deliverables, exclusions, and constraints that affect product choices. -->
+
+## Domain language and contexts
+
+<!-- Record only this change's product relationships, constraints, and differences. Link complete terms and contexts in authoritative Wiki topics rather than copying the glossary. Keep unconfirmed concepts open, distinguish confirmed language from implementation facts, and do not create a domain directory. Omit when irrelevant. -->
 
 ## Scenarios and product rules
 
@@ -27,7 +33,7 @@ locale: en
 
 ## Open decisions and design references
 
-<!-- Keep real unresolved choices and explain whether design is needed and why. Link applicable design material. After design confirmation, incorporate resulting behavior, scenario, and acceptance changes into this Spec for user confirmation. -->
+<!-- Before another grill question, update this Spec with each answer round in its rules, scope, terms, AC, or open choices. Distinguish decisions from assumptions without verbatim chat. Product-stage technical constraints remain here rather than creating a premature Plan. Keep real unresolved choices and explain whether design is needed and why. Link applicable design material. After design confirmation, incorporate resulting behavior, scenario, and acceptance changes into this Spec for user confirmation. -->
 
 ## Confirmation and next step
 

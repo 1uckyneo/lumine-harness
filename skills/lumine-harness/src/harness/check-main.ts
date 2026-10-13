@@ -7,6 +7,7 @@ import { inspectSharedSkillCatalog } from "./core/skill-catalog.ts";
 import { checkProjectContracts } from "./core/project-checks.ts";
 import { commandLocale, formatCommandError, formatHumanIssue } from "./core/messages.ts";
 import { checkTask } from "./core/task-contract.ts";
+import { checkMethodModuleIntegrity } from "./core/method-modules.ts";
 
 const REQUIRED_SKILLS = ["lumine-plan", "lumine-run", "lumine-knowledge", "lumine-design"];
 const CAPABILITIES = ["project_instructions", "session_context", "skill_discovery", "skill_read", "pre_mutation_gate", "stop_gate", "automatic_continuation", "work_status_matrix", "session_isolation"];
@@ -25,17 +26,19 @@ export function runChecks(root: string, command = "health", target?: string): Ch
   const manifest = readRootManifest(root);
   const runtime = projectRuntimeRoot(root);
   const checkDocs = () => { issues.push(...checkDocumentContracts(root)); };
-  const checkArchitecture = () => { required("ARCHITECTURE.md"); };
+  // Existing project architecture files remain valid, but new projects use the Wiki.
+  const checkArchitecture = () => { if (has("ARCHITECTURE.md")) required("ARCHITECTURE.md"); };
   const checkHealth = () => {
     required(".lumine/project.json");
     required(manifest.instructions);
-    checkArchitecture();
     const raw = JSON.parse(read(".lumine/project.json"));
     if (raw.schemaVersion !== 2 || raw.workflowVersion !== 2) fail("Project configuration must declare version 2", "Complete the reviewed project migration.", "CONFIG_VERSION");
     const inspection = inspectSharedSkillCatalog(root);
     const catalog = inspection.skills;
     for (const issue of inspection.diagnostics) fail(issue.message, "Fix this canonical project Skill metadata.", "INVALID_SKILL", issue.file);
     for (const name of REQUIRED_SKILLS) if (!catalog.some((skill) => skill.name === name)) fail(`Missing shared Skill: ${name}`, `Restore ${path.relative(root, canonicalSkillsRoot(root))}/${name}/SKILL.md.`, "MISSING_SKILL");
+    const methodRoot = resolveProjectPath(root, path.relative(root, path.join(canonicalSkillsRoot(root), "lumine-plan/vendor")), "bundled method directory");
+    issues.push(...checkMethodModuleIntegrity(methodRoot, root));
     for (const file of ["cli", "check.mjs", "core/task-cli.mjs", "core/session-context.mjs"]) {
       const absolute = path.join(runtime, file);
       if (!existsSync(absolute)) fail(`Missing runtime asset: ${path.relative(root, absolute)}`, "Reinstall or rebuild the runtime from its TypeScript source.", "MISSING_RUNTIME");

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "id": "lumine-command-guide",
+  "path": "docs/repo-wiki/guides/常用指令与阅读器.md",
+  "generation": 2,
+  "generatedMarkdown": "---\nid: lumine-command-guide\ntitle: \"常用指令与阅读器\"\nsummary: \"常用指令与阅读器：本仓实际能力、使用入口和验证边界。\"\ntype: guide\nstatus: current\nlocale: zh-CN\n---\n\n# 常用指令与阅读器\n\n| 目标 | 可以对 Agent 说 |\n| --- | --- |\n| 梳理产品 | 先整理产品规则和验收，必要时提问，暂不实现。 |\n| 压力测试 | 检查这份方案的关键歧义与领域边界，把结论写回适当资料。 |\n| 技术规划 | 按已确认 Spec 编写执行计划。 |\n| 实施或恢复 | 按已确认计划实施，或恢复当前任务。 |\n| 查询知识 | 解释安装保护和恢复机制，指出来源。 |\n| 维护知识 | 核对这次源码变化，更新受影响专题。 |\n| 阅读器 | 打开、重启或停止这个项目的 Wiki 阅读器。 |\n\n本仓没有业务前后端生命周期扩展，不生成无用 dev-servers；构建是维护命令。Runtime 构建/检查见根 AGENTS，浏览器阅读器与 Runtime 分别构建。四个日常 Skill 位于规范包 assets/skills，路径由 root manifest 定位。\n\n阅读器由 lumine-knowledge 的[阅读器管理指导](../../../skills/lumine-harness/assets/skills/lumine-knowledge/references/reader.md)管理，核实当前项目归属后复用或启停，并报告本次真实地址。不要按端口批量停止其他项目进程；HTTP 可达不等于导航、搜索和图解全部可用。它无需连接模型或启动业务服务，直接阅读/检索 Markdown 时也无需浏览器。\n\n需要终端检索时，在本仓运行 `./.lumine/cli wiki query \"问题\"`；查看目录用 `./.lumine/cli wiki map`，结构检查用 `./.lumine/cli wiki check`。扫描和检查不会自动撰写知识。没有专用 wiki stop/restart/status 命令时，由 Agent 按进程归属处理，不能编造命令。真实宿主事件能力须单独核实。\n\n<!-- lumine-wiki-metadata:v1\n{\n  \"tags\": [\n    \"Lumine\",\n    \"使用指南\"\n  ],\n  \"sources\": [\n    {\n      \"id\": \"rules\",\n      \"repoId\": \"project\",\n      \"path\": \"AGENTS.md\"\n    },\n    {\n      \"id\": \"reader\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-knowledge/references/reader.md\"\n    },\n    {\n      \"id\": \"knowledge\",\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md\"\n    }\n  ],\n  \"watchScopes\": [\n    {\n      \"repoId\": \"project\",\n      \"path\": \"AGENTS.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md\"\n    },\n    {\n      \"repoId\": \"project\",\n      \"path\": \"skills/lumine-harness/assets/skills/lumine-knowledge/references/reader.md\"\n    }\n  ],\n  \"relations\": []\n}\n-->\n",
+  "appliedRevision": "4f054e5780b579cf8db86dacefedad3995b3aeba755c4aecc1291857b5e6013b",
+  "sources": {
+    "fingerprints": {
+      "project:AGENTS.md": "d10313e443abdfe811b33abd660400a3ad62c721ad6622b3aeb70ed451c44622",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/references/reader.md": "44de7d69e5b4aa4df0b72d2f03e7c1657452c83cd6fceb8d55a2eb243d73b3ab",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1f5d8701de27420423d8b0844772590691632cd6334cb86919681271f544e61f"
+    },
+    "scopeFingerprints": {
+      "project:AGENTS.md": "5924a52361a1192c183a5605914fe6266bd3e9f79c523940d6afe47855888bfa",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "60265cd4b4593a63f5a32d265612b90d7542f8fabd4bec45809faeae404c042c",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/references/reader.md": "49f8f1bbbe8fd785bded4543e7c9287ef467aa6a3e67b3ed5675e40a884390f4"
+    },
+    "files": {
+      "project:AGENTS.md": "d10313e443abdfe811b33abd660400a3ad62c721ad6622b3aeb70ed451c44622",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1f5d8701de27420423d8b0844772590691632cd6334cb86919681271f544e61f",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/references/reader.md": "44de7d69e5b4aa4df0b72d2f03e7c1657452c83cd6fceb8d55a2eb243d73b3ab"
+    },
+    "missing": []
+  },
+  "updatedAt": "2026-10-13T10:36:22.657Z"
+}

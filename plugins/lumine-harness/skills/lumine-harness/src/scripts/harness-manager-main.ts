@@ -257,9 +257,11 @@ function sourceMap(locale: Locale, adapters: string[]): Map<string, string> {
   });
   add(path.join(SKILL_ROOT, "assets/wiki-reader"), ".lumine/wiki-reader");
   add(localized("skills", locale), ".agents/skills");
+  // Upstream method modules have one canonical copy shared by both locales.
+  add(path.join(SKILL_ROOT, "assets/skills/lumine-plan/vendor"), ".agents/skills/lumine-plan/vendor");
   add(localized("docs-templates", locale), "docs/templates");
   add(localized("docs-seed", locale), "docs");
-  for (const name of ["AGENTS.md", "ARCHITECTURE.md"])
+  for (const name of ["AGENTS.md"])
     map.set(name, localized("root/" + name, locale));
   for (const a of adapters) {
     const entry = ROOT_ADAPTER_ENTRIES[a];

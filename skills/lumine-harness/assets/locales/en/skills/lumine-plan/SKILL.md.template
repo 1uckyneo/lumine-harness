@@ -1,6 +1,6 @@
 ---
 name: lumine-plan
-description: Clarify requirements, create or review product specifications and execution plans, and assess readiness for the next step; obtain separate stage confirmations for the Spec, necessary design, and Plan without automatically implementing a generated plan.
+description: Clarify requirements, grill consequential product and technical choices when needed, maintain domain language, create or review product specifications and execution plans, and assess readiness for the next step; obtain separate stage confirmations for the Spec, necessary design, and Plan without automatically implementing a generated plan.
 ---
 
 # Requirements and solution planning
@@ -9,6 +9,7 @@ description: Clarify requirements, create or review product specifications and e
 Work toward the outcome requested in this turn. Read AGENTS.md, applicable rules, and the existing task. Choose Wiki, source, or both to understand current behavior and impact; not every task requires a query. Verify important missing, stale, or contradictory knowledge against source and preserve reusable findings within authorization. Read lumine-knowledge for deeper methods; honor explicit read-only requests.
 
 <!-- LH-PLAN-02 -->
+- For requested grilling or unresolved consequential ambiguity, rule conflicts, or trade-offs, read [Bundled grilling and writeback](references/grill.md). Do not manufacture questions for clear tasks; read bundled domain-modeling when the domain model changes.
 - For product problems, scenarios, rules, and acceptance, read [Product specification](references/product-spec.md) and maintain the Spec in place.
 - For technical choices, execution order, and recovery, read [Execution plan](references/exec-plan.md) and reference the applicable Spec acceptance items.
 - A Spec-only discussion or revision does not require an Exec Plan. A review request produces findings, evidence, and focused corrections, not implementation.

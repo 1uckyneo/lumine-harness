@@ -437,6 +437,44 @@
         }
       ],
       "status": "covered"
+    },
+    {
+      "id": "lumine-collaboration-guide",
+      "title": "Lumine 协作开发指南",
+      "parentId": "lumine-project",
+      "questions": [
+        "怎样从产品讨论推进到实施，何时确认下一阶段？",
+        "提问答案和现有成果怎样保存与恢复？"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "AGENTS.md"
+        }
+      ],
+      "documentRefs": [
+        "lumine-collaboration-guide"
+      ],
+      "status": "covered"
+    },
+    {
+      "id": "lumine-command-guide",
+      "title": "常用指令与阅读器",
+      "parentId": "lumine-project",
+      "questions": [
+        "本仓怎样查询知识与管理阅读器？",
+        "无需业务服务能否阅读知识，如何核对进程归属？"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "AGENTS.md"
+        }
+      ],
+      "documentRefs": [
+        "lumine-command-guide"
+      ],
+      "status": "covered"
     }
   ]
 }

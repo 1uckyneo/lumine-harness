@@ -1,0 +1,20 @@
+{
+  "documentId": "lumine-command-guide",
+  "revision": "4f054e5780b579cf8db86dacefedad3995b3aeba755c4aecc1291857b5e6013b",
+  "sourceFingerprint": "4b09e9dbcc0885b16e9b94c8eec96028f673771f9ec90a9d2ecd9a1efa104fcd",
+  "reviewedAt": "2026-10-13T10:38:56.230Z",
+  "reviewer": {
+    "kind": "agent",
+    "role": "independent"
+  },
+  "outcome": "reviewed",
+  "scope": [
+    "本轮修订的资料角色、直接来源、提问回写与确认边界",
+    "架构入口、采用分发和指南与已声明规范相符"
+  ],
+  "findings": [],
+  "limitations": [
+    "独立reviewer未撰写被审阅页面；相关修正已增量复核",
+    "不替代业务全库审阅、真实宿主Hook、自动续跑或用户接受"
+  ]
+}

@@ -15,7 +15,7 @@ locale: "zh-CN"
 
 Agent 产品的 Harness 提供模型与工具循环、上下文管理、权限和生命周期。Lumine 提供项目级环境：目标、工程边界、方法、知识、进度和证据留在项目里，使换会话、换 Agent 后仍能恢复。二者互补；项目资产不会因为某个产品有更强模型就自动出现，也不能由安装一组脚本替代模型理解。
 
-人通过 README、架构地图和知识树理解工程；Agent 按任务选择规则、知识、源码与证据。Product Spec 保存目标，Exec Plan 保存本次技术变化，Wiki 解释现状，Validation 保存实际观测。共享资产减少重复调查，但不把整个知识库固定塞入每次上下文。
+人通过 README 和 Wiki 架构专题、知识树理解工程；Agent 按任务选择规则、知识、源码与证据。Product Spec 保存目标，Exec Plan 保存本次技术变化，Wiki 分别维护已确认的领域语言、长期决策与已核实现状，Validation 保存实际观测。共享资产减少重复调查，但不把整个知识库固定塞入每次上下文。
 
 <a id="canonical-source"></a>
 ## 哪一层可以修改
@@ -71,6 +71,22 @@ YAML 与忽略规则打包成本地 vendor。Mermaid 的绘图依赖由 `build-r
 
 维护顺序是 typecheck、Runtime build、源码与分发测试、build consistency、Skill 包检查、Plugin sync 与一致性检查。涉及阅读交互另做浏览器验收；涉及宿主生命周期另看真实事件。正式包脱离源码仓依赖、无缓存和无模型调用仍应可阅读检索已有 Wiki 并绘图。此页说明构建与职责，不声称当前改动已发布、所有宿主已运行或用户已接受。
 
+
+<a id="implementation-map"></a>
+## 从哪里进入实现
+
+工程与授权边界直接读根 AGENTS，架构正文由本专题维护，不再另设根 ARCHITECTURE.md。公共 Core 在 `src/harness/core/`，宿主协议在 `src/harness/adapters/`，知识引擎在 `src/harness/wiki/`，阅读器在 `src/browser/`；以上路径均相对于规范包 `skills/lumine-harness/`。维护工具在 `src/scripts/` 与 `src/migration/`，不会成为日常工作的额外阶段。服务端与浏览器分别构建，支持范围以当前 Node 策略为准。
+
+<a id="bundled-modules"></a>
+## 内置提问为什么仍只有四个 Skill
+
+`lumine-plan/vendor` 保存完整 grilling 与 domain-modeling 适配模块、格式资源、MIT 许可、来源与哈希清单。模块入口名为 INSTRUCTIONS.md，仅由 lumine-plan 按需读取；不是项目根规则，也不作为独立 Skill 发现。中文与英文安装共享这一份 vendor，避免语言选择漏装模块或形成两个修改源。健康检查校验实际分发的适配版字节；哈希通过只能证明完整性，不能证明问答质量。
+
+<a id="decision-bundled-planning"></a>
+### 长期决定：随框架内置、由规划能力按需调用
+
+2026-10-13 已确认：选择完整模块随 Lumine 分发并做可追溯适配。备选是要求使用者另装第三方 Skill，或在 Lumine 重写精简提问能力。前者引入额外安装与全局解析差异，后者难以持续保留完整提问和领域建模行为；内置方式需要承担上游追踪、许可证和行为回归成本。适配将资料归入现有 Wiki/Spec/Plan，保留完整算法与语义边界。决定依据见[产品方案](../product-specs/内置提问与统一知识体系.md)与[执行计划](../exec-plans/active/内置提问与统一知识体系.md)。决定有效不表示项目业务功能已实现或所有宿主已验收。
+
 <!-- lumine-wiki-metadata:v1
 {
   "tags": [
@@ -97,129 +113,134 @@ YAML 与忽略规则打包成本地 vendor。Mermaid 的绘图依赖由 `build-r
       "id": "position",
       "repoId": "project",
       "path": "README.zh-CN.md",
-      "startLine": 1,
-      "endLine": 175,
       "kind": "source"
     },
     {
       "id": "core",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/session-context.ts",
-      "startLine": 1,
-      "endLine": 61,
       "kind": "source"
     },
     {
       "id": "routing",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
-      "startLine": 1,
-      "endLine": 152,
       "kind": "source"
     },
     {
       "id": "build",
       "repoId": "project",
       "path": "scripts/build-runtime.ts",
-      "startLine": 1,
-      "endLine": 241,
       "kind": "source"
     },
     {
       "id": "manifest",
       "repoId": "project",
       "path": "scripts/runtime-artifacts.ts",
-      "startLine": 1,
-      "endLine": 73,
       "kind": "source"
     },
     {
       "id": "reader",
       "repoId": "project",
       "path": "scripts/build-reader.ts",
-      "startLine": 1,
-      "endLine": 199,
       "kind": "source"
     },
     {
       "id": "wrapper",
       "repoId": "project",
       "path": "scripts/sync-plugin-wrapper.sh",
-      "startLine": 1,
-      "endLine": 15,
       "kind": "source"
     },
     {
       "id": "sync-check",
       "repoId": "project",
       "path": "scripts/check-repo-sync.sh",
-      "startLine": 1,
-      "endLine": 38,
       "kind": "source"
     },
     {
       "id": "manager",
       "repoId": "project",
       "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+      "kind": "source",
       "startLine": 1,
-      "endLine": 1050,
-      "kind": "source"
+      "endLine": 1500
     },
     {
       "id": "node-policy",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/node-runtime.ts",
-      "startLine": 1,
-      "endLine": 59,
       "kind": "source"
     },
     {
       "id": "node-bootstrap",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts",
-      "startLine": 1,
-      "endLine": 56,
       "kind": "source"
     },
     {
       "id": "manager-entry",
       "repoId": "project",
       "path": "skills/lumine-harness/src/scripts/harness-manager.ts",
-      "startLine": 1,
-      "endLine": 10,
       "kind": "source"
     },
     {
       "id": "runtime-types",
       "repoId": "project",
       "path": "package.json",
-      "startLine": 1,
-      "endLine": 32,
       "kind": "source"
     },
     {
       "id": "build-target",
       "repoId": "project",
       "path": "tsdown.config.ts",
-      "startLine": 1,
-      "endLine": 43,
       "kind": "source"
     },
     {
       "id": "hook-config-build",
       "repoId": "project",
       "path": "scripts/build-hook-configs.ts",
-      "startLine": 1,
-      "endLine": 53,
       "kind": "source"
     },
     {
       "id": "hook-root-dispatch",
       "repoId": "project",
       "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts",
-      "startLine": 1,
-      "endLine": 29,
       "kind": "source"
+    },
+    {
+      "id": "vendor-manifest",
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/manifest.json"
+    },
+    {
+      "id": "root-rules",
+      "repoId": "project",
+      "path": "AGENTS.md"
+    },
+    {
+      "id": "decision-spec",
+      "repoId": "project",
+      "path": "docs/product-specs/内置提问与统一知识体系.md"
+    },
+    {
+      "id": "decision-plan",
+      "repoId": "project",
+      "path": "docs/exec-plans/active/内置提问与统一知识体系.md"
+    },
+    {
+      "id": "integrity",
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/method-modules.ts"
+    },
+    {
+      "id": "health",
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/check-main.ts"
+    },
+    {
+      "id": "discovery",
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/skill-catalog.ts"
     }
   ],
   "relations": [
@@ -252,51 +273,19 @@ YAML 与忽略规则打包成本地 vendor。Mermaid 的绘图依赖由 `build-r
   "watchScopes": [
     {
       "repoId": "project",
+      "path": "AGENTS.md"
+    },
+    {
+      "repoId": "project",
       "path": "README.zh-CN.md"
     },
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/core/session-context.ts"
+      "path": "docs/exec-plans/active/内置提问与统一知识体系.md"
     },
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/core/phase-router.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "scripts/build-runtime.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "scripts/runtime-artifacts.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "scripts/build-reader.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "scripts/sync-plugin-wrapper.sh"
-    },
-    {
-      "repoId": "project",
-      "path": "scripts/check-repo-sync.sh"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/src/scripts/harness-manager.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/core/node-runtime.ts"
-    },
-    {
-      "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts"
+      "path": "docs/product-specs/内置提问与统一知识体系.md"
     },
     {
       "repoId": "project",
@@ -304,15 +293,75 @@ YAML 与忽略规则打包成本地 vendor。Mermaid 的绘图依赖由 `build-r
     },
     {
       "repoId": "project",
-      "path": "tsdown.config.ts"
-    },
-    {
-      "repoId": "project",
       "path": "scripts/build-hook-configs.ts"
     },
     {
       "repoId": "project",
+      "path": "scripts/build-reader.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "scripts/build-runtime.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "scripts/check-repo-sync.sh"
+    },
+    {
+      "repoId": "project",
+      "path": "scripts/runtime-artifacts.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "scripts/sync-plugin-wrapper.sh"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/manifest.json"
+    },
+    {
+      "repoId": "project",
       "path": "skills/lumine-harness/src/adapter-launchers/root-dispatcher.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/check-main.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/method-modules.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/node-bootstrap.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/node-runtime.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/phase-router.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/session-context.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/skill-catalog.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/scripts/harness-manager.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "tsdown.config.ts"
     }
   ],
   "diagrams": [

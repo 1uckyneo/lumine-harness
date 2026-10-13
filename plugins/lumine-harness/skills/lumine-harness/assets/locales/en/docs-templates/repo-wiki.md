@@ -9,6 +9,8 @@ locale: en
 
 # {{title}}
 
+<!-- New prose/topic filenames follow locale with independent stable IDs. Choose a type for architecture, guide, standard, example, domain language, or lasting decision; type alone grants no authority. Distinguish confirmed concepts/rules from implemented facts; proposals are not current facts. Preserve complete terms/contexts and necessary ADRs in related topics without domain/decisions directories. Standards need explicit AGENTS authorization; relate Wiki pages through prose/relations, not mutual sources/watchScopes. -->
+
 <a id="section-1"></a>
 
 ## The question this topic answers

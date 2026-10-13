@@ -1,22 +1,20 @@
 {
   "documentId": "lumine-adoption",
-  "revision": "c94b3868035cf44f6dcc47a4cc914d4e048d093449df0a5da31e9f15d39fe0db",
-  "sourceFingerprint": "4348c0fb01b889da5ffeb2216f30245f8c7e6df7dba5e518ed836d860884014f",
-  "reviewedAt": "2026-09-30T07:02:26.264054Z",
+  "revision": "5b69861915ccf60dc289c87de1955813bde089e9eab7630367bb40ad9e27ecaa",
+  "sourceFingerprint": "ddf143cfc21bd97fb5c72afffaac90b17ce9b11905ef0fd8e79c0868efb1e2fe",
+  "reviewedAt": "2026-10-13T10:38:56.111Z",
   "reviewer": {
     "kind": "agent",
     "role": "independent"
   },
   "outcome": "reviewed",
   "scope": [
-    "Node 22.x >=22.18.0 与 Node 24.x >=24.11.0 的精确支持范围及低语法例外",
-    "入口版本拒绝先于事件读取、根查找与实现加载，包括共同生成的静态 Hook 定位器",
-    "迁移恢复工具与日志保留边界，恢复操作不绕过当前工具版本策略",
-    "终端进程与真实 Hook 进程证据区别，以及 Bun 嵌入运行环境的独立验证边界"
+    "本轮修订的资料角色、直接来源、提问回写与确认边界",
+    "架构入口、采用分发和指南与已声明规范相符"
   ],
   "findings": [],
   "limitations": [
-    "未验证真实宿主生命周期与自动续跑。",
-    "本次仅复核 Node 政策、入口顺序、恢复边界与 Bun；不代表全文所有语义已复核。"
+    "独立reviewer未撰写被审阅页面；相关修正已增量复核",
+    "不替代业务全库审阅、真实宿主Hook、自动续跑或用户接受"
   ]
 }

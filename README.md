@@ -90,20 +90,24 @@ Explain how login and dynamic routing cooperate, with source references.
 
 Work autonomously within a stage without repeating confirmation for the same scope. An early broad request to build a feature cannot approve later concrete deliverables. Local repairs that introduce no product choice, change no agreed behavior contract, and need no independent coordination, as well as explicit rule maintenance and verification-only requests, retain their own scope without the full product workflow. A generated Plan, approved field, or passing tool check does not establish authorization or acceptance.
 
+Built-in `grilling` and `domain-modeling` modules support planning when material ambiguity, conflicting rules, or important tradeoffs need questioning. Clear tasks do not receive a compulsory interview. Each answer round is written into the current Spec or Plan before the next question; answers do not approve stage handoffs. Complete terms, distinct contexts, and necessary lasting decisions live in related Wiki topics, linked from Spec/Plan without separate domain or decisions ledgers. Confirmed language does not claim implementation. These modules ship with Lumine; no global Skill installation is required.
+
 ## Engineering records for people and Agents
 
 - **Product Spec:** product problems, scenarios, rules, scope, and stable acceptance items.
 - **Exec Plan:** this technical change, current progress, next action, and evidence summaries; references the Spec instead of duplicating requirements.
-- **Repo Wiki:** existing mechanisms, architecture, technical rationale, and limits linked to source, decisions, and runtime evidence.
+- **Repo Wiki:** existing mechanisms, architecture, confirmed domain language and lasting decisions, project guides, authorized standards, and examples, each with clear authority and implementation status.
 - **Validation:** actual actions and outcomes, separating tests, runtime behavior, deployment, and user acceptance.
 
-Lead with current conclusions before technical detail and history. Chinese, English, and mixed filenames are supported without mandatory English slugs; stable identities are separate from names. Historical content, human edits, and actual approvals are not rewritten in bulk.
+Lead with current conclusions before technical detail and history. New prose and topic filenames follow project locale by default, retaining README, template names, and necessary technical terms. Use portable filenames with stable identities separate from names. Historical content, human edits, and actual approvals are not rewritten in bulk.
 
 Ask the Agent to archive a completed Plan or restore it when work resumes. For current-format plans, `task doc-archive` and `task doc-restore` move the document between `active/` and `completed/`, retain its stable ID, update current links, and record recoverable operations. They require the current content hash to protect intervening edits; historical evidence stays unchanged.
 
+Root AGENTS keeps minimal mandatory rules and direct links to authorized standards and Wiki. Architecture maps and detailed engineering material belong in Wiki rather than a second root architecture document. Standards explicitly authorized by AGENTS retain their authority; explanatory examples and implementation facts do not silently override them.
+
 ## Project knowledge, Agentic Search, and continuous learning
 
-Knowledge defaults to `docs/repo-wiki/`, with one configurable authoritative root. The Agent first understands project purpose, real entry points, module relationships, and dependencies, then builds a suitable knowledge hierarchy. Initial building covers major modules in depth by default; users may narrow or defer the scope. Large projects proceed in resumable batches. Getting-started, API, frontend, or deployment topics appear only where applicable.
+Knowledge defaults to `docs/repo-wiki/`, with one configurable authoritative root. The Agent first understands project purpose, real entry points, module relationships, and dependencies, then builds a suitable knowledge hierarchy. Initial building covers major modules in depth by default; users may narrow or defer the scope. Large projects proceed in resumable batches. Initial adoption also provides project-specific Lumine collaboration and operation/service guides in Wiki, inventories artifact destinations, and checks safe retirement of old entry points. Reuse or generate service extensions from actual project needs without assuming a stack or inheriting another project's installation permissions. API, frontend, or deployment topics appear only where applicable.
 
 Wiki explains entry points, call chains, data flow, normal and failure paths, tradeoffs, change impact, and verification. Pages provide coherent explanations; important sections have stable identities. Cards reuse section conclusions, qualifications, and sources for selective expansion. The bundled React reader opens on a project home, then connects the knowledge tree, body, page outline, diagrams, and nearby source locations. Its human search can continue through pages of results; Agent queries retain the six-card and context-size limits. Search defaults to the current project's Wiki. An explicit all-documents scope includes registered Specs, active Plans, and individually allowlisted validation Markdown. Source changes and semantic content review are shown separately.
 
@@ -129,6 +133,8 @@ These terminal commands are composable tools; users need not invoke each one:
 
 Markdown, Mermaid, and text metadata are the knowledge sources; cards are selectable, searchable, copyable HTML. Knowledge production creates no card images, thumbnails, or persistent images, uses no vision model, and never sends rendered SVG to models. Mermaid generates SVG DOM in the browser; explicit user-requested SVG export stays local and does not become knowledge source. No additional model account or background generation service is required.
 
+Adoption acceptance separates installation, content completion, and actual usage. Existing Validation records, Wiki coverage, and versioned task knowledge retain the checklist, gaps, independent semantic review, cold-start questions, and actual reader/service/host checks. Migration complete retains its installation meaning; passing structure checks does not establish usable content or business acceptance.
+
 ## Directories, language, and recovery
 
 ```text
@@ -148,7 +154,7 @@ Initialization language covers entry points, Skills, templates, CLI, and reader.
 
 ## Host integrations
 
-Shared rules live in `AGENTS.md` and `.agents/skills/`. Adapters translate host protocols without duplicating Skills. Install only the Adapters you select. When you deselect one, an upgrade removes only unchanged configuration owned by Lumine; edited or shared settings are preserved for review.
+Shared rules use `AGENTS.md`, its explicitly authorized standards, and `.agents/skills/`. Adapters translate host protocols without duplicating Skills. Install only the Adapters you select. When you deselect one, an upgrade removes only unchanged configuration owned by Lumine; edited or shared settings are preserved for review.
 
 Host support changes Hooks, continuation, and discovery, not goals or evidence responsibilities. Report configuration presence, static checks, and actual host operation separately. This refactor has exercised the new entry points and CLI in Codex; community Adapters retain protocol and distribution regression coverage, but each host application has not been tested live.
 
@@ -169,6 +175,8 @@ npx skills update lumine-harness -g -y
 ```
 
 For a manual clone, fast-forward using its configured remote. Then ask the Agent for a project upgrade proposal and apply it within authorization; updating the entry does not upgrade the project automatically. Migration records baselines/backups, preserves existing changes, resumes interruptions, and marks completion only after verification. It does not automatically commit, push, or publish.
+
+Upgrades integrate only affected guidance and content gaps. Before retiring an existing root ARCHITECTURE or old documentation layer, migrate unique material, preserve recoverable history, and repair active references. Preserve and report anything unsafe to remove, including concurrent untracked work; an upgrade does not reopen unrelated business requirements.
 
 Legacy `.harness/` projects are handled by the separate migration tools. Temporary forwarding entries are retired after host verification; everyday Skills and the Runtime use `.lumine/` without retaining a second legacy workflow. Historical records and recovery backups remain available.
 

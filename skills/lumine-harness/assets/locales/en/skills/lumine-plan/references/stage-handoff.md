@@ -43,3 +43,6 @@ Stop at a pending handoff; do not use continue or automatic follow-up to cross i
 
 <!-- LH-HANDOFF-05 -->
 Standalone read-only reviews, verification, and diagnosis, and explicitly requested local maintenance/repairs that introduce no new product decisions, preserve the agreed behavior contract, and require no independent cross-task coordination, need not create the full Spec/design/Plan set. Still identify the goal, scope, and evidence. A small file count does not qualify a task; this exception cannot bypass confirmations for feature work or product changes. Diagnostic failures do not authorize repair, and implementation authorization does not authorize committing, pushing, or deploying.
+
+<!-- LH-HANDOFF-06 -->
+Accepted recommendations, answers and per-round grill writeback are not stage approval. Once all relevant branches and factual prerequisites are settled, present the shared understanding and combine its confirmation with the concrete deliverable and next-stage confirmation defined here. Do not add a separate grill approval or repeat a still-valid confirmation for the same scope. Unanswered and partially answered questions remain unresolved.

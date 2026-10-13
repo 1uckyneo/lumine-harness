@@ -18,7 +18,7 @@ specId: "{{spec_id}}"
 
 ## Technical approach and tradeoffs
 
-<!-- Explain necessary entry points, reasons, affected scope, dependencies, and recovery. Reference current Wiki knowledge and label proposed structures. -->
+<!-- Explain necessary entry points, reasons, affected scope, dependencies, and recovery. Write each technical grill answer round into this Plan before another question, updating choices/milestones/verification/open items. Product-contract changes return to Spec; answers do not approve handoffs. Reference Wiki facts and confirmed language, label proposals, and use locale-based topic filenames with independent stable IDs. -->
 
 ## Implementation milestones
 
@@ -30,4 +30,4 @@ specId: "{{spec_id}}"
 
 ## Material decisions and history
 
-<!-- Retain decisions and findings needed for recovery; link long logs from validation. At closeout, record archive eligibility and unresolved work. -->
+<!-- Current choices remain in Plan. Necessary ADRs meeting the lasting-record threshold belong in relevant Wiki topics with context, alternatives, decision, rationale, consequences, formation evidence, and supersession; link rather than adding decisions/adr ledgers. Retain decisions and findings needed for recovery; link long logs from validation. At closeout, record archive eligibility and unresolved work. -->

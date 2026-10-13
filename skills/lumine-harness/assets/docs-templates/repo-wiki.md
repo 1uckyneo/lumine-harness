@@ -9,6 +9,8 @@ locale: zh-CN
 
 # {{title}}
 
+<!-- 新正文与主题文件名跟随项目 locale，稳定 ID 独立。按主题选择 type（架构、指南、规范、示例、领域语言或长期决定），不以 type 自动产生规范效力。已确认概念/规则与已实现事实分开；拟议方案不写成现状。完整术语及多上下文、必要 ADR 归相关主题，不新建 domain/decisions 目录。规范须有 AGENTS 明确授权；Wiki 内用 relations/正文链接关联，不互相登记为 sources/watchScopes。 -->
+
 <a id="section-1"></a>
 
 ## 这个主题回答什么

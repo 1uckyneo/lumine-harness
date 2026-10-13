@@ -24,3 +24,9 @@ wiki check validates knowledge structure and relationships; semantic truth still
 ## Evidence quality
 
 Evidence identifies actions, outcomes, time, code/environment scope, and uncovered cases. Do not relabel historical results as acceptance of current requirements. If the user requested no file changes, report in the response without fabricating evidence or repairing issues merely to satisfy checks.
+
+## Adoption delivery acceptance
+
+Use docs/templates/adoption-validation.md to record artifact destinations, retirement or preservation of old entry points, project-specific collaboration/operation guides, service extensions, major-module coverage, independent semantic review, and cold-start questions in Validation. Coverage represents topics and gaps. Task schemaVersion 3 knowledge binds this request's required/status/refs/sync, source baselines, created/revised/retained/deferred decisions, and content hashes. No additional adoption status or change to migration complete is needed.
+
+wiki check verifies structure, references, and incomplete writes; it does not prove guide applicability, term completeness, correct standards authority, or usable guidance. The Agent checks these against actual material. Record reader navigation/search, service health, and real host operation separately with actions, results, and limits. Mark unperformed work unverified; preserve content gaps in existing coverage/task/Plan recovery rather than treating installation as delivery.
