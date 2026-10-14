@@ -225,7 +225,7 @@ flowchart TB
     {
       "id": "document-contract",
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/docs-seed/workflow-artifacts.md"
+      "path": "skills/lumine-harness/assets/docs-seed/index.md"
     }
   ],
   "relations": [
@@ -253,7 +253,7 @@ flowchart TB
   "watchScopes": [
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/docs-seed/workflow-artifacts.md"
+      "path": "skills/lumine-harness/assets/docs-seed/index.md"
     },
     {
       "repoId": "project",

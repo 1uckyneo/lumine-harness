@@ -18,8 +18,16 @@
 
 - [README](README.md)：项目启动与使用。
 - [项目 Wiki](<{{wiki_entry}}>)：架构、当前实现、领域语言、长期决策与使用指南。
-- [工作资料分工](docs/workflow-artifacts.md)：Product Spec 的产品方案与验收；Exec Plan 承接 Spec 的技术方案、执行安排与记录；Validation 保存实际证据。
-- `.agents/skills/`：按目标实际读取适用的 `lumine-plan`、`lumine-design`、`lumine-run` 或 `lumine-knowledge`。服务操作读取项目服务扩展，不将业务服务与 Wiki 阅读器混用。
+- [项目资料导航](docs/index.md)：Product Spec 的产品方案与验收；Exec Plan 承接 Spec 的技术方案、执行安排与记录；Validation 保存实际证据。
+
+按当前任务实际读取适用入口，不以 Skill 名称命中代替读取：
+
+- 产品方案、技术计划、就绪评估或需要 grill／领域澄清：[lumine-plan](.agents/skills/lumine-plan/SKILL.md)。
+- 视觉与交互方案、设计审阅：[lumine-design](.agents/skills/lumine-design/SKILL.md)。
+- 实施、恢复、修复、验证或诊断：[lumine-run](.agents/skills/lumine-run/SKILL.md)。
+- 实现定位、知识查询与维护、Wiki 阅读器：[lumine-knowledge](.agents/skills/lumine-knowledge/SKILL.md)。业务服务操作另读项目服务扩展，不与阅读器混用。
+
+开始或恢复实施前，按 `lumine-run` 复用或创建任务记录，核对本轮目标、范围、授权及当前有效绑定；绑定缺失或失效时按该 Skill 绑定当前会话，绑定不产生授权。普通讨论、知识查询和独立检查不强制创建任务。
 
 产品工作按 Product Spec →（必要设计 → 回写同一 Spec）→ Exec Plan → Run 推进，跨阶段针对具体成果取得人的明确确认；阶段内自主，同一范围不重复确认。细则见[阶段交接](.agents/skills/lumine-plan/references/stage-handoff.md)。明确局部维护、只验证与诊断按当前授权范围处理，诊断不自动授权修复。
 

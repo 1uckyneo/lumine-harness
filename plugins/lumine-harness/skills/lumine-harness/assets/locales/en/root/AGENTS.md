@@ -18,8 +18,16 @@ This file and the standards explicitly designated here govern actions. Standards
 
 - [README](README.md): project setup and usage.
 - [Project Wiki](<{{wiki_entry}}>): architecture, current implementation, domain language, lasting decisions, and guides.
-- [Work artifact responsibilities](docs/workflow-artifacts.md): Product Spec owns the product proposal and acceptance; Exec Plan derives technical approach, execution arrangements, and records from the Spec; Validation retains actual evidence.
-- .agents/skills/: actually read the applicable lumine-plan, lumine-design, lumine-run, or lumine-knowledge Skill. Read project service extensions for service operations and distinguish business services from the Wiki reader.
+- [Project document index](docs/index.md): Product Spec owns the product proposal and acceptance; Exec Plan derives technical approach, execution arrangements, and records from the Spec; Validation retains actual evidence.
+
+Read the entry point appropriate to the current task; a Skill name match is not a read:
+
+- Product proposals, technical plans, readiness assessment, grilling, or domain clarification: [lumine-plan](.agents/skills/lumine-plan/SKILL.md).
+- Visual and interaction choices or design review: [lumine-design](.agents/skills/lumine-design/SKILL.md).
+- Implementation, recovery, repair, verification, or diagnosis: [lumine-run](.agents/skills/lumine-run/SKILL.md).
+- Implementation discovery, knowledge queries/maintenance, or the Wiki reader: [lumine-knowledge](.agents/skills/lumine-knowledge/SKILL.md). Read project service extensions separately for business service operations.
+
+Before implementation or recovery, use lumine-run to reuse or create a task record and verify this request's goal, scope, authorization, and current valid binding. Follow that Skill to bind the current session when the binding is missing or invalid. Binding grants no authorization. Ordinary discussion, knowledge queries, and standalone checks do not require a task.
 
 Product work follows Product Spec → (necessary design → update the same Spec) → Exec Plan → Run, with explicit human confirmation of concrete deliverables at each handoff. Work autonomously within a stage without repeating confirmation for the same scope. See [Stage handoffs](.agents/skills/lumine-plan/references/stage-handoff.md). Bounded maintenance, verification-only work, and diagnosis retain their authorization scope; diagnosis does not authorize repair.
 

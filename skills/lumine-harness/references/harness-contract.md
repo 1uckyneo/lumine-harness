@@ -5,8 +5,10 @@
 - `.lumine/root.json` 标识项目根；`.lumine/project.json` 管理语言、仓库、能力和知识配置。
 - `.agents/skills/` 分发四个日常规范入口：`lumine-plan`、`lumine-run`、`lumine-knowledge`、`lumine-design`。追问与领域建模模块随规划能力内置；项目扩展按需复用或生成，不要求全局安装。初始化维护使用 `lumine-harness`。
 - `AGENTS.md` 保留基础安全与授权边界、必要仓库身份、最小阶段门禁及按任务直达的规范入口。固定“规范入口”章节明确指定规范索引或附件；编辑前完整读取适用规范、模板与示例，不依赖搜索命中。未建规范时明确缺口或不适用，不生成空页。业务根规则保持宿主中立，实际 Adapter 配置单独维护。
+- 根入口按具体任务直达四个 Skill 的实际文件；就绪评估、grill 和领域澄清归 `lumine-plan`，实施、恢复与验证归 `lumine-run`。名称列举不代替读取，详细流程在 Skill 中维护。
 - 架构地图和详细规范进入 Wiki，不默认生成根 `ARCHITECTURE.md`。旧文件按[迁移策略](migration-policy.md)先迁移独有内容、修复引用，无法安全退休则保留并报告。
 - Spec 默认 `docs/product-specs/`；Plan 默认 `docs/exec-plans/active/`，历史在 `completed/`；证据在 `docs/validation/`；Wiki 默认 `docs/repo-wiki/`，配置只指定一个权威根。不另建 `docs/domain/` 或 `docs/decisions/` 台账。
+- `docs/index.md` 是简明资料导航，只说明职责及必要身份、引用和历史约定；阶段、Skill 与 grill 操作链接既有指引，不复制流程。已有等价人工入口优先复用。通用界面约定归 `lumine-design`，项目技术规范从根授权入口读取，不默认生成独立 `docs/FRONTEND.md`。
 - `.lumine/wiki-state/` 保存持久知识状态；`.lumine/local/wiki/` 只保存可重建缓存／本机态，其他本地内容可能是受保护私有资料。
 
 ## 资料角色与效力
@@ -30,6 +32,8 @@ Spec／Plan 使用稳定 `id` 和类型；Wiki 按知识接口保存稳定 ID。
 ## 工作与证据
 
 完整产品工作按 Spec →（必要设计 → 回写 Spec）→ Exec Plan → Run 的[阶段交接](../assets/skills/lumine-plan/references/stage-handoff.md)取得人的明确确认；阶段内自主，同一范围不重复确认。只改 Spec 不强制建 Plan，Run 中或之后验证不另设确认，只验证不修复。
+
+开始或恢复实施前按 `lumine-run` 复用或创建任务，核对目标、范围、适用资料、本轮授权与当前绑定；局部修复可无长期 Spec／Plan，仍保留任务和实际证据。有效绑定可以复用；新用户实施轮、恢复或身份／范围／模式变化时重新核对，缺失、过期或不匹配时通过 Runtime 绑定当前现场。普通讨论、知识查询和独立检查不强制创建任务，明确只读时不写任务文件。任务保存引用、范围、摘要和版本化证据，不复制 Plan／Validation；具体命令及格式以当前 CLI 与任务合同为准，不新建恢复台账或审批阶段。
 
 Runtime 负责确定性检查，四个能力负责语义判断。采用交付复用 Validation、Wiki coverage 和 `.lumine/tasks/` 的版本化 knowledge 证据，分别报告安装完成、内容完成、实际验证；不改变迁移 `complete` 含义或新增采用状态机。详见[检查与证据](runtime-checks.md)。
 

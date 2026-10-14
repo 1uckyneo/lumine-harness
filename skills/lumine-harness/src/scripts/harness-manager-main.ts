@@ -101,6 +101,7 @@ const hash = (v: string | Uint8Array) =>
   createHash("sha256").update(v).digest("hex");
 const READER_LICENSE_SEPARATOR = "\n\n--------------------\n\n";
 const RETAINED_READER_ASSET = /^\.lumine\/wiki-reader\/chunks\/[^/]+\.js(?:\.LEGAL\.txt)?$/;
+const RETIRED_DOCUMENT_SEEDS = ["docs/workflow-artifacts.md", "docs/FRONTEND.md"];
 function mergeReaderLicenses(current: string, previous: string): string {
   return [...new Set([current, previous].flatMap((text) => text.split(READER_LICENSE_SEPARATOR)).filter((block) => block.trim()))]
     .join(READER_LICENSE_SEPARATOR);
@@ -291,6 +292,7 @@ function renderRootTemplate(
   const values: Record<string, string> = {
     project_name: path.basename(root),
     wiki_entry: wikiEntry,
+    wiki_docs_entry: slash(path.relative("docs", wikiEntry)),
     standards_entry: hasStandards
       ? `[${zh ? "工程规范与按任务必读" : "Engineering standards and required reading"}](<${standardsEntry}>)`
       : zh
@@ -430,7 +432,7 @@ export function createProposal(
       if (oldHash && previous[rel]?.hash === oldHash)
         body = Buffer.from(mergeReaderLicenses(body.toString("utf8"), readFileSync(oldLicense, "utf8")));
     }
-    if (rel === "AGENTS.md" || rel === "ARCHITECTURE.md") {
+    if (rel === "AGENTS.md" || rel === "ARCHITECTURE.md" || rel === "docs/index.md") {
       body = Buffer.from(
         renderRootTemplate(body.toString(), root, project, locale),
       );
@@ -491,6 +493,26 @@ export function createProposal(
   add(".lumine/root.json", Buffer.from(json(marker)), undefined, 0o644, true);
   for (const [rel, body] of convertLegacySessions(root)) {
     if (!existsSync(target(root, rel))) add(rel, Buffer.from(json(convertWorkStatusSession(JSON.parse(body)))));
+  }
+  // These documents may hold project rules. Installer ownership alone does not
+  // establish that unique content and active references have been reconciled.
+  const reviewedRetirements = new Set(options.reviewedRetirements ?? []);
+  for (const rel of RETIRED_DOCUMENT_SEEDS) {
+    if (operations.some((operation) => operation.path === rel)) continue;
+    let before: string | null;
+    try { before = fingerprint(target(root, rel)); }
+    catch {
+      retirementWarnings.push(locale === "zh-CN"
+        ? `保留 ${rel}：无法安全核对文件类型或路径；请检查原件并完成资料归位，不自动退休。`
+        : `Preserve ${rel}: its path or file type cannot be assessed safely. Inspect and reconcile the original; it will not be retired automatically.`);
+      continue;
+    }
+    if (!before) continue;
+    const reviewed = reviewedRetirements.has(rel);
+    operations.push({ path: rel, action: reviewed ? "delete" : "preserve", before, after: reviewed ? null : before });
+    if (!reviewed) retirementWarnings.push(locale === "zh-CN"
+      ? `保留 ${rel}：先归位有效内容并修复活动引用，再将该路径加入 --reviewed-retirements；受管默认文件也不自动删除。`
+      : `Preserve ${rel}: reconcile valid content and repair active references, then include this path in --reviewed-retirements. Even an unchanged managed default is not deleted automatically.`);
   }
   for (const rel of legacyRetirements(root, options.reviewedRetirements)) {
     if (operations.some((o) => o.path === rel)) continue;

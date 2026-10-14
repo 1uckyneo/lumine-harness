@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-workflow-entry-20261014",
+  "mode": "implement",
+  "goal": "补强工作流入口，将资料规范迁入精简的docs/index.md并归并界面约定，同步后续项目分发。",
+  "scope": "维护根入口、执行与设计指引、资料导航规范、双语模板、安全升级、相关知识和验证；保留并行工作及原暂存状态。用户已授权源码仓库及试点项目的提交与推送。",
+  "selectedSkills": [
+    "lumine-run",
+    "lumine-knowledge"
+  ],
+  "acceptanceRefs": [],
+  "evidence": [
+    {
+      "artifact": "docs/validation/文档入口与执行规范验证-2026-10-14.json",
+      "sha256": "954a03d18a7648bfc37746506d92d13251f17b7a307ad8bfd9d8bcf2d9b5bacd",
+      "outcome": "passed",
+      "observedAt": "2026-10-14T05:10:04.655140Z",
+      "command": "pnpm runtime:test",
+      "environment": "本地源码与可分发Runtime文档/迁移检查；合成接入夹具不冒充真实宿主Hook或业务运行。",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "AGENTS.md",
+          "sha256": "802c979c300fd6291087da37845facf631b2a3fff100394b59801268013244ea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
+          "sha256": "42f02df22143632b9786b36623d542a4944bd9f6a7e1b55a35b06f048e417740"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-design/SKILL.md",
+          "sha256": "3e0b56925e7b227a8a902c3e8bd05c1b324d63c96f9f02e72b5b82d96496d55a"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/index.md",
+          "sha256": "4772e051624a3216e6cd802e8cb92a634ad942db81df71272e6361e6709e7893"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/root/AGENTS.md",
+          "sha256": "73f74cb5b3f88c2a3fdb89083d39cbfb67d9e2d7c7daf74afe66f9ec24c4b880"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/locales/en/root/AGENTS.md",
+          "sha256": "878f55079e6ae3d9479885e9b069a5c0dff0a2ae60a1560705c327ca26624dea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/docs-seed/index.md",
+          "sha256": "8cc467fbd7f75700a200459c6c460e09471eda414c0638be9ffde67b8959b85d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/locales/en/docs-seed/index.md",
+          "sha256": "16a75ee1145095c93150bb5dc1d90857c00f0b48fb2ad6cf3c459401a116addf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "76a1e3aa3eab2eda26829e13b4e864dde80432e250d490f9f3ca3e871c3de264"
+        }
+      ]
+    }
+  ],
+  "knowledge": {
+    "required": true,
+    "status": "synchronized",
+    "refs": [
+      "lumine-adoption",
+      "lumine-workflow",
+      "lumine-wiki",
+      "lumine-collaboration-guide",
+      "lumine-command-guide"
+    ],
+    "sync": {
+      "contractVersion": 2,
+      "assessedAt": "2026-10-14T05:10:04.655140Z",
+      "changedSources": [
+        {
+          "repoId": "project",
+          "path": "AGENTS.md",
+          "sha256": "802c979c300fd6291087da37845facf631b2a3fff100394b59801268013244ea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
+          "sha256": "42f02df22143632b9786b36623d542a4944bd9f6a7e1b55a35b06f048e417740"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/skills/lumine-design/SKILL.md",
+          "sha256": "3e0b56925e7b227a8a902c3e8bd05c1b324d63c96f9f02e72b5b82d96496d55a"
+        },
+        {
+          "repoId": "project",
+          "path": "docs/index.md",
+          "sha256": "4772e051624a3216e6cd802e8cb92a634ad942db81df71272e6361e6709e7893"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/root/AGENTS.md",
+          "sha256": "73f74cb5b3f88c2a3fdb89083d39cbfb67d9e2d7c7daf74afe66f9ec24c4b880"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/locales/en/root/AGENTS.md",
+          "sha256": "878f55079e6ae3d9479885e9b069a5c0dff0a2ae60a1560705c327ca26624dea"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/docs-seed/index.md",
+          "sha256": "8cc467fbd7f75700a200459c6c460e09471eda414c0638be9ffde67b8959b85d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/assets/locales/en/docs-seed/index.md",
+          "sha256": "16a75ee1145095c93150bb5dc1d90857c00f0b48fb2ad6cf3c459401a116addf"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "76a1e3aa3eab2eda26829e13b4e864dde80432e250d490f9f3ca3e871c3de264"
+        }
+      ],
+      "verifiedScope": [
+        "根入口分流、实施任务复用和有效绑定；资料职责、命名及历史证据保真。",
+        "限定复核受影响知识的规范授权、来源迁移及界面条款归位；未重审全项目实现或运行。"
+      ],
+      "decisions": [
+        {
+          "ref": "lumine-adoption",
+          "action": "revised",
+          "sha256": "d23cb42ea84c85563a458f833b190de23e1dc27d45d0b16f4e95fc9cadf51e2e",
+          "reason": "按本轮入口、资料路径或界面约定归位修订，并完成限定语义审阅。"
+        },
+        {
+          "ref": "lumine-workflow",
+          "action": "revised",
+          "sha256": "eb9e473783de84d8601b4c3c77ff6b60de53cb0ac9a4f11cb433a4caeb4247e1",
+          "reason": "按本轮入口、资料路径或界面约定归位修订，并完成限定语义审阅。"
+        },
+        {
+          "ref": "lumine-wiki",
+          "action": "revised",
+          "sha256": "c65e928044492c623fff9f6a9da114aeb91343bf56c3628d8c06f2530c32d67d",
+          "reason": "按本轮入口、资料路径或界面约定归位修订，并完成限定语义审阅。"
+        },
+        {
+          "ref": "lumine-collaboration-guide",
+          "action": "revised",
+          "sha256": "9062d925b71e56954c07805b62251bf3e9e2b58d8ae11f08dfe49434d3a52cd0",
+          "reason": "按本轮入口、资料路径或界面约定归位修订，并完成限定语义审阅。"
+        },
+        {
+          "ref": "lumine-command-guide",
+          "action": "revised",
+          "sha256": "41102a9784e7ff75f0a8d97cba585c6f353cec9f0ab8f1fcd08b7c6b60f9c70b",
+          "reason": "按本轮入口、资料路径或界面约定归位修订，并完成限定语义审阅。"
+        }
+      ]
+    }
+  },
+  "summary": "资料入口迁移和规则归并完成；入口与Run补强保留。适用检查通过，既有测试跳过及试点Wiki冲突单独记录；发布结果另由Git远端核对。"
+}

@@ -40,7 +40,7 @@ test("locale is pinned before proposal content; clean installation has four new 
 			applyProposal(file);
 			const cfg = JSON.parse(readFileSync(path.join(f.root, ".lumine/project.json"), "utf8"));
 			assert.equal(cfg.locale, locale);
-			for (const rootDoc of ["AGENTS.md"]) assert.doesNotMatch(readFileSync(path.join(f.root, rootDoc), "utf8"), /\{\{[a-z_]+\}\}/);
+			for (const rootDoc of ["AGENTS.md", "docs/index.md"]) assert.doesNotMatch(readFileSync(path.join(f.root, rootDoc), "utf8"), /\{\{[a-z_]+\}\}/);
 			for (const name of [
 				"plan",
 				"run",
@@ -48,6 +48,9 @@ test("locale is pinned before proposal content; clean installation has four new 
 				"design"
 			]) assert.ok(existsSync(path.join(f.root, ".agents/skills/lumine-" + name + "/SKILL.md")));
 			assert.equal(existsSync(path.join(f.root, "ARCHITECTURE.md")), false);
+			assert.equal(existsSync(path.join(f.root, "docs/index.md")), true);
+			assert.equal(existsSync(path.join(f.root, "docs/workflow-artifacts.md")), false);
+			assert.equal(existsSync(path.join(f.root, "docs/FRONTEND.md")), false);
 			assert.deepEqual(discoverSharedSkills(f.root).map((skill) => skill.name), [
 				"lumine-design",
 				"lumine-knowledge",
@@ -70,6 +73,95 @@ test("locale is pinned before proposal content; clean installation has four new 
 		}
 	}
 });
+test("adoption and upgrade preserve unreviewed document rules and a human-maintained docs index", () => {
+	for (const mode of ["adopt", "upgrade"]) {
+		const f = fixture();
+		try {
+			if (mode === "upgrade") applyProposal(f.save(createProposal(f.root, { locale: "en" })));
+			mkdirSync(path.join(f.root, "docs"), { recursive: true });
+			const bodies = {
+				"docs/index.md": "# Project documentation\nKeep this human-maintained entry.\n",
+				"docs/workflow-artifacts.md": "# Project approval rules\nKeep the unique product approval boundary.\n",
+				"docs/FRONTEND.md": "# Project interface rules\nPreserve keyboard focus during dialogs.\n"
+			};
+			for (const [relative, body] of Object.entries(bodies)) writeFileSync(path.join(f.root, relative), body);
+			const proposal = createProposal(f.root, {
+				locale: "en",
+				mode
+			});
+			for (const relative of Object.keys(bodies)) assert.equal(proposal.operations.find((operation) => operation.path === relative)?.action, "preserve");
+			for (const relative of ["docs/workflow-artifacts.md", "docs/FRONTEND.md"]) assert.ok(proposal.warnings.some((warning) => warning.includes(relative)));
+			applyProposal(f.save(proposal));
+			for (const [relative, body] of Object.entries(bodies)) assert.equal(readFileSync(path.join(f.root, relative), "utf8"), body);
+		} finally {
+			f.clean();
+		}
+	}
+});
+test("reviewed document retirement is explicit for old managed defaults and restores exact originals on rollback", () => {
+	const f = fixture();
+	try {
+		applyProposal(f.save(createProposal(f.root, { locale: "en" })));
+		const oldDefaults = {
+			"docs/workflow-artifacts.md": "# Work artifact responsibilities\nKeep one product proposal and one execution record.\n",
+			"docs/FRONTEND.md": "# Interface implementation conventions\nProvide accessible state feedback.\n"
+		};
+		const managedFile = path.join(f.root, ".lumine/managed.json");
+		const managed = JSON.parse(readFileSync(managedFile, "utf8"));
+		for (const [relative, body] of Object.entries(oldDefaults)) {
+			writeFileSync(path.join(f.root, relative), body);
+			managed.files[relative] = {
+				hash: createHash("sha256").update(body).digest("hex"),
+				source: "lumine-harness"
+			};
+		}
+		writeFileSync(managedFile, JSON.stringify(managed));
+		const unreviewed = createProposal(f.root, {
+			locale: "en",
+			mode: "upgrade"
+		});
+		for (const relative of Object.keys(oldDefaults)) assert.equal(unreviewed.operations.find((operation) => operation.path === relative)?.action, "preserve");
+		const previousIndex = readFileSync(path.join(f.root, "docs/index.md"), "utf8");
+		const reconciledIndex = "# Project documentation\nApplicable artifact rules are linked here; interface rules are in the authorized engineering standard.\n";
+		const proposal = createProposal(f.root, {
+			locale: "en",
+			mode: "upgrade",
+			reviewedRetirements: Object.keys(oldDefaults),
+			overrides: { "docs/index.md": Buffer.from(reconciledIndex).toString("base64") }
+		});
+		for (const relative of Object.keys(oldDefaults)) assert.equal(proposal.operations.find((operation) => operation.path === relative)?.action, "delete");
+		const proposalFile = f.save(proposal);
+		applyProposal(proposalFile);
+		for (const relative of Object.keys(oldDefaults)) assert.equal(existsSync(path.join(f.root, relative)), false);
+		assert.equal(readFileSync(path.join(f.root, "docs/index.md"), "utf8"), reconciledIndex);
+		assert.deepEqual(rollbackProposal(proposalFile).conflicts, []);
+		for (const [relative, body] of Object.entries(oldDefaults)) assert.equal(readFileSync(path.join(f.root, relative), "utf8"), body);
+		assert.equal(readFileSync(path.join(f.root, "docs/index.md"), "utf8"), previousIndex);
+	} finally {
+		f.clean();
+	}
+});
+test("reviewed retirement rejects later document edits before applying the proposal", () => {
+	const f = fixture();
+	try {
+		applyProposal(f.save(createProposal(f.root, { locale: "en" })));
+		const relative = "docs/workflow-artifacts.md";
+		writeFileSync(path.join(f.root, relative), "# Reconciled old rules\nOriginal reviewed content.\n");
+		const proposal = createProposal(f.root, {
+			locale: "en",
+			mode: "upgrade",
+			reviewedRetirements: [relative]
+		});
+		const revised = "# Concurrent project rule\nPreserve this change made after review.\n";
+		writeFileSync(path.join(f.root, relative), revised);
+		const projectConfig = readFileSync(path.join(f.root, ".lumine/project.json"), "utf8");
+		assert.throws(() => applyProposal(f.save(proposal)), /Target changed: docs\/workflow-artifacts\.md/);
+		assert.equal(readFileSync(path.join(f.root, relative), "utf8"), revised);
+		assert.equal(readFileSync(path.join(f.root, ".lumine/project.json"), "utf8"), projectConfig);
+	} finally {
+		f.clean();
+	}
+});
 test("root instructions use the configured Wiki and declare only existing standards without duplicate repository maps", () => {
 	for (const locale of ["zh-CN", "en"]) {
 		const f = fixture();
@@ -89,7 +181,8 @@ test("root instructions use the configured Wiki and declare only existing standa
 				overrides: { ".lumine/project.json": Buffer.from(JSON.stringify(config)).toString("base64") }
 			};
 			const pending = createProposal(f.root, options);
-			const instructions = (proposal) => Buffer.from(proposal.operations.find((operation) => operation.path === "AGENTS.md").content, "base64").toString();
+			const document = (proposal, relative) => Buffer.from(proposal.operations.find((operation) => operation.path === relative).content, "base64").toString();
+			const instructions = (proposal) => document(proposal, "AGENTS.md");
 			const initial = instructions(pending);
 			assert.ok(initial.includes("](<knowledge>)"));
 			assert.ok(!initial.includes("knowledge/README.md"));
@@ -98,12 +191,17 @@ test("root instructions use the configured Wiki and declare only existing standa
 			assert.doesNotMatch(initial, /\]\((?:<)?AGENTS\.md(?:>)?\)/);
 			assert.ok(!initial.includes("knowledge/engineering/README.md"));
 			assert.equal(existsSync(path.join(f.root, "knowledge/engineering/README.md")), false);
+			const initialIndex = document(pending, "docs/index.md");
+			assert.ok(initialIndex.includes("](<../knowledge>)"));
+			assert.ok(!initialIndex.includes("repo-wiki/README.md"));
 			mkdirSync(path.join(f.root, "knowledge/engineering"), { recursive: true });
 			writeFileSync(path.join(f.root, "knowledge/engineering/README.md"), "# Standards\nUse applicable project rules.\n");
 			writeFileSync(path.join(f.root, "knowledge/README.md"), "# Project Wiki\nCurrent navigation.\n");
-			const ready = instructions(createProposal(f.root, options));
+			const readyProposal = createProposal(f.root, options);
+			const ready = instructions(readyProposal);
 			assert.ok(ready.includes("knowledge/engineering/README.md"));
 			assert.ok(ready.includes("](<knowledge/README.md>)"));
+			assert.ok(document(readyProposal, "docs/index.md").includes("](<../knowledge/README.md>)"));
 		} finally {
 			f.clean();
 		}

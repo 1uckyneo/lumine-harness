@@ -70,12 +70,14 @@ The Agent uses existing material, repository facts, and applicable Skills to jud
 
 | Everyday Skill | Responsibility |
 | --- | --- |
-| lumine-plan | Clarify requirements and revise or review product proposals and technical plans; a Spec-only discussion needs no Plan. |
+| lumine-plan | Clarify requirements, grill and model domains as needed, revise or review product proposals and technical plans, and assess readiness; a Spec-only discussion needs no Plan. |
 | lumine-run | Implement, continue, recover, verify, and diagnose; verification-only work does not automatically repair. |
 | lumine-knowledge | Locate source, query knowledge, verify provenance, and maintain Wiki. |
 | lumine-design | Explore and review concrete visual and interaction choices. |
 
 lumine-harness remains the initialization/upgrade entry. Checks are Runtime tools, not another manual phase.
+
+The project root routes concrete tasks directly to applicable Skill files. Before implementation or recovery, the Agent checks current authorization and reuses an applicable task and valid binding. A new user implementation turn, recovery, or identity/scope/mode change triggers a recheck and recording or binding when needed. Tasks reference plans and evidence instead of copying them. Ordinary discussion, knowledge queries, and standalone checks need no task or added approval stage.
 
 Example requests:
 
@@ -93,6 +95,8 @@ Work autonomously within a stage without repeating confirmation for the same sco
 Built-in `grilling` and `domain-modeling` modules support planning when material ambiguity, conflicting rules, or important tradeoffs need questioning. Clear tasks do not receive a compulsory interview. Each answer round is written into the current Spec or Plan before the next question; answers do not approve stage handoffs. Complete terms, distinct contexts, and necessary lasting decisions live in related Wiki topics, linked from Spec/Plan without separate domain or decisions ledgers. Confirmed language does not claim implementation. These modules ship with Lumine; no global Skill installation is required.
 
 ## Engineering records for people and Agents
+
+The [project document index](docs/index.md) centralizes navigation, responsibilities, and necessary naming, reference, and history conventions. Stage, Skill, and grilling procedures remain linked to their own guidance. Common interface conventions ship with lumine-design; the root routes tasks explicitly to applicable project standards.
 
 - **Product Spec:** the product proposal’s goals, scope, scenarios, rules, and stable acceptance criteria.
 - **Exec Plan:** technical approach, tradeoffs, execution/verification arrangements, progress, and implementation records derived from applicable Specs/AC items; links detailed evidence rather than duplicating requirements.
@@ -142,6 +146,7 @@ Adoption acceptance separates installation, content completion, and actual usage
   wiki-state/             Shareable durable knowledge state
   local/wiki/             Rebuildable caches and machine state
 .agents/skills/           Four canonical everyday Skills
+docs/index.md            Document navigation and responsibilities
 docs/product-specs/       Product proposals
 docs/exec-plans/          Technical plans and execution history
 docs/repo-wiki/           Default knowledge body

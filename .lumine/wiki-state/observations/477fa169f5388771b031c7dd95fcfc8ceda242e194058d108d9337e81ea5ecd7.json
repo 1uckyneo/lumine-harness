@@ -1,14 +1,14 @@
 {
   "id": "lumine-workflow",
-  "revision": "8996c4933e928f4eebf2d6d8cbc554a0d4626a156fc7c7a8d401282ae9e400f7",
-  "checkedAt": "2026-10-13T11:48:21.133Z",
-  "sourceFingerprint": "a6acf92e1ea8fbe9caf1bf1880882bdda6b9274dccd56d1457ce6762fdb6b827",
+  "revision": "eb9e473783de84d8601b4c3c77ff6b60de53cb0ac9a4f11cb433a4caeb4247e1",
+  "checkedAt": "2026-10-14T05:07:30.062Z",
+  "sourceFingerprint": "495a696c0749a088460f8037765c8a2f13f9d516718554e6f658b0b8edcae960",
   "sources": {
     "fingerprints": {
       "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "09a5530d8082e2f021985bf6dfffeca48f1237143d86c0dfe47918fed45c4035",
-      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "46701c0444f716d87a907c768789bc736e9cd3ad0203275dc8bae9674ca9a938",
+      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "42f02df22143632b9786b36623d542a4944bd9f6a7e1b55a35b06f048e417740",
       "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1cb1cce83bfc8831e839389b73f07496a44b609a57a17b040486726249b0bd9e",
-      "project:skills/lumine-harness/assets/skills/lumine-design/SKILL.md": "8d417b9354458fe4aef74cc9e379ba29102756940bc1f117a6df6c9279bf8a77",
+      "project:skills/lumine-harness/assets/skills/lumine-design/SKILL.md": "3e0b56925e7b227a8a902c3e8bd05c1b324d63c96f9f02e72b5b82d96496d55a",
       "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
       "project:skills/lumine-harness/src/harness/core/documents.ts": "8716a6e582d67b467da1bc9b79b6732d1def8c8bdfa6626ba70caf1beecd438a",
       "project:skills/lumine-harness/src/harness/core/task-contract.ts": "283ae153091aea0eb962add7d31eb6cb126d1de295478b462aa315e0a7d5e874",
@@ -17,40 +17,43 @@
       "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "3977308a20b7e7fd16766ff072a1f5089d2aa17930d67429ab7b59faab3a546b",
       "project:skills/lumine-harness/assets/skills/lumine-plan/vendor/grilling/INSTRUCTIONS.md": "d28120599720db27300a8cd10587ecd5166360ff2bdc8703370488b0a7d6b107",
       "project:skills/lumine-harness/assets/skills/lumine-plan/vendor/domain-modeling/INSTRUCTIONS.md": "8c7dcbc0ce04f6d1311c2679ad2835edcba069d5c931c8331e9b59a5565aba5d",
-      "project:skills/lumine-harness/assets/docs-seed/workflow-artifacts.md": "aeffb13edb57103f180df2195972f9029b142af8b914417ad1e49085a156ff63",
-      "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "a8a65577010720cdd6dba9e14cd876912d8ea874033985bd5bc9a09729147cc1"
+      "project:skills/lumine-harness/assets/docs-seed/index.md": "8cc467fbd7f75700a200459c6c460e09471eda414c0638be9ffde67b8959b85d",
+      "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "a8a65577010720cdd6dba9e14cd876912d8ea874033985bd5bc9a09729147cc1",
+      "project:skills/lumine-harness/src/harness/core/task-cli-main.ts": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
     },
     "scopeFingerprints": {
-      "project:skills/lumine-harness/assets/docs-seed/workflow-artifacts.md": "5f9c136a159f0ab0f8925918e3d7a554744f4754732aad791fbe183437ca2872",
-      "project:skills/lumine-harness/assets/skills/lumine-design/SKILL.md": "5c829faaf6961ab0d8637ee8d384885fea29acaffd1c17173b6e9e6483a921f3",
+      "project:skills/lumine-harness/assets/docs-seed/index.md": "6df48049255177302aec751ef03ef4561aeea9b1c0fed2776f3cf946006d9e3b",
+      "project:skills/lumine-harness/assets/skills/lumine-design/SKILL.md": "5c8bd9df93cfe0562a338a9aa6f6588f395ac3972d584dc25e1197b2a8c8f66f",
       "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "7133238462af6995470b874960d6e680ad5b765cf7565466d65ebb2bbc201cd8",
       "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "3ca598ecb6f06ff82c1a5101fae83bbb4444f0a23787fe207c20fdfa1b20cd13",
       "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "d6cc110e6114f5a0f8fe75183086a0136dcf5b50e365824fae7effb00dc24e7e",
       "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "42eb71a85713446b62bf0eac1fe042d04cc0d4513586f3a8fda1debdfd102838",
       "project:skills/lumine-harness/assets/skills/lumine-plan/vendor/domain-modeling/INSTRUCTIONS.md": "75d95cde9e360d8a728c1bdef330161889624c4472d6928f47401f2317cb2876",
       "project:skills/lumine-harness/assets/skills/lumine-plan/vendor/grilling/INSTRUCTIONS.md": "ae86708ed1b210c0d90797ed7a33e754690df8288b52e84eacb7dffdc2f02cfa",
-      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "bdfad8a69a8ce661a0645594b982a4ff762953a47db6a24a6c846096c8dbb338",
+      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "4e9e2d0c3d5ce6d0a477d28d871514bfc5f49716f2f0284e92a0e5b15419e45e",
       "project:skills/lumine-harness/src/harness/core/documents.ts": "911a57ed3192d66c54897807b0545d6d81931aee6f562ba4ce31c01ee1ea87d3",
       "project:skills/lumine-harness/src/harness/core/phase-router.ts": "64fa2e9dab9922216f8760190d8077c25d18cf0c5d08f28651e2455ace438520",
       "project:skills/lumine-harness/src/harness/core/session-context.ts": "18d4ab343f35393d5a7dc571377dbe4a912523c4219cf92ef207ea095f20d95d",
       "project:skills/lumine-harness/src/harness/core/task-cli.ts": "5a3589a5874868f3949bdf00926bbabc1d38d7a0a6e46c04895b28fa2ba6c728",
-      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "1f63bf718d748f9bc4297c4f7847566c89f3f780b50830fbcb1d9c0524b6420c"
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "1f63bf718d748f9bc4297c4f7847566c89f3f780b50830fbcb1d9c0524b6420c",
+      "project:skills/lumine-harness/src/harness/core/task-cli-main.ts": "78665550168d61868084db3342cc54a075017460653e4aa1d638742d0208b213"
     },
     "files": {
-      "project:skills/lumine-harness/assets/docs-seed/workflow-artifacts.md": "aeffb13edb57103f180df2195972f9029b142af8b914417ad1e49085a156ff63",
-      "project:skills/lumine-harness/assets/skills/lumine-design/SKILL.md": "8d417b9354458fe4aef74cc9e379ba29102756940bc1f117a6df6c9279bf8a77",
+      "project:skills/lumine-harness/assets/docs-seed/index.md": "8cc467fbd7f75700a200459c6c460e09471eda414c0638be9ffde67b8959b85d",
+      "project:skills/lumine-harness/assets/skills/lumine-design/SKILL.md": "3e0b56925e7b227a8a902c3e8bd05c1b324d63c96f9f02e72b5b82d96496d55a",
       "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1cb1cce83bfc8831e839389b73f07496a44b609a57a17b040486726249b0bd9e",
       "project:skills/lumine-harness/assets/skills/lumine-plan/SKILL.md": "09a5530d8082e2f021985bf6dfffeca48f1237143d86c0dfe47918fed45c4035",
       "project:skills/lumine-harness/assets/skills/lumine-plan/references/grill.md": "a8a65577010720cdd6dba9e14cd876912d8ea874033985bd5bc9a09729147cc1",
       "project:skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md": "3977308a20b7e7fd16766ff072a1f5089d2aa17930d67429ab7b59faab3a546b",
       "project:skills/lumine-harness/assets/skills/lumine-plan/vendor/domain-modeling/INSTRUCTIONS.md": "8c7dcbc0ce04f6d1311c2679ad2835edcba069d5c931c8331e9b59a5565aba5d",
       "project:skills/lumine-harness/assets/skills/lumine-plan/vendor/grilling/INSTRUCTIONS.md": "d28120599720db27300a8cd10587ecd5166360ff2bdc8703370488b0a7d6b107",
-      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "46701c0444f716d87a907c768789bc736e9cd3ad0203275dc8bae9674ca9a938",
+      "project:skills/lumine-harness/assets/skills/lumine-run/SKILL.md": "42f02df22143632b9786b36623d542a4944bd9f6a7e1b55a35b06f048e417740",
       "project:skills/lumine-harness/src/harness/core/documents.ts": "8716a6e582d67b467da1bc9b79b6732d1def8c8bdfa6626ba70caf1beecd438a",
       "project:skills/lumine-harness/src/harness/core/phase-router.ts": "7a5116e956c99628f04000972aeace028605957f94435cbb254c954dce644456",
       "project:skills/lumine-harness/src/harness/core/session-context.ts": "e3e9a2cfc29bb5d1ea034d54afc74f31ab5f7f286111adc9e50bab9463006903",
       "project:skills/lumine-harness/src/harness/core/task-cli.ts": "382c5b7d353d24647d1f00af40dea4640782410d6318a75edfeb33064c77d3ac",
-      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "283ae153091aea0eb962add7d31eb6cb126d1de295478b462aa315e0a7d5e874"
+      "project:skills/lumine-harness/src/harness/core/task-contract.ts": "283ae153091aea0eb962add7d31eb6cb126d1de295478b462aa315e0a7d5e874",
+      "project:skills/lumine-harness/src/harness/core/task-cli-main.ts": "d7cafbf4a9aafd0dbda1b2aecf02c114b6875a3df1ac53db9916caade6717ad2"
     },
     "missing": []
   },

@@ -88,6 +88,8 @@ flowchart LR
 
 `.lumine/tasks/<taskId>.json` 保存当前目标、范围、模式、Spec／Plan 引用、已选择能力、适用验收、证据和必要的知识同步状态。模式是 `plan`、`implement`、`verify` 或 `diagnose`，不是从 Skill 名称推断。 新建任务使用 `schemaVersion: 3`；历史 v2 任务仍可读取并继续更新，已采用 v3 的任务不能降回 v2。v3 的实施完成检查要求显式评估是否需要同步知识。
 
+开始或恢复实施时先核对对应任务的目标、范围、模式、适用成果及授权，同一任务优先复用。通过 `task show` 取得已有记录和 recordHash，更新用 `task record <候选JSON> --expect <recordHash>` 保护并发修改；新用户实施请求、恢复或身份、范围、模式变化时重新核对，必要时 `task bind` 当前身份和模式；同一任务与当前仍有效的绑定可复用，旧轮绑定不证明本轮允许继续。字段与实际命令见共享 lumine-run；任务保存引用和证据摘要，不复制 Plan 或 Validation。普通讨论、查询和独立检查不强制创建实施任务，实际实施缺记录或绑定不能据此豁免。
+
 任务与本机会话分开保存：任务是项目资产；会话只记录当前宿主、用户轮次以及绑定了哪个任务。`task bind` 将任务模式和本轮关联写入会话，不产生新的实施授权。恢复时先 `task show` 核对目标、边界和已存进度，再按用户本轮请求绑定，避免把上次“只诊断”或另一项实施任务沿用到新目标。
 
 更新已存在的任务需提供它的当前内容哈希；写入在任务锁内核对，然后临时文件原子替换。外部编辑或另一 worker 已改变任务时会拒绝覆盖。中断后保留锁意味着先调查进程及文件，再恢复，不应通过盲删状态重置已发生的工作。
@@ -254,12 +256,18 @@ lumine-plan 遇到关键歧义、规则冲突和重要取舍时读取内置 gril
     {
       "id": "document-contract",
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/docs-seed/workflow-artifacts.md"
+      "path": "skills/lumine-harness/assets/docs-seed/index.md"
     },
     {
       "id": "writeback",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-plan/references/grill.md"
+    },
+    {
+      "id": "task-cli-main",
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
+      "kind": "source"
     }
   ],
   "relations": [
@@ -346,7 +354,9 @@ lumine-plan 遇到关键歧义、规则冲突和重要取舍时读取内置 gril
       "sources": [
         "task-storage",
         "task-cli",
-        "knowledge-sync"
+        "knowledge-sync",
+        "run-skill",
+        "task-cli-main"
       ]
     },
     {
@@ -375,7 +385,7 @@ lumine-plan 遇到关键歧义、规则冲突和重要取舍时读取内置 gril
   "watchScopes": [
     {
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/docs-seed/workflow-artifacts.md"
+      "path": "skills/lumine-harness/assets/docs-seed/index.md"
     },
     {
       "repoId": "project",
@@ -428,6 +438,10 @@ lumine-plan 遇到关键歧义、规则冲突和重要取舍时读取内置 gril
     {
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-contract.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts"
     }
   ]
 }

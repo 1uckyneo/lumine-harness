@@ -1,20 +1,19 @@
 {
   "documentId": "lumine-workflow",
-  "revision": "8996c4933e928f4eebf2d6d8cbc554a0d4626a156fc7c7a8d401282ae9e400f7",
-  "sourceFingerprint": "a6acf92e1ea8fbe9caf1bf1880882bdda6b9274dccd56d1457ce6762fdb6b827",
-  "reviewedAt": "2026-10-13T11:48:21.116Z",
+  "revision": "eb9e473783de84d8601b4c3c77ff6b60de53cb0ac9a4f11cb433a4caeb4247e1",
+  "sourceFingerprint": "495a696c0749a088460f8037765c8a2f13f9d516718554e6f658b0b8edcae960",
+  "reviewedAt": "2026-10-14T05:07:30.045Z",
   "reviewer": {
     "kind": "agent",
     "role": "independent"
   },
   "outcome": "reviewed",
   "scope": [
-    "本轮采用与工作流Wiki增量对照双语模板、资料职责、采用/迁移/交付指导及实际源码的静态比对",
-    "根入口职责与规则归位、安装和内容验收、首次待建规范、最小阶段门禁及特殊授权保全"
+    "本轮Skill路由、任务复用与有效绑定、CLI指引、资料入口与旧文档安全退休的增量说明；对照当前真实入口/Run/CLI/manager相关来源"
   ],
   "findings": [],
   "limitations": [
-    "审阅者未撰写这两篇Wiki正文，但参与了所引用的Runtime checker实现；本记录不构成该代码的独立代码审阅。",
-    "不证明新宿主Hook、实际阅读器、服务运行或用户接受。"
+    "仅本轮入口、资料组织与迁移的限定语义审阅；不是该页全部实现来源、业务运行、部署或宿主Hook验收。",
+    "保留无关既有欠账，不以来源刷新或语义review证明全库已通过。"
   ]
 }

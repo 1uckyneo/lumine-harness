@@ -1,20 +1,19 @@
 {
   "documentId": "lumine-wiki",
-  "revision": "8ec749743cc05880f678089f0b82c14c2ce87581710dc6414a3092a7bc9af6bd",
-  "sourceFingerprint": "b6eff8ae0fd60d9557fce63c2fc3ee007c7cb02de22b88a321de90436f577538",
-  "reviewedAt": "2026-10-13T10:38:56.152Z",
+  "revision": "c65e928044492c623fff9f6a9da114aeb91343bf56c3628d8c06f2530c32d67d",
+  "sourceFingerprint": "05491de152b62cf1cdc1ff9c4e0348b0d349f0c8c9db03cdbfbfd490adbe246a",
+  "reviewedAt": "2026-10-14T05:07:30.093Z",
   "reviewer": {
     "kind": "agent",
     "role": "independent"
   },
   "outcome": "reviewed",
   "scope": [
-    "本轮修订的资料角色、直接来源、提问回写与确认边界",
-    "架构入口、采用分发和指南与已声明规范相符"
+    "资料合同来源由退休种子迁到docs/index；既有正文与HEAD一致，限定检查其职责说明继续有效，不重审全部Wiki引擎"
   ],
   "findings": [],
   "limitations": [
-    "独立reviewer未撰写被审阅页面；相关修正已增量复核",
-    "不替代业务全库审阅、真实宿主Hook、自动续跑或用户接受"
+    "仅本轮入口、资料组织与迁移的限定语义审阅；不是该页全部实现来源、业务运行、部署或宿主Hook验收。",
+    "保留无关既有欠账，不以来源刷新或语义review证明全库已通过。"
   ]
 }

@@ -1,8 +1,8 @@
 {
   "id": "lumine-wiki",
-  "revision": "8ec749743cc05880f678089f0b82c14c2ce87581710dc6414a3092a7bc9af6bd",
-  "checkedAt": "2026-10-13T10:38:56.168Z",
-  "sourceFingerprint": "b6eff8ae0fd60d9557fce63c2fc3ee007c7cb02de22b88a321de90436f577538",
+  "revision": "c65e928044492c623fff9f6a9da114aeb91343bf56c3628d8c06f2530c32d67d",
+  "checkedAt": "2026-10-14T05:07:30.111Z",
+  "sourceFingerprint": "05491de152b62cf1cdc1ff9c4e0348b0d349f0c8c9db03cdbfbfd490adbe246a",
   "sources": {
     "fingerprints": {
       "project:skills/lumine-harness/src/harness/wiki/engine.ts": "b1d416f91fb2f0bf2ae23fc27152f951203f96594be07f2af839f9be5cd63971",
@@ -13,16 +13,16 @@
       "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "f9e647229ffceae8071f729dd4e119a5d2cead3df52ca1d75c9e75490e07a6a0",
       "project:skills/lumine-harness/src/harness/wiki/search.ts": "27018037924bf9b8c28bbf60c56bc5545ec3a5b5bc0fc74b8fa4e40192da6da4",
       "project:skills/lumine-harness/src/harness/wiki/transactions.ts": "4ca902993c3486347d5f3613b2afde7de52b936429faca072c05ed7aa3a738d1",
-      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1f5d8701de27420423d8b0844772590691632cd6334cb86919681271f544e61f",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1cb1cce83bfc8831e839389b73f07496a44b609a57a17b040486726249b0bd9e",
       "project:skills/lumine-harness/src/harness/wiki/server.ts": "76dc895e1c05117bf89546d0fd99c30d491e4aeaa75a983393d35a3169437800",
       "project:skills/lumine-harness/src/harness/wiki/dispositions.ts": "e12248fde0d89c8fa1376bad63212f36a570adb5132338d11fd61b1c37002544",
       "project:skills/lumine-harness/src/harness/wiki/validation-documents.ts": "ef8be032fdb488b34d8efcabd1991b561a94e00d8dafbb24a3435b692c72fcb1",
       "project:skills/lumine-harness/src/harness/wiki/references.ts": "9e68c9fb58681c6d03ac2ea5b7308ec2694a125230d954a7452e467b69e18b58",
-      "project:skills/lumine-harness/assets/docs-seed/workflow-artifacts.md": "ab36d1672db2e2d3bf365d2d2de773fd7083ff5632cae716bead23120e796c64"
+      "project:skills/lumine-harness/assets/docs-seed/index.md": "8cc467fbd7f75700a200459c6c460e09471eda414c0638be9ffde67b8959b85d"
     },
     "scopeFingerprints": {
-      "project:skills/lumine-harness/assets/docs-seed/workflow-artifacts.md": "15154f8cfc23260561dcc79bf593d76adaaab23270a371cf6a866f94f5fa1ca6",
-      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "60265cd4b4593a63f5a32d265612b90d7542f8fabd4bec45809faeae404c042c",
+      "project:skills/lumine-harness/assets/docs-seed/index.md": "6df48049255177302aec751ef03ef4561aeea9b1c0fed2776f3cf946006d9e3b",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "7133238462af6995470b874960d6e680ad5b765cf7565466d65ebb2bbc201cd8",
       "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "e9a2ab8b81595653d13ba8f7048e7f94658e4994e588ff03f540fef4d282a71d",
       "project:skills/lumine-harness/src/harness/wiki/dispositions.ts": "8333f769758c16edb198581a4743dd50e9c4aa434d5aac295d3ad7450bd6ce68",
       "project:skills/lumine-harness/src/harness/wiki/documents.ts": "1d98eacc505a6a5f3ab35fd1fb6822e2a00458d50cf27975a7e934a5e47ccbc6",
@@ -37,8 +37,8 @@
       "project:skills/lumine-harness/src/harness/wiki/validation-documents.ts": "fe49e91dadef5c05b4590eec211150519865f7c3e4a8b6e92d89d6d5fa9608a1"
     },
     "files": {
-      "project:skills/lumine-harness/assets/docs-seed/workflow-artifacts.md": "ab36d1672db2e2d3bf365d2d2de773fd7083ff5632cae716bead23120e796c64",
-      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1f5d8701de27420423d8b0844772590691632cd6334cb86919681271f544e61f",
+      "project:skills/lumine-harness/assets/docs-seed/index.md": "8cc467fbd7f75700a200459c6c460e09471eda414c0638be9ffde67b8959b85d",
+      "project:skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md": "1cb1cce83bfc8831e839389b73f07496a44b609a57a17b040486726249b0bd9e",
       "project:skills/lumine-harness/src/harness/wiki/coverage.ts": "f9e647229ffceae8071f729dd4e119a5d2cead3df52ca1d75c9e75490e07a6a0",
       "project:skills/lumine-harness/src/harness/wiki/dispositions.ts": "e12248fde0d89c8fa1376bad63212f36a570adb5132338d11fd61b1c37002544",
       "project:skills/lumine-harness/src/harness/wiki/documents.ts": "c6cd3097124ffe9e48bf51ffcc5ec86786fea5618a923636e1da37cb9b1483c9",

@@ -17,10 +17,6 @@
       "hash": "7aee990816ea2b908a7b923b3042a9bc620e5c3ffe157cba5ef63ad742f28fe6",
       "source": "lumine-harness"
     },
-    "docs/FRONTEND.md": {
-      "hash": "2054ae25b91dd491fbc852ce8fc9e879b7d6b7241cd39749526f81f0d5a28fbc",
-      "source": "lumine-harness"
-    },
     "docs/design-docs/core-beliefs.md": {
       "hash": "ba9a76b1dd2309fb83437d7422b7ff7afb8a4259a94795d7b9d06ebd2c7f3de6",
       "source": "lumine-harness"
@@ -47,10 +43,6 @@
     },
     ".codex/hooks.json": {
       "hash": "4b8a98e88a631b245e03a5703cc4252ab6d3af7a1a9918bd66ad04f8a8c09c59",
-      "source": "lumine-harness"
-    },
-    "docs/workflow-artifacts.md": {
-      "hash": "f4dda264373c6deb4ee03d34daeecfbf0d7e9a61e96bc85fe0b0d3646e9e10e3",
       "source": "lumine-harness"
     },
     ".lumine/project.json": {

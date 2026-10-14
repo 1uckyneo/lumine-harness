@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-14",
+  "observedAt": "2026-10-14T05:10:04.655140Z",
+  "scope": "根入口与执行指引补强、资料导航精简、界面约定归并和安全升级；不涉及业务实现或新流程阶段。",
+  "result": "passed",
+  "entrySize": {
+    "agentsLines": 130,
+    "previousDocumentLines": 35,
+    "previousDocumentCharacters": 1574,
+    "indexLines": 30,
+    "indexCharacters": 1630
+  },
+  "retiredDocuments": {
+    "docs/workflow-artifacts.md": {
+      "originalSha256": "5437c1d633de2f733224c02808da97d9953dd81b3dfdbb17800975ef44650cfd",
+      "destination": "docs/index.md"
+    },
+    "docs/FRONTEND.md": {
+      "originalSha256": "2054ae25b91dd491fbc852ce8fc9e879b7d6b7241cd39749526f81f0d5a28fbc",
+      "destination": "skills/lumine-harness/assets/skills/lumine-design/SKILL.md"
+    }
+  },
+  "checks": {
+    "health": {
+      "ok": true,
+      "scope": "health",
+      "issues": [],
+      "evidenceLevel": "repository_checked"
+    },
+    "docs": {
+      "ok": true,
+      "scope": "docs",
+      "issues": [],
+      "evidenceLevel": "repository_checked"
+    },
+    "all": {
+      "ok": true,
+      "scope": "all",
+      "issues": [],
+      "evidenceLevel": "repository_checked"
+    },
+    "wiki": {
+      "status": "passed",
+      "issues": [],
+      "checked": [
+        "lumine-adapters",
+        "lumine-architecture",
+        "lumine-collaboration-guide",
+        "lumine-wiki",
+        "lumine-task-check",
+        "lumine-workflow",
+        "lumine-command-guide",
+        "lumine-wiki-reader",
+        "lumine-root-config",
+        "lumine-adoption"
+      ],
+      "notVerified": [
+        "semantic accuracy",
+        "runtime behavior",
+        "human acceptance"
+      ]
+    }
+  },
+  "sourceRegression": {
+    "commands": [
+      "pnpm runtime:typecheck",
+      "pnpm runtime:build",
+      "pnpm runtime:check",
+      "pnpm runtime:test",
+      "bash skills/lumine-harness/scripts/check-skill-package.sh",
+      "bash scripts/sync-plugin-wrapper.sh",
+      "bash scripts/check-repo-sync.sh"
+    ],
+    "summary": {
+      "tests": 259,
+      "pass": 258,
+      "fail": 0,
+      "skipped": 1
+    },
+    "migrationCases": [
+      "unreviewed human content and docs index preserved",
+      "managed defaults require explicit retirement review",
+      "reviewed retirement and exact rollback",
+      "post-proposal edits reject apply",
+      "configured Wiki navigation in both locales"
+    ]
+  },
+  "freshInstalledRuntimeAcceptance": {
+    "observedAt": "2026-10-14T05:00:37.993Z",
+    "results": [
+      {
+        "locale": "zh-CN",
+        "installation": "applied",
+        "actualSkillLinks": 4,
+        "docsEntryRouted": true,
+        "retiredSeedsAbsent": true,
+        "health": true,
+        "taskIdentityReused": true,
+        "protectedUpdate": true,
+        "boundMode": "implement",
+        "taskCheck": true,
+        "realHostReceipt": false
+      },
+      {
+        "locale": "en",
+        "installation": "applied",
+        "actualSkillLinks": 4,
+        "docsEntryRouted": true,
+        "retiredSeedsAbsent": true,
+        "health": true,
+        "taskIdentityReused": true,
+        "protectedUpdate": true,
+        "boundMode": "implement",
+        "taskCheck": true,
+        "realHostReceipt": false
+      }
+    ]
+  },
+  "knowledgeReview": {
+    "documents": 5,
+    "kind": "independent_scoped_semantic_review",
+    "scope": "本轮入口、资料规范、来源路径与规则归位的有限复核；不是每篇全部实现来源的重新审阅。"
+  },
+  "preservation": {
+    "protectedFiles": 168,
+    "protectedContentChanged": false,
+    "originalIndexEntriesChangedBeforeOwnStaging": false,
+    "unrelatedStagedFiles": 0
+  },
+  "limitations": [
+    "一项既有测试跳过仍保留；自动化测试不证明真实宿主。",
+    "会话身份来自工具环境；本轮没有新的真实宿主Hook回执，也未进行业务页面、后端、持久化或部署验收。",
+    "历史验证保持原基线；当前任务记录只保存引用与摘要。"
+  ]
+}

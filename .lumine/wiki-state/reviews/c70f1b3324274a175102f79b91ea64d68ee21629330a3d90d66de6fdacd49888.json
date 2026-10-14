@@ -1,20 +1,19 @@
 {
   "documentId": "lumine-collaboration-guide",
-  "revision": "3449fedfef59f49e45f783edc539d0bda35ce48f577526bf7c42b03e62895b04",
-  "sourceFingerprint": "48fe2729d6e517a02a878cf52e2ba5bf8fb528bdeb51e4f33caf79020134e542",
-  "reviewedAt": "2026-10-13T10:38:56.193Z",
+  "revision": "9062d925b71e56954c07805b62251bf3e9e2b58d8ae11f08dfe49434d3a52cd0",
+  "sourceFingerprint": "33dc276b2790d55a1bab3f0e8da83abcc37601ea20c9801583955718fb0b07d3",
+  "reviewedAt": "2026-10-14T05:07:30.142Z",
   "reviewer": {
     "kind": "agent",
     "role": "independent"
   },
   "outcome": "reviewed",
   "scope": [
-    "本轮修订的资料角色、直接来源、提问回写与确认边界",
-    "架构入口、采用分发和指南与已声明规范相符"
+    "本轮Skill路由、任务复用与有效绑定、CLI指引、资料入口与旧文档安全退休的增量说明；对照当前真实入口/Run/CLI/manager相关来源"
   ],
   "findings": [],
   "limitations": [
-    "独立reviewer未撰写被审阅页面；相关修正已增量复核",
-    "不替代业务全库审阅、真实宿主Hook、自动续跑或用户接受"
+    "仅本轮入口、资料组织与迁移的限定语义审阅；不是该页全部实现来源、业务运行、部署或宿主Hook验收。",
+    "保留无关既有欠账，不以来源刷新或语义review证明全库已通过。"
   ]
 }

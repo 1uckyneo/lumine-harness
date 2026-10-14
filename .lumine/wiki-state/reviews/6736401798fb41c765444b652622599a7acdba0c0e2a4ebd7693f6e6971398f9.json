@@ -1,20 +1,19 @@
 {
   "documentId": "lumine-adoption",
-  "revision": "a4a3aacac31d8cb138f381e4d2d065de6095c04b8bdafaabf90f5a0e1fe9395f",
-  "sourceFingerprint": "356b898b2908006e682ceb1d3b7e70f144b38849bac515e975279f5f2ccf4aeb",
-  "reviewedAt": "2026-10-13T11:48:21.064Z",
+  "revision": "d23cb42ea84c85563a458f833b190de23e1dc27d45d0b16f4e95fc9cadf51e2e",
+  "sourceFingerprint": "aeb4696f0afab365aef8042397834a60fc6352462bddbee80734719b88961b37",
+  "reviewedAt": "2026-10-14T05:07:29.995Z",
   "reviewer": {
     "kind": "agent",
     "role": "independent"
   },
   "outcome": "reviewed",
   "scope": [
-    "本轮采用与工作流Wiki增量对照双语模板、资料职责、采用/迁移/交付指导及实际源码的静态比对",
-    "根入口职责与规则归位、安装和内容验收、首次待建规范、最小阶段门禁及特殊授权保全"
+    "本轮Skill路由、任务复用与有效绑定、CLI指引、资料入口与旧文档安全退休的增量说明；对照当前真实入口/Run/CLI/manager相关来源"
   ],
   "findings": [],
   "limitations": [
-    "审阅者未撰写这两篇Wiki正文，但参与了所引用的Runtime checker实现；本记录不构成该代码的独立代码审阅。",
-    "不证明新宿主Hook、实际阅读器、服务运行或用户接受。"
+    "仅本轮入口、资料组织与迁移的限定语义审阅；不是该页全部实现来源、业务运行、部署或宿主Hook验收。",
+    "保留无关既有欠账，不以来源刷新或语义review证明全库已通过。"
   ]
 }

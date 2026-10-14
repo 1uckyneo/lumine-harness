@@ -1,20 +1,19 @@
 {
   "documentId": "lumine-command-guide",
-  "revision": "4f054e5780b579cf8db86dacefedad3995b3aeba755c4aecc1291857b5e6013b",
-  "sourceFingerprint": "4b09e9dbcc0885b16e9b94c8eec96028f673771f9ec90a9d2ecd9a1efa104fcd",
-  "reviewedAt": "2026-10-13T10:38:56.230Z",
+  "revision": "41102a9784e7ff75f0a8d97cba585c6f353cec9f0ab8f1fcd08b7c6b60f9c70b",
+  "sourceFingerprint": "5c1c7d81d228dfb3f42a2e1888d58b8fb55de23f960e45a7fc07ac7e21ee5c0a",
+  "reviewedAt": "2026-10-14T05:07:30.188Z",
   "reviewer": {
     "kind": "agent",
     "role": "independent"
   },
   "outcome": "reviewed",
   "scope": [
-    "本轮修订的资料角色、直接来源、提问回写与确认边界",
-    "架构入口、采用分发和指南与已声明规范相符"
+    "本轮Skill路由、任务复用与有效绑定、CLI指引、资料入口与旧文档安全退休的增量说明；对照当前真实入口/Run/CLI/manager相关来源"
   ],
   "findings": [],
   "limitations": [
-    "独立reviewer未撰写被审阅页面；相关修正已增量复核",
-    "不替代业务全库审阅、真实宿主Hook、自动续跑或用户接受"
+    "仅本轮入口、资料组织与迁移的限定语义审阅；不是该页全部实现来源、业务运行、部署或宿主Hook验收。",
+    "保留无关既有欠账，不以来源刷新或语义review证明全库已通过。"
   ]
 }
