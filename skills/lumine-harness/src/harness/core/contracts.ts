@@ -111,7 +111,22 @@ export interface UsedSkill {
   contentHash?: string;
 }
 
+export type RequestMode = "plan" | "implement" | "verify" | "diagnose" | "check";
+
+/** Local request identity; it never changes the identity or contents of a long-lived task. */
+export interface RequestScope {
+  schemaVersion: 1;
+  id: string;
+  origin: "host" | "agent";
+  declarationKey?: string;
+  userTurnRevision: number;
+  startedAt: string;
+  mode: RequestMode | null;
+  taskId: string | null;
+}
+
 export interface SessionState extends UnknownRecord {
+  requestScope?: RequestScope | null;
   product: HarnessProduct;
   sessionId: string;
   updatedAt: string;
@@ -121,6 +136,12 @@ export interface SessionState extends UnknownRecord {
   sessionMode?: string | null;
   lastAssistantMessage?: string | null;
   userTurnId?: string | null;
+  /** Bounded tombstones prevent late events from reopening completed request scopes. */
+  retiredUserTurnIds?: string[];
+  userTurnHistoryTruncated?: boolean;
+  /** Stable response hashes, bounded independently from retired request IDs. */
+  handledStopEmissionIds?: string[];
+  retiredStopEmissionIds?: string[];
   userTurnRevision?: number;
   hostTurnRevision?: number;
   statusProtocolVersion?: 2;

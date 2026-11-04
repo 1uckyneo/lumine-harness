@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "b4b47b6b-ef43-4883-a3ad-b9c1653a475d-546b363e42b2",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "candidateHashes": {
+      "lumine-task-check": "ffa2363872cc94ecc252214d36733f9b5c4d9763c0ca47ddc3afe2dbda1373af"
+    },
+    "mutationHashes": [
+      {
+        "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md",
+        "beforeHash": "6a7c1c3e1fc769f5b345414663c92782fe3c4e344f05e8c6cd4e6fe7263076c0",
+        "afterHash": "3af1e20d12576177281a6b3b2f2c82482757d18c9f80945ca65b33b3084e0b35"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/546b363e42b21889472f90c119d705efbbddc4f7b7533ed9d17aabc4972e68f8.json",
+        "beforeHash": "2b58c0851e0a01a03624b825a8992a680914db6a9558fcf7bbdb1b7605210c8d",
+        "afterHash": "53939f3f0cc5df80fa7518d4eaee1f7cb56bb1696852ce7439eac3364e5a8530"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/546b363e42b21889472f90c119d705efbbddc4f7b7533ed9d17aabc4972e68f8.json",
+        "beforeHash": "3ef1baea1636aae64d5278439749b757f30ea1a15f6a6945a2597db95ebb5328",
+        "afterHash": "2878213415fd233b067bce396267200d192f3412669fc678d6138b884ab6c62f"
+      }
+    ]
+  }
+}

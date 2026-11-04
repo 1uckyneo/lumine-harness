@@ -32,3 +32,5 @@ Verify important gaps, stale explanations, and contradictions, then update affec
 
 <!-- LH-RUN-06 -->
 Parallel writers need exclusive file ownership, inputs, acceptance, and stopping conditions. Integrate serially and verify runtime behavior after relevant changes are integrated. Preserve repository, read-only business, and publication boundaries; implementation authorization does not imply permission to commit, push, deploy, or perform other external actions.
+
+Use [current request scope](references/request-scope.md) before work and closeout. New requests do not automatically replace persistent tasks or restart the product workflow.

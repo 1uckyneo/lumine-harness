@@ -1,0 +1,616 @@
+Observed: 2026-11-04T11:24:54.156Z
+Environment: macOS, Node v24.14.0; canonical source and generated distribution.
+
+COMMAND runtime:typecheck
+$ tsc --noEmit
+
+COMMAND runtime:build
+$ tsx scripts/build-runtime.ts --write
+ℹ tsdown v0.22.14 powered by rolldown v1.2.5
+ℹ config file: <source-root>/tsdown.config.ts 
+ℹ entry: skills/lumine-harness/src/harness/adapter-cli-main.ts, skills/lumine-harness/src/harness/adapter-cli.ts, skills/lumine-harness/src/harness/adapter-manager.ts, skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts, skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts, skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts, skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts, skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts, skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts, skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts, skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts, skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts, skills/lumine-harness/src/harness/check-main.ts, skills/lumine-harness/src/harness/check.ts, skills/lumine-harness/src/harness/core/continuation-delivery.ts, skills/lumine-harness/src/harness/core/document-operations.ts, skills/lumine-harness/src/harness/core/documents.ts, skills/lumine-harness/src/harness/core/hook-io.ts, skills/lumine-harness/src/harness/core/instruction-entrypoints.ts, skills/lumine-harness/src/harness/core/messages.ts, skills/lumine-harness/src/harness/core/method-modules.ts, skills/lumine-harness/src/harness/core/node-bootstrap.ts, skills/lumine-harness/src/harness/core/node-runtime.ts, skills/lumine-harness/src/harness/core/phase-router.ts, skills/lumine-harness/src/harness/core/project-checks.ts, skills/lumine-harness/src/harness/core/project-config.ts, skills/lumine-harness/src/harness/core/root-resolver.ts, skills/lumine-harness/src/harness/core/runtime-environment.ts, skills/lumine-harness/src/harness/core/runtime-layout.ts, skills/lumine-harness/src/harness/core/session-context.ts, skills/lumine-harness/src/harness/core/session-scope.ts, skills/lumine-harness/src/harness/core/skill-catalog.ts, skills/lumine-harness/src/harness/core/stop-policy.ts, skills/lumine-harness/src/harness/core/task-cli-main.ts, skills/lumine-harness/src/harness/core/task-cli.ts, skills/lumine-harness/src/harness/core/task-contract.ts, skills/lumine-harness/src/harness/core/verification.ts, skills/lumine-harness/src/harness/core/work-status.ts, skills/lumine-harness/src/harness/tests/adapter-manager-cli.test.ts, skills/lumine-harness/src/harness/tests/adapter-runtime.test.ts, skills/lumine-harness/src/harness/tests/adoption-manager.test.ts, skills/lumine-harness/src/harness/tests/architecture-contracts.test.ts, skills/lumine-harness/src/harness/tests/core-v2.test.ts, skills/lumine-harness/src/harness/tests/coverage-groups.test.ts, skills/lumine-harness/src/harness/tests/document-lifecycle.test.ts, skills/lumine-harness/src/harness/tests/document-metadata.test.ts, skills/lumine-harness/src/harness/tests/instruction-entrypoints.test.ts, skills/lumine-harness/src/harness/tests/manager-storage-upgrade.test.ts, skills/lumine-harness/src/harness/tests/method-modules.test.ts, skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts, skills/lumine-harness/src/harness/tests/migration-legacy.test.ts, skills/lumine-harness/src/harness/tests/migration-work-status.test.ts, skills/lumine-harness/src/harness/tests/multi-agent-adapters.test.ts, skills/lumine-harness/src/harness/tests/node-runtime.test.ts, skills/lumine-harness/src/harness/tests/session-scope.test.ts, skills/lumine-harness/src/harness/tests/session-start.test.ts, skills/lumine-harness/src/harness/tests/status-protocol.test.ts, skills/lumine-harness/src/harness/tests/stop-gate.test.ts, skills/lumine-harness/src/harness/tests/storage-cli.test.ts, skills/lumine-harness/src/harness/tests/storage-version.test.ts, skills/lumine-harness/src/harness/tests/wiki-agentic.test.ts, skills/lumine-harness/src/harness/tests/wiki-compaction.test.ts, skills/lumine-harness/src/harness/tests/wiki-format.test.ts, skills/lumine-harness/src/harness/tests/wiki-map-markdown.test.ts, skills/lumine-harness/src/harness/tests/wiki-reader.test.ts, skills/lumine-harness/src/harness/tests/wiki-search-dispositions.test.ts, skills/lumine-harness/src/harness/tests/wiki-snapshot.test.ts, skills/lumine-harness/src/harness/tests/wiki-storage.test.ts, skills/lumine-harness/src/harness/tests/wiki.test.ts, skills/lumine-harness/src/harness/vendor/ignore.ts, skills/lumine-harness/src/harness/vendor/yaml.ts, skills/lumine-harness/src/harness/wiki-main.ts, skills/lumine-harness/src/harness/wiki.ts, skills/lumine-harness/src/harness/wiki/compaction.ts, skills/lumine-harness/src/harness/wiki/coverage.ts, skills/lumine-harness/src/harness/wiki/dispositions.ts, skills/lumine-harness/src/harness/wiki/documents.ts, skills/lumine-harness/src/harness/wiki/engine.ts, skills/lumine-harness/src/harness/wiki/files.ts, skills/lumine-harness/src/harness/wiki/format-migration.ts, skills/lumine-harness/src/harness/wiki/index.ts, skills/lumine-harness/src/harness/wiki/map-markdown.ts, skills/lumine-harness/src/harness/wiki/merge.ts, skills/lumine-harness/src/harness/wiki/messages.ts, skills/lumine-harness/src/harness/wiki/reader-model.ts, skills/lumine-harness/src/harness/wiki/references.ts, skills/lumine-harness/src/harness/wiki/search.ts, skills/lumine-harness/src/harness/wiki/sections.ts, skills/lumine-harness/src/harness/wiki/server.ts, skills/lumine-harness/src/harness/wiki/storage.ts, skills/lumine-harness/src/harness/wiki/transactions.ts, skills/lumine-harness/src/harness/wiki/types.ts, skills/lumine-harness/src/harness/wiki/validation-documents.ts, skills/lumine-harness/src/opencode/plugins/harness.ts, skills/lumine-harness/src/scripts/harness-manager-main.ts, skills/lumine-harness/src/scripts/harness-manager.ts, skills/lumine-harness/src/migration/knowledge.ts, skills/lumine-harness/src/migration/legacy.ts, skills/lumine-harness/src/migration/work-status.ts
+ℹ target: node22
+ℹ tsconfig: tsconfig.json
+ℹ Build start
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/harness/adapter-cli-main.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/harness/adapter-cli.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/harness/core/task-cli-main.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/harness/core/task-cli.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/scripts/harness-manager-main.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/scripts/harness-manager.mjs
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapter-manager.mjs                                                                       61.96 kB │ gzip: 17.84 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/engine.mjs                                                                           41.97 kB │ gzip: 10.26 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/scripts/harness-manager-main.mjs                                                                  37.51 kB │ gzip: 11.15 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/core-v2.test.mjs                                                                    34.90 kB │ gzip:  8.53 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-agentic.test.mjs                                                               31.56 kB │ gzip:  7.24 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/adoption-manager.test.mjs                                                           31.01 kB │ gzip:  6.61 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/compaction.mjs                                                                       30.18 kB │ gzip:  7.76 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/session-scope.test.mjs                                                              25.77 kB │ gzip:  5.71 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/adapter-manager-cli.test.mjs                                                        25.69 kB │ gzip:  6.15 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/multi-agent-adapters.test.mjs                                                       22.84 kB │ gzip:  4.84 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki.test.mjs                                                                       22.43 kB │ gzip:  5.81 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/work-status.mjs                                                                      21.85 kB │ gzip:  5.44 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-storage.test.mjs                                                               20.64 kB │ gzip:  4.96 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-compaction.test.mjs                                                            18.13 kB │ gzip:  4.59 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/architecture-contracts.test.mjs                                                     18.08 kB │ gzip:  5.12 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/storage.mjs                                                                          17.30 kB │ gzip:  4.86 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/task-contract.mjs                                                                    15.86 kB │ gzip:  4.85 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/server.mjs                                                                           15.55 kB │ gzip:  4.68 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/document-operations.mjs                                                              15.50 kB │ gzip:  4.65 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-reader.test.mjs                                                                14.74 kB │ gzip:  4.07 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/verification.mjs                                                                     14.65 kB │ gzip:  4.39 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-search-dispositions.test.mjs                                                   14.26 kB │ gzip:  3.67 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/status-protocol.test.mjs                                                            14.25 kB │ gzip:  3.90 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/documents.mjs                                                                        13.54 kB │ gzip:  4.43 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/migration-knowledge.test.mjs                                                        13.33 kB │ gzip:  3.12 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki-main.mjs                                                                             13.13 kB │ gzip:  4.57 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/stop-gate.test.mjs                                                                  13.12 kB │ gzip:  2.65 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/files.mjs                                                                            12.79 kB │ gzip:  4.17 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-format.test.mjs                                                                12.67 kB │ gzip:  3.34 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/migration/legacy.mjs                                                                              12.31 kB │ gzip:  3.78 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/stop-policy.mjs                                                                      11.81 kB │ gzip:  3.83 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/manager-storage-upgrade.test.mjs                                                     9.94 kB │ gzip:  2.89 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/messages.mjs                                                                          9.86 kB │ gzip:  4.53 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/documents.mjs                                                                         9.84 kB │ gzip:  3.41 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/migration-legacy.test.mjs                                                            9.53 kB │ gzip:  2.64 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/document-lifecycle.test.mjs                                                          9.48 kB │ gzip:  2.57 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/check-main.mjs                                                                             9.44 kB │ gzip:  3.62 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/search.mjs                                                                            9.40 kB │ gzip:  3.56 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/phase-router.mjs                                                                      8.22 kB │ gzip:  2.81 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/session-context.mjs                                                                   8.09 kB │ gzip:  4.11 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/messages.mjs                                                                          7.99 kB │ gzip:  3.94 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/skill-catalog.mjs                                                                     7.98 kB │ gzip:  2.99 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/adapter-runtime.test.mjs                                                             7.79 kB │ gzip:  2.42 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/migration/knowledge.mjs                                                                            7.38 kB │ gzip:  2.58 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-snapshot.test.mjs                                                               7.32 kB │ gzip:  1.91 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/instruction-entrypoints.test.mjs                                                     6.68 kB │ gzip:  2.10 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/method-modules.test.mjs                                                              6.57 kB │ gzip:  2.16 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/instruction-entrypoints.mjs                                                           6.55 kB │ gzip:  2.46 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/node-runtime.test.mjs                                                                6.46 kB │ gzip:  2.19 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/format-migration.mjs                                                                  6.37 kB │ gzip:  1.95 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/project-config.mjs                                                                    6.22 kB │ gzip:  2.02 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/migration/work-status.mjs                                                                          5.87 kB │ gzip:  2.17 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/dispositions.mjs                                                                      5.77 kB │ gzip:  1.98 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/session-scope.mjs                                                                     5.75 kB │ gzip:  2.04 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/document-metadata.test.mjs                                                           5.60 kB │ gzip:  2.11 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/zcode/hooks/dispatch.main.mjs                                                     5.46 kB │ gzip:  1.64 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codebuddy/hooks/dispatch.main.mjs                                                 5.45 kB │ gzip:  1.66 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapter-cli-main.mjs                                                                       5.12 kB │ gzip:  1.79 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/deepseek-harness/hooks/dispatch.main.mjs                                          4.99 kB │ gzip:  1.60 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/method-modules.mjs                                                                    4.73 kB │ gzip:  1.86 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-map-markdown.test.mjs                                                           4.73 kB │ gzip:  1.94 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/task-cli-main.mjs                                                                     4.32 kB │ gzip:  1.52 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/transactions.mjs                                                                      4.21 kB │ gzip:  1.54 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/map-markdown.mjs                                                                      4.03 kB │ gzip:  1.87 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/validation-documents.mjs                                                              3.96 kB │ gzip:  1.53 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/migration-work-status.test.mjs                                                       3.51 kB │ gzip:  1.38 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/coverage.mjs                                                                          3.00 kB │ gzip:  1.18 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/merge.mjs                                                                             2.94 kB │ gzip:  1.05 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/hook-io.mjs                                                                           2.77 kB │ gzip:  0.98 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/storage-cli.test.mjs                                                                 2.70 kB │ gzip:  1.04 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/root-resolver.mjs                                                                     2.67 kB │ gzip:  1.06 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/reader-model.mjs                                                                      2.54 kB │ gzip:  0.93 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/project-checks.mjs                                                                    2.44 kB │ gzip:  1.04 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/storage-version.test.mjs                                                             2.33 kB │ gzip:  0.81 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/stop.main.mjs                                                        2.28 kB │ gzip:  0.91 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/node-runtime.mjs                                                                      2.24 kB │ gzip:  1.06 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/node-bootstrap.mjs                                                                    2.14 kB │ gzip:  0.94 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/sections.mjs                                                                          2.10 kB │ gzip:  0.99 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/kimi/hooks/dispatch.main.mjs                                                      2.09 kB │ gzip:  0.79 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/tool-after.main.mjs                                                   2.04 kB │ gzip:  0.71 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/prompt-submit.main.mjs                                                1.82 kB │ gzip:  0.81 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/opencode/plugin-main.mjs                                                          1.67 kB │ gzip:  0.77 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/coverage-groups.test.mjs                                                             1.67 kB │ gzip:  0.70 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/runtime-layout.mjs                                                                    1.55 kB │ gzip:  0.56 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/tool-before.main.mjs                                                  1.52 kB │ gzip:  0.70 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/stop.main.mjs                                                         1.44 kB │ gzip:  0.60 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/trae/hooks/stop.main.mjs                                                          1.44 kB │ gzip:  0.60 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/runtime-environment.mjs                                                               1.42 kB │ gzip:  0.52 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/lib/stop-gate.mjs                                                     1.38 kB │ gzip:  0.55 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.mjs   1.34 kB │ gzip:  0.65 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/kimi/installed-dispatcher.mjs                                                     1.27 kB │ gzip:  0.62 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/session-start.main.mjs                                                1.27 kB │ gzip:  0.59 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/session-start.test.mjs                                                               1.23 kB │ gzip:  0.57 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/trae/hooks/session-start.main.mjs                                                 1.19 kB │ gzip:  0.54 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/session-start.main.mjs                                               1.13 kB │ gzip:  0.52 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/index.mjs                                                                             1.10 kB │ gzip:  0.37 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/references.mjs                                                                        1.06 kB │ gzip:  0.57 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/scripts/harness-manager.mjs                                                                        0.99 kB │ gzip:  0.36 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/after-agent-response.main.mjs                                        0.98 kB │ gzip:  0.51 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/deepseek-harness/hooks/dispatch.mjs                                               0.75 kB │ gzip:  0.35 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codebuddy/hooks/dispatch.mjs                                                      0.72 kB │ gzip:  0.35 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/stop-gate.main.mjs                                                    0.70 kB │ gzip:  0.41 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/zcode/hooks/dispatch.mjs                                                          0.70 kB │ gzip:  0.34 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/kimi/hooks/dispatch.mjs                                                           0.69 kB │ gzip:  0.34 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/continuation-delivery.mjs                                                             0.62 kB │ gzip:  0.36 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/check.mjs                                                                                  0.58 kB │ gzip:  0.28 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/opencode/plugins/harness.mjs                                                                       0.57 kB │ gzip:  0.29 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/lib/session-start-context.mjs                                         0.56 kB │ gzip:  0.30 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/hook-bootstrap.mjs                                                                0.55 kB │ gzip:  0.36 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/task-cli.mjs                                                                          0.50 kB │ gzip:  0.28 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki.mjs                                                                                   0.47 kB │ gzip:  0.27 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapter-cli.mjs                                                                            0.38 kB │ gzip:  0.25 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/after-agent-response.mjs                                             0.36 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/session-start.mjs                                                    0.34 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/session-start.mjs                                                     0.34 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/prompt-submit.mjs                                                     0.34 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/trae/hooks/session-start.mjs                                                      0.33 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/tool-before.mjs                                                       0.33 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/tool-after.mjs                                                        0.33 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/stop-gate.mjs                                                         0.32 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/stop.mjs                                                             0.31 kB │ gzip:  0.22 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/stop.mjs                                                              0.31 kB │ gzip:  0.22 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/trae/hooks/stop.mjs                                                               0.31 kB │ gzip:  0.22 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/vendor/yaml.mjs                                                                            0.14 kB │ gzip:  0.10 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/vendor/ignore.mjs                                                                          0.07 kB │ gzip:  0.07 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/types.mjs                                                                             0.01 kB │ gzip:  0.03 kB
+ℹ 126 files, total: 975.34 kB
+✔ Build complete in 53ms
+Reader bundle and offline assets verified
+
+COMMAND runtime:check
+$ tsx scripts/build-runtime.ts --check
+ℹ tsdown v0.22.14 powered by rolldown v1.2.5
+ℹ config file: <source-root>/tsdown.config.ts 
+ℹ entry: skills/lumine-harness/src/harness/adapter-cli-main.ts, skills/lumine-harness/src/harness/adapter-cli.ts, skills/lumine-harness/src/harness/adapter-manager.ts, skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.main.ts, skills/lumine-harness/src/harness/adapters/codebuddy/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/lib/session-start-context.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/lib/stop-gate.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.main.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/session-start.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.main.ts, skills/lumine-harness/src/harness/adapters/codex/hooks/stop-gate.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.main.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/after-agent-response.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.main.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/session-start.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.main.ts, skills/lumine-harness/src/harness/adapters/cursor/hooks/stop.ts, skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.main.ts, skills/lumine-harness/src/harness/adapters/deepseek-harness/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/hook-bootstrap.ts, skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.main.ts, skills/lumine-harness/src/harness/adapters/kimi/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/kimi/installed-dispatcher.ts, skills/lumine-harness/src/harness/adapters/opencode/plugin-main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/prompt-submit.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/stop.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-after.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.main.ts, skills/lumine-harness/src/harness/adapters/qoder/hooks/tool-before.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.main.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/session-start.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/stop.main.ts, skills/lumine-harness/src/harness/adapters/trae/hooks/stop.ts, skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.main.ts, skills/lumine-harness/src/harness/adapters/zcode/hooks/dispatch.ts, skills/lumine-harness/src/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.ts, skills/lumine-harness/src/harness/check-main.ts, skills/lumine-harness/src/harness/check.ts, skills/lumine-harness/src/harness/core/continuation-delivery.ts, skills/lumine-harness/src/harness/core/document-operations.ts, skills/lumine-harness/src/harness/core/documents.ts, skills/lumine-harness/src/harness/core/hook-io.ts, skills/lumine-harness/src/harness/core/instruction-entrypoints.ts, skills/lumine-harness/src/harness/core/messages.ts, skills/lumine-harness/src/harness/core/method-modules.ts, skills/lumine-harness/src/harness/core/node-bootstrap.ts, skills/lumine-harness/src/harness/core/node-runtime.ts, skills/lumine-harness/src/harness/core/phase-router.ts, skills/lumine-harness/src/harness/core/project-checks.ts, skills/lumine-harness/src/harness/core/project-config.ts, skills/lumine-harness/src/harness/core/root-resolver.ts, skills/lumine-harness/src/harness/core/runtime-environment.ts, skills/lumine-harness/src/harness/core/runtime-layout.ts, skills/lumine-harness/src/harness/core/session-context.ts, skills/lumine-harness/src/harness/core/session-scope.ts, skills/lumine-harness/src/harness/core/skill-catalog.ts, skills/lumine-harness/src/harness/core/stop-policy.ts, skills/lumine-harness/src/harness/core/task-cli-main.ts, skills/lumine-harness/src/harness/core/task-cli.ts, skills/lumine-harness/src/harness/core/task-contract.ts, skills/lumine-harness/src/harness/core/verification.ts, skills/lumine-harness/src/harness/core/work-status.ts, skills/lumine-harness/src/harness/tests/adapter-manager-cli.test.ts, skills/lumine-harness/src/harness/tests/adapter-runtime.test.ts, skills/lumine-harness/src/harness/tests/adoption-manager.test.ts, skills/lumine-harness/src/harness/tests/architecture-contracts.test.ts, skills/lumine-harness/src/harness/tests/core-v2.test.ts, skills/lumine-harness/src/harness/tests/coverage-groups.test.ts, skills/lumine-harness/src/harness/tests/document-lifecycle.test.ts, skills/lumine-harness/src/harness/tests/document-metadata.test.ts, skills/lumine-harness/src/harness/tests/instruction-entrypoints.test.ts, skills/lumine-harness/src/harness/tests/manager-storage-upgrade.test.ts, skills/lumine-harness/src/harness/tests/method-modules.test.ts, skills/lumine-harness/src/harness/tests/migration-knowledge.test.ts, skills/lumine-harness/src/harness/tests/migration-legacy.test.ts, skills/lumine-harness/src/harness/tests/migration-work-status.test.ts, skills/lumine-harness/src/harness/tests/multi-agent-adapters.test.ts, skills/lumine-harness/src/harness/tests/node-runtime.test.ts, skills/lumine-harness/src/harness/tests/session-scope.test.ts, skills/lumine-harness/src/harness/tests/session-start.test.ts, skills/lumine-harness/src/harness/tests/status-protocol.test.ts, skills/lumine-harness/src/harness/tests/stop-gate.test.ts, skills/lumine-harness/src/harness/tests/storage-cli.test.ts, skills/lumine-harness/src/harness/tests/storage-version.test.ts, skills/lumine-harness/src/harness/tests/wiki-agentic.test.ts, skills/lumine-harness/src/harness/tests/wiki-compaction.test.ts, skills/lumine-harness/src/harness/tests/wiki-format.test.ts, skills/lumine-harness/src/harness/tests/wiki-map-markdown.test.ts, skills/lumine-harness/src/harness/tests/wiki-reader.test.ts, skills/lumine-harness/src/harness/tests/wiki-search-dispositions.test.ts, skills/lumine-harness/src/harness/tests/wiki-snapshot.test.ts, skills/lumine-harness/src/harness/tests/wiki-storage.test.ts, skills/lumine-harness/src/harness/tests/wiki.test.ts, skills/lumine-harness/src/harness/vendor/ignore.ts, skills/lumine-harness/src/harness/vendor/yaml.ts, skills/lumine-harness/src/harness/wiki-main.ts, skills/lumine-harness/src/harness/wiki.ts, skills/lumine-harness/src/harness/wiki/compaction.ts, skills/lumine-harness/src/harness/wiki/coverage.ts, skills/lumine-harness/src/harness/wiki/dispositions.ts, skills/lumine-harness/src/harness/wiki/documents.ts, skills/lumine-harness/src/harness/wiki/engine.ts, skills/lumine-harness/src/harness/wiki/files.ts, skills/lumine-harness/src/harness/wiki/format-migration.ts, skills/lumine-harness/src/harness/wiki/index.ts, skills/lumine-harness/src/harness/wiki/map-markdown.ts, skills/lumine-harness/src/harness/wiki/merge.ts, skills/lumine-harness/src/harness/wiki/messages.ts, skills/lumine-harness/src/harness/wiki/reader-model.ts, skills/lumine-harness/src/harness/wiki/references.ts, skills/lumine-harness/src/harness/wiki/search.ts, skills/lumine-harness/src/harness/wiki/sections.ts, skills/lumine-harness/src/harness/wiki/server.ts, skills/lumine-harness/src/harness/wiki/storage.ts, skills/lumine-harness/src/harness/wiki/transactions.ts, skills/lumine-harness/src/harness/wiki/types.ts, skills/lumine-harness/src/harness/wiki/validation-documents.ts, skills/lumine-harness/src/opencode/plugins/harness.ts, skills/lumine-harness/src/scripts/harness-manager-main.ts, skills/lumine-harness/src/scripts/harness-manager.ts, skills/lumine-harness/src/migration/knowledge.ts, skills/lumine-harness/src/migration/legacy.ts, skills/lumine-harness/src/migration/work-status.ts
+ℹ target: node22
+ℹ tsconfig: tsconfig.json
+ℹ Build start
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/harness/adapter-cli-main.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/harness/adapter-cli.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/harness/core/task-cli-main.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/harness/core/task-cli.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/scripts/harness-manager-main.mjs
+ℹ Granting execute permission to ../../../../../..<runtime-build-temp>/stage/scripts/harness-manager.mjs
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapter-manager.mjs                                                                       61.96 kB │ gzip: 17.84 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/engine.mjs                                                                           41.97 kB │ gzip: 10.26 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/scripts/harness-manager-main.mjs                                                                  37.51 kB │ gzip: 11.15 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/core-v2.test.mjs                                                                    34.90 kB │ gzip:  8.53 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-agentic.test.mjs                                                               31.56 kB │ gzip:  7.24 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/adoption-manager.test.mjs                                                           31.01 kB │ gzip:  6.61 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/compaction.mjs                                                                       30.18 kB │ gzip:  7.76 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/session-scope.test.mjs                                                              25.77 kB │ gzip:  5.71 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/adapter-manager-cli.test.mjs                                                        25.69 kB │ gzip:  6.15 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/multi-agent-adapters.test.mjs                                                       22.84 kB │ gzip:  4.84 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki.test.mjs                                                                       22.43 kB │ gzip:  5.81 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/work-status.mjs                                                                      21.85 kB │ gzip:  5.44 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-storage.test.mjs                                                               20.64 kB │ gzip:  4.96 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-compaction.test.mjs                                                            18.13 kB │ gzip:  4.59 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/architecture-contracts.test.mjs                                                     18.08 kB │ gzip:  5.12 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/storage.mjs                                                                          17.30 kB │ gzip:  4.86 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/task-contract.mjs                                                                    15.86 kB │ gzip:  4.85 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/server.mjs                                                                           15.55 kB │ gzip:  4.68 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/document-operations.mjs                                                              15.50 kB │ gzip:  4.65 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-reader.test.mjs                                                                14.74 kB │ gzip:  4.07 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/verification.mjs                                                                     14.65 kB │ gzip:  4.39 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-search-dispositions.test.mjs                                                   14.26 kB │ gzip:  3.67 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/status-protocol.test.mjs                                                            14.25 kB │ gzip:  3.90 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/documents.mjs                                                                        13.54 kB │ gzip:  4.43 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/migration-knowledge.test.mjs                                                        13.33 kB │ gzip:  3.12 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki-main.mjs                                                                             13.13 kB │ gzip:  4.57 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/stop-gate.test.mjs                                                                  13.12 kB │ gzip:  2.65 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/files.mjs                                                                            12.79 kB │ gzip:  4.17 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-format.test.mjs                                                                12.67 kB │ gzip:  3.34 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/migration/legacy.mjs                                                                              12.31 kB │ gzip:  3.78 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/stop-policy.mjs                                                                      11.81 kB │ gzip:  3.83 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/manager-storage-upgrade.test.mjs                                                     9.94 kB │ gzip:  2.89 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/messages.mjs                                                                          9.86 kB │ gzip:  4.53 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/documents.mjs                                                                         9.84 kB │ gzip:  3.41 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/migration-legacy.test.mjs                                                            9.53 kB │ gzip:  2.64 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/document-lifecycle.test.mjs                                                          9.48 kB │ gzip:  2.57 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/check-main.mjs                                                                             9.44 kB │ gzip:  3.62 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/search.mjs                                                                            9.40 kB │ gzip:  3.56 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/phase-router.mjs                                                                      8.22 kB │ gzip:  2.81 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/session-context.mjs                                                                   8.09 kB │ gzip:  4.11 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/messages.mjs                                                                          7.99 kB │ gzip:  3.94 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/skill-catalog.mjs                                                                     7.98 kB │ gzip:  2.99 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/adapter-runtime.test.mjs                                                             7.79 kB │ gzip:  2.42 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/migration/knowledge.mjs                                                                            7.38 kB │ gzip:  2.58 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-snapshot.test.mjs                                                               7.32 kB │ gzip:  1.91 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/instruction-entrypoints.test.mjs                                                     6.68 kB │ gzip:  2.10 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/method-modules.test.mjs                                                              6.57 kB │ gzip:  2.16 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/instruction-entrypoints.mjs                                                           6.55 kB │ gzip:  2.46 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/node-runtime.test.mjs                                                                6.46 kB │ gzip:  2.19 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/format-migration.mjs                                                                  6.37 kB │ gzip:  1.95 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/project-config.mjs                                                                    6.22 kB │ gzip:  2.02 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/migration/work-status.mjs                                                                          5.87 kB │ gzip:  2.17 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/dispositions.mjs                                                                      5.77 kB │ gzip:  1.98 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/session-scope.mjs                                                                     5.75 kB │ gzip:  2.04 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/document-metadata.test.mjs                                                           5.60 kB │ gzip:  2.11 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/zcode/hooks/dispatch.main.mjs                                                     5.46 kB │ gzip:  1.64 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codebuddy/hooks/dispatch.main.mjs                                                 5.45 kB │ gzip:  1.66 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapter-cli-main.mjs                                                                       5.12 kB │ gzip:  1.79 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/deepseek-harness/hooks/dispatch.main.mjs                                          4.99 kB │ gzip:  1.60 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/method-modules.mjs                                                                    4.73 kB │ gzip:  1.86 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/wiki-map-markdown.test.mjs                                                           4.73 kB │ gzip:  1.94 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/task-cli-main.mjs                                                                     4.32 kB │ gzip:  1.52 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/transactions.mjs                                                                      4.21 kB │ gzip:  1.54 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/map-markdown.mjs                                                                      4.03 kB │ gzip:  1.87 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/validation-documents.mjs                                                              3.96 kB │ gzip:  1.53 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/migration-work-status.test.mjs                                                       3.51 kB │ gzip:  1.38 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/coverage.mjs                                                                          3.00 kB │ gzip:  1.18 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/merge.mjs                                                                             2.94 kB │ gzip:  1.05 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/hook-io.mjs                                                                           2.77 kB │ gzip:  0.98 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/storage-cli.test.mjs                                                                 2.70 kB │ gzip:  1.04 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/root-resolver.mjs                                                                     2.67 kB │ gzip:  1.06 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/reader-model.mjs                                                                      2.54 kB │ gzip:  0.93 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/project-checks.mjs                                                                    2.44 kB │ gzip:  1.04 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/storage-version.test.mjs                                                             2.33 kB │ gzip:  0.81 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/stop.main.mjs                                                        2.28 kB │ gzip:  0.91 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/node-runtime.mjs                                                                      2.24 kB │ gzip:  1.06 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/node-bootstrap.mjs                                                                    2.14 kB │ gzip:  0.94 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/sections.mjs                                                                          2.10 kB │ gzip:  0.99 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/kimi/hooks/dispatch.main.mjs                                                      2.09 kB │ gzip:  0.79 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/tool-after.main.mjs                                                   2.04 kB │ gzip:  0.71 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/prompt-submit.main.mjs                                                1.82 kB │ gzip:  0.81 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/opencode/plugin-main.mjs                                                          1.67 kB │ gzip:  0.77 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/coverage-groups.test.mjs                                                             1.67 kB │ gzip:  0.70 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/runtime-layout.mjs                                                                    1.55 kB │ gzip:  0.56 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/tool-before.main.mjs                                                  1.52 kB │ gzip:  0.70 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/stop.main.mjs                                                         1.44 kB │ gzip:  0.60 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/trae/hooks/stop.main.mjs                                                          1.44 kB │ gzip:  0.60 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/runtime-environment.mjs                                                               1.42 kB │ gzip:  0.52 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/lib/stop-gate.mjs                                                     1.38 kB │ gzip:  0.55 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/zcode/marketplace/plugins/lumine-harness-adapter/hooks/installed-dispatcher.mjs   1.34 kB │ gzip:  0.65 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/kimi/installed-dispatcher.mjs                                                     1.27 kB │ gzip:  0.62 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/session-start.main.mjs                                                1.27 kB │ gzip:  0.59 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/tests/session-start.test.mjs                                                               1.23 kB │ gzip:  0.57 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/trae/hooks/session-start.main.mjs                                                 1.19 kB │ gzip:  0.54 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/session-start.main.mjs                                               1.13 kB │ gzip:  0.52 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/index.mjs                                                                             1.10 kB │ gzip:  0.37 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/references.mjs                                                                        1.06 kB │ gzip:  0.57 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/scripts/harness-manager.mjs                                                                        0.99 kB │ gzip:  0.36 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/after-agent-response.main.mjs                                        0.98 kB │ gzip:  0.51 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/deepseek-harness/hooks/dispatch.mjs                                               0.75 kB │ gzip:  0.35 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codebuddy/hooks/dispatch.mjs                                                      0.72 kB │ gzip:  0.35 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/stop-gate.main.mjs                                                    0.70 kB │ gzip:  0.41 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/zcode/hooks/dispatch.mjs                                                          0.70 kB │ gzip:  0.34 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/kimi/hooks/dispatch.mjs                                                           0.69 kB │ gzip:  0.34 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/continuation-delivery.mjs                                                             0.62 kB │ gzip:  0.36 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/check.mjs                                                                                  0.58 kB │ gzip:  0.28 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/opencode/plugins/harness.mjs                                                                       0.57 kB │ gzip:  0.29 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/lib/session-start-context.mjs                                         0.56 kB │ gzip:  0.30 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/hook-bootstrap.mjs                                                                0.55 kB │ gzip:  0.36 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/core/task-cli.mjs                                                                          0.50 kB │ gzip:  0.28 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki.mjs                                                                                   0.47 kB │ gzip:  0.27 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapter-cli.mjs                                                                            0.38 kB │ gzip:  0.25 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/after-agent-response.mjs                                             0.36 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/session-start.mjs                                                    0.34 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/session-start.mjs                                                     0.34 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/prompt-submit.mjs                                                     0.34 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/trae/hooks/session-start.mjs                                                      0.33 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/tool-before.mjs                                                       0.33 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/tool-after.mjs                                                        0.33 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/codex/hooks/stop-gate.mjs                                                         0.32 kB │ gzip:  0.23 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/cursor/hooks/stop.mjs                                                             0.31 kB │ gzip:  0.22 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/qoder/hooks/stop.mjs                                                              0.31 kB │ gzip:  0.22 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/adapters/trae/hooks/stop.mjs                                                               0.31 kB │ gzip:  0.22 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/vendor/yaml.mjs                                                                            0.14 kB │ gzip:  0.10 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/vendor/ignore.mjs                                                                          0.07 kB │ gzip:  0.07 kB
+ℹ ../../../../../..<runtime-build-temp>/stage/harness/wiki/types.mjs                                                                             0.01 kB │ gzip:  0.03 kB
+ℹ 126 files, total: 975.34 kB
+✔ Build complete in 55ms
+Reader bundle and offline assets verified
+
+COMMAND runtime:test
+$ node --test skills/lumine-harness/assets/harness/tests/*.test.mjs
+✔ adapter status current does not guess when no runtime identity exists (5.985ms)
+✔ adapter status current uses one live pointer and reports ambiguity instead of guessing (16.746834ms)
+✔ adapter status current ignores stale runtime pointers (3.768875ms)
+✔ doctor isolates malformed routed Skills without hiding valid Skills (8.438625ms)
+✔ Cursor only requests a concrete trust action when the host explicitly reports a restricted workspace (12.730792ms)
+✔ doctor remains a static setup check even when runtime evidence exists (12.150959ms)
+✔ doctor output includes concrete setup steps and completion signals (5.911083ms)
+✔ readiness is independent from runtime evidence and product limitations (39.435584ms)
+✔ DeepSeek Harness becomes trial-only after setup evidence is observed (26.738417ms)
+✔ stale runtime evidence does not turn repository readiness into connection_error (8.0975ms)
+✔ adapter list reports repository metadata without claiming runtime compatibility (0.120833ms)
+✔ adapter status selected groups products without a worst-state conclusion (8.626625ms)
+✔ adapter status supports an explicit product and a stable machine contract (6.544083ms)
+✔ adapter check is read-only and leaves probes to explicit verification (12.846083ms)
+✔ adapter-routed Doctor messages require the Agent to read the canonical Skill (11.322583ms)
+✔ default Chinese output stays concise and details separates evidence (33.607083ms)
+✔ runtime observations are not presented as repository checks (22.781167ms)
+✔ details expands the four equally weighted capability groups (10.719459ms)
+✔ runtime skill evidence remains independent from readiness (15.188083ms)
+✔ English status and doctor translate guidance while preserving machine fields (111.552542ms)
+✔ English guidance preserves project-authored text and Unicode paths (18.758417ms)
+✔ CLI help, status and doctor follow the selected project locale without installing anything (406.272833ms)
+✔ adapter CLI resolves installed runtime for verify, status and doctor without claiming host evidence (297.529583ms)
+✔ adapter CLI resolves source-self-use runtime for verify, status and doctor without claiming host evidence (271.58ms)
+✔ source-self-use manual adapter entries and install instructions use the declared runtime (23.0455ms)
+✔ probe fixtures record the actual current process separately from the product host version (17.555083ms)
+✔ legacy receipt fixtures never infer the Hook runtime from the terminal (21.561875ms)
+✔ synthetic unsupported Hook receipts cannot inherit readiness from a supported terminal or stored pass label (13.317209ms)
+✔ Bun observations keep the Node compatibility field separate and unverified (0.185042ms)
+✔ standalone installed dispatcher fixtures find the current lumine-root marker (95.732458ms)
+✔ OpenCode adapter fixture preserves context hooks and records audit-only idle events (13.757541ms)
+✔ locale is pinned before proposal content; clean installation has four new Skills (957.830625ms)
+✔ adoption and upgrade preserve unreviewed document rules and a human-maintained docs index (1784.027791ms)
+✔ reviewed document retirement is explicit for old managed defaults and restores exact originals on rollback (1399.19625ms)
+✔ reviewed retirement rejects later document edits before applying the proposal (233.848208ms)
+✔ root instructions use the configured Wiki and declare only existing standards without duplicate repository maps (159.045292ms)
+✔ health checks declared standards routes while allowing pending Wiki content (163.847292ms)
+✔ upgrade preserves human-edited bundled methods and existing root architecture without claiming integrity (1299.853042ms)
+✔ proposal integrity rejects locale tampering (50.350209ms)
+✔ reader upgrade preserves older managed chunks and writes the entry after its assets (1295.68125ms)
+✔ interrupted migration resumes and rollback preserves edits after application (175.580167ms)
+✔ pre-application drift fails before any runtime mutation (54.041458ms)
+✔ old sessions preserve progress but reset retired Skill gate; legacy code stays in migration (182.867625ms)
+✔ runtime upgrade refuses unknown wiki state without changing the original (178.970125ms)
+✔ write-before-journal crash can roll back without resume (73.77675ms)
+✔ first ignore write has a persistent original backup (170.206708ms)
+✔ finalization is idempotent and rollback includes managed metadata (185.438833ms)
+✔ installed Hook command resolves a non-Git parent from a child checkout (197.367291ms)
+✔ source self-use points to canonical built Runtime and Skills without another implementation copy (141.538041ms)
+✔ rollback restores finalized migration bridges without a false conflict (177.434333ms)
+✔ migration finalization rejects stale host receipts from before the current application (152.851791ms)
+✔ deselecting managed adapters removes only unchanged installer-owned entry files and is reversible (1420.569875ms)
+✔ source self-use deselection removes host entry while preserving canonical community adapters (77.719334ms)
+✔ modified shared adapter settings require a reviewed override and retain unrelated configuration (1466.181666ms)
+✔ deselection requires ownership metadata and does not touch unrelated unselected host files (224.476834ms)
+✔ public project template stays host-neutral and portable (0.982542ms)
+✔ public README files avoid fixed model subjects and local absolute paths (0.647209ms)
+✔ README keeps the safe first-use path ahead of optional Plugin distribution (0.648334ms)
+✔ product adapters never contain physical Skill projections (0.137792ms)
+✔ capability manifest separates implementation, setup, runtime evidence, and maturity (0.573834ms)
+✔ public compatibility summaries separate repository implementation from current-session proof (0.889209ms)
+✔ public compatibility docs expose the OpenCode Stop Gate gap (0.706459ms)
+✔ dynamic Skill catalog discovers arbitrary project Skills and limits prompt output (22.8115ms)
+✔ canonical Skill reads accept relative and symlinked paths without accepting unrelated files (3.230959ms)
+✔ parallel sessions keep independent state and continuation is consumed per status revision (29.975625ms)
+✔ work-status CLI never guesses the active host (7.383792ms)
+✔ runtime probes are opt-in, redact local identity, and report evidence per capability (10.142084ms)
+✔ runtime verification rejects evidence outside the Harness root (5.023292ms)
+✔ runtime verification can observe two isolated session streams in one explicit probe (8.591125ms)
+✔ v2 roots work across nested Git boundaries and canonical source assets (10.345583ms)
+✔ configuration supports non-Git missing source directories and rejects escapes (11.395667ms)
+✔ natural language and business knowledge terms only discover candidates without a gate or mode (37.8835ms)
+✔ canonical Skill reads are reused only for the exact current content hash (32.565708ms)
+✔ stable document and AC IDs support Chinese filenames without fixed headings (16.5255ms)
+✔ task evidence binds the exact artifact, source file and selected acceptance section (50.141ms)
+✔ another task's AC, absent proof and an unsynchronized knowledge obligation cannot close implementation (18.943667ms)
+✔ task knowledge references accept Wiki IDs and preserve them across readable renames (99.853916ms)
+✔ new tasks require v3 while existing v2 records retain CAS updates and can only upgrade (27.384084ms)
+✔ v3 implementation cannot claim synchronized knowledge with the old refs-only shape (34.061333ms)
+✔ versioned knowledge sync records the affected source, disposition and verified scope (43.314042ms)
+✔ diagnostics can finish with failures without authorizing repairs or requiring an implementation task (50.930542ms)
+✔ a new user turn cannot reuse another turn's task binding or diagnostic mode (31.726792ms)
+✔ document check is read-only and session guidance is localized without workflow duplicates (17.452625ms)
+✔ a newer failed verification cannot be hidden by earlier passed evidence (15.957083ms)
+✔ AC sections include heading-like examples inside fenced blocks (20.64675ms)
+✔ project-owned checks preserve repository and architecture boundaries without fixed global headings (24.481417ms)
+✔ document rename preserves stable IDs, diagrams and AC hashes and updates current links (46.125666ms)
+✔ rename rejects Unicode and case collisions and ambiguous human names (20.294292ms)
+✔ rename journals recover interrupted writes and preserve edits made after preparation (36.70925ms)
+✔ migration awaiting host verification permits diagnostics with an explicit partial-state notice (5.9345ms)
+✔ Chinese command diagnostics explain the finding and next action while keeping machine codes stable (6.545083ms)
+✔ session identity cannot collide through punctuation normalization (8.580084ms)
+✔ bound task mode and selected Skills survive mixed keyword mentions without acquiring extra gates (18.702625ms)
+✔ an unknown explicit name is diagnostic data and cannot poison later task binding (20.911834ms)
+✔ Codex completes a validated task without inventing unobservable Skill reads (51.2025ms)
+✔ a completed grouping topic uses child pages without copying a parent document (0.906833ms)
+✔ empty leaves and groups with unfinished children cannot claim coverage (0.192834ms)
+✔ a page has one primary place even when another topic selects a different fragment (0.069334ms)
+✔ archive and restore preserve Chinese plan IDs, task references and acceptance baselines (58.353542ms)
+✔ historical evidence stays immutable and no-ID histories are not indexed (33.628125ms)
+✔ archive recovery resumes an interrupted move and rollback preserves subsequent edits (23.447209ms)
+✔ restore rejects existing and Unicode-equivalent destinations and stale source hashes (28.819ms)
+✔ lifecycle journals cannot mutate other archived records or escape the plan collections (28.268541ms)
+✔ JSON and YAML frontmatter preserve the same Chinese metadata and stable identity (4.848583ms)
+✔ flow lists, block lists and empty fields retain string-array metadata (0.87975ms)
+✔ structured Wiki metadata is not flattened into core string metadata (0.378459ms)
+✔ metadata is only read from an opening frontmatter block (0.242709ms)
+✔ invalid JSON or YAML and incomplete delimiters reject instead of reading body identity (0.898625ms)
+✔ task knowledge refs resolve JSON Wiki IDs through current documents (27.198834ms)
+✔ declared local standards resolve Markdown headings, stable anchors, and reference links (5.993917ms)
+✔ inline code in link labels remains a declaration while code examples are ignored (1.773625ms)
+✔ Markdown title slugs coexist with Wiki stable anchors and duplicate-heading conventions (2.299542ms)
+✔ inline HTML anchor examples do not create real standards sections (0.968375ms)
+✔ missing, empty, and nonexistent-section routes are distinct failures (3.226625ms)
+✔ explicit undefined references fail without treating ordinary bracketed prose as a link (0.861125ms)
+✔ instructions cannot masquerade as their own normative attachment or escape the project (1.336625ms)
+✔ empty Markdown destinations resolve to the current instructions and fail as self-links (1.807417ms)
+✔ pending Wiki navigation, undeclared standards, examples, and remote references do not fail installation (1.403291ms)
+✔ custom instructions paths resolve declarations relative to the instructions document (3.027375ms)
+✔ modern runtime upgrade fixes preservation in its signed proposal and leaves historical Wiki, candidates and tasks byte-identical (2160.551333ms)
+✔ schema 3 projects can receive another runtime upgrade without migrating state or lowering the writer fence (1530.678459ms)
+✔ rolling back a pre-storage runtime requires explicit storage rollback before any installed file is replaced (1424.570917ms)
+✔ preserve mode checks new corruption without reselecting historical Markdown conversion at apply or finalize (1383.741417ms)
+✔ historic proposals without knowledgeMode retain the original one-time conversion contract (254.926375ms)
+✔ module integrity checks adaptation hashes while accepting additional upstream provenance (6.748417ms)
+✔ missing, edited, and unlisted module files are reported separately (6.4985ms)
+✔ module manifests cannot omit format files or escape their directory (10.20825ms)
+✔ module manifests reject duplicate paths and missing manifests (3.888917ms)
+✔ nested Skill entries and module symlinks are rejected without reading outside content (6.050166ms)
+✔ health and all check bundled modules without requiring a root architecture file or an authored Wiki (39.779791ms)
+✔ architecture checks retain existing project-owned document requirements (28.065458ms)
+✔ conversion preserves stable anchors, body qualifications, and idempotence (8.748042ms)
+✔ current and baseline are converted separately; candidates and packet CAS references follow their own text (9.588958ms)
+✔ unfinished transactions prevent conversion before any original state changes (6.079167ms)
+✔ manager backs up knowledge, resumes each interrupted write, and protects later human changes during rollback (935.693833ms)
+✔ distinct CRLF baseline and pending text are converted without absorbing human edits (4.379917ms)
+✔ a format marker does not hide old transactions or later convertible assets (5.055833ms)
+✔ apply rejects a transaction created after proposal before changing installed files (132.277916ms)
+✔ apply rejects late old Markdown and embedded baselines not authorized by proposal (186.781042ms)
+✔ apply, finalize and rollback respect the Wiki writer lock (281.294541ms)
+✔ the format marker is last and interruption after it still resumes from the journal (630.549542ms)
+✔ finalization blocks new old-format assets and pending journals, but allows valid later edits (374.890084ms)
+✔ legacy hook bridge executes a guarded entry and forwards stdin, arguments and exit status (76.393667ms)
+✔ private trees, embedded repositories and symlinks stay outside cleanup even with reviewed paths (8.038667ms)
+✔ unclassified and newly appearing files stop finalization before cleanup (6.755917ms)
+✔ verified cleanup can resume after an individual deletion and rollback restores verified originals (8.831416ms)
+✔ retired templates and Skills require an unchanged baseline or an explicit reviewed file (9.034334ms)
+✔ session migration uses the Core identity path and archives old probes and ambiguous data (6.037292ms)
+✔ duplicate session identities are preserved as history instead of overwriting each other (2.622583ms)
+✔ opaque runtime files remain protected rather than being converted through lossy UTF-8 (3.608208ms)
+✔ six status migration preserves scope, task mode, user turn, progress and consumed budget (0.760709ms)
+✔ unknown or malformed status cannot be inferred as complete (0.312333ms)
+✔ migration planning is read-only, preserves originals and returns hashes for manager CAS (14.986ms)
+✔ root lookup crosses nested Git boundaries (2.38075ms)
+✔ public Stop Policy preserves all three states and deduplicates one status revision (26.171583ms)
+✔ ZCode applies its three-cycle host limit without limiting later user-authorized chains (19.106833ms)
+✔ Qoder blocks mutation until the routed public Skill was read (359.20725ms)
+✔ one malformed shared Skill does not hide valid Skills (9.169333ms)
+✔ CodeBuddy gates Harness and explicitly requested shared Skills through canonical reads (608.518917ms)
+✔ ZCode Hook-only Plugin routes the shared Skill and records runtime evidence (360.335125ms)
+✔ DeepSeek Harness bridge verifies native Skill evidence before mutation (279.65ms)
+✔ Cursor emits one followup_message per continuation status revision (131.168ms)
+✔ Kimi installer is idempotent and preserves unrelated TOML (3.862375ms)
+✔ Kimi validation failure leaves configuration and dispatcher untouched (1.503292ms)
+✔ repository keeps one canonical Skill source and capability boundaries remain explicit (1.173833ms)
+✔ skills inspect CLI formats a single Skill descriptor (0.137792ms)
+﹣ Doctor keeps product-side setup and partial semantics visible (0.027708ms) # SKIP
+✔ maintenance engines match the runtime LTS branch policy (0.822667ms)
+✔ reviewed Node LTS branches have exact minimums and do not admit prereleases or future majors (0.424167ms)
+✔ early diagnostics include actual version, support range and an action in both locales (0.1945ms)
+✔ bootstrap rejects before loading an implementation and preserves machine feedback (0.831041ms)
+✔ unsupported public imports reject before implementation loading without a CLI side effect (0.690958ms)
+✔ real symlink entry invocation executes the main and retains early unsupported-version feedback (75.588375ms)
+✔ main detection tolerates missing invocation files and non-file URLs (0.378875ms)
+✔ a completed implementation followed by an independent read-only request never checks or rewrites old evidence (129.148583ms)
+✔ unknown scope, unbound implementation, missing verification and genuine evidence drift remain blocked (51.042833ms)
+✔ same request cannot downgrade implementation or switch tasks, and two sessions remain independent (27.282834ms)
+✔ real host turn identifiers, retry transport identities and continuation receipts have separate meanings (32.409625ms)
+✔ late Stop and event retries from retired requests cannot reset or write the current read-only scope (131.284333ms)
+✔ stable response identities reject cross-request late Stops even without host user-turn IDs (35.66725ms)
+✔ new prompts and current progress events may reference an older response without replaying its report (36.640833ms)
+✔ reportless Stop with an old response association still requires a fresh current report (20.79775ms)
+✔ reportless Stop consumes a fresh current structured report rather than its historical response association (17.380125ms)
+✔ response replay history remains bounded without storing response text (399.210333ms)
+✔ bounded request history fails closed for unknown Stop identities after eviction (123.7945ms)
+✔ continued feature work keeps one Spec, Plan, task, progress and applicable approval across request scopes (18.830875ms)
+✔ session CLI supports JSON and Chinese guidance; identity and a fallback request key are explicit (180.336625ms)
+✔ Trae protocol subprocess rejects unbound work and accepts the explicitly declared independent diagnosis (99.298292ms)
+✔ SessionStart uses the public AGENTS and Skill sources (3.979375ms)
+✔ only the final standalone report controls stopping; examples, quotes, fences and duplicate tails cannot impersonate it (1.971541ms)
+✔ structured and terminal reports merge explanations, but conflicting intentions require bounded correction (28.395541ms)
+✔ invalid reports and completion failures share the same budget as ordinary continuation (106.524666ms)
+✔ unchanged rejected completion stops retrying rather than bypassing the autonomous limit (18.46425ms)
+✔ Codex report correction requests one bounded followup and does not silently terminate the host (20.970125ms)
+✔ a new user turn invalidates structured state, and migration requires a fresh current report (26.483292ms)
+✔ diagnosis completes with failed findings; an unobservable progress source is not treated as stalled (44.382083ms)
+✔ automatic continuation evidence needs the matching receipt in the same session and user turn (111.729666ms)
+✔ one response identity cannot change its report and an occupied stop lock cannot deliver twice (15.078625ms)
+✔ structured CLI reports carry explanation, reject stale turns, and support JSON stdin without guessing identity (75.669625ms)
+✔ unreadable session state is preserved rather than replaced by a fresh budget (17.026041ms)
+✔ explicit WORK_STATUS drives Codex continuation and pause (19.089042ms)
+✔ one status emission creates one logical continuation request (8.490125ms)
+✔ one emission cannot silently change status and a new user turn invalidates old state (16.51075ms)
+✔ fallback emission identity changes only after continuation delivery (16.687042ms)
+✔ changing Hook invocation IDs does not create a new assistant status emission (11.957916ms)
+✔ an explicitly observable new user turn resets the autonomous chain at Stop (22.928166ms)
+✔ prompt submission infers a real user turn only when no automatic continuation is pending (10.78325ms)
+✔ fresh status emissions can continue repeatedly until the configured chain limit (107.792875ms)
+✔ ZCode host limit overrides the generic continuation limit (28.948875ms)
+✔ two observable no-progress cycles pause while a progress event resets the count (31.351458ms)
+✔ semantic continuation and host delivery remain separate (0.138458ms)
+✔ storage CLI saves an exact reviewed plan, rejects a wrong hash and offers JSON recovery (473.429083ms)
+✔ storage version fence remains distinct from workflow version and reads do not rewrite config (5.262667ms)
+✔ an upgrade preserves the compacted project version fence and rejects downgrade overrides (178.272958ms)
+✔ new text pages are created through prepared sources, with no prior document or model service (69.4105ms)
+✔ source discovery must be prepared; new scopes can be added without bypassing protection (117.118334ms)
+✔ replacing deleted sources and watch scopes requires an explicit prepared declaration (125.065125ms)
+✔ explicit source replacement cannot retain an old source through a broad prepared scope (128.147916ms)
+✔ creation protects another writer and source drift retains candidate text (43.447708ms)
+✔ section identity survives title edits; code fences are not headings; fragments and outline are bounded (73.238708ms)
+✔ query uses meaningful Chinese, inflected English and code symbols and declines unrelated questions (84.613125ms)
+✔ query does not rescan source repositories and explicit scan updates observed freshness (74.021541ms)
+✔ query obeys six-card and total-character budgets without image payloads (264.768958ms)
+✔ directory and split pages publish as one recoverable group and retain old fragment identities (105.519958ms)
+✔ dependent candidates wait together and an external directory edit is protected (48.844209ms)
+✔ semantic review is separately recorded against exact text and source, then becomes outdated (47.236541ms)
+✔ a malformed page is isolated from catalog, query and healthy documents, but check reports it (29.569625ms)
+✔ hierarchy cycles and duplicate normalized creation paths are rejected before writes (7.233625ms)
+✔ merged identity and new human watch scopes cannot silently change a prepared baseline (77.172417ms)
+✔ removing a fragment protects incoming relations and unchanged directory references (104.292292ms)
+✔ prospective reference moves preserve inbound links and related navigation through aliases (117.749583ms)
+✔ document fallback aliases reject fragment cycles before publishing and resolve valid fragments once (59.990333ms)
+✔ latest explicit update decisions protect candidates and their dependent group (112.0555ms)
+✔ search excerpts render labels as text and preserve identifiers and negative conditions (0.830375ms)
+✔ bounded excerpts keep the complete matching sentence instead of dropping a leading negation (0.546708ms)
+✔ clearing local receipts removes current freshness without losing semantic review or knowledge (39.928458ms)
+✔ copied local receipts do not establish source freshness in another checkout (37.243875ms)
+✔ a missing registered repository is reported by query without walking or hashing sources (21.99375ms)
+✔ receipt cache failure cannot undo a durable content transaction (37.193417ms)
+✔ explicit compaction deduplicates completed payloads and preserves active candidates, generated baseline and document rollback bytes (1826.28775ms)
+✔ all persistent migration steps resume or roll back without Git (2500.22075ms)
+✔ CAS rejects a new packet, edited wiki, corrupt object and later manual state before destructive writes (78.009209ms)
+✔ unknown formats and divergent duplicate candidates are explicit protected failures (15.270417ms)
+✔ known legacy single-document receipts and Markdown-only active candidates convert without losing their meaning (55.377291ms)
+✔ an unfinished transaction keeps the byte baseline required by its existing CAS and can recover after migration (64.326084ms)
+✔ Git recovery bytes are excluded before source bytes are saved (110.710458ms)
+✔ completed status never deletes a later edited candidate or an unproven lone Markdown candidate (136.516209ms)
+✔ all rollback writes can be interrupted and recovery never lowers the version fence before old bytes are restored (1030.241333ms)
+✔ corrupt recovery bytes and competing locks fail before state mutation (46.21675ms)
+✔ metadata bytes survive compaction and an existing document rename can still roll back its exact alias CAS (72.719917ms)
+✔ JSON and YAML headers become a short header plus one hidden, lossless metadata appendix (20.456917ms)
+✔ legacy YAML comments stop conversion instead of disappearing, including nested and inline comments (82.527291ms)
+✔ a comment retained only in the generation baseline also blocks conversion (61.96475ms)
+✔ format migration keeps human edits, baseline, source observation and review evidence without advancing their dates (200.095917ms)
+✔ an unresolved packet blocks only its unapplied units (226.729917ms)
+✔ format-only conversion retains a matching review and observation time (90.074625ms)
+✔ Markdown navigation reuses hierarchy and current document/section identities with encoded paths (0.924958ms)
+✔ map --markdown emits plain bilingual Markdown without writing another directory source; JSON stays unchanged (28.581292ms)
+✔ reader derives navigation and partial/missing progress from the sole coverage hierarchy (1.015791ms)
+✔ reader resets a loaded unknown identity and clears a remembered project switch (0.088083ms)
+✔ reader reuses parser-owned stable heading identities including duplicates and Chinese labels (2.359084ms)
+✔ reader API preserves shared outlines, typed reverse links and source observation boundaries (466.484167ms)
+✔ reader API resolves moved deep links while returning the full canonical document (74.289042ms)
+✔ one invalid page is reported without hiding readable catalog pages or coverage (30.301125ms)
+✔ relative source references respect registered child roots, declared ranges and symlink exclusions (98.596834ms)
+✔ Wiki CLI treats explicit --root as an exact project root (186.744833ms)
+✔ reader search paginates complete Wiki matches, isolates Agent query budget and restarts after an index change (106.040208ms)
+✔ source dispositions are scoped, versioned and re-open after source or topic changes (274.547791ms)
+✔ a damaged coverage map leaves the source observation scan available and reopens classifications (37.704042ms)
+✔ validation search reads only individually registered Markdown and invalidates a changed page cursor (83.034417ms)
+✔ validation registration rejects traversal, glob, directories and outside paths (8.729667ms)
+✔ validation namespace preserves real Wiki IDs and suppresses a synthetic identity collision (58.163209ms)
+✔ source snapshots reuse parent ranges and exact bytes within one operation (15.855ms)
+✔ a later parent snapshot reuses already captured descendant subtrees without fingerprint drift (9.800208ms)
+✔ cache reuse preserves repository, ignore and missing boundaries and new operations see additions/deletions (14.263209ms)
+✔ scan and prepare share overlap snapshots only within that operation (69.724833ms)
+✔ codec is pure, shares text and source objects, dual reads, and validates content identity (16.449917ms)
+✔ complete packets and transactions become idempotent receipts and candidates have no duplicate markdown (92.507459ms)
+✔ 100 scan, same-packet apply and recovery calls leave every shared byte unchanged (1732.03775ms)
+✔ generated baseline and human edits survive three-way merge and subsequent GC (35.112542ms)
+✔ partial, conflict and explicit decisions pin original baselines and candidates (61.36275ms)
+✔ interrupted transaction retains exact disk bytes and nested references through GC and recovery (31.318417ms)
+✔ GC refuses missing objects, corrupt objects, unknown envelopes and symlinks without deleting orphan data (8.000125ms)
+✔ schema2 reads remain untouched and schema3 activation preserves configuration fingerprint (35.172042ms)
+✔ identical review is idempotent while a new review preserves fresh evidence (49.619875ms)
+✔ recovery preserves a candidate edited after its transaction consumed the original (28.362209ms)
+✔ unfinished compaction blocks ordinary writes and GC until explicit recovery completes (26.569416ms)
+✔ missing or malformed generated baseline never falls back to the current human text (50.693584ms)
+✔ document format migration reads referenced baselines and keeps human edits under schema3 (27.03575ms)
+✔ deleted source persists null fingerprints and missing-source state without invalidating legacy baselines (51.924041ms)
+✔ cold cache preserves bilingual knowledge and review but requires local source verification (185.554833ms)
+✔ a document without baseline is protected; overlapping human and generated edits stay durable (107.311834ms)
+✔ disjoint human edits are preserved by the generated baseline across repeated updates (135.740959ms)
+✔ new unreferenced files and dirty content invalidate freshness and prepared work (85.59325ms)
+✔ source registration, exclusions, traversal and symlink boundaries are enforced (4.806208ms)
+✔ diagram validation is text-only and does not equate structure checks with semantic acceptance (8.07125ms)
+✔ three-way merge rejects same-position competing insertions but merges distant changes (0.541583ms)
+✔ reader serves text to allowed loopback origin and rejects writes, hostile origin and file paths (33.167833ms)
+✔ updates only create text files and preserve image-free knowledge assets (30.287625ms)
+✔ Git ignored files, nested repositories and migration backups do not enter parent snapshots (21.398ms)
+✔ deferred and keep-current decisions persist without deleting candidate evidence (26.635417ms)
+✔ a pending document-write transaction restores its baseline and refuses later human drift (35.8225ms)
+✔ explicit per-topic watch scopes avoid invalidating unrelated knowledge (42.603083ms)
+✔ diagram captions, relations and Mermaid labels participate in text retrieval (9.229458ms)
+✔ historical documents remain directly readable but are excluded from default catalog and queries (21.071583ms)
+✔ reader resolves historical and validation Markdown references without serving arbitrary files (97.895ms)
+ℹ tests 306
+ℹ suites 0
+ℹ pass 305
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 12303.9865
+
+COMMAND check-skill-package
+Four bilingual Skills, shared planning modules, runtime, offline reader, migration boundary and adapters verified.
+
+COMMAND check-repo-sync
+Canonical Skill and Plugin wrapper are identical.

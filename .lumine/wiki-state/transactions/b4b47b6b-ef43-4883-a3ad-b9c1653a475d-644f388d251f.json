@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "b4b47b6b-ef43-4883-a3ad-b9c1653a475d-644f388d251f",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "candidateHashes": {
+      "lumine-wiki": "5d3cab76c974000d48b46eb8405281d4437be91ea8d061437e46b9b9d2bdddd5"
+    },
+    "mutationHashes": [
+      {
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+        "beforeHash": "c65e928044492c623fff9f6a9da114aeb91343bf56c3628d8c06f2530c32d67d",
+        "afterHash": "af6288feb02d532871fde72124375da554d277a393e1ab5103d5f56312de6bd6"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/644f388d251fd2bd3cea369d7d36c63f688f22c24ccbb8a04fee423cf0fe6dac.json",
+        "beforeHash": "f9eab1a9172409cb131361656f3f613ac30a384797a5f82a44395d50e61c8419",
+        "afterHash": "936229e68dd0664cb0e1f18509b149f61e72219740ddbaa6dcdafaca2404caff"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/644f388d251fd2bd3cea369d7d36c63f688f22c24ccbb8a04fee423cf0fe6dac.json",
+        "beforeHash": "8007b708449b597bc432f890d5d4a6e6903dd78a893693643067d7470c448bb8",
+        "afterHash": "b3ca2ea5572f2ad9c5a373143c15e444d80f8c6587c794964f20a53955798be0"
+      }
+    ]
+  }
+}

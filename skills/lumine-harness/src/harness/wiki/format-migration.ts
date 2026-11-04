@@ -1,8 +1,9 @@
+import { decodeStorageRecord, gcStorageObjects, readStorageRecord, storageEnabled, storageRecordText } from './storage.ts';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync } from 'node:fs';
-import { containedPath, hash, readJson, withWikiLock } from './files.ts';
+import { containedPath, hash, withWikiLock } from './files.ts';
 import { baselineFor, findDocument, formatWikiDocument, isStructuredWikiDocument, listDocuments, parseDocument } from './documents.ts';
-import { applyTransaction, diskText, jsonText, pendingTransactions, recoverTransactions, statePath } from './transactions.ts';
+import { applyTransaction, diskText, pendingTransactions, recoverTransactions, statePath } from './transactions.ts';
 import type { Baseline, ObservationRecord, ReviewRecord, UpdatePacket } from './types.ts';
 
 export interface WikiFormatMigrationItem { id: string; path: string; status: 'eligible' | 'current' | 'blocked' | 'converted'; reason?: string; beforeRevision: string; afterRevision?: string }
@@ -12,7 +13,7 @@ function unresolvedPacketIds(root: string): Set<string> {
   if (!existsSync(directory)) return unresolved;
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (!entry.isDirectory() || entry.isSymbolicLink()) continue;
-    const packet = readJson<UpdatePacket | null>(containedPath(root, `.lumine/wiki-state/updates/${entry.name}/packet.json`, false), null);
+    const packet = readStorageRecord<UpdatePacket | null>(root, containedPath(root, `.lumine/wiki-state/updates/${entry.name}/packet.json`, false), null);
     if (!packet || packet.schemaVersion !== 2) throw new Error(`UPDATE_PACKET_INVALID:${entry.name}`);
     if (packet.status === 'applied') continue;
     for (const unit of packet.units) {
@@ -58,7 +59,7 @@ export function migrateWikiDocumentFormat(root: string, id: string): WikiFormatM
     if (current === null || hash(current) !== planned.beforeRevision) return { ...planned, status: 'blocked', reason: 'DOCUMENT_CHANGED' };
     const baselinePath = statePath('documents', id), beforeBaseline = diskText(root, baselinePath);
     if (beforeBaseline === null) return { ...planned, status: 'blocked', reason: 'BASELINE_MISSING' };
-    const baseline = JSON.parse(beforeBaseline) as Baseline;
+    const baseline = decodeStorageRecord<Baseline>(root, JSON.parse(beforeBaseline));
     const next = formatWikiDocument(current, planned.path);
     const generated = formatWikiDocument(baseline.generatedMarkdown, planned.path);
     const beforeGenerated = parseDocument(baseline.generatedMarkdown, planned.path);
@@ -70,21 +71,22 @@ export function migrateWikiDocumentFormat(root: string, id: string): WikiFormatM
     const afterBaseline: Baseline = { ...baseline, generatedMarkdown: generated, appliedRevision };
     const mutations = [
       { path: planned.path, before: current, after: next },
-      { path: baselinePath, before: beforeBaseline, after: jsonText(afterBaseline) }
+      { path: baselinePath, before: beforeBaseline, after: storageRecordText(root, afterBaseline) }
     ];
     const observationPath = statePath('observations', id), beforeObservation = diskText(root, observationPath);
     if (beforeObservation !== null) {
-      const observation = JSON.parse(beforeObservation) as ObservationRecord;
+      const observation = decodeStorageRecord<ObservationRecord>(root, JSON.parse(beforeObservation));
       if (observation.id !== id) return { ...planned, status: 'blocked', reason: 'OBSERVATION_ID_MISMATCH' };
-      if (observation.revision === planned.beforeRevision) mutations.push({ path: observationPath, before: beforeObservation, after: jsonText({ ...observation, revision: hash(next) }) });
+      if (observation.revision === planned.beforeRevision) mutations.push({ path: observationPath, before: beforeObservation, after: storageRecordText(root, { ...observation, revision: hash(next) }) });
     }
     const reviewPath = statePath('reviews', id), beforeReview = diskText(root, reviewPath);
     if (beforeReview !== null) {
-      const review = JSON.parse(beforeReview) as ReviewRecord;
+      const review = decodeStorageRecord<ReviewRecord>(root, JSON.parse(beforeReview));
       if (review.documentId !== id) return { ...planned, status: 'blocked', reason: 'REVIEW_ID_MISMATCH' };
-      if (review.revision === planned.beforeRevision) mutations.push({ path: reviewPath, before: beforeReview, after: jsonText({ ...review, revision: hash(next) }) });
+      if (review.revision === planned.beforeRevision) mutations.push({ path: reviewPath, before: beforeReview, after: storageRecordText(root, { ...review, revision: hash(next) }) });
     }
     applyTransaction(root, { schemaVersion: 1, id: `wiki-format-${randomUUID()}`, status: 'pending', mutations });
+    if (storageEnabled(root)) gcStorageObjects(root, { dryRun: false });
     return { ...planned, status: 'converted', afterRevision: hash(next) };
   });
 }

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "id": "lumine-wiki",
+    "markdown": {
+      "$lumineObject": "5fba6fa94e972cd59fca485c35fab633119fc285ee79c4288c3c51a80c373214",
+      "kind": "text",
+      "bytes": 6255
+    }
+  }
+}

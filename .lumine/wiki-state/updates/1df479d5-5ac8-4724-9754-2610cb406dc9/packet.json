@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "1df479d5-5ac8-4724-9754-2610cb406dc9",
+    "createdAt": "2026-11-04T11:17:52.183Z",
+    "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+    "scope": [
+      "lumine-task-check"
+    ],
+    "status": "applied",
+    "storageReceipt": true,
+    "units": [
+      {
+        "id": "lumine-task-check",
+        "kind": "update",
+        "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md"
+      }
+    ],
+    "results": [
+      {
+        "id": "lumine-task-check",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "0a8b213ae2705581b9567be5eb45e3b40b190d5fb37af6b46d22ff9fc9fbfad9"
+      }
+    ],
+    "audit": {
+      "recordHash": "24c7568ee5bbde26937d0b992ab32ce099432468a2fb0bea8910e0d947de04e5",
+      "unitHashes": [
+        {
+          "id": "lumine-task-check",
+          "sha256": "fb4f472efe0e8ddba85f6014f49c9d1149f169e66e935ed680cb61ce38bd9654"
+        }
+      ]
+    }
+  }
+}

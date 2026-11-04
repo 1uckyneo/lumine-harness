@@ -25,3 +25,5 @@ Organize topics as answer, mechanism and diagrams, tradeoffs and limits, then so
 
 <!-- LH-KNOWLEDGE-07 -->
 When asked to open the knowledge base or start, restart, or stop its reader, read [Reader management](references/reader.md). Prefer reusing a service owned by the current project, and verify process ownership before stopping it. Direct Markdown reading and Agent retrieval need no server.
+
+Use [current request scope](../lumine-run/references/request-scope.md) before work and closeout. New requests do not automatically replace persistent tasks or restart the product workflow.

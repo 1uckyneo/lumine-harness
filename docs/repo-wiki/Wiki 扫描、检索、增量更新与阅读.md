@@ -83,6 +83,15 @@ flowchart TB
 
 修改维护工具应覆盖人工改文与改图、重叠冲突、并发新建、生成期间源码漂移、同组中断与恢复、错误引用和新文件漏扫。检索应用中文、英文、代码符号、模糊问法及明确无答案测试；更重要的是未参与建库的 Agent 能否据此正确回答、定位实现并维护新知识。程序通过不能单独证明内容质量。
 
+<a id="storage-lifecycle"></a>
+## 内容复用与显式整理
+
+Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象，基线、活动包和候选通过引用复用。读取校验哈希、字节长度、类型与路径；缺失对象明确失败，不将当前含人工修改的正文冒充生成基线。候选不再同时保存 Markdown 和 JSON 内全文。成功包与事务只留身份、结果、组关系及版本指纹回执，回执中的审计哈希不永久保留历史全文；prepared、partial、冲突、defer 和 keep-current 继续保留有效恢复内容。
+
+无变化扫描保留共享观察时间，同包重复应用和恢复不产生新版本；实际来源变化仍会更新观察，真正的新语义审阅也会保存。回收只处理无当前状态、活动操作或恢复记录引用的对象，不按年龄删除。文档改名／归档回滚记录维持原格式。
+
+旧项目先升级双读 Runtime，再用 `wiki storage compact --plan --output <plan.json>` 审阅预计收益和精确清单，`--apply <plan.json> --expect <plan-sha256>` 应用；`inspect/check` 提供用量与完整性，`recover <operation-id>` 续跑，`--rollback` 回滚。迁移先将 project schemaVersion 提升为 3 阻止旧 writer，workflowVersion 保持 2；最后核验引用并回收。忽略的 `.lumine-migrations/` 保存原始字节，回滚遇后来人工修改停止覆盖。普通提交只减小当前状态和后续增长，恢复备份及 Git 历史需单独计量。
+
 <!-- lumine-wiki-metadata:v1
 {
   "tags": [
@@ -226,6 +235,16 @@ flowchart TB
       "id": "document-contract",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/docs-seed/index.md"
+    },
+    {
+      "id": "storage",
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/wiki/storage.ts"
+    },
+    {
+      "id": "compaction",
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/wiki/compaction.ts"
     }
   ],
   "relations": [
@@ -306,6 +325,14 @@ flowchart TB
     {
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/wiki/validation-documents.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/wiki/storage.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/wiki/compaction.ts"
     }
   ],
   "diagrams": [
@@ -355,6 +382,13 @@ flowchart TB
         "sections",
         "server-document",
         "reference-alias"
+      ]
+    },
+    {
+      "id": "storage-lifecycle",
+      "sources": [
+        "storage",
+        "compaction"
       ]
     }
   ]

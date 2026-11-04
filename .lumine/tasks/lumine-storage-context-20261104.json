@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-storage-context-20261104",
+  "mode": "implement",
+  "goal": "实现 Wiki 状态瘦身和请求作用域，验证并向两个源发布",
+  "scope": "用户明确批准的 Lumine 状态瘦身、请求上下文修复与双仓发布计划；保留历史和活动资料，不改业务源码",
+  "selectedSkills": [
+    "lumine-run",
+    "lumine-knowledge"
+  ],
+  "acceptanceRefs": [
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-storage",
+      "baselineHash": "40ade62b1763e90abfd9f5477d5adb2e3a9448663bb7fa4c3244e48b65841043"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-storage-migration",
+      "baselineHash": "fc75d1211a2bb331e91cdb31c8f5e227af7aa4f8b40991fba3ecb67d0c3eb599"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-request",
+      "baselineHash": "7a842fa8ab0a741eeac9a09f5c7cd6ad1491722d454206ca937cba170ab80777"
+    },
+    {
+      "specId": "lumine-refactor-product",
+      "acId": "AC-storage-delivery",
+      "baselineHash": "66bd4045844c335de8e24ec2c3afaf50f24a876237cb422da034b53ff34b8445"
+    }
+  ],
+  "evidence": [
+    {
+      "artifact": "docs/validation/Lumine状态瘦身与请求上下文验证.md",
+      "sha256": "1872868950c3f00e1bc14fa85f6383e6450ab30fdcab82a9868a84551d679d43",
+      "outcome": "passed",
+      "observedAt": "2026-11-04T11:24:54.190Z",
+      "command": "类型与生成一致性、完整自动化回归、隔离演练、真实迁移保护核对、冷启动阅读器与限范围宿主观察；详情及限制见证据正文",
+      "environment": "macOS / Node.js 24.14.0；真实工作树与无本机Wiki缓存的Git archive隔离副本；Trae仅协议回归",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/storage.ts",
+          "sha256": "90a59a33faf00bb73784f08c4958144aeaa0fe36e6288d4698e4116479fdcce7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "e4951197ebbeff77235849340d0d7661ef664f290efa8751d60c8998f6822765"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-scope.ts",
+          "sha256": "b62e01320d0a680c3b2cdf10736a550dafff222fb3944666aa14c0c3ddf2fe97"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts",
+          "sha256": "9588b7d3d919399ba3db20171b23c1385cf75ea9ee23bdd163e97f96ab40b3d7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+          "sha256": "16b1eae5d12a40ef855aa0ff571f0d47ec927405a28ecdf4642bf15edbad1ed3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "78b4bf93fcf579cd513b0b20720f12b344c2dbec0e79af99bab5ea26130ea26d"
+        }
+      ],
+      "specId": "lumine-refactor-product",
+      "acId": "AC-storage"
+    },
+    {
+      "artifact": "docs/validation/Lumine状态瘦身与请求上下文验证.md",
+      "sha256": "1872868950c3f00e1bc14fa85f6383e6450ab30fdcab82a9868a84551d679d43",
+      "outcome": "passed",
+      "observedAt": "2026-11-04T11:24:54.190Z",
+      "command": "类型与生成一致性、完整自动化回归、隔离演练、真实迁移保护核对、冷启动阅读器与限范围宿主观察；详情及限制见证据正文",
+      "environment": "macOS / Node.js 24.14.0；真实工作树与无本机Wiki缓存的Git archive隔离副本；Trae仅协议回归",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/storage.ts",
+          "sha256": "90a59a33faf00bb73784f08c4958144aeaa0fe36e6288d4698e4116479fdcce7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "e4951197ebbeff77235849340d0d7661ef664f290efa8751d60c8998f6822765"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-scope.ts",
+          "sha256": "b62e01320d0a680c3b2cdf10736a550dafff222fb3944666aa14c0c3ddf2fe97"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts",
+          "sha256": "9588b7d3d919399ba3db20171b23c1385cf75ea9ee23bdd163e97f96ab40b3d7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+          "sha256": "16b1eae5d12a40ef855aa0ff571f0d47ec927405a28ecdf4642bf15edbad1ed3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "78b4bf93fcf579cd513b0b20720f12b344c2dbec0e79af99bab5ea26130ea26d"
+        }
+      ],
+      "specId": "lumine-refactor-product",
+      "acId": "AC-storage-migration"
+    },
+    {
+      "artifact": "docs/validation/Lumine状态瘦身与请求上下文验证.md",
+      "sha256": "1872868950c3f00e1bc14fa85f6383e6450ab30fdcab82a9868a84551d679d43",
+      "outcome": "passed",
+      "observedAt": "2026-11-04T11:24:54.190Z",
+      "command": "类型与生成一致性、完整自动化回归、隔离演练、真实迁移保护核对、冷启动阅读器与限范围宿主观察；详情及限制见证据正文",
+      "environment": "macOS / Node.js 24.14.0；真实工作树与无本机Wiki缓存的Git archive隔离副本；Trae仅协议回归",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/storage.ts",
+          "sha256": "90a59a33faf00bb73784f08c4958144aeaa0fe36e6288d4698e4116479fdcce7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "e4951197ebbeff77235849340d0d7661ef664f290efa8751d60c8998f6822765"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-scope.ts",
+          "sha256": "b62e01320d0a680c3b2cdf10736a550dafff222fb3944666aa14c0c3ddf2fe97"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts",
+          "sha256": "9588b7d3d919399ba3db20171b23c1385cf75ea9ee23bdd163e97f96ab40b3d7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+          "sha256": "16b1eae5d12a40ef855aa0ff571f0d47ec927405a28ecdf4642bf15edbad1ed3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "78b4bf93fcf579cd513b0b20720f12b344c2dbec0e79af99bab5ea26130ea26d"
+        }
+      ],
+      "specId": "lumine-refactor-product",
+      "acId": "AC-request"
+    },
+    {
+      "artifact": "docs/validation/Lumine状态瘦身与请求上下文验证.md",
+      "sha256": "1872868950c3f00e1bc14fa85f6383e6450ab30fdcab82a9868a84551d679d43",
+      "outcome": "passed",
+      "observedAt": "2026-11-04T11:24:54.190Z",
+      "command": "类型与生成一致性、完整自动化回归、隔离演练、真实迁移保护核对、冷启动阅读器与限范围宿主观察；详情及限制见证据正文",
+      "environment": "macOS / Node.js 24.14.0；真实工作树与无本机Wiki缓存的Git archive隔离副本；Trae仅协议回归",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/storage.ts",
+          "sha256": "90a59a33faf00bb73784f08c4958144aeaa0fe36e6288d4698e4116479fdcce7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "e4951197ebbeff77235849340d0d7661ef664f290efa8751d60c8998f6822765"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-scope.ts",
+          "sha256": "b62e01320d0a680c3b2cdf10736a550dafff222fb3944666aa14c0c3ddf2fe97"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts",
+          "sha256": "9588b7d3d919399ba3db20171b23c1385cf75ea9ee23bdd163e97f96ab40b3d7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+          "sha256": "16b1eae5d12a40ef855aa0ff571f0d47ec927405a28ecdf4642bf15edbad1ed3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "78b4bf93fcf579cd513b0b20720f12b344c2dbec0e79af99bab5ea26130ea26d"
+        }
+      ],
+      "specId": "lumine-refactor-product",
+      "acId": "AC-storage-delivery"
+    }
+  ],
+  "knowledge": {
+    "required": true,
+    "status": "synchronized",
+    "refs": [
+      "lumine-wiki",
+      "lumine-task-check",
+      "lumine-adoption"
+    ],
+    "sync": {
+      "contractVersion": 2,
+      "assessedAt": "2026-11-04T11:24:54.190Z",
+      "changedSources": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/storage.ts",
+          "sha256": "90a59a33faf00bb73784f08c4958144aeaa0fe36e6288d4698e4116479fdcce7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "e4951197ebbeff77235849340d0d7661ef664f290efa8751d60c8998f6822765"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/session-scope.ts",
+          "sha256": "b62e01320d0a680c3b2cdf10736a550dafff222fb3944666aa14c0c3ddf2fe97"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/work-status.ts",
+          "sha256": "9588b7d3d919399ba3db20171b23c1385cf75ea9ee23bdd163e97f96ab40b3d7"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/core/stop-policy.ts",
+          "sha256": "16b1eae5d12a40ef855aa0ff571f0d47ec927405a28ecdf4642bf15edbad1ed3"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/scripts/harness-manager-main.ts",
+          "sha256": "78b4bf93fcf579cd513b0b20720f12b344c2dbec0e79af99bab5ea26130ea26d"
+        }
+      ],
+      "verifiedScope": [
+        "本轮存储、升级与请求作用域行为，以及受影响指南；未改无关业务知识"
+      ],
+      "decisions": [
+        {
+          "ref": "lumine-wiki",
+          "action": "revised",
+          "sha256": "af6288feb02d532871fde72124375da554d277a393e1ab5103d5f56312de6bd6",
+          "reason": "依据最终实现和实际迁移结果同步受影响机制／操作指南，保留规范与业务边界；验证与宿主限制另列Validation。"
+        },
+        {
+          "ref": "lumine-task-check",
+          "action": "revised",
+          "sha256": "903f7f84495b92a812b262f492c5d87f7199c2953a69c4051d02d8fcfdb73791",
+          "reason": "依据最终实现和实际迁移结果同步受影响机制／操作指南，保留规范与业务边界；验证与宿主限制另列Validation。"
+        },
+        {
+          "ref": "lumine-adoption",
+          "action": "revised",
+          "sha256": "e01bcac621138a48afd4c32607e620e955f8d4258e3096d50fb24352cb54c954",
+          "reason": "依据最终实现和实际迁移结果同步受影响机制／操作指南，保留规范与业务边界；验证与宿主限制另列Validation。"
+        }
+      ]
+    }
+  },
+  "summary": "本轮实现、迁移与适用验证已完成；已记录宿主验证边界及既有非本轮问题。提交与远端引用核验按已授权发布步骤执行，实际结果以交付回执为准。",
+  "planRef": "lumine-storage-context-plan",
+  "specRef": "lumine-refactor-product"
+}

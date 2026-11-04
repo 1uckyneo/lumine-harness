@@ -188,3 +188,9 @@ npx skills update lumine-harness -g -y
 旧 `.harness/` 项目由独立迁移工具处理。临时转发入口在宿主验证后退出；日常 Skill 和 Runtime 使用 `.lumine/`，不长期保留第二套旧工作流。历史记录与恢复备份继续保留。
 
 维护者请阅读 [AGENTS.md](AGENTS.md)。English documentation: [README](README.md)。许可证：[MIT](LICENSE)。
+
+### 请求与存储维护
+
+Agent 通过 `session begin/show` 维护当前请求模式，长期任务、Spec 和 Plan 保持原身份；继续开发和方向调整原位更新，只复核受影响确认。自动续跑与 Hook 重试复用请求范围，独立诊断不会重新要求旧实施证据。用户仍用自然语言交互。
+
+Wiki 采用内容寻址共享正文／来源、完成回执和按引用回收。旧工程需先升级再显式运行 `wiki storage compact --plan`，核对后用 `--apply <plan.json> --expect <plan-sha256>` 应用；`inspect/check/recover` 提供统计、核验与恢复。迁移后项目 schemaVersion 为 3、workflowVersion 保持 2。恢复备份和 Git 历史不会随当前状态瘦身消失。详见[维护与恢复](skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md)。

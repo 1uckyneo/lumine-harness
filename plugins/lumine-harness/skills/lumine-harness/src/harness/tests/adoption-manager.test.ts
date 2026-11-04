@@ -344,22 +344,14 @@ test("old sessions preserve progress but reset retired Skill gate; legacy code s
     f.clean();
   }
 });
-test("wiki state and user docs survive runtime upgrade", () => {
+test("runtime upgrade refuses unknown wiki state without changing the original", () => {
   const f = fixture();
   try {
     applyProposal(f.save(createProposal(f.root, { locale: "en" })));
     mkdirSync(path.join(f.root, ".lumine/wiki-state"), { recursive: true });
     writeFileSync(path.join(f.root, ".lumine/wiki-state/human.json"), "human");
-    const p = createProposal(f.root, { locale: "en" });
-    assert.equal(
-      p.operations.some((o) => o.path.includes("wiki-state")),
-      false,
-    );
-    applyProposal(f.save(p));
-    assert.equal(
-      readFileSync(path.join(f.root, ".lumine/wiki-state/human.json"), "utf8"),
-      "human",
-    );
+    assert.throws(() => createProposal(f.root, { locale: "en" }), /KNOWLEDGE_STORAGE_INVALID/);
+    assert.equal(readFileSync(path.join(f.root, ".lumine/wiki-state/human.json"), "utf8"), "human");
   } finally {
     f.clean();
   }

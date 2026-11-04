@@ -24,3 +24,5 @@ After the user confirms the design, use lumine-plan to supplement the same Spec 
 
 <!-- LH-DESIGN-06 -->
 Use existing product, interaction, and interface knowledge or inspect implementation directly; a knowledge query is optional. Within authorization, preserve reusable implemented interface mechanisms and limits in Wiki. Unimplemented designs remain Spec attachments or Plan content.
+
+Use [current request scope](../lumine-run/references/request-scope.md) before work and closeout. New requests do not automatically replace persistent tasks or restart the product workflow.

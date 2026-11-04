@@ -1,4 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { inspectStorage, checkStorage, planCompaction, applyCompaction, recoverCompaction } from './wiki/compaction.ts';
 import path from 'node:path';
 import { requireHarnessRoot } from './core/root-resolver.ts';
 import { applyUpdate, checkWiki, loadWikiConfig, prepareUpdate, queryKnowledge, recordUpdateDecision, recoverWiki, scanWiki, showKnowledge, mapKnowledge, outlineKnowledge, relatedKnowledge, recordSemanticReview, inspectKnowledge } from './wiki/engine.ts';
@@ -12,9 +14,9 @@ import type { Candidate, ChangeManifest, Collection, Freshness, ReviewRecord } f
 async function runWikiCommand(argv: string[]): Promise<void> {
   const args = [...argv];
   const option = (name: string): string | undefined => { const index = args.indexOf(name); if (index < 0) return undefined; const value = args[index + 1]; if (!value || value.startsWith('--')) throw new Error(`OPTION_VALUE_REQUIRED:${name}`); args.splice(index, 2); return value; };
-  const rootArg = option('--root'), limit = option('--limit'), maxChars = option('--max-chars'), repoId = option('--repo'), type = option('--type'), freshness = option('--freshness'), collection = option('--collection'), port = option('--port'), candidate = option('--candidate'), decision = option('--decision'), reason = option('--reason'), manifestFile = option('--manifest'), reviewFile = option('--file'), direction = option('--direction'), topic = option('--topic'), scope = option('--scope'), fingerprint = option('--fingerprint');
+  const rootArg = option('--root'), limit = option('--limit'), maxChars = option('--max-chars'), repoId = option('--repo'), type = option('--type'), freshness = option('--freshness'), collection = option('--collection'), port = option('--port'), candidate = option('--candidate'), decision = option('--decision'), reason = option('--reason'), manifestFile = option('--manifest'), reviewFile = option('--file'), direction = option('--direction'), topic = option('--topic'), scope = option('--scope'), fingerprint = option('--fingerprint'), outputFile = option('--output'), applyFile = option('--apply'), expect = option('--expect');
   const flag = (name: string): boolean => { const index = args.indexOf(name); if (index < 0) return false; args.splice(index, 1); return true; };
-  const outline = flag('--outline'), full = flag('--full'), markdown = flag('--markdown');
+  const outline = flag('--outline'), full = flag('--full'), markdown = flag('--markdown'), storagePlan = flag('--plan'), rollback = flag('--rollback');
   if (outline && full) throw new Error('SHOW_MODE_CONFLICT');
   const jsonIndex = args.indexOf('--json'); if (jsonIndex >= 0) args.splice(jsonIndex, 1);
   if (markdown && (args[0] !== 'map' || jsonIndex >= 0)) throw new Error('MARKDOWN_MODE_CONFLICT');
@@ -38,6 +40,22 @@ async function runWikiCommand(argv: string[]): Promise<void> {
     process.stdout.write(`${lines.join('\n')}\n`);
   };
   switch (args[0]) {
+    case 'storage': {
+      let result: unknown;
+      if (args[1] === 'inspect' && args.length === 2) result = inspectStorage(root);
+      else if (args[1] === 'check' && args.length === 2) result = checkStorage(root);
+      else if (args[1] === 'compact' && args.length === 2 && storagePlan && !applyFile) {
+        const plan = planCompaction(root), bytes = JSON.stringify(plan, null, 2) + '\n';
+        if (outputFile) { writeFileSync(path.resolve(outputFile), bytes, { flag: 'wx' }); result = { planFile: outputFile, planSha256: createHash('sha256').update(bytes).digest('hex'), operationId: plan.operationId, beforeBytes: plan.beforeBytes, afterBytes: plan.afterBytes, savedBytes: plan.savedBytes, protectedRecords: plan.protected.length }; }
+        else result = plan;
+      } else if (args[1] === 'compact' && args.length === 2 && applyFile && expect && !storagePlan) result = applyCompaction(root, readFileSync(path.resolve(applyFile), 'utf8'), expect);
+      else if (args[1] === 'recover' && args.length === 3) result = recoverCompaction(root, args[2], { rollback });
+      else throw new Error('STORAGE_ACTION_REQUIRED');
+      if (jsonIndex >= 0 || (storagePlan && !outputFile)) output(result);
+      else { const data = result as Record<string, unknown>; process.stdout.write((config.locale === 'zh-CN' ? 'Wiki 存储操作结果' : 'Wiki storage result') + '\n' + JSON.stringify(data, null, 2) + '\n'); }
+      if ((result as {ok?: boolean}).ok === false) process.exitCode = 1;
+      break;
+    }
     case 'map': {
       const map = mapKnowledge(root);
       if (markdown) { const { issues } = inspectKnowledge(root); process.stdout.write(renderKnowledgeMapMarkdown(map, (reference) => showKnowledge(root, reference), { locale: config.locale, wikiRoot: config.root, issues })); }
@@ -84,7 +102,7 @@ async function runWikiCommand(argv: string[]): Promise<void> {
       for (const signal of ['SIGINT', 'SIGTERM'] as const) process.once(signal, () => { void result.close().then(() => process.exit(0)); });
       break;
     }
-    default: if (args[0] && !['help', '--help', '-h'].includes(args[0])) throw new Error('UNKNOWN_COMMAND'); output({ description: config.locale === 'zh-CN' ? '文本知识库：检索、核实、更新和阅读。' : 'Text knowledge: query, verify, update and read.', commands: ['wiki map [--markdown]', 'wiki related <id> [--direction in|out|both]', 'wiki show [id] --outline', 'wiki show <id#fragment>', 'wiki show <id> --full', 'wiki update prepare --manifest <changes.json>', 'wiki update review --file <review.json>', 'wiki scan', 'wiki classify <repo:path> --topic <id> --scope <repo:path> --fingerprint <sha256> --decision needs-explanation|covered|deferred --reason <text>', 'wiki format plan', 'wiki format apply <document-id>', 'wiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan]', 'wiki show <id|path|title>', 'wiki check', 'wiki update prepare [document-id...]', 'wiki update apply <packet-id> --candidate <json-file>', 'wiki update decide <packet-id> <document-id> --decision keep-current|defer --reason <text>', 'wiki update recover', 'wiki serve [--port 4318]'], options: ['--root <harness-root>', '--json'] });
+    default: if (args[0] && !['help', '--help', '-h'].includes(args[0])) throw new Error('UNKNOWN_COMMAND'); output({ description: config.locale === 'zh-CN' ? '文本知识库：检索、核实、更新和阅读。' : 'Text knowledge: query, verify, update and read.', commands: ['wiki storage inspect|check', 'wiki storage compact --plan [--output plan.json]', 'wiki storage compact --apply <plan.json> --expect <plan-sha256>', 'wiki storage recover <operation-id> [--rollback]', 'wiki map [--markdown]', 'wiki related <id> [--direction in|out|both]', 'wiki show [id] --outline', 'wiki show <id#fragment>', 'wiki show <id> --full', 'wiki update prepare --manifest <changes.json>', 'wiki update review --file <review.json>', 'wiki scan', 'wiki classify <repo:path> --topic <id> --scope <repo:path> --fingerprint <sha256> --decision needs-explanation|covered|deferred --reason <text>', 'wiki format plan', 'wiki format apply <document-id>', 'wiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan]', 'wiki show <id|path|title>', 'wiki check', 'wiki update prepare [document-id...]', 'wiki update apply <packet-id> --candidate <json-file>', 'wiki update decide <packet-id> <document-id> --decision keep-current|defer --reason <text>', 'wiki update recover', 'wiki serve [--port 4318]'], options: ['--root <harness-root>', '--json'] });
   }
 }
 export async function runWikiCli(argv = process.argv.slice(2)): Promise<void> {

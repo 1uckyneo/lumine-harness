@@ -186,3 +186,9 @@ Upgrades integrate only affected guidance and content gaps. Before retiring an e
 Legacy `.harness/` projects are handled by the separate migration tools. Temporary forwarding entries are retired after host verification; everyday Skills and the Runtime use `.lumine/` without retaining a second legacy workflow. Historical records and recovery backups remain available.
 
 Maintainers: [AGENTS.md](AGENTS.md). 简体中文：[README.zh-CN.md](README.zh-CN.md)。 License: [MIT](LICENSE).
+
+### Request and storage maintenance
+
+Agents use `session begin/show` for the current request mode while keeping persistent task, Spec and Plan identities. Continue development and direction changes in place, reassessing affected confirmations only. Automatic continuation and Hook retries reuse the scope; independent diagnosis does not recheck old implementation evidence. Users still interact in natural language.
+
+Wiki uses content-addressed text/source objects, completion receipts and reference-based collection. Upgrade legacy projects before explicit `wiki storage compact --plan`; review it and apply with `--apply <plan.json> --expect <plan-sha256>`. `inspect/check/recover` provide accounting, integrity and recovery. Migration sets project schemaVersion to 3, leaving workflowVersion at 2. Recovery backups and Git history do not disappear with current-state compaction. See [maintenance and recovery](skills/lumine-harness/assets/locales/en/skills/lumine-knowledge/references/maintenance.md).

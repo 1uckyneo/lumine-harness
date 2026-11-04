@@ -1,0 +1,35 @@
+{
+  "observedAt": "2026-11-04T11:19:49.770Z",
+  "provenance": "真实当前Codex会话结束后由宿主Stop Hook写入；未手工调用Hook或回执写入API",
+  "sessionMatches": true,
+  "processRuntime": {
+    "source": "actual_process",
+    "runtime": "node",
+    "version": "24.14.0",
+    "support": "supported"
+  },
+  "stopGate": {
+    "result": "passed",
+    "evidenceLevel": "runtime_observed",
+    "observedAt": "2026-11-04T11:19:49.770Z"
+  },
+  "decision": {
+    "action": "continue",
+    "disposition": "request_continuation",
+    "workStatus": "continue",
+    "shouldDeliver": true
+  },
+  "rawReceiptSha256": "122020847013b166ded339491b471b519a766ff54816154c9482aaca4efe6bc3",
+  "requestRetained": {
+    "sameTaskId": true,
+    "sameRequestId": true,
+    "userTurnRevision": 1
+  },
+  "observedContinuation": "真实宿主返回继续执行提示，本轮继续了原任务。",
+  "limits": [
+    "公共probe缺少匹配continuationRequestId的后续非Stop回执，因此automatic_continuation仍为not_tested。",
+    "hostVersion未可靠取得，保持unknown。",
+    "仅证明当前Stop Gate被真实观察，不宣称全部宿主能力认证。",
+    "Trae只有协议回归，没有真实应用运行观察。"
+  ]
+}

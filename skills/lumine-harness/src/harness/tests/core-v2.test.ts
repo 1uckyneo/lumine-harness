@@ -12,6 +12,7 @@ import { recordPromptRoute, routeHarnessPhase, suggestHarnessPhases, markExpecte
 import { getSharedSkill, searchSharedSkills } from "../core/skill-catalog.ts";
 import { initializeSessionState, readSessionState, recordUsedSkill, recordUserTurn } from "../core/work-status.ts";
 import { evaluateStopPolicy } from "../core/stop-policy.ts";
+import { beginSessionRequest } from "../core/session-scope.ts";
 import { buildSessionStartContext } from "../core/session-context.ts";
 import { applyDocumentOperation, prepareDocumentRename, recoverDocumentOperation, renameDocument, resolveCurrentDocument } from "../core/document-operations.ts";
 import { commandLocale, formatCommandError, formatHumanIssue } from "../core/messages.ts";
@@ -252,6 +253,7 @@ test("diagnostics can finish with failures without authorizing repairs or requir
     const input = normalizeHookInput("codex", "stop", { cwd: root, session_id: "diagnosis", last_assistant_message: "Found a failure.\nWORK_STATUS: done" });
     initializeSessionState(root, input);
     recordPromptRoute(root, input, "只诊断失败，不要修复");
+    beginSessionRequest({ root, product: input.product, sessionId: input.sessionId!, requestId: "diagnostic-request", mode: "diagnose" });
     assert.equal(evaluateStopPolicy(input, { root }).action, "allow");
     const record = task(root); record.evidence = []; saveTaskRecord(root, record);
     bindTask(root, input.product, input.sessionId!, record.taskId, "diagnose");
@@ -261,7 +263,7 @@ test("diagnostics can finish with failures without authorizing repairs or requir
     bindTask(root, implementation.product, implementation.sessionId!, record.taskId);
     recordPromptRoute(root, implementation, "仅提及诊断相关能力");
     assert.equal(evaluateStopPolicy(implementation, { root }).disposition, "reject_completion");
-    assert.equal(checkSessionCompletion(root, { requestedActivity: "check" }).ok, true);
+    assert.equal(checkSessionCompletion(root, { requestedActivity: "check" }).ok, false, "legacy activity alone cannot declare the current request");
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
@@ -277,7 +279,9 @@ test("a new user turn cannot reuse another turn's task binding or diagnostic mod
     assert.equal(readSessionState(root, input.product, input.sessionId)?.requestedActivity, null);
     const fresh = recordPromptRoute(root, input, "开始实施新范围");
     assert.equal(fresh.requestedActivity, null, "a new prompt alone cannot assign an implementation mode");
-    assert.equal(checkSessionCompletion(root, { ...fresh, requestedActivity: "implement" }).issues[0]?.code, "TASK_NOT_BOUND");
+    assert.equal(checkSessionCompletion(root, { ...fresh, requestedActivity: "implement" }).issues[0]?.code, "REQUEST_SCOPE_REQUIRED");
+    const declared = beginSessionRequest({ root, product: input.product, sessionId: input.sessionId!, mode: "implement" });
+    assert.equal(checkSessionCompletion(root, declared).issues[0]?.code, "TASK_NOT_BOUND");
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 

@@ -28,6 +28,7 @@ import {
   restoreLegacy,
 } from "../migration/legacy.ts";
 import { planKnowledgeMigration } from "../migration/knowledge.ts";
+import { checkStorage } from "../harness/wiki/compaction.ts";
 import { withWikiLock } from "../harness/wiki/files.ts";
 import { convertWorkStatusSession, planWorkStatusMigration } from "../migration/work-status.ts";
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -81,6 +82,8 @@ export interface Proposal {
   integrity: string;
   warnings: string[];
   retainedReaderAssets?: Record<string, string>;
+  /** Fixed in the signed proposal. Omitted in historic proposals means legacy conversion. */
+  knowledgeMode?: "preserve" | "convert";
   legacy?: {
     before: Record<string, string>;
     bridges: Record<string, string>;
@@ -349,7 +352,7 @@ export function createProposal(
     inspect.childRepositories,
   );
   Object.assign(project, {
-    schemaVersion: 2,
+    schemaVersion: current.schemaVersion === 3 ? 3 : 2,
     workflowVersion: 2,
     locale,
     topology: inspect.topology,
@@ -373,7 +376,7 @@ export function createProposal(
     const custom = JSON.parse(
       Buffer.from(overrides[".lumine/project.json"], "base64").toString(),
     );
-    if (custom.locale !== locale || custom.schemaVersion !== 2)
+    if (custom.locale !== locale || custom.schemaVersion !== project.schemaVersion)
       throw new Error("Config override must match proposal language and version");
     Object.assign(project, custom);
     project.selectedAdapters = adapters;
@@ -579,7 +582,9 @@ export function createProposal(
     );
   // Maintenance conversion is planned with the same backup/CAS/recovery contract as installation.
   // Project knowledge remains an asset, never a distribution-owned file.
-  const conversions = [planKnowledgeMigration(root, project.wiki.root), planWorkStatusMigration(root)];
+  const knowledgeMode: NonNullable<Proposal["knowledgeMode"]> = !legacy.exists && oldMarker.kind === "lumine-root" && oldMarker.schemaVersion === 2 && hasCurrentKnowledgeFormat(root) ? "preserve" : "convert";
+  if (knowledgeMode === "preserve") verifyPreservedKnowledge(root);
+  const conversions = [...(knowledgeMode === "convert" ? [planKnowledgeMigration(root, project.wiki.root)] : []), planWorkStatusMigration(root)];
   for (const conversion of conversions) {
     for (const issue of conversion.issues) {
       retirementWarnings.push(`${issue.code}: ${issue.path}: ${issue.message}`);
@@ -633,6 +638,7 @@ export function createProposal(
     inspect,
     operations,
     retainedReaderAssets: Object.fromEntries(preservedReaderAssets.map(([rel, meta]) => [rel, meta.hash!])),
+    knowledgeMode,
     integrity: "",
     warnings: [
       ...(legacy.exists
@@ -652,6 +658,8 @@ function recoveryDir(p: Proposal) {
 function verify(p: Proposal, checkSources = true) {
   if (p.schemaVersion !== 2 || sign(p) !== p.integrity)
     throw new Error("Proposal integrity mismatch");
+  if (p.knowledgeMode !== undefined && !["preserve", "convert"].includes(p.knowledgeMode)) throw new Error("Unknown proposal knowledge mode");
+  if (p.knowledgeMode === "preserve" && p.operations.some((op) => op.action !== "preserve" && (op.path.startsWith(".lumine/wiki-state/") || op.path.startsWith(`${p.project.wiki.root}/`)))) throw new Error("KNOWLEDGE_PRESERVE_CONFLICT: a runtime-only upgrade cannot rewrite Wiki content or state");
   if (realpathSync(p.targetRoot) !== p.targetRoot)
     throw new Error("Project identity changed");
   for (const op of p.operations) {
@@ -682,10 +690,25 @@ interface Journal {
   appliedAt?: string;
   finalized?: Record<string, string>;
 }
+function hasCurrentKnowledgeFormat(root: string): boolean {
+  const marker = target(root, ".lumine/wiki-state/format.json");
+  if (!existsSync(marker)) return false;
+  const value = readJson(marker);
+  return value.schemaVersion === 1 && value.knowledgeFormat === 3;
+}
+function verifyPreservedKnowledge(root: string): void {
+  if (!hasCurrentKnowledgeFormat(root)) throw new Error("KNOWLEDGE_FORMAT_CHANGED: the runtime-only proposal requires the established knowledge format; preserve it and inspect the change.");
+  const checked = checkStorage(root);
+  if (!checked.ok) {
+    const issue = checked.issues[0];
+    throw new Error(`KNOWLEDGE_STORAGE_INVALID: ${issue.path}: ${issue.message}`);
+  }
+}
 // The maintenance writer shares the Wiki writer lock. Re-scan even when a format
 // marker exists: proposals and partially applied migrations are not snapshots of
 // files created later, and an old pending journal must be recovered before upgrade.
 function verifyKnowledgeInputs(p: Proposal, requireComplete = false) {
+  if (p.knowledgeMode === "preserve") { verifyPreservedKnowledge(p.targetRoot); return; }
   const plan = planKnowledgeMigration(p.targetRoot, p.project.wiki.root);
   if (plan.issues.length) {
     const issue = plan.issues[0];
@@ -823,14 +846,25 @@ export function rollbackProposal(proposalFile: string) {
 }
 function rollbackVerifiedProposal(p: Proposal) {
   verifyRetainedReaderAssets(p);
-  // Pending writes can reference either version; recover them with their installed
-  // Runtime before replacing it. Newly added ordinary documents remain protected.
-  const knowledge = planKnowledgeMigration(p.targetRoot, p.project.wiki.root);
-  const recovery = knowledge.issues.find((issue) => issue.code === "KNOWLEDGE_RECOVERY_REQUIRED");
-  if (recovery) throw new Error(`${recovery.code}: ${recovery.path}: ${recovery.message}`);
   const dir = recoveryDir(p),
     jf = path.join(dir, "journal.json"),
     j = readJson(jf) as Journal;
+  // Storage must be rolled back by its own exact-byte recovery operation before
+  // reinstalling a Runtime whose original project contract predates schema 3.
+  const currentConfig = target(p.targetRoot, ".lumine/project.json");
+  const originalConfig = j.backups[".lumine/project.json"];
+  const configOperation = p.operations.find(op => op.path === ".lumine/project.json");
+  if (originalConfig && hash(Buffer.from(originalConfig.content, "base64")) !== configOperation?.before) throw new Error("STORAGE_ROLLBACK_CONFIG_BACKUP_INVALID: preserve the recovery journal and restore its verified configuration backup before rollback.");
+  const originalSchema = originalConfig ? JSON.parse(Buffer.from(originalConfig.content, "base64").toString("utf8")).schemaVersion : undefined;
+  if (existsSync(currentConfig) && readJson(currentConfig).schemaVersion === 3 && originalSchema !== 3) throw new Error("STORAGE_ROLLBACK_REQUIRED: use wiki storage recover <operation-id> --rollback before rolling back to the previous Runtime; schema 3 state must not be exposed to an older writer.");
+  // The signed proposal determines whether this is preservation or one-time
+  // legacy conversion; never reselect the mode from partially written files.
+  if (p.knowledgeMode === "preserve") verifyKnowledgeInputs(p);
+  else {
+    const knowledge = planKnowledgeMigration(p.targetRoot, p.project.wiki.root);
+    const recovery = knowledge.issues.find((issue) => issue.code === "KNOWLEDGE_RECOVERY_REQUIRED");
+    if (recovery) throw new Error(`${recovery.code}: ${recovery.path}: ${recovery.message}`);
+  }
   const conflicts: string[] = [];
   for (const op of [...p.operations].reverse()) {
     if (!(op.path in j.backups)) continue;

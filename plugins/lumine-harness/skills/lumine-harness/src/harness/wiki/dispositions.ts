@@ -1,3 +1,4 @@
+import { assertStorageWritable } from './storage.ts';
 import { containedPath, hash, readJson, snapshotSources, wikiConfig, withWikiLock, writeJson } from './files.ts';
 import { listDocuments } from './documents.ts';
 import { readCoverage } from './coverage.ts';
@@ -65,6 +66,7 @@ export function sourceDispositionStatuses(root: string, files: Record<string, st
 
 export function recordSourceDisposition(root: string, input: { file: string; topicId: string; scope: WatchScope; action: SourceDispositionAction; reason: string; expectedFingerprint: string }): SourceDisposition {
   return withWikiLock(root, () => {
+    assertStorageWritable(root);
     if (!input.reason?.trim() || input.reason.length > 2000 || !['needs-explanation', 'covered', 'deferred'].includes(input.action)) throw new Error('SOURCE_DISPOSITION_INVALID');
     const config = wikiConfig(root), scope = config.watchScopes.find((item) => item.repoId === input.scope.repoId && item.path === input.scope.path);
     if (!scope || !within(scope, input.file)) throw new Error('SOURCE_DISPOSITION_SCOPE_INVALID');
@@ -78,7 +80,9 @@ export function recordSourceDisposition(root: string, input: { file: string; top
     if (!fingerprint || fingerprint !== input.expectedFingerprint) throw new Error('SOURCE_DISPOSITION_FINGERPRINT_CHANGED');
     const revisions = new Map(documents.map((document) => [document.id, document.revision]));
     const entry: SourceDisposition = { file: input.file, topicId: topic.id, scope, fingerprint, topicFingerprint: topicHash(topic, revisions), scopeFingerprint: scopesHash(config.watchScopes), action: input.action, reason: input.reason.trim(), decidedAt: new Date().toISOString() };
-    const saved = state(root); saved.entries[input.file] = entry;
+    const saved = state(root), previous = saved.entries[input.file];
+    if (previous) { const { decidedAt: _old, ...before } = previous, { decidedAt: _now, ...after } = entry; if (JSON.stringify(before) === JSON.stringify(after)) return previous; }
+    saved.entries[input.file] = entry;
     writeJson(containedPath(root, STATE_PATH, false), saved);
     return entry;
   });

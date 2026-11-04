@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "id": "lumine-adoption",
+    "markdown": {
+      "$lumineObject": "ed2ebfee42dd2efb2595c7729ab8f8654eefa0516eceebfe91ef3bf5e1d3f97a",
+      "kind": "text",
+      "bytes": 4705
+    }
+  }
+}

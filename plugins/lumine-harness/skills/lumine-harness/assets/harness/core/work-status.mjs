@@ -12,6 +12,7 @@ const WORK_STATUSES = new Set([
 	"blocked"
 ]);
 const WORK_STATUS_PROTOCOL_VERSION = 2;
+const RETIRED_REQUEST_HISTORY_LIMIT = 128;
 /** Only the terminal standalone protocol line controls the turn. Markdown examples do not. */
 function terminalStatusLines(message) {
 	const text = String(message ?? "").replace(/\s*<oai-mem-citation>[\s\S]*?<\/oai-mem-citation>\s*$/, "");
@@ -90,10 +91,13 @@ function eventIdentity(input, explicit, kind) {
 	if (hostId) return hashRuntimeIdentifier(`${kind}:${hostId}`);
 	return null;
 }
-function deriveStatusEmissionId(input, state = {}) {
+function explicitStatusEmissionId(input) {
 	const raw = input?.raw ?? {};
 	const responseId = input.statusEmissionId ?? raw.assistant_message_id ?? raw.assistantMessageId ?? raw.response_id ?? raw.responseId ?? raw.message_id ?? raw.messageId ?? raw.generation_id ?? raw.generationId;
-	const explicit = responseId ? hashRuntimeIdentifier(`status:${responseId}`) : null;
+	return responseId ? hashRuntimeIdentifier(`status:${responseId}`) : null;
+}
+function deriveStatusEmissionId(input, state = {}) {
+	const explicit = explicitStatusEmissionId(input);
 	if (explicit) return explicit;
 	if (!input.lastAssistantMessage) return null;
 	return hashRuntimeIdentifier([
@@ -224,13 +228,45 @@ function initializeSessionState(root, input) {
 		usedSkills: []
 	});
 }
+/** Reject before consuming an old event's report, progress or continuation receipt. */
+function requestEventIssue(state, input, options = {}) {
+	const emissionId = options.report ? explicitStatusEmissionId(input) : null;
+	if (emissionId && state.retiredStopEmissionIds?.includes(emissionId)) return "STALE_RESPONSE_EVENT: this response belongs to a retired request; the current request and report were preserved.";
+	if (emissionId && state.handledStopEmissionIds?.includes(emissionId) && state.lastStopEmissionId !== emissionId) return "STALE_RESPONSE_EVENT: a newer response in this request was already evaluated; the current report and continuation were preserved.";
+	if (!input.userTurnId) return null;
+	const turnId = hashRuntimeIdentifier(input.userTurnId);
+	if (state.userTurnId === turnId) return null;
+	if (state.retiredUserTurnIds?.includes(turnId)) return "STALE_REQUEST_EVENT: this event belongs to a retired request; the current request and report were preserved.";
+	if (options.implicitStop && state.userTurnHistoryTruncated) return "REQUEST_HISTORY_BOUNDARY: this Stop identity is outside the retained request history; preserve the current request and establish the actual new request through an explicit user event or a new host session.";
+	if (options.requireCurrent && state.userTurnId) return "REQUEST_SCOPE_MISMATCH: an event for another request cannot write the current request's report, progress or continuation state.";
+	return null;
+}
 function recordUserTurn(root, input, options = {}) {
 	requireIdentity(input.product, input.sessionId);
 	const state = readSessionState(root, input.product, input.sessionId) ?? initializeSessionState(root, input);
 	const turnId = eventIdentity(input, options.userTurnId ?? input.userTurnId ?? input.eventId, "user-turn") ?? hashRuntimeIdentifier(`user-turn:${randomUUID()}`);
 	if (state.userTurnId === turnId) return state;
+	if (state.retiredUserTurnIds?.includes(turnId)) throw new Error("STALE_REQUEST_EVENT: a retired request identity cannot reopen or replace the current request.");
+	const retired = [...state.retiredUserTurnIds ?? [], ...state.userTurnId ? [state.userTurnId] : []];
 	return writeSessionState(root, input.product, input.sessionId, {
 		userTurnId: turnId,
+		retiredUserTurnIds: retired.slice(-128),
+		userTurnHistoryTruncated: Boolean(state.userTurnHistoryTruncated || retired.length > 128),
+		retiredStopEmissionIds: [...new Set([
+			...state.retiredStopEmissionIds ?? [],
+			...state.handledStopEmissionIds ?? [],
+			...state.lastStopEmissionId ? [state.lastStopEmissionId] : []
+		])].slice(-128),
+		handledStopEmissionIds: [],
+		requestScope: {
+			schemaVersion: 1,
+			id: turnId,
+			origin: options.requestOrigin ?? "host",
+			userTurnRevision: Number(state.userTurnRevision ?? 0) + 1,
+			startedAt: new Date().toISOString(),
+			mode: null,
+			taskId: null
+		},
 		requestedActivity: null,
 		expectedPhase: null,
 		expectedSkill: null,
@@ -271,9 +307,38 @@ function recordUserTurn(root, input, options = {}) {
 		noProgressCount: 0
 	});
 }
+function currentRequestScope(state) {
+	const scope = state.requestScope;
+	return scope?.schemaVersion === 1 && typeof scope.id === "string" && scope.id.length > 0 && ["host", "agent"].includes(scope.origin) && (scope.mode === null || [
+		"plan",
+		"implement",
+		"verify",
+		"diagnose",
+		"check"
+	].includes(scope.mode)) && scope.userTurnRevision === Number(state.userTurnRevision ?? 0) ? scope : null;
+}
+/** Explicit task binding is also a declaration of this request, never an inferred mode. */
+function requestScopeForBinding(state, mode, taskId) {
+	const current = currentRequestScope(state);
+	if (current?.mode === "implement" && mode !== "implement") throw new Error("REQUEST_MODE_CONFLICT: an implementation request cannot become a diagnosis to bypass validation; declare a distinct actual user request with session begin.");
+	if (current?.taskId && taskId && current.taskId !== taskId) throw new Error("REQUEST_TASK_CONFLICT: this request is already associated with another task; declare the actual new request first.");
+	return {
+		...current ?? {
+			schemaVersion: 1,
+			id: hashRuntimeIdentifier(`task-request:${randomUUID()}`),
+			origin: "agent",
+			userTurnRevision: Number(state.userTurnRevision ?? 0),
+			startedAt: new Date().toISOString()
+		},
+		mode,
+		taskId
+	};
+}
 function markContinuationDelivered(root, input, options = {}) {
 	const state = readSessionState(root, input.product, input.sessionId);
 	if (!state?.pendingContinuationRequestId || input.event === "stop" || input.userInitiated === true || options.userInitiated === true) return state;
+	const issue = requestEventIssue(state, input, { requireCurrent: true });
+	if (issue) throw new Error(issue);
 	const sameTurn = state.pendingContinuationUserTurnRevision === Number(state.userTurnRevision ?? 0);
 	const confirmed = sameTurn && input.continuationRequestId === state.pendingContinuationRequestId;
 	if (!sameTurn || input.continuationRequestId && !confirmed) return state;
@@ -310,6 +375,15 @@ function observeHarnessEvent(root, input, options = {}) {
 	let state = readSessionState(root, input.product, input.sessionId) ?? initializeSessionState(root, input);
 	const explicitUserInitiated = options.userInitiated ?? input.userInitiated;
 	const userInitiated = explicitUserInitiated ?? (input.event === "prompt_submit" && !state.pendingContinuationRequestId);
+	const carriesReport = !userInitiated && input.event === "assistant_response" && Boolean(input.workReport || input.lastAssistantMessage?.trim());
+	const issue = requestEventIssue(state, {
+		...input,
+		userTurnId: options.userTurnId ?? input.userTurnId
+	}, {
+		requireCurrent: !userInitiated,
+		report: carriesReport
+	});
+	if (issue) throw new Error(issue);
 	if (input.event !== "stop") state = markContinuationDelivered(root, input, options) ?? state;
 	if (userInitiated) state = recordUserTurn(root, input, options);
 	if (options.progressObservable ?? input.progressObservable) state = setProgressObservability(root, input, true);
@@ -328,6 +402,11 @@ function recordWorkReport(root, input, value, options = {}) {
 	const report = validateWorkReport(value);
 	requireIdentity(input.product, input.sessionId);
 	const state = readSessionState(root, input.product, input.sessionId) ?? initializeSessionState(root, input);
+	const issue = requestEventIssue(state, input, {
+		requireCurrent: true,
+		report: true
+	});
+	if (issue) throw new Error(issue);
 	const candidateEmissionId = options.emissionId ?? deriveStatusEmissionId(input, state) ?? hashRuntimeIdentifier(`status:${randomUUID()}`);
 	const emissionId = /^[a-f0-9]{64}$/i.test(String(candidateEmissionId)) ? String(candidateEmissionId).toLowerCase() : hashRuntimeIdentifier(`status:${candidateEmissionId}`);
 	if (state.workStatusEmissionId === emissionId) {
@@ -384,4 +463,4 @@ function readFreshStateStatus(state) {
 }
 
 //#endregion
-export { WORK_STATUSES, WORK_STATUS_PROTOCOL_VERSION, countWorkStatus, deriveStatusEmissionId, extractWorkStatus, getCurrentSessionPointerPath, getSessionStatePath, hashRuntimeIdentifier, initializeSessionState, listCurrentSessionPointers, markContinuationDelivered, observeHarnessEvent, parseWorkReport, readCurrentSessionPointer, readFreshStateReport, readFreshStateStatus, readSessionState, recordProgressObservation, recordUsedSkill, recordUserTurn, recordWorkReport, recordWorkStatus, setProgressObservability, skillReadObservability, validateWorkReport, writeCurrentSessionPointer, writeSessionState };
+export { RETIRED_REQUEST_HISTORY_LIMIT, WORK_STATUSES, WORK_STATUS_PROTOCOL_VERSION, countWorkStatus, currentRequestScope, deriveStatusEmissionId, explicitStatusEmissionId, extractWorkStatus, getCurrentSessionPointerPath, getSessionStatePath, hashRuntimeIdentifier, initializeSessionState, listCurrentSessionPointers, markContinuationDelivered, observeHarnessEvent, parseWorkReport, readCurrentSessionPointer, readFreshStateReport, readFreshStateStatus, readSessionState, recordProgressObservation, recordUsedSkill, recordUserTurn, recordWorkReport, recordWorkStatus, requestEventIssue, requestScopeForBinding, setProgressObservability, skillReadObservability, validateWorkReport, writeCurrentSessionPointer, writeSessionState };

@@ -2,6 +2,7 @@
 // Source: skills/lumine-harness/src/harness/wiki/documents.ts
 import { parseSections } from "./sections.mjs";
 import { containedPath, hash, slash, wikiConfig } from "./files.mjs";
+import { validateStorageRecord } from "./storage.mjs";
 import { statePath, visibleJson, visibleText } from "./transactions.mjs";
 import { resolveAliasReference } from "./references.mjs";
 import path from "node:path";
@@ -30,7 +31,11 @@ function stateFile(root, id) {
 	return containedPath(root, `.lumine/wiki-state/documents/${hash(assertId(id))}.json`, false);
 }
 function baselineFor(root, id) {
-	return visibleJson(root, statePath("documents", assertId(id)), null);
+	const relative = statePath("documents", assertId(id)), baseline = visibleJson(root, relative, null);
+	if (baseline === null) return null;
+	validateStorageRecord(relative, baseline);
+	if (!baseline.path.startsWith(`${wikiConfig(root).root}/`)) throw new Error("BASELINE_PATH_INVALID");
+	return baseline;
 }
 function documentParts(markdown, collection) {
 	const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(markdown);

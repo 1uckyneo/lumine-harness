@@ -2,6 +2,7 @@
 import path from "node:path";
 import { readFileSync } from "node:fs";
 import { adapterHelp, formatAdapterResult, formatSkillResult, runAdapterCommand, runSkillCommand, setCliWorkStatus, setCliWorkReport } from "./adapter-manager.ts";
+import { beginSessionRequest, showSessionRequest } from "./core/session-scope.ts";
 import { commandLocale } from "./core/messages.ts";
 
 export function runAdapterCli(): void {
@@ -24,6 +25,20 @@ try {
   } else if (command === "skills") {
     const result = runSkillCommand(args, options);
     process.stdout.write(`${formatSkillResult(result)}\n`);
+  } else if (command === "session") {
+    const value = (name: string): string | undefined => {
+      const index = args.indexOf(name);
+      if (index < 0) return undefined;
+      if (!args[index + 1] || args[index + 1].startsWith("--")) throw new Error(`${name} requires a value.`);
+      return args[index + 1];
+    };
+    const requestOptions = { ...options, product: value("--product"), sessionId: value("--session-id"), mode: value("--mode"), taskId: value("--task"), requestId: value("--request-id"), expectedRequestId: value("--expect-request"), resume: args.includes("--resume") };
+    if (!["begin", "show"].includes(args[0])) throw new Error("Usage: session begin --mode <mode> [--task <existing-id>] [--request-id <stable-key>|--resume] --product <host> --session-id <id> | session show --product <host> --session-id <id>");
+    if (args[0] === "begin") beginSessionRequest(requestOptions);
+    const result = showSessionRequest(requestOptions);
+    process.stdout.write(args.includes("--json") ? `${JSON.stringify(result, null, 2)}\n` : locale === "en"
+      ? `Current request: ${result.request?.id ?? "undeclared"} | mode: ${result.request?.mode ?? "undeclared"} | task: ${result.request?.taskId ?? "none"}\n`
+      : `当前请求：${result.request?.id ?? "尚未声明"} | 模式：${result.request?.mode ?? "尚未声明"} | 关联任务：${result.request?.taskId ?? "无"}\n`);
   } else if (command === "work-status") {
     const value = (name: string): string | undefined => {
       const index = args.indexOf(name);
@@ -42,7 +57,7 @@ try {
       ? `WORK_STATUS recorded: ${state.workStatus} (revision ${state.workStatusRevision})\n`
       : `WORK_STATUS 已记录：${state.workStatus}（版本 ${state.workStatusRevision}）\n`);
   } else {
-    throw new Error("Usage: adapter help | skills <list|search|inspect> ... | work-status <status> --product <product> --session-id <id>");
+    throw new Error("Usage: adapter help | session <begin|show> ... | skills <list|search|inspect> ... | work-status <status> --product <product> --session-id <id>");
   }
 } catch (error) {
   const detail = error instanceof Error ? error.message : String(error);

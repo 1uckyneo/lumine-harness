@@ -24,3 +24,5 @@ Work autonomously within a stage. Every stage transition requires user confirmat
 
 <!-- LH-PLAN-05 -->
 Review product and technical consistency, testable acceptance, and missing boundaries. Runtime checks validate structure and references, not semantic quality. Lead with conclusions and current decisions, omit irrelevant sections, and link to logs rather than copying them. Follow the project language; readable filenames and stable identities are separate.
+
+Use [current request scope](../lumine-run/references/request-scope.md) before work and closeout. New requests do not automatically replace persistent tasks or restart the product workflow.

@@ -54,3 +54,18 @@
 AGENTS 明确授权的规范附件必须按任务完整读取，不由普通检索预算限制。规范、示例、实现知识和用户指南分别标明职责；旧代码不同不构成放宽规范的依据。规范变更说明有效依据并复核受影响内容，不能将普通知识同步变成政策修改。
 
 已确认的领域语言、上下文和长期决定可以是 Wiki 当前知识，但必须标明“已确认概念／规则”与“实现事实”的区别。完整术语、同词多上下文及必要 ADR 在相关主题保存并链接有效 Spec／Plan 依据；尚未确认方向留在当前 Spec／Plan。Wiki 内部使用正文链接及 relations，不登记彼此为 sources/watchScopes；关系不能自动触发来源过期。长期决定替代时保留形成依据和被替代身份。
+
+## 存储整理与恢复
+
+旧项目先升级 Runtime，再显式执行存储迁移；普通读取不转换格式。
+
+```text
+./.lumine/cli wiki storage inspect --json
+./.lumine/cli wiki storage check --json
+./.lumine/cli wiki storage compact --plan --output <plan.json> --json
+./.lumine/cli wiki storage compact --apply <plan.json> --expect <plan-sha256> --json
+./.lumine/cli wiki storage recover <operation-id> --json
+./.lumine/cli wiki storage recover <operation-id> --rollback --json
+```
+
+预演是只读操作，应用须核对精确清单、收益和受保护对象，并在当前授权内执行。expect 是计划文件原始字节的 SHA-256。对象按内容寻址复用，完成包／事务保留轻量回执，活动候选与三方生成基线仍受保护。不要手删 updates、transactions 或 objects；未知、损坏或并发变更先解决具体问题。迁移将项目 schemaVersion 升为 3，workflowVersion 仍为 2；旧 Runtime 拒绝写入。恢复资料留在已忽略的 .lumine-migrations，不能自动删除；回滚遇后续人工修改报告冲突，降级须先恢复旧状态与配置。当前状态、恢复备份和 Git 历史分别统计，普通提交不会抹去历史体积。

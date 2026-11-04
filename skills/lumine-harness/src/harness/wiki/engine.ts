@@ -1,5 +1,6 @@
+import { assertStorageWritable, decodeStorageRecord, gcStorageObjects, readStorageRecord, storageEnabled, storageRecordText, writeStorageRecord } from './storage.ts';
 import { randomUUID } from 'node:crypto';
-import { existsSync, readdirSync, realpathSync } from 'node:fs';
+import { existsSync, readdirSync, realpathSync, unlinkSync } from 'node:fs';
 import { atomicWrite, configFingerprint, containedPath, hash, readJson, snapshotSources, wikiConfig, withWikiLock, writeJson, relativePath, repositoryRoot } from './files.ts';
 import { assertId, baselineFor, findDocument, formatWikiDocument, isStructuredWikiDocument, listDocuments, parseDocument } from './documents.ts';
 import { threeWayMerge } from './merge.ts';
@@ -27,10 +28,48 @@ function conflictIds(root: string): Set<string> {
   if (!existsSync(folder)) return ids;
   for (const entry of readdirSync(folder, { withFileTypes: true })) {
     if (!entry.isDirectory() || entry.isSymbolicLink()) continue;
-    const packet = readJson<UpdatePacket | null>(packetFile(root, entry.name), null);
+    const packet = readStorageRecord<UpdatePacket | null>(root, packetFile(root, entry.name), null);
     if (packet?.status !== 'applied') for (const result of packet?.results ?? []) if (['conflict', 'protected', 'source-drift', 'config-drift'].includes(result.status) && packet?.decisions?.filter((decision) => decision.id === result.id).at(-1)?.action !== 'keep-current') ids.add(result.id);
   }
   return ids;
+}
+function stableObservation(root: string, observation: ObservationRecord): ObservationRecord {
+  const previous = visibleJson<ObservationRecord | null>(root, statePath('observations', observation.id), null);
+  if (!previous) return observation;
+  return previous.id === observation.id && previous.revision === observation.revision && previous.freshness === observation.freshness && previous.sourceFingerprint === observation.sourceFingerprint && snapshotEqual(previous.sources, observation.sources) ? previous : observation;
+}
+function collectGarbage(root: string): void { if (storageEnabled(root)) gcStorageObjects(root, { dryRun: false }); }
+function finishPacket(root: string, packet: UpdatePacket): void {
+  if (!storageEnabled(root) || packet.status !== 'applied' || packet.decisions?.some(item => ['defer', 'keep-current'].includes(item.action))) return;
+  assertStorageWritable(root);
+  const retained: NonNullable<UpdatePacket['retainedCandidates']> = [];
+  for (const unit of packet.units) {
+    const base = `.lumine/wiki-state/updates/${packet.id}/candidates/${hash(unit.id)}`;
+    const candidate = readStorageRecord<Candidate | null>(root, `${base}.json`, null);
+    const consumedHash = packet.results.find(result => result.id === unit.id && result.status === 'applied')?.candidateHash;
+    if (!candidate) continue;
+    if (!consumedHash || hash(JSON.stringify(candidate)) !== consumedHash) { retained.push(packet.retainedCandidates?.find(item => item.id === unit.id && item.path === `${base}.json`) ?? { id: unit.id, path: `${base}.json`, reason: 'Candidate consumption is unproven or its content changed after application.' }); continue; }
+    const markdown = diskText(root, `${base}.md`);
+    // Never discard an independently edited or otherwise unaccounted-for candidate.
+    if (markdown !== null && candidate.markdown !== markdown) { retained.push(packet.retainedCandidates?.find(item => item.id === unit.id && item.path === `${base}.json`) ?? { id: unit.id, path: `${base}.json`, reason: 'The separate Markdown candidate contains additional changes.' }); continue; }
+    for (const extension of ['md', 'json']) { const target = containedPath(root, `${base}.${extension}`, false); if (existsSync(target)) unlinkSync(target); }
+  }
+  if (retained.length) {
+    const file = packetFile(root, packet.id), stored = readStorageRecord<UpdatePacket>(root, file, packet);
+    stored.retainedCandidates = retained;
+    stored.results = stored.results.map(result => { const candidate = retained.find(item => item.id === result.id); return candidate ? { ...result, candidatePath: candidate.path } : result; });
+    writeStorageRecord(root, file, stored, { receipt: true });
+  }
+}
+function finishPackets(root: string): void {
+  if (!storageEnabled(root)) return;
+  const directory = containedPath(root, '.lumine/wiki-state/updates', false);
+  if (!existsSync(directory)) return;
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.isSymbolicLink()) continue;
+    const packet = readStorageRecord<UpdatePacket | null>(root, packetFile(root, entry.name), null);
+    if (packet) finishPacket(root, packet);
+  }
 }
 interface LocalObservationReceipt { revision: string; checkedAt: string; sourceFingerprint: string; }
 interface LocalObservationReceipts { schemaVersion: 1; environment: string; observations: Record<string, LocalObservationReceipt>; }
@@ -142,10 +181,12 @@ export function scanWiki(root: string) {
       const baseline = baselineFor(root, document.id), current = snapshotSources(root, document.sources, scopesFor(root, document), cache);
       const freshness: Freshness = current.missing.length ? 'missing-source' : !baseline ? 'unverified' : !snapshotEqual(baseline.sources, current) ? 'stale' : baseline.appliedRevision !== document.revision ? 'unverified' : 'current';
       const observation: ObservationRecord = { id: document.id, revision: document.revision, freshness, checkedAt, sourceFingerprint: sourceFingerprint(current), sources: current };
-      writeJson(containedPath(root, statePath('observations', document.id), false), observation); observations.push(observation);
+      const stable = stableObservation(root, observation);
+      writeStorageRecord(root, statePath('observations', document.id), stable); observations.push(stable);
       return { id: document.id, path: document.path, freshness, checkedAt, changedSources: Object.keys(current.fingerprints).filter((key) => current.fingerprints[key] !== baseline?.sources.fingerprints[key]), newFiles: Object.keys(current.files).filter((key) => !baseline?.sources.files[key]), removedFiles: Object.keys(baseline?.sources.files ?? {}).filter((key) => !Object.hasOwn(current.files, key)) };
     });
     recordLocalObservations(root, observations, environment);
+    collectGarbage(root);
     return { checkedAt, documents: scanned, unclassifiedFiles: sourceDispositions.filter((item) => item.status !== 'current').map((item) => item.file), sourceDispositions, classificationIssues: classification.issues, missingScopes: all.missing };
   });
 }
@@ -191,7 +232,7 @@ export function prepareUpdate(root: string, references: string[] = [], manifest?
     const packet: UpdatePacket = { schemaVersion: 2, id: randomUUID(), createdAt: new Date().toISOString(), configFingerprint: configFingerprint(root), scope: units.map((unit) => unit.id), units, status: 'prepared', results: [] };
     if (manifest?.coverage) packet.coverage = { before: diskText(root, COVERAGE_PATH), content: validateCoverage(manifest.coverage) };
     if (manifest?.referenceMoves) { if (manifest.referenceMoves.some((move) => !move.from || !move.to || move.from === move.to)) throw new Error('REFERENCE_MOVE_INVALID'); packet.referenceMoves = { before: diskText(root, '.lumine/wiki-state/document-aliases.json'), entries: manifest.referenceMoves }; }
-    writeJson(packetFile(root, packet.id), packet); return packet;
+    writeStorageRecord(root, packetFile(root, packet.id), packet); return packet;
   });
 }
 export function recoverWiki(root: string): { recovered: string[] } {
@@ -199,16 +240,18 @@ export function recoverWiki(root: string): { recovered: string[] } {
     const recovered = recoverTransactions(root), folder = containedPath(root, '.lumine/wiki-state/updates', false);
     if (existsSync(folder)) for (const entry of readdirSync(folder, { withFileTypes: true })) {
       if (!entry.isDirectory() || entry.isSymbolicLink()) continue;
-      const file = packetFile(root, entry.name), packet = readJson<UpdatePacket | null>(file, null);
+      const file = packetFile(root, entry.name), packet = readStorageRecord<UpdatePacket | null>(root, file, null);
       if (!packet || packet.status === 'applied') continue;
       let changed = false;
       for (const unit of packet.units) {
-        const journal = readJson<{ status: string } | null>(containedPath(root, `.lumine/wiki-state/transactions/${packet.id}-${hash(unit.group ?? unit.id).slice(0, 12)}.json`, false), null);
+        const journal = readStorageRecord<{ status: string; candidateHashes?: Record<string, string> } | null>(root, containedPath(root, `.lumine/wiki-state/transactions/${packet.id}-${hash(unit.group ?? unit.id).slice(0, 12)}.json`, false), null);
         if (journal?.status !== 'complete' || packet.results.some((item) => item.id === unit.id && item.status === 'applied')) continue;
-        packet.results = packet.results.filter((item) => item.id !== unit.id); packet.results.push({ id: unit.id, status: 'applied', reason: 'Recovered complete change group.' }); changed = true;
+        packet.results = packet.results.filter((item) => item.id !== unit.id); packet.results.push({ id: unit.id, status: 'applied', reason: 'Recovered complete change group.', ...(journal.candidateHashes?.[unit.id] ? { candidateHash: journal.candidateHashes[unit.id] } : {}) }); changed = true;
       }
-      if (changed) { packet.status = packet.units.every((unit) => packet.results.some((item) => item.id === unit.id && item.status === 'applied')) ? 'applied' : 'partial'; writeJson(file, packet); }
+      if (changed) { packet.status = packet.units.every((unit) => packet.results.some((item) => item.id === unit.id && item.status === 'applied')) ? 'applied' : 'partial'; writeStorageRecord(root, file, packet, { receipt: true }); }
     }
+    finishPackets(root);
+    collectGarbage(root);
     return { recovered };
   });
 }
@@ -223,10 +266,12 @@ export function recordSemanticReview(root: string, review: ReviewRecord): Semant
     recoverTransactions(root); const environment = localObservationContext(root).environment;
     const document = showKnowledge(root, review.documentId), sources = snapshotSources(root, document.sources, scopesFor(root, document)); validateReview(review, document, sources);
     const checkedAt = new Date().toISOString(), baseline = baselineFor(root, document.id);
-    const observation: ObservationRecord = { id: document.id, revision: document.revision, checkedAt, sourceFingerprint: sourceFingerprint(sources), sources, freshness: sources.missing.length ? 'missing-source' : baseline && snapshotEqual(baseline.sources, sources) && baseline.appliedRevision === document.revision ? 'current' : 'unverified' };
+    const observation = stableObservation(root, { id: document.id, revision: document.revision, checkedAt, sourceFingerprint: sourceFingerprint(sources), sources, freshness: sources.missing.length ? 'missing-source' : baseline && snapshotEqual(baseline.sources, sources) && baseline.appliedRevision === document.revision ? 'current' : 'unverified' });
     const reviewPath = statePath('reviews', document.id), observationPath = statePath('observations', document.id);
-    applyTransaction(root, { schemaVersion: 1, id: randomUUID(), status: 'pending', mutations: [{ path: reviewPath, before: diskText(root, reviewPath), after: jsonText(review) }, { path: observationPath, before: diskText(root, observationPath), after: jsonText(observation) }] });
+    const mutations = [{ path: reviewPath, before: diskText(root, reviewPath), after: storageRecordText(root, review) }, { path: observationPath, before: diskText(root, observationPath), after: storageRecordText(root, observation) }].filter(item => item.before !== item.after);
+    if (mutations.length) applyTransaction(root, { schemaVersion: 1, id: randomUUID(), status: 'pending', mutations });
     recordLocalObservations(root, [observation], environment);
+    collectGarbage(root);
     return { ...review, status: review.outcome };
   });
 }
@@ -251,7 +296,7 @@ function candidateMutations(root: string, unit: UpdateUnit, candidate: Candidate
   if (unit.kind === 'create' && current !== null) return result('conflict', 'Another writer created this path.');
   if (unit.kind !== 'create' && current === null) return result('conflict', 'The document was removed after preparation.');
   if (unit.kind !== 'create' && !baseline && candidateMarkdown !== current) return result('protected', 'Existing document has no generation baseline; preserve it and review it first.');
-  const merged = unit.kind === 'create' ? { clean: true, content: candidateMarkdown } : threeWayMerge(baseline?.generatedMarkdown ?? current!, current!, candidateMarkdown);
+  const merged = unit.kind === 'create' || !baseline ? { clean: true, content: candidateMarkdown } : threeWayMerge(baseline.generatedMarkdown, current!, candidateMarkdown);
   if (!merged.clean) return result('conflict', 'Human changes overlap the candidate. Both versions remain available.');
   const applied = parseDocument(merged.content, unit.path);
   if (applied.id !== unit.id) return result('conflict', 'Merged identity changed; preserve the human version and prepare the correct document again.');
@@ -266,18 +311,18 @@ function candidateMutations(root: string, unit: UpdateUnit, candidate: Candidate
     ? { ...candidate.review, revision: hash(candidateMarkdown) } : candidate.review;
   if (review) validateReview(review, parsed, candidateSources);
   const checkedAt = new Date().toISOString();
-  const nextBaseline: Baseline = { schemaVersion: 2, id: unit.id, path: unit.path, generation: (baseline?.generation ?? 0) + 1, generatedMarkdown: candidateMarkdown, appliedRevision: applied.revision, sources, updatedAt: checkedAt };
-  const observation: ObservationRecord = { id: unit.id, revision: applied.revision, freshness: 'current', checkedAt, sourceFingerprint: sourceFingerprint(sources), sources };
+  const nextBaseline: Baseline = baseline && baseline.generatedMarkdown === candidateMarkdown && baseline.appliedRevision === applied.revision && snapshotEqual(baseline.sources, sources) ? baseline : { schemaVersion: 2, id: unit.id, path: unit.path, generation: (baseline?.generation ?? 0) + 1, generatedMarkdown: candidateMarkdown, appliedRevision: applied.revision, sources, updatedAt: checkedAt };
+  const observation = stableObservation(root, { id: unit.id, revision: applied.revision, freshness: 'current', checkedAt, sourceFingerprint: sourceFingerprint(sources), sources });
   const baselinePath = statePath('documents', unit.id), observationPath = statePath('observations', unit.id);
-  const mutations: Mutation[] = [{ path: unit.path, before: current, after: merged.content }, { path: baselinePath, before: diskText(root, baselinePath), after: jsonText(nextBaseline) }, { path: observationPath, before: diskText(root, observationPath), after: jsonText(observation) }];
-  if (review) { const reviewPath = statePath('reviews', unit.id); mutations.push({ path: reviewPath, before: diskText(root, reviewPath), after: jsonText(review) }); }
-  return { result: { id: unit.id, status: 'applied', reason: 'Text, source observation and generation baseline saved together.', candidatePath }, mutations, document: applied };
+  const mutations: Mutation[] = [{ path: unit.path, before: current, after: merged.content }, { path: baselinePath, before: diskText(root, baselinePath), after: storageRecordText(root, nextBaseline) }, { path: observationPath, before: diskText(root, observationPath), after: storageRecordText(root, observation) }];
+  if (review) { const reviewPath = statePath('reviews', unit.id); mutations.push({ path: reviewPath, before: diskText(root, reviewPath), after: storageRecordText(root, review) }); }
+  return { result: { id: unit.id, status: 'applied', reason: 'Text, source observation and generation baseline saved together.', candidateHash: hash(JSON.stringify(candidate)), candidatePath }, mutations: mutations.filter(item => item.before !== item.after), document: applied };
 }
 export function applyUpdate(root: string, packetId: string, candidates: Candidate[], options: { failAfterWrites?: number } = {}): { packetId: string; status: UpdatePacket['status']; results: ApplyResult[] } {
   return withWikiLock(root, () => {
     recoverTransactions(root);
     const environment = localObservationContext(root).environment;
-    const file = packetFile(root, packetId), packet = readJson<UpdatePacket | null>(file, null);
+    const file = packetFile(root, packetId), packet = readStorageRecord<UpdatePacket | null>(root, file, null);
     if (!packet || packet.schemaVersion !== 2) throw new Error('UPDATE_NOT_FOUND');
     if (packet.status === 'applied') return { packetId, status: packet.status, results: packet.results };
     const byId = new Map<string, Candidate>();
@@ -285,10 +330,11 @@ export function applyUpdate(root: string, packetId: string, candidates: Candidat
       assertId(candidate.id); if (!packet.units.some((unit) => unit.id === candidate.id)) throw new Error(`UPDATE_OUTSIDE_SCOPE:${candidate.id}`);
       if (byId.has(candidate.id)) throw new Error('CANDIDATE_DUPLICATE'); byId.set(candidate.id, candidate);
       const folder = `.lumine/wiki-state/updates/${packetId}/candidates/${hash(candidate.id)}`;
-      atomicWrite(containedPath(root, `${folder}.md`, false), candidate.markdown); writeJson(containedPath(root, `${folder}.json`, false), candidate);
+      if (!storageEnabled(root)) atomicWrite(containedPath(root, `${folder}.md`, false), candidate.markdown);
+      writeStorageRecord(root, `${folder}.json`, candidate);
     }
     for (const unit of packet.units) if (!byId.has(unit.id)) {
-      const saved = readJson<Candidate | null>(containedPath(root, `.lumine/wiki-state/updates/${packetId}/candidates/${hash(unit.id)}.json`, false), null);
+      const saved = readStorageRecord<Candidate | null>(root, containedPath(root, `.lumine/wiki-state/updates/${packetId}/candidates/${hash(unit.id)}.json`, false), null);
       if (saved) byId.set(unit.id, saved);
     }
     const results = new Map(packet.results.map((result) => [result.id, result]));
@@ -296,8 +342,8 @@ export function applyUpdate(root: string, packetId: string, candidates: Candidat
     for (const unit of packet.units) { const key = unit.group ?? unit.id; groups.set(key, [...(groups.get(key) ?? []), unit]); }
     if (!packet.units.length) groups.set('directory', []);
     for (const [group, units] of groups) {
-      const previousTransaction = readJson<{ status: string } | null>(containedPath(root, `.lumine/wiki-state/transactions/${packetId}-${hash(group).slice(0, 12)}.json`, false), null);
-      if (previousTransaction?.status === 'complete') { for (const unit of units) results.set(unit.id, { id: unit.id, status: 'applied', reason: 'Recovered complete change group.' }); continue; }
+      const previousTransaction = readStorageRecord<{ status: string; candidateHashes?: Record<string, string> } | null>(root, containedPath(root, `.lumine/wiki-state/transactions/${packetId}-${hash(group).slice(0, 12)}.json`, false), null);
+      if (previousTransaction?.status === 'complete') { for (const unit of units) results.set(unit.id, { id: unit.id, status: 'applied', reason: 'Recovered complete change group.', ...(previousTransaction.candidateHashes?.[unit.id] ? { candidateHash: previousTransaction.candidateHashes[unit.id] } : {}) }); continue; }
       if (units.length && units.every((unit) => results.get(unit.id)?.status === 'applied')) continue;
       const decisions = new Map((packet.decisions ?? []).map((decision) => [decision.id, decision]));
       if (units.some((unit) => decisions.has(unit.id))) {
@@ -310,7 +356,7 @@ export function applyUpdate(root: string, packetId: string, candidates: Candidat
       if (units.some((unit) => !byId.has(unit.id))) { for (const unit of units) results.set(unit.id, { id: unit.id, status: 'pending', reason: 'The dependent change group needs all text candidates.' }); continue; }
       if (packet.configFingerprint !== configFingerprint(root)) { if (!units.length) throw new Error('CONFIG_CHANGED'); for (const unit of units) results.set(unit.id, { id: unit.id, status: 'config-drift', reason: 'Configuration changed after preparation.' }); continue; }
       const prepared = units.map((unit) => {
-        const candidatePath = `.lumine/wiki-state/updates/${packetId}/candidates/${hash(unit.id)}.md`;
+        const candidatePath = `.lumine/wiki-state/updates/${packetId}/candidates/${hash(unit.id)}.${storageEnabled(root) ? 'json' : 'md'}`;
         try { return candidateMutations(root, unit, byId.get(unit.id)!, candidatePath); }
         catch (error) { return { result: { id: unit.id, status: 'invalid' as const, reason: error instanceof Error ? error.message : 'UPDATE_INVALID', candidatePath }, mutations: [] as Mutation[], document: undefined }; }
       });
@@ -345,24 +391,27 @@ export function applyUpdate(root: string, packetId: string, candidates: Candidat
           mutations.push({ path: COVERAGE_PATH, before: packet.coverage.before, after: jsonText(packet.coverage.content) });
         }
         if (group === 'directory' && packet.referenceMoves) mutations.push({ path: aliasPath, before: packet.referenceMoves.before, after: jsonText(aliases) });
-        applyTransaction(root, { schemaVersion: 1, id: `${packetId}-${hash(group).slice(0, 12)}`, status: 'pending', mutations }, options.failAfterWrites);
-        recordLocalObservations(root, mutations.filter(mutation => mutation.path.startsWith('.lumine/wiki-state/observations/') && mutation.after).map(mutation => JSON.parse(mutation.after!) as ObservationRecord), environment);
+        applyTransaction(root, { schemaVersion: 1, id: `${packetId}-${hash(group).slice(0, 12)}`, status: 'pending', candidateHashes: Object.fromEntries(units.map(unit => [unit.id, hash(JSON.stringify(byId.get(unit.id)!))])), mutations }, options.failAfterWrites);
+        recordLocalObservations(root, mutations.filter(mutation => mutation.path.startsWith('.lumine/wiki-state/observations/') && mutation.after).map(mutation => decodeStorageRecord<ObservationRecord>(root, JSON.parse(mutation.after!))), environment);
         for (const item of prepared) results.set(item.result.id, item.result);
       } catch (error) {
         if (error instanceof Error && error.message === 'TRANSACTION_INJECTED_INTERRUPTION') throw error;
         for (const item of prepared) results.set(item.result.id, { ...item.result, status: 'conflict', reason: error instanceof Error ? error.message : 'TRANSACTION_FAILED' });
         if (!units.length) throw error;
       }
-      packet.results = [...results.values()]; packet.status = packet.units.every((unit) => results.get(unit.id)?.status === 'applied') ? 'applied' : 'partial'; writeJson(file, packet);
+      packet.results = [...results.values()]; packet.status = packet.units.every((unit) => results.get(unit.id)?.status === 'applied') ? 'applied' : 'partial'; writeStorageRecord(root, file, packet, { receipt: true });
     }
-    packet.results = [...results.values()]; packet.status = packet.units.every((unit) => results.get(unit.id)?.status === 'applied') ? 'applied' : 'partial'; writeJson(file, packet);
-    return { packetId, status: packet.status, results: packet.results };
+    packet.results = [...results.values()]; packet.status = packet.units.every((unit) => results.get(unit.id)?.status === 'applied') ? 'applied' : 'partial'; writeStorageRecord(root, file, packet, { receipt: true });
+    finishPacket(root, packet);
+    collectGarbage(root);
+    const saved = readStorageRecord<UpdatePacket>(root, file, packet);
+    return { packetId, status: saved.status, results: saved.results };
   });
 }
 export function recordUpdateDecision(root: string, packetId: string, id: string, action: 'keep-current' | 'defer', reason: string): UpdatePacket {
   if (!['keep-current', 'defer'].includes(action)) throw new Error('DECISION_ACTION_INVALID');
   if (!reason.trim()) throw new Error('DECISION_REASON_REQUIRED');
-  return withWikiLock(root, () => { const file = packetFile(root, packetId), packet = readJson<UpdatePacket | null>(file, null); if (!packet || !packet.units.some((unit) => unit.id === id)) throw new Error('UPDATE_DOCUMENT_NOT_FOUND'); packet.decisions = [...(packet.decisions ?? []), { id, action, reason, at: new Date().toISOString() }]; writeJson(file, packet); return packet; });
+  return withWikiLock(root, () => { const file = packetFile(root, packetId), packet = readStorageRecord<UpdatePacket | null>(root, file, null); if (!packet || !packet.units.some((unit) => unit.id === id)) throw new Error('UPDATE_DOCUMENT_NOT_FOUND'); packet.decisions = [...(packet.decisions ?? []), { id, action, reason, at: new Date().toISOString() }]; writeStorageRecord(root, file, packet, { receipt: true }); return packet; });
 }
 export function checkWiki(root: string): { status: 'passed' | 'failed'; issues: CheckIssue[]; checked: string[]; notVerified: string[] } {
   const { documents, issues } = inspectKnowledge(root), checked = documents.map((doc) => doc.id);

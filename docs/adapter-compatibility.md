@@ -88,3 +88,7 @@ Most users can stop here. If you maintain an Adapter or need to investigate a pr
 ## Verification scope for this refactor
 
 The new entry points and CLI are exercised in an actual Codex session. Projects install only their selected Adapters. Trae and other community Adapters retain protocol and distribution regression coverage; their applications have not each been tested live. Completing a project migration does not certify every host lifecycle capability. Skill-read events, independent sessions, and automatic continuation remain unverified when not observed. Deselecting an Adapter retires only unchanged managed configuration, while preserving community implementations and user settings.
+
+## Identifying the current request
+
+A reliable host userTurnId identifies new requests. Without one, the Agent uses public session begin/show with a stable request-id, mode and optional existing task. Automatic continuation and Hook retries reuse the scope; sessions remain independent. Local scopes do not duplicate Specs/Plans, and confirmation review stays limited to affected scope. Unknown scope cannot silently pass; implementation still validates task binding and evidence. A scope cannot downgrade implementation to diagnosis to bypass checks. Community-host protocol tests do not establish live host execution; see the [validation record](validation/Lumine状态瘦身与请求上下文验证.md).

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "b4b47b6b-ef43-4883-a3ad-b9c1653a475d",
+    "createdAt": "2026-11-04T10:50:21.002Z",
+    "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+    "scope": [
+      "lumine-wiki",
+      "lumine-task-check",
+      "lumine-adoption"
+    ],
+    "status": "applied",
+    "storageReceipt": true,
+    "units": [
+      {
+        "id": "lumine-wiki",
+        "kind": "update",
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md"
+      },
+      {
+        "id": "lumine-task-check",
+        "kind": "update",
+        "path": "docs/repo-wiki/任务检查、停止状态与继续条件.md"
+      },
+      {
+        "id": "lumine-adoption",
+        "kind": "update",
+        "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md"
+      }
+    ],
+    "results": [
+      {
+        "id": "lumine-wiki",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "5d3cab76c974000d48b46eb8405281d4437be91ea8d061437e46b9b9d2bdddd5"
+      },
+      {
+        "id": "lumine-task-check",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "ffa2363872cc94ecc252214d36733f9b5c4d9763c0ca47ddc3afe2dbda1373af"
+      },
+      {
+        "id": "lumine-adoption",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "2c9a0a540a4a04ab62cc0a261618eb7a3a1206bc8b437c9261868846fb156da5"
+      }
+    ],
+    "audit": {
+      "recordHash": "66e6a5857fc2d823722b892d1d0fdb22a18c45745ae028c91b8902f6265ce7b6",
+      "unitHashes": [
+        {
+          "id": "lumine-wiki",
+          "sha256": "4ca858d70d1509701c3ddaef59b8c5cac3c25fed99353bee07a030929ae4adad"
+        },
+        {
+          "id": "lumine-task-check",
+          "sha256": "19e5efd66248d7badc043854256d822565cea1cd585da66fc33f16fe8d401a13"
+        },
+        {
+          "id": "lumine-adoption",
+          "sha256": "3e22ff8028988540f9e5a054de0c808da8ceec05e31b24996971adf4b42794ff"
+        }
+      ]
+    }
+  }
+}

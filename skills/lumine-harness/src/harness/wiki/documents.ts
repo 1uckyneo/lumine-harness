@@ -1,3 +1,4 @@
+import { validateStorageRecord } from './storage.ts';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { isMap, isPair, isSeq, parse as parseYaml, parseDocument as parseYamlDocument } from 'yaml';
@@ -15,7 +16,13 @@ const TAIL_MARKER = '\n<!-- lumine-wiki-metadata:v1\n';
 const TAIL_PATTERN = /\n<!-- lumine-wiki-metadata:v1\r?\n([\s\S]*?)\r?\n-->(?:\r?\n)?$/;
 export function assertId(id: string): string { if (!SAFE_ID.test(id)) throw new Error('DOCUMENT_ID_INVALID'); return id; }
 export function stateFile(root: string, id: string): string { return containedPath(root, `.lumine/wiki-state/documents/${hash(assertId(id))}.json`, false); }
-export function baselineFor(root: string, id: string): Baseline | null { return visibleJson<Baseline | null>(root, statePath('documents', assertId(id)), null); }
+export function baselineFor(root: string, id: string): Baseline | null {
+  const relative = statePath('documents', assertId(id)), baseline = visibleJson<Baseline | null>(root, relative, null);
+  if (baseline === null) return null;
+  validateStorageRecord(relative, baseline);
+  if (!baseline.path.startsWith(`${wikiConfig(root).root}/`)) throw new Error('BASELINE_PATH_INVALID');
+  return baseline;
+}
 function documentParts(markdown: string, collection: Collection): { value: Record<string, unknown>; body: string; structured: boolean } {
   const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(markdown);
   const front = match ? parseYaml(match[1], { maxAliasCount: 0, uniqueKeys: true }) as Record<string, unknown> : {};

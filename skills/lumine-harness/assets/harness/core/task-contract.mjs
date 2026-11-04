@@ -2,7 +2,7 @@
 // Source: skills/lumine-harness/src/harness/core/task-contract.ts
 import { loadProjectConfig, resolveProjectPath } from "./project-config.mjs";
 import { discoverSharedSkills } from "./skill-catalog.mjs";
-import { readSessionState, skillReadObservability, writeSessionState } from "./work-status.mjs";
+import { currentRequestScope, readSessionState, requestScopeForBinding, skillReadObservability, writeSessionState } from "./work-status.mjs";
 import { acceptanceSections, contentHash, resolveDocument } from "./documents.mjs";
 import { resolveCurrentDocument } from "./document-operations.mjs";
 import path from "node:path";
@@ -93,6 +93,7 @@ function bindTask(root, product, sessionId, taskId, mode) {
 		};
 	});
 	return writeSessionState(root, product, sessionId, {
+		requestScope: requestScopeForBinding(state ?? {}, selected, taskId),
 		taskId,
 		taskUserTurnRevision: Number(state?.userTurnRevision ?? 0),
 		requestedActivity: selected,
@@ -262,28 +263,26 @@ function checkTask(root, taskId, modeOverride) {
 	};
 }
 function checkSessionCompletion(root, state) {
-	const diagnostic = state.requestedActivity === "diagnose" || state.requestedActivity === "verify" || state.requestedActivity === "check" || state.requestedActivity === "plan";
-	if (diagnostic) return {
-		ok: true,
-		issues: [],
-		mode: state.requestedActivity === "check" ? "diagnose" : state.requestedActivity,
-		output: ""
-	};
-	if (state.taskId && (state.taskUserTurnRevision === undefined || state.taskUserTurnRevision === Number(state.userTurnRevision ?? 0))) return checkTask(root, state.taskId, "implement");
-	if (state.requestedActivity === "implement") return {
+	const issue = (code, message) => ({
 		ok: false,
 		issues: [{
-			code: "TASK_NOT_BOUND",
-			message: "Bind the current implementation task before claiming completion",
-			remediation: "Use task record and task bind for the current request."
+			code,
+			message,
+			remediation: "Use session begin to declare the current request, then bind and validate an implementation task when applicable."
 		}],
-		output: "TASK_NOT_BOUND: Bind the current implementation task and its evidence before claiming completion."
-	};
-	return {
+		output: `${code}: ${message}`
+	});
+	const scope = currentRequestScope(state);
+	if (!scope?.mode) return issue("REQUEST_SCOPE_REQUIRED", "Declare the current request with session begin; an earlier task binding or an unknown mode does not establish this request's scope.");
+	if (scope.mode !== state.requestedActivity) return issue("REQUEST_SCOPE_MISMATCH", "The request declaration and session mode disagree; preserve the record and reassess this request.");
+	if (scope.mode !== "implement") return {
 		ok: true,
 		issues: [],
+		mode: scope.mode === "check" ? "diagnose" : scope.mode,
 		output: ""
 	};
+	if (!scope.taskId || state.taskId !== scope.taskId || state.taskUserTurnRevision !== Number(state.userTurnRevision ?? 0)) return issue("TASK_NOT_BOUND", "Bind the current implementation task and its evidence before claiming completion.");
+	return checkTask(root, scope.taskId, "implement");
 }
 
 //#endregion

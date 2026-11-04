@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "id": "lumine-task-check",
+    "markdown": {
+      "$lumineObject": "03cb879962ee57847bae62a5e7c54d4e38c23119e3434c40e53bd5f8145781bd",
+      "kind": "text",
+      "bytes": 5795
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { contentHash, resolveDocument, acceptanceSections, type ContractIssue } 
 import { loadProjectConfig, resolveProjectPath } from "./project-config.ts";
 import { resolveCurrentDocument } from "./document-operations.ts";
 import { discoverSharedSkills } from "./skill-catalog.ts";
-import { readSessionState, skillReadObservability, writeSessionState } from "./work-status.ts";
+import { currentRequestScope, readSessionState, requestScopeForBinding, skillReadObservability, writeSessionState } from "./work-status.ts";
 import type { HarnessProduct, SessionState } from "./contracts.ts";
 
 export type TaskMode = "plan" | "implement" | "verify" | "diagnose";
@@ -94,6 +94,7 @@ export function bindTask(root: string, product: HarnessProduct, sessionId: strin
     return { name, path: skill.file, reason: "task-selected", read: Boolean(used), readObservability: skillReadObservability(product), contentHash: skill.hash, readAt: used?.readAt };
   });
   return writeSessionState(root, product, sessionId, {
+    requestScope: requestScopeForBinding(state ?? {}, selected, taskId),
     taskId, taskUserTurnRevision: Number(state?.userTurnRevision ?? 0), requestedActivity: selected,
     selectedSkills, expectedSkills, expectedSkill: expectedSkills[0]?.name ?? null,
     expectedSkillPath: expectedSkills[0]?.path ?? null, expectedSkillRead: expectedSkills.every((item) => item.read)
@@ -200,12 +201,12 @@ export function checkTask(root: string, taskId: string, modeOverride?: TaskMode)
   return { ok: issues.length === 0, issues, taskId, mode, output: issues.map((item) => `${item.code}: ${item.message}`).join("\n") };
 }
 export function checkSessionCompletion(root: string, state: Partial<SessionState>): TaskCheckResult {
-  // selectedSkills declares intent; observed reads belong to Adapter telemetry.
-  // Missing telemetry cannot prove a missing read or replace task evidence.
-  const diagnostic = state.requestedActivity === "diagnose" || state.requestedActivity === "verify" || state.requestedActivity === "check" || state.requestedActivity === "plan";
-  // A diagnostic request may finish with findings. It is not an instruction to fix them.
-  if (diagnostic) return { ok: true, issues: [], mode: state.requestedActivity === "check" ? "diagnose" : state.requestedActivity as TaskMode, output: "" };
-  if (state.taskId && (state.taskUserTurnRevision === undefined || state.taskUserTurnRevision === Number(state.userTurnRevision ?? 0))) return checkTask(root, state.taskId, "implement");
-  if (state.requestedActivity === "implement") return { ok: false, issues: [{ code: "TASK_NOT_BOUND", message: "Bind the current implementation task before claiming completion", remediation: "Use task record and task bind for the current request." }], output: "TASK_NOT_BOUND: Bind the current implementation task and its evidence before claiming completion." };
-  return { ok: true, issues: [], output: "" };
+  const issue = (code: string, message: string): TaskCheckResult => ({ ok: false, issues: [{ code, message, remediation: "Use session begin to declare the current request, then bind and validate an implementation task when applicable." }], output: `${code}: ${message}` });
+  const scope = currentRequestScope(state);
+  if (!scope?.mode) return issue("REQUEST_SCOPE_REQUIRED", "Declare the current request with session begin; an earlier task binding or an unknown mode does not establish this request's scope.");
+  if (scope.mode !== state.requestedActivity) return issue("REQUEST_SCOPE_MISMATCH", "The request declaration and session mode disagree; preserve the record and reassess this request.");
+  // Read-only/plan requests finish on their own findings, never on a previous implementation's evidence.
+  if (scope.mode !== "implement") return { ok: true, issues: [], mode: scope.mode === "check" ? "diagnose" : scope.mode, output: "" };
+  if (!scope.taskId || state.taskId !== scope.taskId || state.taskUserTurnRevision !== Number(state.userTurnRevision ?? 0)) return issue("TASK_NOT_BOUND", "Bind the current implementation task and its evidence before claiming completion.");
+  return checkTask(root, scope.taskId, "implement");
 }

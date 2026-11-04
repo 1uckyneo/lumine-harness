@@ -6,6 +6,7 @@ import { initializeSessionState, observeHarnessEvent, recordWorkStatus } from ".
 import { beginVerificationRun } from "../core/verification.mjs";
 import { resolveHarnessRuntimeRoot, resolveSkillAssetsRoot } from "../core/runtime-layout.mjs";
 import { doctorAdapter, formatSkillResult, installKimiAdapter, setCliWorkStatus, uninstallKimiAdapter } from "../adapter-manager.mjs";
+import { beginSessionRequest } from "../core/session-scope.mjs";
 import { evaluateStopPolicy } from "../core/stop-policy.mjs";
 import path from "node:path";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -77,6 +78,13 @@ test("public Stop Policy preserves all three states and deduplicates one status 
 			cwd: root
 		};
 		initializeSessionState(root, done);
+		beginSessionRequest({
+			root,
+			product: done.product,
+			sessionId: done.sessionId,
+			requestId: "protocol-check",
+			mode: "check"
+		});
 		recordWorkStatus(root, done, "done");
 		assert.equal(evaluateStopPolicy(done, {
 			root,

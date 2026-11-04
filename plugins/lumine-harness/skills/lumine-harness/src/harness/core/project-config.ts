@@ -4,7 +4,7 @@ import type { HarnessProduct } from "./contracts.ts";
 
 export interface RepositoryConfig { id: string; path: string; }
 export interface ProjectConfig {
-  schemaVersion: 2;
+  schemaVersion: 2 | 3;
   locale: "zh-CN" | "en";
   displayName?: string;
   workflowVersion: 2;
@@ -44,7 +44,7 @@ export function resolveProjectPath(root: string, relative: string, name = "path"
 export function loadProjectConfig(root: string): ProjectConfig {
   const file = resolveProjectPath(root, ".lumine/project.json", "project config");
   const raw = existsSync(file) ? object(JSON.parse(readFileSync(file, "utf8")), "project config") : {};
-  if (raw.schemaVersion !== undefined && raw.schemaVersion !== 2) throw new Error("Unsupported project schemaVersion; use the upgrade tool.");
+  if (raw.schemaVersion !== undefined && raw.schemaVersion !== 2 && raw.schemaVersion !== 3) throw new Error("Unsupported project schemaVersion; use the upgrade tool.");
   if (raw.workflowVersion !== undefined && raw.workflowVersion !== 2) throw new Error("Unsupported workflowVersion");
   const locale = raw.locale ?? "en";
   if (locale !== "zh-CN" && locale !== "en") throw new Error("locale must be zh-CN or en");
@@ -84,7 +84,7 @@ export function loadProjectConfig(root: string): ProjectConfig {
   if (!Array.isArray(adapters) || adapters.some((item) => typeof item !== "string" || !PRODUCTS.has(item))) throw new Error("selectedAdapters contains an unsupported product");
   const autonomy = raw.autonomy === undefined ? {} : object(raw.autonomy, "autonomy");
   return {
-    ...raw, schemaVersion: 2, locale, displayName: typeof raw.displayName === "string" ? raw.displayName.trim() : undefined, workflowVersion: 2, repositories,
+    ...raw, schemaVersion: raw.schemaVersion === 3 ? 3 : 2, locale, displayName: typeof raw.displayName === "string" ? raw.displayName.trim() : undefined, workflowVersion: 2, repositories,
     wiki: { root: wikiRoot, watchScopes, maxCards: positive(wiki.maxCards, 6, "wiki.maxCards"), maxContextChars: positive(wiki.maxContextChars, 12000, "wiki.maxContextChars"), searchValidationFiles: [...validationFiles] as string[] },
     selectedAdapters: [...new Set(adapters)] as HarnessProduct[],
     extensions: raw.extensions === undefined ? {} : object(raw.extensions, "extensions"),

@@ -52,3 +52,18 @@ After investigating reusable findings, update affected knowledge within authoriz
 Read applicable AGENTS-authorized standards in full, unconstrained by ordinary retrieval budgets. Distinguish standards, examples, implementation knowledge, and user guides. Legacy code differing from a standard is not a reason to relax it. Explain the valid basis for a standards change and review affected content; ordinary synchronization cannot change policy.
 
 Confirmed domain language, contexts, and lasting decisions may be current Wiki knowledge while explicitly distinguishing confirmed concepts/rules from implementation facts. Preserve complete terms, overloaded terms by context, and necessary ADRs in relevant topics, linked to valid Spec/Plan evidence; unconfirmed directions remain in the current Spec/Plan. Link Wiki pages through prose and relations, not mutual sources/watchScopes; relations do not automatically invalidate freshness. Superseded lasting decisions retain their formation evidence and identity.
+
+## Storage compaction and recovery
+
+Upgrade Runtime first, then explicitly migrate legacy projects. Reads never migrate storage.
+
+```text
+./.lumine/cli wiki storage inspect --json
+./.lumine/cli wiki storage check --json
+./.lumine/cli wiki storage compact --plan --output <plan.json> --json
+./.lumine/cli wiki storage compact --apply <plan.json> --expect <plan-sha256> --json
+./.lumine/cli wiki storage recover <operation-id> --json
+./.lumine/cli wiki storage recover <operation-id> --rollback --json
+```
+
+Planning is read-only. Review exact inputs, expected savings and protected records before applying within authorization. expect is the SHA-256 of the plan file's exact bytes. Content-addressed objects share payloads; completed packets/transactions retain receipts while active candidates and generated merge baselines remain protected. Do not manually remove updates, transactions or objects; resolve unknown formats, corruption and concurrency explicitly. Migration changes project schemaVersion to 3 while workflowVersion stays 2, so old Runtime refuses writes. Ignored .lumine-migrations recovery material is never automatically cleared. Rollback reports conflicts with later human edits; restore old state/config before downgrade. Report current storage, recovery backup and Git history separately; ordinary commits do not erase historical size.

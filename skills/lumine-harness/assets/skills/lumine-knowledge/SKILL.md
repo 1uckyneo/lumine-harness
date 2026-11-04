@@ -25,3 +25,5 @@ description: 定位实现、查询和维护 Repo Wiki，或打开、启动、重
 
 <!-- LH-KNOWLEDGE-07 -->
 用户要求打开知识库或启动、重启、停止阅读器时，读取[阅读器管理](references/reader.md)。优先复用属于当前项目的服务，停止前核实进程归属；直接阅读 Markdown 和 Agent 检索不需要启动服务。
+
+开始及收尾时按[当前请求作用域](../lumine-run/references/request-scope.md)核对本轮范围。新请求不自动替换长期任务或重启产品流程。

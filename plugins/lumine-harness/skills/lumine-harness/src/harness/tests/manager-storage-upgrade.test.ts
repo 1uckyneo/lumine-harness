@@ -1,0 +1,107 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { createHash } from 'node:crypto';
+import { applyProposal, createProposal, finalizeProposal, rollbackProposal, type Proposal } from '../../scripts/harness-manager.ts';
+import { applyCompaction, checkStorage, compactionPlanHash, planCompaction, recoverCompaction } from '../wiki/compaction.ts';
+const hash = (value: string | Buffer) => createHash('sha256').update(value).digest('hex');
+const json = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
+function fixture() {
+  const root = mkdtempSync(path.join(os.tmpdir(), 'lumine-manager-storage-'));
+  const put = (relative: string, value: unknown) => { const file = path.join(root, relative); mkdirSync(path.dirname(file), { recursive: true }); writeFileSync(file, typeof value === 'string' ? value : json(value)); };
+  const save = (proposal: Proposal) => { const file = path.join(root, `proposal-${proposal.proposalId}.json`); writeFileSync(file, json(proposal)); return file; };
+  return { root, put, save, clean: () => rmSync(root, { recursive: true, force: true }) };
+}
+function protectedBytes(root: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  const visit = (relative: string) => { const file = path.join(root, relative); if (!existsSync(file)) return; for (const entry of readdirSync(file, { withFileTypes: true })) { const rel = `${relative}/${entry.name}`; if (entry.isDirectory()) visit(rel); else result[rel] = hash(readFileSync(path.join(root, rel))); } };
+  for (const relative of ['docs/repo-wiki', '.lumine/wiki-state', '.lumine/tasks']) visit(relative);
+  return result;
+}
+function addHistoricalKnowledge(f: ReturnType<typeof fixture>) {
+  const markdown = '---\nid: guide\ntitle: 指南\nsummary: 保留历史生成语义\nrelations: [related]\nsources: []\n---\n# 指南\n\n## 原章节\n原始生成内容。\n';
+  const sources = { fingerprints: {}, scopeFingerprints: {}, files: {}, missing: [] };
+  const baseline = { schemaVersion: 2, id: 'guide', path: 'docs/repo-wiki/指南.md', generation: 2, generatedMarkdown: markdown, appliedRevision: hash(markdown), sources, updatedAt: '2026-01-01T00:00:00Z' };
+  f.put(baseline.path, markdown + '\n人工补充。\n');
+  f.put(`.lumine/wiki-state/documents/${hash('guide')}.json`, baseline);
+  for (const status of ['prepared', 'partial']) {
+    const id = `historical-${status}`;
+    const candidatePath = `.lumine/wiki-state/updates/${id}/candidates/${hash('guide')}.md`;
+    f.put(`.lumine/wiki-state/updates/${id}/packet.json`, { schemaVersion: 2, id, status, createdAt: '2026-01-01T00:00:00Z', configFingerprint: 'original', scope: ['guide'], units: [{ kind: 'update', id: 'guide', group: 'stable-group', path: baseline.path, baseline, currentMarkdown: markdown, currentRevision: hash(markdown), sources, sourceRefs: [], watchScopes: [] }], results: status === 'prepared' ? [] : [{ id: 'guide', status: 'conflict', reason: 'Preserve both versions', candidatePath }] });
+    if (status === 'partial') { f.put(candidatePath, markdown); f.put(candidatePath.slice(0, -3) + '.json', { id: 'guide', markdown }); }
+  }
+  f.put('.lumine/tasks/existing-task.json', { schemaVersion: 3, taskId: 'existing-task', mode: 'implement', goal: 'Existing work', scope: 'Existing scope', acceptanceRefs: [], evidence: [], summary: 'Existing progress and approval.' });
+  assert.equal(checkStorage(f.root).ok, true, JSON.stringify(checkStorage(f.root).issues));
+}
+
+test('modern runtime upgrade fixes preservation in its signed proposal and leaves historical Wiki, candidates and tasks byte-identical', () => {
+  const f = fixture(); try {
+    applyProposal(f.save(createProposal(f.root, { adapters: 'none', locale: 'zh-CN' })));
+    addHistoricalKnowledge(f); const before = protectedBytes(f.root);
+    const proposal = createProposal(f.root, { mode: 'upgrade' }); assert.equal(proposal.knowledgeMode, 'preserve');
+    assert.equal(proposal.operations.some(op => op.action !== 'preserve' && (op.path.startsWith('.lumine/wiki-state/') || op.path.startsWith('docs/repo-wiki/') || op.path.startsWith('.lumine/tasks/'))), false);
+    const file = f.save(proposal); applyProposal(file); assert.deepEqual(protectedBytes(f.root), before);
+    finalizeProposal(file); assert.deepEqual(protectedBytes(f.root), before);
+    assert.deepEqual(rollbackProposal(file).conflicts, []); assert.deepEqual(protectedBytes(f.root), before);
+    const tampered = { ...proposal, knowledgeMode: 'convert' } as Proposal;
+    assert.throws(() => applyProposal(f.save(tampered)), /integrity/);
+  } finally { f.clean(); }
+});
+
+test('schema 3 projects can receive another runtime upgrade without migrating state or lowering the writer fence', () => {
+  const f = fixture(); try {
+    applyProposal(f.save(createProposal(f.root, { adapters: 'none', locale: 'zh-CN' })));
+    addHistoricalKnowledge(f); const plan = planCompaction(f.root); applyCompaction(f.root, plan, compactionPlanHash(plan));
+    const before = protectedBytes(f.root);
+    const proposal = createProposal(f.root, { mode: 'upgrade' }); assert.equal(proposal.knowledgeMode, 'preserve'); assert.equal(proposal.project.schemaVersion, 3); assert.equal(proposal.project.workflowVersion, 2);
+    const file = f.save(proposal); applyProposal(file); finalizeProposal(file);
+    assert.deepEqual(protectedBytes(f.root), before); assert.equal(JSON.parse(readFileSync(path.join(f.root, '.lumine/project.json'), 'utf8')).schemaVersion, 3);
+    assert.deepEqual(rollbackProposal(file).conflicts, []); assert.deepEqual(protectedBytes(f.root), before);
+    assert.equal(JSON.parse(readFileSync(path.join(f.root, '.lumine/project.json'), 'utf8')).schemaVersion, 3);
+  } finally { f.clean(); }
+});
+
+test('rolling back a pre-storage runtime requires explicit storage rollback before any installed file is replaced', () => {
+  const f = fixture(); try {
+    applyProposal(f.save(createProposal(f.root, { adapters: 'none', locale: 'zh-CN' })));
+    addHistoricalKnowledge(f); const upgrade = createProposal(f.root, { mode: 'upgrade' }); const file = f.save(upgrade); applyProposal(file);
+    const plan = planCompaction(f.root); applyCompaction(f.root, plan, compactionPlanHash(plan));
+    const before = protectedBytes(f.root); const installedFiles = ['.lumine/project.json', '.lumine/root.json', '.lumine/managed.json', '.lumine/core/project-config.mjs'];
+    const installed = installedFiles.map(relative => readFileSync(path.join(f.root, relative), 'utf8'));
+    const journalFile = path.join(f.root, '.lumine-migrations', upgrade.proposalId, 'journal.json');
+    const originalJournal = readFileSync(journalFile, 'utf8'); const alteredJournal = JSON.parse(originalJournal);
+    const originalConfig = JSON.parse(Buffer.from(alteredJournal.backups['.lumine/project.json'].content, 'base64').toString('utf8'));
+    alteredJournal.backups['.lumine/project.json'].content = Buffer.from(json({ ...originalConfig, schemaVersion: 3 })).toString('base64');
+    writeFileSync(journalFile, json(alteredJournal)); assert.throws(() => rollbackProposal(file), /STORAGE_ROLLBACK_CONFIG_BACKUP_INVALID/);
+    writeFileSync(journalFile, originalJournal);
+    assert.throws(() => rollbackProposal(file), /STORAGE_ROLLBACK_REQUIRED/);
+    assert.deepEqual(installedFiles.map(relative => readFileSync(path.join(f.root, relative), 'utf8')), installed); assert.deepEqual(protectedBytes(f.root), before);
+    recoverCompaction(f.root, plan.operationId, { rollback: true });
+    assert.deepEqual(rollbackProposal(file).conflicts, []); assert.equal(JSON.parse(readFileSync(path.join(f.root, '.lumine/project.json'), 'utf8')).schemaVersion, 2);
+  } finally { f.clean(); }
+});
+
+test('preserve mode checks new corruption without reselecting historical Markdown conversion at apply or finalize', () => {
+  const f = fixture(); try {
+    applyProposal(f.save(createProposal(f.root, { adapters: 'none', locale: 'en' })));
+    addHistoricalKnowledge(f); const proposal = createProposal(f.root, { mode: 'upgrade' }); const file = f.save(proposal);
+    f.put('.lumine/wiki-state/unknown.json', { schemaVersion: 42 });
+    assert.throws(() => applyProposal(file), /KNOWLEDGE_STORAGE_INVALID/); rmSync(path.join(f.root, '.lumine/wiki-state/unknown.json'));
+    applyProposal(file); const before = protectedBytes(f.root);
+    f.put('.lumine/wiki-state/unknown.json', { schemaVersion: 42 }); assert.throws(() => finalizeProposal(file), /KNOWLEDGE_STORAGE_INVALID/);
+    rmSync(path.join(f.root, '.lumine/wiki-state/unknown.json')); finalizeProposal(file); assert.deepEqual(protectedBytes(f.root), before);
+  } finally { f.clean(); }
+});
+
+test('historic proposals without knowledgeMode retain the original one-time conversion contract', () => {
+  const f = fixture(); try {
+    const old = '---\nid: legacy\ntitle: 旧格式\nrelations: [related]\n---\n# 历史\n\n## 原章节\n原文。\n'; f.put('docs/repo-wiki/旧资料.md', old);
+    const proposal = createProposal(f.root, { adapters: 'none', locale: 'en' }); assert.equal(proposal.knowledgeMode, 'convert');
+    delete proposal.knowledgeMode; const { integrity: _old, ...unsigned } = proposal; proposal.integrity = hash(JSON.stringify(unsigned));
+    const file = f.save(proposal); applyProposal(file); finalizeProposal(file);
+    assert.match(readFileSync(path.join(f.root, 'docs/repo-wiki/旧资料.md'), 'utf8'), /kind: related/);
+    assert.deepEqual(rollbackProposal(file).conflicts, []); assert.equal(readFileSync(path.join(f.root, 'docs/repo-wiki/旧资料.md'), 'utf8'), old);
+  } finally { f.clean(); }
+});

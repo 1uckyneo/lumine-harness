@@ -6,11 +6,12 @@ import { getSharedSkill, searchSharedSkills } from "../core/skill-catalog.mjs";
 import { initializeSessionState, readSessionState, recordUsedSkill, recordUserTurn } from "../core/work-status.mjs";
 import { appendVerificationEvent, beginVerificationRun, verifyRuntimeEvidence } from "../core/verification.mjs";
 import { commandLocale, formatCommandError, formatHumanIssue } from "../core/messages.mjs";
-import { normalizeHookInput } from "../core/hook-io.mjs";
-import { buildSessionStartContext } from "../core/session-context.mjs";
 import { acceptanceSections, checkDocumentContracts, contentHash, resolveDocument } from "../core/documents.mjs";
 import { applyDocumentOperation, prepareDocumentRename, recoverDocumentOperation, renameDocument, resolveCurrentDocument } from "../core/document-operations.mjs";
 import { bindTask, checkSessionCompletion, checkTask, saveTaskRecord, taskRecordPath } from "../core/task-contract.mjs";
+import { beginSessionRequest } from "../core/session-scope.mjs";
+import { normalizeHookInput } from "../core/hook-io.mjs";
+import { buildSessionStartContext } from "../core/session-context.mjs";
 import { evaluateStopPolicy } from "../core/stop-policy.mjs";
 import { markExpectedSkillRead, recordPromptRoute, routeHarnessPhase, suggestHarnessPhases } from "../core/phase-router.mjs";
 import { runChecks } from "../check.mjs";
@@ -420,6 +421,13 @@ test("diagnostics can finish with failures without authorizing repairs or requir
 		});
 		initializeSessionState(root, input);
 		recordPromptRoute(root, input, "只诊断失败，不要修复");
+		beginSessionRequest({
+			root,
+			product: input.product,
+			sessionId: input.sessionId,
+			requestId: "diagnostic-request",
+			mode: "diagnose"
+		});
 		assert.equal(evaluateStopPolicy(input, { root }).action, "allow");
 		const record = task(root);
 		record.evidence = [];
@@ -441,7 +449,7 @@ test("diagnostics can finish with failures without authorizing repairs or requir
 		bindTask(root, implementation.product, implementation.sessionId, record.taskId);
 		recordPromptRoute(root, implementation, "仅提及诊断相关能力");
 		assert.equal(evaluateStopPolicy(implementation, { root }).disposition, "reject_completion");
-		assert.equal(checkSessionCompletion(root, { requestedActivity: "check" }).ok, true);
+		assert.equal(checkSessionCompletion(root, { requestedActivity: "check" }).ok, false, "legacy activity alone cannot declare the current request");
 	} finally {
 		rmSync(root, {
 			recursive: true,
@@ -470,7 +478,14 @@ test("a new user turn cannot reuse another turn's task binding or diagnostic mod
 		assert.equal(checkSessionCompletion(root, {
 			...fresh,
 			requestedActivity: "implement"
-		}).issues[0]?.code, "TASK_NOT_BOUND");
+		}).issues[0]?.code, "REQUEST_SCOPE_REQUIRED");
+		const declared = beginSessionRequest({
+			root,
+			product: input.product,
+			sessionId: input.sessionId,
+			mode: "implement"
+		});
+		assert.equal(checkSessionCompletion(root, declared).issues[0]?.code, "TASK_NOT_BOUND");
 	} finally {
 		rmSync(root, {
 			recursive: true,

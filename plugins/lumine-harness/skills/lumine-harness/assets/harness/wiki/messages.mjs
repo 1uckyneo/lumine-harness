@@ -2,6 +2,13 @@
 // Source: skills/lumine-harness/src/harness/wiki/messages.ts
 //#region skills/lumine-harness/src/harness/wiki/messages.ts
 const diagnostics = {
+	STORAGE_ACTION_REQUIRED: ["请选择 inspect、check、compact --plan／--apply 或 recover，并提供精确清单哈希。", "Choose inspect, check, compact --plan/--apply or recover, with the exact plan hash."],
+	STORAGE_CHECK_FAILED: ["存储完整性检查失败，原始资料已保留；请先执行 storage check 定位问题。", "Storage integrity failed. Originals are preserved; use storage check to locate the issue."],
+	STORAGE_OBJECT_CORRUPT: ["内容对象校验失败，不能用当前正文替代基线；请检查恢复资料。", "Content object verification failed. Current text cannot replace the baseline; inspect recovery material."],
+	STORAGE_RECORD_UNKNOWN: ["遇到未知存储记录，已拒绝整理；请核对格式与 Runtime 版本。", "Unknown storage record; compaction refused. Check format and Runtime version."],
+	STORAGE_INPUT_CHANGED: ["预演后输入已变化，已保留当前内容；请重新预演并核对。", "Inputs changed after planning. Current content is preserved; create and review a new plan."],
+	STORAGE_PLAN_HASH_MISMATCH: ["计划文件哈希不匹配，请核对 --expect 与原始计划字节。", "Plan hash mismatch; check --expect against the original plan bytes."],
+	STORAGE_RECOVERY_CONFLICT: ["恢复目标有后续修改，未覆盖；请核对冲突及恢复清单。", "Recovery found later changes and did not overwrite them; review conflicts and the recovery manifest."],
 	DOCUMENT_NOT_FOUND: ["未找到文档。请使用知识 ID、路径或无歧义标题。", "Document not found. Use its ID, path or an unambiguous title."],
 	DOCUMENT_AMBIGUOUS: ["名称对应多个文档。请从候选中选择明确的文档 ID。", "The name matches multiple documents. Select an explicit document ID."],
 	OPTION_VALUE_REQUIRED: ["选项缺少参数。请查看 wiki --help。", "An option needs a value. See wiki --help."],

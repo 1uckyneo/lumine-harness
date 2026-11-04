@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { doctorAdapter, formatSkillResult, installKimiAdapter, setCliWorkStatus, uninstallKimiAdapter } from "../adapter-manager.ts";
 import { findHarnessRoot } from "../core/root-resolver.ts";
 import { inspectSharedSkillCatalog } from "../core/skill-catalog.ts";
+import { beginSessionRequest } from "../core/session-scope.ts";
 import { evaluateStopPolicy } from "../core/stop-policy.ts";
 import { initializeSessionState, observeHarnessEvent, recordWorkStatus } from "../core/work-status.ts";
 import { beginVerificationRun } from "../core/verification.ts";
@@ -98,6 +99,7 @@ test("public Stop Policy preserves all three states and deduplicates one status 
     }
     const done: HarnessSessionInput = { product: "kimi", sessionId: "done", cwd: root };
     initializeSessionState(root, done);
+    beginSessionRequest({ root, product: done.product, sessionId: done.sessionId!, requestId: "protocol-check", mode: "check" });
     recordWorkStatus(root, done, "done");
     assert.equal(evaluateStopPolicy(done, { root, runCheck: () => ({ ok: true }) }).action, "allow");
     const next: HarnessSessionInput = { product: "kimi", sessionId: "next", cwd: root };

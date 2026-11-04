@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "id": "lumine-architecture",
+    "markdown": {
+      "$lumineObject": "a6da2a8480d103a50b50a060833a6ee74e541facb3b86b8ca35212523e95c971",
+      "kind": "text",
+      "bytes": 5990
+    }
+  }
+}

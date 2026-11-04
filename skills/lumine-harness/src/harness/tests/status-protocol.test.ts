@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { beginSessionRequest } from "../core/session-scope.ts";
+import { saveTaskRecord } from "../core/task-contract.ts";
+import { contentHash } from "../core/documents.ts";
 import { setCliWorkStatus } from "../adapter-manager.ts";
 import { evaluateStopPolicy } from "../core/stop-policy.ts";
 import { countWorkStatus, extractWorkStatus, getSessionStatePath, initializeSessionState, observeHarnessEvent, parseWorkReport, readSessionState, recordUserTurn, recordWorkReport, validateWorkReport, writeSessionState } from "../core/work-status.ts";
@@ -17,6 +20,10 @@ function fixture() {
   mkdirSync(path.join(root, ".lumine"));
   writeFileSync(path.join(root, ".lumine", "root.json"), '{"schemaVersion":2,"kind":"lumine-root"}');
   const input: HarnessHookInput = { product: "codex", sessionId: "work", cwd: root, event: "stop", statusEmissionId: "response-1", lastAssistantMessage: "WORK_STATUS: done" };
+  writeFileSync(path.join(root, '.lumine/project.json'), JSON.stringify({ schemaVersion: 2, workflowVersion: 2, repositories: [{ id: 'project', path: '.' }] }));
+  writeFileSync(path.join(root, 'source.txt'), 'source'); writeFileSync(path.join(root, 'validation.txt'), 'passed');
+  saveTaskRecord(root, { schemaVersion: 3, taskId: 'status-fixture', mode: 'implement', goal: 'Verify status protocol', scope: 'fixture', acceptanceRefs: [], evidence: [{ artifact: 'validation.txt', sha256: contentHash('passed'), outcome: 'passed', observedAt: new Date().toISOString(), command: 'fixture validation', environment: 'protocol fixture', codeRefs: [{ repoId: 'project', path: 'source.txt', sha256: contentHash('source') }] }], knowledge: { required: false, status: 'not_applicable', refs: [] } });
+  beginSessionRequest({ root, product: 'codex', sessionId: 'work', requestId: 'status-fixture', mode: 'implement', taskId: 'status-fixture' });
   return { root, input, clean: () => rmSync(root, { recursive: true, force: true }) };
 }
 
@@ -100,7 +107,7 @@ test("diagnosis completes with failed findings; an unobservable progress source 
   const f = fixture();
   try {
     initializeSessionState(f.root, f.input);
-    writeSessionState(f.root, 'codex', 'work', { requestedActivity: 'diagnose' });
+    beginSessionRequest({ root: f.root, product: 'codex', sessionId: 'work', mode: 'diagnose', requestId: 'independent-diagnosis' });
     assert.equal(evaluateStopPolicy(f.input, { root: f.root, runCheck: () => ({ ok: false, output: 'finding' }) }).disposition, 'finish');
     for (let index = 0; index < 4; index++) assert.equal(evaluateStopPolicy({ ...f.input, statusEmissionId: `next-${index}`, lastAssistantMessage: 'WORK_STATUS: continue' }, { root: f.root }).shouldDeliver, true);
     assert.equal(readSessionState(f.root, 'codex', 'work')?.progressObservable, false);
@@ -148,15 +155,15 @@ test("structured CLI reports carry explanation, reject stale turns, and support 
   const f = fixture();
   try {
     initializeSessionState(f.root, f.input);
-    const options = { root: f.root, product: 'codex', sessionId: 'work', expectedUserTurnRevision: 0, emissionId: 'cli-first', reason: 'Waiting for a choice', nextStep: 'Choose retention policy' };
+    const options = { root: f.root, product: 'codex', sessionId: 'work', expectedUserTurnRevision: 1, emissionId: 'cli-first', reason: 'Waiting for a choice', nextStep: 'Choose retention policy' };
     const report = setCliWorkStatus('blocked', options);
     assert.deepEqual(report.workReport, { protocolVersion: 2, status: 'blocked', reason: options.reason, nextStep: options.nextStep });
     assert.equal(setCliWorkStatus('blocked', options).workStatusRevision, report.workStatusRevision);
-    assert.throws(() => setCliWorkStatus('continue', { ...options, expectedUserTurnRevision: 1 }), /STALE_WORK_REPORT/);
+    assert.throws(() => setCliWorkStatus('continue', { ...options, expectedUserTurnRevision: 2 }), /STALE_WORK_REPORT/);
     const sourceMode = import.meta.url.endsWith('.ts');
     const cli = fileURLToPath(new URL(sourceMode ? '../adapter-cli.ts' : '../adapter-cli.mjs', import.meta.url));
     const repo = path.resolve(path.dirname(cli), '../../../..');
-    const result = spawnSync(process.execPath, [...(sourceMode ? ['--import', 'tsx'] : []), cli, 'work-status', '--report', '-', '--root', f.root, '--product', 'codex', '--session-id', 'work', '--expect-turn', '0', '--emission-id', 'cli-second', '--json'], {
+    const result = spawnSync(process.execPath, [...(sourceMode ? ['--import', 'tsx'] : []), cli, 'work-status', '--report', '-', '--root', f.root, '--product', 'codex', '--session-id', 'work', '--expect-turn', '1', '--emission-id', 'cli-second', '--json'], {
       cwd: repo, input: JSON.stringify({ protocolVersion: 2, status: 'continue', nextStep: 'Run scoped verification' }), encoding: 'utf8'
     });
     assert.equal(result.status, 0, result.stderr);

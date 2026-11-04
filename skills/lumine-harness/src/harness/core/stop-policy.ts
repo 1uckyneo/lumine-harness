@@ -4,7 +4,7 @@ import path from "node:path";
 import { loadProjectConfig } from "./project-config.ts";
 import { checkSessionCompletion, taskRecordPath } from "./task-contract.ts";
 import { continuationDeliveryFor } from "./continuation-delivery.ts";
-import { countWorkStatus, deriveStatusEmissionId, getSessionStatePath, initializeSessionState, parseWorkReport, readFreshStateReport, readSessionState, recordUserTurn, recordWorkReport, validateWorkReport, writeSessionState } from "./work-status.ts";
+import { currentRequestScope, countWorkStatus, deriveStatusEmissionId, explicitStatusEmissionId, getSessionStatePath, initializeSessionState, parseWorkReport, readFreshStateReport, readSessionState, recordUserTurn, recordWorkReport, requestEventIssue, RETIRED_REQUEST_HISTORY_LIMIT, validateWorkReport, writeSessionState } from "./work-status.ts";
 import type { HarnessHookDecision, HarnessProduct, HarnessSessionInput, SessionState, StopDisposition, UnknownRecord, WorkReport } from "./contracts.ts";
 
 export const DEFAULT_AUTONOMY_POLICY = Object.freeze({ maxContinuationChain: 20, noProgressThreshold: 2 });
@@ -69,9 +69,12 @@ function evaluateLockedStopPolicy(input: RuntimeHookInput, options: StopPolicyOp
   if (!state && existsSync(getSessionStatePath(root, input.product, input.sessionId))) return decision("pause_for_human", { shouldDeliver: false, message: "SESSION_RECOVERY_REQUIRED: preserve the unreadable session before continuing." });
   if (state && state.statusProtocolVersion !== 2) return decision("pause_for_human", { shouldDeliver: false, message: "STATUS_PROTOCOL_MIGRATION_REQUIRED: resume with the independent maintenance migration; existing task progress is preserved." });
   state ??= initializeSessionState(root, input);
+  const carriesReport = Boolean(input.workReport || input.lastAssistantMessage?.trim());
+  const requestIssue = requestEventIssue(state, input, { implicitStop: true, report: carriesReport });
+  if (requestIssue) return decision("pause_for_human", { shouldDeliver: false, message: requestIssue });
   if (input.userTurnId) state = recordUserTurn(root, input, { userTurnId: input.userTurnId });
-  const emissionId = deriveStatusEmissionId(input, state)
-    ?? (!input.workReport && !input.lastAssistantMessage ? state.workStatusEmissionId : null)
+  // A response ID on a reportless Stop is context, not a new status emission.
+  const emissionId = (carriesReport ? deriveStatusEmissionId(input, state) : state.workStatusEmissionId)
     ?? hash(JSON.stringify([input.product, input.sessionId, state.userTurnRevision ?? 0, state.hostTurnRevision ?? 0, input.workReport ?? null, input.lastAssistantMessage ?? ""]));
   const inputHash = hash(JSON.stringify([input.lastAssistantMessage ?? null, input.workReport ?? null, input.lastAssistantMessage || input.workReport ? null : state.workStatusEmissionId ?? null]));
   if (state.lastStopEmissionId === emissionId && state.lastStopDecision) {
@@ -83,20 +86,24 @@ function evaluateLockedStopPolicy(input: RuntimeHookInput, options: StopPolicyOp
   let failure = "";
   try {
     report = resolveReport(input, state);
-    state = recordWorkReport(root, input, report, { emissionId, source: input.workReport ? "structured" : "text" });
+    const reportInput = carriesReport ? input : { ...input, statusEmissionId: null, raw: {} };
+    state = recordWorkReport(root, reportInput, report, { emissionId, source: input.workReport ? "structured" : "text" });
   } catch (error) { failure = error instanceof Error ? error.message : String(error); }
   const common = { ...(report ? { workStatus: report.status, workReport: report } : {}), workStatusRevision: Number(state.workStatusRevision ?? 0) };
   const persist = (result: HarnessHookDecision, patch: Partial<SessionState> = {}): HarnessHookDecision => {
     writeSessionState(root, input.product, input.sessionId, {
       ...patch, lastStopEmissionId: emissionId, lastStopInputHash: inputHash, lastStopDecision: result,
+      handledStopEmissionIds: [...new Set([...(state?.handledStopEmissionIds ?? []), ...(carriesReport && explicitStatusEmissionId(input) ? [emissionId] : [])])].slice(-RETIRED_REQUEST_HISTORY_LIMIT),
       consumedWorkReportEmissionId: state?.workStatusEmissionId ?? null
     });
     return result;
   };
   if (report?.status === "blocked") return persist(decision("pause_for_human", { ...common, shouldDeliver: false, message: [report.reason, report.nextStep].filter(Boolean).join("\n") }));
   if (report?.status === "done") {
-    const diagnostic = ["plan", "verify", "diagnose", "check"].includes(state.requestedActivity ?? "");
-    const check = diagnostic ? { ok: true } : options.runCheck ? options.runCheck(root) : checkSessionCompletion(root, state);
+    const scope = currentRequestScope(state);
+    const diagnostic = scope?.mode && scope.mode === state.requestedActivity && ["plan", "verify", "diagnose", "check"].includes(scope.mode);
+    const scopedCheck = checkSessionCompletion(root, state);
+    const check = !scopedCheck.ok || diagnostic || !options.runCheck ? scopedCheck : options.runCheck(root);
     if (check.ok) return persist(decision("finish", common), { repeatedFailureFingerprint: null, repeatedFailureCount: 0 });
     cause = "completion_check";
     failure = check.output || "The current task completion evidence is insufficient.";
