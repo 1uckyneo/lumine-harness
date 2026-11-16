@@ -134,7 +134,13 @@ lumine-plan 遇到关键歧义、规则冲突和重要取舍时读取内置 gril
 <a id="feature-knowledge-delivery"></a>
 ## 功能怎样进入知识库
 
-方案指出受影响的现有功能页或场景。设计按需要确定使用入口、操作路径和反馈，相关决定回到同一方案。实施按实际行为与验证结果修订功能说明，检查相关图、限制和导航，再记录依据。没有业务语义变化可以保留说明并记录理由。日常用 Knowledge 修正不合理的目录、长页和过时关系，不用重新接入仓库。
+方案不仅指出受影响的功能页或场景，还给出读者完成阅读后应该能够回答的问题，例如“工作从谁手里进入、怎样完成、失败后怎么继续”。同一功能继续迭代时复用原 Spec、Plan、任务和页面身份；一个模块可以关联多次交付，不为每轮对话复制说明。设计按需要确认使用入口、操作路径和反馈，影响产品语义的决定回到同一方案。
+
+实施按实际行为与验证结果修订功能说明，同时核对摘要、图解、限制、导航和上下游关系，再记录可追溯依据。没有业务语义变化可以保留说明并记录理由。计划、设计存在和代码已经完成是不同状态，知识不能把未来能力写成现状。原 Plan 与任务应说明代码交付、知识交付和仍未执行的验收，检查命令通过不替代实际进度。
+
+日常用 Knowledge 从读者入口重新检查：用户是否能找到功能、解释状态和例外、知道去哪里核实。它可以在授权范围内修正不合理的目录、长页、过时图解和关联说明，无需重新接入仓库；明确只读时报告发现，待允许修改后再处理。作者核对和独立审阅分别记录，普通同步不改变工程规则的效力、条件或适用范围。具体方法见[知识的持续维护](lumine-wiki#reader-question-maintenance)。
+
+知识正文与来源名称按实际读者语言写作。资料使用真实标题和关联理由，稳定内部编号只承担定位；界面语言切换不自动翻译原资料，也不把编号包装成标题。
 
 <!-- lumine-wiki-metadata:v1
 {
@@ -168,111 +174,138 @@ lumine-plan 遇到关键歧义、规则冲突和重要取舍时读取内置 gril
       "id": "plan-skill",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md",
-      "kind": "source"
+      "kind": "source",
+      "title": "需求与方案规划"
     },
     {
       "id": "run-skill",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
-      "kind": "source"
+      "kind": "source",
+      "title": "实施、恢复与验证"
     },
     {
       "id": "knowledge-skill",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
-      "kind": "source"
+      "kind": "source",
+      "title": "项目知识"
     },
     {
       "id": "design-skill",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-design/SKILL.md",
-      "kind": "source"
+      "kind": "source",
+      "title": "视觉与交互设计"
     },
     {
       "id": "routing",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "任务能力与规范读取路由"
     },
     {
       "id": "skill-read",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/phase-router.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "任务能力与规范读取路由"
     },
     {
       "id": "doc-identity",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/documents.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "文档身份与内容解析"
     },
     {
       "id": "acceptance",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/documents.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "文档身份与内容解析"
     },
     {
       "id": "task-storage",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "任务与验证证据合同"
     },
     {
       "id": "task-evidence",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "任务与验证证据合同"
     },
     {
       "id": "task-cli",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-cli.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "任务记录命令"
     },
     {
       "id": "session-guidance",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/session-context.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "会话上下文与当前请求"
     },
     {
       "id": "stage-handoff",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-plan/references/stage-handoff.md",
-      "kind": "source"
+      "kind": "source",
+      "title": "阶段判断与交接"
     },
     {
       "id": "knowledge-sync",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-contract.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "任务与验证证据合同"
     },
     {
       "id": "grilling",
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/grilling/INSTRUCTIONS.md"
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/grilling/INSTRUCTIONS.md",
+      "title": "Grilling — Lumine adaptation"
     },
     {
       "id": "domain-modeling",
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/domain-modeling/INSTRUCTIONS.md"
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/vendor/domain-modeling/INSTRUCTIONS.md",
+      "title": "Domain Modeling"
     },
     {
       "id": "document-contract",
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/docs-seed/index.md"
+      "path": "skills/lumine-harness/assets/docs-seed/index.md",
+      "title": "文档导航与维护约定"
     },
     {
       "id": "writeback",
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/skills/lumine-plan/references/grill.md"
+      "path": "skills/lumine-harness/assets/skills/lumine-plan/references/grill.md",
+      "title": "内置 grill 与回写"
     },
     {
       "id": "task-cli-main",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "任务命令入口"
+    },
+    {
+      "id": "knowledge-maintenance",
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
+      "kind": "source",
+      "title": "维护与阅读知识",
+      "note": "以读者问题检查正文、图解、摘要、导航与来源的语义维护方法。"
     }
   ],
   "relations": [
@@ -383,7 +416,18 @@ lumine-plan 遇到关键歧义、规则冲突和重要取舍时读取内置 gril
       "id": "workflow-quality",
       "sources": [
         "run-skill",
-        "knowledge-skill"
+        "knowledge-skill",
+        "knowledge-maintenance"
+      ]
+    },
+    {
+      "id": "feature-knowledge-delivery",
+      "sources": [
+        "plan-skill",
+        "run-skill",
+        "knowledge-skill",
+        "design-skill",
+        "knowledge-maintenance"
       ]
     }
   ],
@@ -447,6 +491,10 @@ lumine-plan 遇到关键歧义、规则冲突和重要取舍时读取内置 gril
     {
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/core/task-cli-main.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md"
     }
   ]
 }

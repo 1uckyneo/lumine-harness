@@ -393,6 +393,7 @@ function sameSourceRefs(left, right) {
 		id: ref.id,
 		repoId: ref.repoId,
 		path: ref.path,
+		title: ref.title ?? null,
 		startLine: ref.startLine ?? null,
 		endLine: ref.endLine ?? null,
 		kind: ref.kind ?? null,

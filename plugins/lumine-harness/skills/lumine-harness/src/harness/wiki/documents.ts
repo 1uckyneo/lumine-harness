@@ -93,6 +93,10 @@ export function parseDocument(markdown: string, relative: string, collection: Co
     const source = item as Record<string, unknown>;
     if (typeof source.repoId !== 'string' || typeof source.path !== 'string') throw new Error('SOURCE_METADATA_INVALID');
     const ref: SourceRef = { id: text(source.id, `source-${hash(`${source.repoId}:${source.path}`).slice(0, 12)}`), repoId: source.repoId, path: source.path };
+    if (source.title !== undefined) {
+      if (typeof source.title !== 'string' || !source.title.trim() || source.title.length > 300 || /[\r\n\x00-\x1f]/.test(source.title)) throw new Error('SOURCE_TITLE_INVALID');
+      ref.title = source.title.trim();
+    }
     if (typeof source.startLine === 'number') ref.startLine = source.startLine;
     if (typeof source.endLine === 'number') ref.endLine = source.endLine;
     if (['source', 'runtime', 'decision'].includes(String(source.kind))) ref.kind = source.kind as SourceRef['kind'];

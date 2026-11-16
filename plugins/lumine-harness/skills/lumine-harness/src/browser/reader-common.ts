@@ -9,11 +9,59 @@ export type Catalog = { documents: CatalogDocument[]; issues?: { code: string; d
 export type ReaderMap = CoverageMap;
 export type SearchPage = { query: string; cards: KnowledgeCard[]; total: number; hasMore: boolean; nextCursor: string | null };
 export type RelatedResult = { id: string; relations: { target: string; kind: string; note?: string; direction: string; title?: string; path?: string; summary?: string }[] };
-export type ReferenceResult = { kind: 'document' | 'markdown' | 'attachment' | 'source'; id?: string; path: string; markdown?: string; title?: string; revision?: string; fragment?: string; sections?: Section[]; documentId?: string; sourceId?: string; focusStartLine?: number; focusEndLine?: number };
-export type SourceResult = { source: SourceRef; text: string; startLine: number; endLine: number; totalLines: number; fingerprint: string; baselineFingerprint: string | null; observedAt: string | null; readAt: string };
+export type ReferenceResult = { kind: 'document' | 'markdown' | 'attachment' | 'source'; id?: string; path: string; markdown?: string; title?: string; revision?: string; fragment?: string; referenceFrom?: string; sections?: Section[]; documentId?: string; sourceId?: string; focusStartLine?: number; focusEndLine?: number };
+export type SourceResult = { source: SourceRef; title?: string; markdown?: { body: string; sections: Section[]; title: string; path: string; referenceFrom?: string }; text: string; startLine: number; endLine: number; totalLines: number; fingerprint: string; baselineFingerprint: string | null; observedAt: string | null; readAt: string };
+
+export type EvidencePanel = { kind: 'source'; documentId: string; sourceId: string; focusStartLine?: number; focusEndLine?: number }
+  | { kind: 'reference'; from: string; target: string };
+
+/** Evidence is an addressable reading state, including when opened in another tab. */
+export function evidenceHref(panel: EvidencePanel, base: string): string {
+  const url = new URL(base, 'http://reader.local/');
+  for (const key of ['source', 'sourceStart', 'sourceEnd', 'reference', 'from']) url.searchParams.delete(key);
+  if (panel.kind === 'source') {
+    url.searchParams.set('doc', panel.documentId);
+    for (const key of ['section', 'topic', 'search', 'q', 'collection']) url.searchParams.delete(key);
+    url.searchParams.set('source', panel.sourceId);
+    if (panel.focusStartLine) url.searchParams.set('sourceStart', String(panel.focusStartLine));
+    if (panel.focusEndLine) url.searchParams.set('sourceEnd', String(panel.focusEndLine));
+  } else {
+    url.searchParams.set('reference', panel.target);
+    url.searchParams.set('from', panel.from);
+  }
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+export function parseEvidence(url: string): EvidencePanel | null {
+  const params = new URL(url, 'http://reader.local/').searchParams;
+  const documentId = params.get('doc'), sourceId = params.get('source');
+  const line = (key: string) => { const raw = params.get(key); const n = raw && /^\d+$/.test(raw) ? Number(raw) : 0; return Number.isSafeInteger(n) && n > 0 ? n : undefined; };
+  if (documentId && sourceId) return { kind: 'source', documentId, sourceId, focusStartLine: line('sourceStart'), focusEndLine: line('sourceEnd') };
+  const from = params.get('from'), target = params.get('reference');
+  return from && target ? { kind: 'reference', from, target } : null;
+}
+
+export function withoutEvidence(url: string): string {
+  const target = new URL(url, 'http://reader.local/');
+  for (const key of ['source', 'sourceStart', 'sourceEnd', 'reference', 'from']) target.searchParams.delete(key);
+  if (decode(target.hash.slice(1)).startsWith('source:')) target.hash = '';
+  return `${target.pathname}${target.search}${target.hash}`;
+}
+
+/** Titles belong to the source language; UI verbs belong to the reader locale. IDs are never labels. */
+export function sourceTitle(source: SourceRef, catalog: CatalogDocument[], locale: Locale, resolvedTitle?: string): string {
+  const title = resolvedTitle?.trim() || source.title?.trim() || catalog.find((item) => item.path === source.path)?.title.trim();
+  if (title) return title;
+  const filename = source.path.replace(/\\/g, '/').split('/').pop() ?? '';
+  if (source.note?.trim() && source.note.trim().length <= 90) return source.note.trim();
+  if (/\.md$/i.test(filename) && !/^(readme|index)\.md$/i.test(filename)) return filename.replace(/\.md$/i, '').replace(/[-_]+/g, ' ');
+  return filename ? `${translate(locale, /\.md$/i.test(filename) ? 'sourceDocument' : 'sourceFile')} · ${filename}` : translate(locale, 'sources');
+}
 
 const dictionary: Record<Locale, Record<string, string>> = {
   'zh-CN': {
+    explore: '继续深入', sectionToggle: '展开或收起目录', sourceDocument: '参考文档', sourceFile: '实现文件',
+    readingView: '阅读文档', rawView: '查看原文', evidenceDetails: '版本与定位', copyLink: '复制链接', sourceScope: '当前仅显示引用的行范围。',
     understand: '理解项目', operate: '开发与运行', reference: '查找与核实',
     moreDetail: '更多说明', table: '表格，可横向滚动', home: '项目首页', knowledge: '仓库知识', search: '搜索知识', tree: '知识目录', contents: '本页导航',
     relatedDocuments: '关联文档', specs: '产品方案', plans: '执行计划', validation: '验证记录', maintenance: '知识维护',
@@ -65,6 +113,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
     unknownProject: '项目知识库',
   },
   en: {
+    explore: 'Explore further', sectionToggle: 'Expand or collapse section', sourceDocument: 'Reference document', sourceFile: 'Implementation file',
+    readingView: 'Read document', rawView: 'View original', evidenceDetails: 'Version and location', copyLink: 'Copy link', sourceScope: 'Only the referenced line range is shown.',
     understand: 'Understand the project', operate: 'Develop and operate', reference: 'Find and verify',
     moreDetail: 'More detail', table: 'Scrollable table', home: 'Project home', knowledge: 'Repo Wiki', search: 'Search knowledge', tree: 'Knowledge tree', contents: 'On this page',
     relatedDocuments: 'Related documents', specs: 'Product specs', plans: 'Execution plans', validation: 'Validation record', maintenance: 'Knowledge maintenance',

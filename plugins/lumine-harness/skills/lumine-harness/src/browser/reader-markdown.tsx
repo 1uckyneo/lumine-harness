@@ -5,7 +5,7 @@ import type { Components, ExtraProps } from 'react-markdown';
 import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import type { Diagram, KnowledgeDocument, Locale, Section } from '../harness/wiki/types.ts';
-import { decode, documentHref, translate, type CatalogDocument } from './reader-common.ts';
+import { decode, documentHref, evidenceHref, sourceTitle, translate, type CatalogDocument } from './reader-common.ts';
 import { drawMermaid } from './reader-diagrams.tsx';
 
 type AstNode = {
@@ -62,13 +62,18 @@ function ordinaryClick(event: React.MouseEvent): boolean {
   return !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0;
 }
 
-function SourcePills({ ids, label, onSource }: { ids: string[]; label: string; onSource: (id: string) => void }) {
+function SourceLinks({ ids, label, doc, catalog, locale, onSource }: { ids: string[]; label: string; doc: KnowledgeDocument; catalog: CatalogDocument[]; locale: Locale; onSource: (id: string) => void }) {
   if (!ids.length) return null;
-  return <div className="source-pills">{ids.map((id) => <button type="button" key={id} onClick={() => onSource(id)}>{label} · {id}</button>)}</div>;
+  return <details className="source-disclosure"><summary>{label}<span aria-hidden="true"> · {ids.length}</span></summary><ul>{ids.map((id) => {
+    const source = doc.sources.find((entry) => entry.id === id);
+    return <li key={id}><a href={evidenceHref({ kind: 'source', documentId: doc.id, sourceId: id }, location.href)} onClick={(event) => { if (ordinaryClick(event)) { event.preventDefault(); onSource(id); } }}>
+      {source ? sourceTitle(source, catalog, locale) : translate(locale, 'sourceUnavailable')}
+    </a></li>;
+  })}</ul></details>;
 }
 
-function DiagramFigure({ diagram, locale, onOpen, onSource }: {
-  diagram: Diagram; locale: Locale; onOpen: () => void; onSource: (id: string) => void;
+function DiagramFigure({ diagram, doc, catalog, locale, onOpen, onSource }: {
+  diagram: Diagram; doc: KnowledgeDocument; catalog: CatalogDocument[]; locale: Locale; onOpen: () => void; onSource: (id: string) => void;
 }) {
   const canvas = useRef<HTMLDivElement>(null);
   const t = (key: string) => translate(locale, key);
@@ -87,18 +92,18 @@ function DiagramFigure({ diagram, locale, onOpen, onSource }: {
     <header className="diagram-header"><strong>{diagram.title}</strong><button type="button" onClick={onOpen}>{t('openDiagram')}</button></header>
     <div className="diagram-canvas" role="group" aria-label={diagram.title} ref={canvas}>{t('loading')}</div>
     {diagram.caption && <figcaption>{diagram.caption}</figcaption>}
-    <SourcePills ids={diagram.sources} label={t('source')} onSource={onSource} />
+    <SourceLinks ids={diagram.sources} label={t('sources')} doc={doc} catalog={catalog} locale={locale} onSource={onSource} />
     <details><summary>{t('viewMermaid')}</summary><pre><code>{diagram.code}</code></pre></details>
   </figure>;
 }
 
-function proseHeadings(sections: Section[], onSource?: (id: string) => void, sourceLabel = '', titleId?: string): Components {
+function proseHeadings(sections: Section[], renderSources?: (ids: string[]) => ReactNode, titleId?: string): Components {
   const byId = new Map(sections.map((section) => [section.id, section]));
   const heading = (Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') => ({ node, children }: ExtraProps & { children?: ReactNode }) => {
     const id = node?.properties['data-section-id'] as string | undefined;
     const section = id ? byId.get(id) : undefined;
     return <>{!id || id !== titleId ? <Tag id={id} tabIndex={id ? -1 : undefined}>{children}</Tag> : null}
-      {section && onSource && <SourcePills ids={section.sources} label={sourceLabel} onSource={onSource} />}
+      {section && renderSources?.(section.sources)}
     </>;
   };
   return { h1: heading('h1'), h2: heading('h2'), h3: heading('h3'), h4: heading('h4'), h5: heading('h5'), h6: heading('h6') };
@@ -148,7 +153,7 @@ export function MarkdownBody({ doc, catalog, locale, fragment, titleId, onDocume
     const resolve: ResolveLink = (href) => {
       if (href.startsWith('source:')) {
         const id = decode(href.slice(7));
-        return { href: documentHref(doc.id, 'source:' + id), open: () => source(id) };
+        return { href: evidenceHref({ kind: 'source', documentId: doc.id, sourceId: id }, location.href), open: () => source(id) };
       }
       if (href.startsWith('#')) {
         const fragment = decode(href.slice(1));
@@ -163,14 +168,14 @@ export function MarkdownBody({ doc, catalog, locale, fragment, titleId, onDocume
           const fragment = decode(url.hash.slice(1));
           return { href: documentHref(found.id, fragment), open: () => onDocument(found.id, fragment) };
         }
-        return { href: documentHref(doc.id), open: () => onReference(doc.id, href) };
+        return { href: evidenceHref({ kind: 'reference', from: doc.id, target: href }, location.href), open: () => onReference(doc.id, href) };
       } catch { return; }
     };
     return {
-      ...proseHeadings(doc.sections, source, translate(locale, 'sectionSources'), titleId),
+      ...proseHeadings(doc.sections, (ids) => <SourceLinks ids={ids} label={translate(locale, 'sectionSources')} doc={doc} catalog={catalog} locale={locale} onSource={source} />, titleId),
       ...proseComponents(resolve, locale, (id) => {
         const diagram = doc.diagrams.find((entry) => entry.id === id);
-        return diagram && <DiagramFigure diagram={diagram} locale={locale} onOpen={() => onDiagram(diagram)} onSource={source} />;
+        return diagram && <DiagramFigure diagram={diagram} doc={doc} catalog={catalog} locale={locale} onOpen={() => onDiagram(diagram)} onSource={source} />;
       }),
     };
   }, [catalog, doc, locale, titleId, onDocument, onFragment, onSource, onReference, onDiagram]);
@@ -246,9 +251,7 @@ export function ReferenceMarkdown({ markdown, sections, path, locale, fragment, 
   }, [markdown, sections, fragment]);
   const components = {
     ...proseHeadings(sections),
-    ...proseComponents((href) => href.startsWith('#') ? {
-      href, open: () => onFragment(decode(href.slice(1))),
-    } : { href: '#', open: () => onReference(path, href) }, locale),
+    ...proseComponents((href) => ({ href: evidenceHref({ kind: 'reference', from: path, target: href }, location.href), open: () => onReference(path, href) }), locale),
   };
   return <div className="prose reference-prose" ref={root}>
     <Markdown skipHtml urlTransform={safeUrl} remarkPlugins={[remarkGfm, remarkDirective, editorialMarkup(sections)]} components={components}>

@@ -2,7 +2,7 @@ export type Locale = 'zh-CN' | 'en';
 export type KnowledgeStatus = 'current' | 'proposed' | 'historical';
 export type Freshness = 'current' | 'stale' | 'unverified' | 'missing-source' | 'conflict';
 export type Collection = 'wiki' | 'spec' | 'plan' | 'validation';
-export interface SourceRef { id: string; repoId: string; path: string; startLine?: number; endLine?: number; kind?: 'source' | 'runtime' | 'decision'; note?: string }
+export interface SourceRef { id: string; repoId: string; path: string; title?: string; startLine?: number; endLine?: number; kind?: 'source' | 'runtime' | 'decision'; note?: string }
 export interface WatchScope { repoId: string; path: string }
 export interface Diagram { id: string; title: string; caption: string; sources: string[]; code: string }
 export interface Section { id: string; title: string; level: number; parentId?: string; startLine: number; endLine: number; body: string; stable: boolean; sources: string[] }

@@ -207,7 +207,7 @@ export function scanWiki(root: string) {
 }
 function uniqueScopes(scopes: WatchScope[]): WatchScope[] { return [...new Map(scopes.map((scope) => [`${scope.repoId}:${scope.path}`, scope])).values()]; }
 function sameSourceRefs(left: SourceRef[], right: SourceRef[]): boolean {
-  const ordered = (refs: SourceRef[]) => refs.map((ref) => ({ id: ref.id, repoId: ref.repoId, path: ref.path, startLine: ref.startLine ?? null, endLine: ref.endLine ?? null, kind: ref.kind ?? null, note: ref.note ?? null })).sort((a, b) => a.id.localeCompare(b.id));
+  const ordered = (refs: SourceRef[]) => refs.map((ref) => ({ id: ref.id, repoId: ref.repoId, path: ref.path, title: ref.title ?? null, startLine: ref.startLine ?? null, endLine: ref.endLine ?? null, kind: ref.kind ?? null, note: ref.note ?? null })).sort((a, b) => a.id.localeCompare(b.id));
   return JSON.stringify(ordered(left)) === JSON.stringify(ordered(right));
 }
 function sameWatchScopes(left: WatchScope[], right: WatchScope[]): boolean {

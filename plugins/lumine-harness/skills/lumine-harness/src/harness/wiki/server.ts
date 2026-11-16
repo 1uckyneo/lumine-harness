@@ -7,7 +7,7 @@ import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConf
 import { inspectKnowledge, mapKnowledge, navigationKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from './engine.ts';
 import { searchKnowledgePage } from './search.ts';
 import { isRegisteredValidationDocumentId, registeredValidationDocuments, showRegisteredValidation } from './validation-documents.ts';
-import { baselineFor } from './documents.ts';
+import { baselineFor, parseDocument } from './documents.ts';
 import { parseSections } from './sections.ts';
 import type { Collection, Freshness } from './types.ts';
 
@@ -104,11 +104,21 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
         };
         const from = url.searchParams.get('from') ?? '', target = url.searchParams.get('target') ?? '';
         let fromPath: string;
-        if (isRegisteredValidationDocumentId(root, from)) fromPath = showRegisteredValidation(root, from).path;
+        const sourceOrigin = /^(.*?)#source:(.+)$/.exec(from);
+        const owner = sourceOrigin?.[1] ?? from;
+        if (sourceOrigin) {
+          const document = showKnowledge(root, owner), source = document.sources.find((item) => item.id === sourceOrigin[2]);
+          if (!source) throw new Error('SOURCE_NOT_IN_DOCUMENT');
+          const excerpt = readSource(root, config, source);
+          if (!/\.md$/i.test(source.path) || excerpt.startLine !== 1 || excerpt.endLine !== excerpt.totalLines) throw new Error('SOURCE_RANGE_INVALID');
+          const repository = config.repositories.find((item) => item.id === source.repoId)!;
+          fromPath = slash(path.join(repository.path, source.path));
+        }
+        else if (isRegisteredValidationDocumentId(root, from)) fromPath = showRegisteredValidation(root, from).path;
         else if (from.startsWith('docs/validation/') && from.endsWith('.md')) { permittedFile(from); fromPath = from; }
         else fromPath = showKnowledge(root, from).path;
         if (target.startsWith('source:')) {
-          const document = showKnowledge(root, from), source = document.sources.find((item) => item.id === target.slice(7));
+          const document = showKnowledge(root, owner), source = document.sources.find((item) => item.id === target.slice(7));
           if (!source) throw new Error('SOURCE_NOT_IN_DOCUMENT');
           json(response, 200, { kind: 'source', path: source.path, documentId: document.id, sourceId: source.id }); return;
         }
@@ -118,10 +128,9 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
         // Relative Markdown source links remain useful in raw files. Resolve only
         // declarations owned by this document; never turn the reader into a file server.
         if (!allowed.some((base) => relative.startsWith(`${base}/`)) || /^L\d/.test(decodeURIComponent(address.hash.slice(1)))) {
-          const document = showKnowledge(root, from);
+          const document = showKnowledge(root, owner);
           const requestedFile = path.resolve(root, relative), fragment = decodeURIComponent(address.hash.slice(1));
           const lineRange = fragment ? /^L([1-9]\d*)(?:-L?([1-9]\d*))?$/.exec(fragment) : null;
-          if (fragment && !lineRange) throw new Error('SOURCE_REFERENCE_FRAGMENT_INVALID');
           const startLine = lineRange ? Number(lineRange[1]) : undefined, endLine = lineRange ? Number(lineRange[2] ?? lineRange[1]) : undefined;
           if (startLine !== undefined && (!Number.isSafeInteger(startLine) || !Number.isSafeInteger(endLine) || endLine! < startLine)) throw new Error('SOURCE_RANGE_INVALID');
           const matches = document.sources.filter((source) => {
@@ -131,10 +140,17 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
           if (!matches.length) throw new Error('SOURCE_NOT_IN_DOCUMENT');
           const candidates = matches.map((source) => ({ source, excerpt: readSource(root, config, source) }))
             .filter(({ excerpt }) => startLine === undefined || (startLine >= excerpt.startLine && endLine! <= excerpt.endLine))
+            .filter(({ source, excerpt }) => !fragment || lineRange || (/\.md$/i.test(source.path) && excerpt.startLine === 1 && excerpt.endLine === excerpt.totalLines))
             .sort((a, b) => (a.excerpt.endLine - a.excerpt.startLine) - (b.excerpt.endLine - b.excerpt.startLine));
           if (!candidates.length) throw new Error('SOURCE_RANGE_INVALID');
           if (!fragment && candidates.length > 1) throw new Error('SOURCE_REFERENCE_AMBIGUOUS');
-          const { source } = candidates[0];
+          const { source, excerpt } = candidates[0];
+          if (fragment && !lineRange) {
+            if (!/\.md$/i.test(source.path) || excerpt.startLine !== 1 || excerpt.endLine !== excerpt.totalLines) throw new Error('SOURCE_REFERENCE_FRAGMENT_INVALID');
+            const parsed = parseDocument(excerpt.text, relative, 'validation');
+            if (!parsed.sections.some((section) => section.id === fragment)) throw new Error('REFERENCE_FRAGMENT_NOT_FOUND');
+            json(response, 200, { kind: 'markdown', path: relative, referenceFrom: `${document.id}#source:${source.id}`, markdown: parsed.body, title: source.title ?? parsed.title, revision: hash(excerpt.text), sections: parsed.sections, fragment }); return;
+          }
           json(response, 200, { kind: 'source', path: source.path, documentId: document.id, sourceId: source.id, focusStartLine: startLine, focusEndLine: endLine }); return;
         }
         const file = permittedFile(relative);
@@ -153,7 +169,21 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
         const source = document.sources.find((item) => item.id === url.searchParams.get('id'));
         if (!source) throw new Error('SOURCE_NOT_IN_DOCUMENT');
         const baseline = baselineFor(root, document.id);
-        json(response, 200, { source, ...readSource(root, config, source), baselineFingerprint: baseline?.sources.fingerprints[`${source.repoId}:${source.path}`] ?? null, observedAt: document.checkedAt, readAt: new Date().toISOString() }); return;
+        const excerpt = readSource(root, config, source);
+        const repository = config.repositories.find((item) => item.id === source.repoId)!;
+        const sourceRelative = slash(path.join(repository.path, source.path));
+        // Readability must never widen the registered source range. A partial
+        // Markdown excerpt remains an excerpt, with its original line numbers.
+        const completeMarkdown = /\.md$/i.test(source.path) && excerpt.startLine === 1 && excerpt.endLine === excerpt.totalLines;
+        let parsed: ReturnType<typeof parseDocument> | null = null;
+        if (completeMarkdown) {
+          try { parsed = parseDocument(excerpt.text, sourceRelative, 'validation'); }
+          catch { /* Invalid document metadata does not make the original evidence unreadable. */ }
+        }
+        const title = source.title ?? parsed?.title;
+        json(response, 200, { source, ...excerpt, title,
+          ...(parsed ? { markdown: { body: parsed.body, sections: parsed.sections, title: parsed.title, path: sourceRelative, referenceFrom: `${document.id}#source:${source.id}` } } : {}),
+          baselineFingerprint: baseline?.sources.fingerprints[`${source.repoId}:${source.path}`] ?? null, observedAt: document.checkedAt, readAt: new Date().toISOString() }); return;
       }
       if (url.pathname.startsWith('/api/')) { json(response, 404, { code: 'ENDPOINT_NOT_FOUND' }); return; }
       const raw = decodeURIComponent(url.pathname), relative = raw === '/' ? 'index.html' : raw.slice(1);

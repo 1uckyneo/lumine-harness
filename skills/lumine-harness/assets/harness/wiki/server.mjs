@@ -4,7 +4,7 @@ import { loadProjectConfig } from "../core/project-config.mjs";
 import { resolveHarnessRuntimeRoot } from "../core/runtime-layout.mjs";
 import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConfig } from "./files.mjs";
 import { parseSections } from "./sections.mjs";
-import { baselineFor } from "./documents.mjs";
+import { baselineFor, parseDocument } from "./documents.mjs";
 import { searchKnowledgePage } from "./search.mjs";
 import { inspectKnowledge, mapKnowledge, navigationKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from "./engine.mjs";
 import { isRegisteredValidationDocumentId, registeredValidationDocuments, showRegisteredValidation } from "./validation-documents.mjs";
@@ -213,13 +213,22 @@ async function serveWiki(root, options = {}) {
 				};
 				const from = url.searchParams.get("from") ?? "", target = url.searchParams.get("target") ?? "";
 				let fromPath;
-				if (isRegisteredValidationDocumentId(root, from)) fromPath = showRegisteredValidation(root, from).path;
+				const sourceOrigin = /^(.*?)#source:(.+)$/.exec(from);
+				const owner = sourceOrigin?.[1] ?? from;
+				if (sourceOrigin) {
+					const document = showKnowledge(root, owner), source = document.sources.find((item) => item.id === sourceOrigin[2]);
+					if (!source) throw new Error("SOURCE_NOT_IN_DOCUMENT");
+					const excerpt = readSource(root, config, source);
+					if (!/\.md$/i.test(source.path) || excerpt.startLine !== 1 || excerpt.endLine !== excerpt.totalLines) throw new Error("SOURCE_RANGE_INVALID");
+					const repository = config.repositories.find((item) => item.id === source.repoId);
+					fromPath = slash(path.join(repository.path, source.path));
+				} else if (isRegisteredValidationDocumentId(root, from)) fromPath = showRegisteredValidation(root, from).path;
 				else if (from.startsWith("docs/validation/") && from.endsWith(".md")) {
 					permittedFile(from);
 					fromPath = from;
 				} else fromPath = showKnowledge(root, from).path;
 				if (target.startsWith("source:")) {
-					const document = showKnowledge(root, from), source = document.sources.find((item) => item.id === target.slice(7));
+					const document = showKnowledge(root, owner), source = document.sources.find((item) => item.id === target.slice(7));
 					if (!source) throw new Error("SOURCE_NOT_IN_DOCUMENT");
 					json(response, 200, {
 						kind: "source",
@@ -233,10 +242,9 @@ async function serveWiki(root, options = {}) {
 				if (address.origin !== "https://wiki.invalid" || address.search || !target || target.includes("\\")) throw new Error("REFERENCE_NOT_ALLOWED");
 				const relative = decodeURIComponent(address.pathname).slice(1);
 				if (!allowed.some((base) => relative.startsWith(`${base}/`)) || /^L\d/.test(decodeURIComponent(address.hash.slice(1)))) {
-					const document = showKnowledge(root, from);
+					const document = showKnowledge(root, owner);
 					const requestedFile = path.resolve(root, relative), fragment = decodeURIComponent(address.hash.slice(1));
 					const lineRange = fragment ? /^L([1-9]\d*)(?:-L?([1-9]\d*))?$/.exec(fragment) : null;
-					if (fragment && !lineRange) throw new Error("SOURCE_REFERENCE_FRAGMENT_INVALID");
 					const startLine = lineRange ? Number(lineRange[1]) : undefined, endLine = lineRange ? Number(lineRange[2] ?? lineRange[1]) : undefined;
 					if (startLine !== undefined && (!Number.isSafeInteger(startLine) || !Number.isSafeInteger(endLine) || endLine < startLine)) throw new Error("SOURCE_RANGE_INVALID");
 					const matches = document.sources.filter((source) => {
@@ -247,10 +255,26 @@ async function serveWiki(root, options = {}) {
 					const candidates = matches.map((source) => ({
 						source,
 						excerpt: readSource(root, config, source)
-					})).filter(({ excerpt }) => startLine === undefined || startLine >= excerpt.startLine && endLine <= excerpt.endLine).sort((a, b) => a.excerpt.endLine - a.excerpt.startLine - (b.excerpt.endLine - b.excerpt.startLine));
+					})).filter(({ excerpt }) => startLine === undefined || startLine >= excerpt.startLine && endLine <= excerpt.endLine).filter(({ source, excerpt }) => !fragment || lineRange || /\.md$/i.test(source.path) && excerpt.startLine === 1 && excerpt.endLine === excerpt.totalLines).sort((a, b) => a.excerpt.endLine - a.excerpt.startLine - (b.excerpt.endLine - b.excerpt.startLine));
 					if (!candidates.length) throw new Error("SOURCE_RANGE_INVALID");
 					if (!fragment && candidates.length > 1) throw new Error("SOURCE_REFERENCE_AMBIGUOUS");
-					const { source } = candidates[0];
+					const { source, excerpt } = candidates[0];
+					if (fragment && !lineRange) {
+						if (!/\.md$/i.test(source.path) || excerpt.startLine !== 1 || excerpt.endLine !== excerpt.totalLines) throw new Error("SOURCE_REFERENCE_FRAGMENT_INVALID");
+						const parsed = parseDocument(excerpt.text, relative, "validation");
+						if (!parsed.sections.some((section) => section.id === fragment)) throw new Error("REFERENCE_FRAGMENT_NOT_FOUND");
+						json(response, 200, {
+							kind: "markdown",
+							path: relative,
+							referenceFrom: `${document.id}#source:${source.id}`,
+							markdown: parsed.body,
+							title: source.title ?? parsed.title,
+							revision: hash(excerpt.text),
+							sections: parsed.sections,
+							fragment
+						});
+						return;
+					}
 					json(response, 200, {
 						kind: "source",
 						path: source.path,
@@ -299,9 +323,28 @@ async function serveWiki(root, options = {}) {
 				const source = document.sources.find((item) => item.id === url.searchParams.get("id"));
 				if (!source) throw new Error("SOURCE_NOT_IN_DOCUMENT");
 				const baseline = baselineFor(root, document.id);
+				const excerpt = readSource(root, config, source);
+				const repository = config.repositories.find((item) => item.id === source.repoId);
+				const sourceRelative = slash(path.join(repository.path, source.path));
+				const completeMarkdown = /\.md$/i.test(source.path) && excerpt.startLine === 1 && excerpt.endLine === excerpt.totalLines;
+				let parsed = null;
+				if (completeMarkdown) {
+					try {
+						parsed = parseDocument(excerpt.text, sourceRelative, "validation");
+					} catch {}
+				}
+				const title = source.title ?? parsed?.title;
 				json(response, 200, {
 					source,
-					...readSource(root, config, source),
+					...excerpt,
+					title,
+					...parsed ? { markdown: {
+						body: parsed.body,
+						sections: parsed.sections,
+						title: parsed.title,
+						path: sourceRelative,
+						referenceFrom: `${document.id}#source:${source.id}`
+					} } : {},
 					baselineFingerprint: baseline?.sources.fingerprints[`${source.repoId}:${source.path}`] ?? null,
 					observedAt: document.checkedAt,
 					readAt: new Date().toISOString()

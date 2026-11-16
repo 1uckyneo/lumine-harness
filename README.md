@@ -196,3 +196,7 @@ Wiki uses content-addressed text/source objects, completion receipts and referen
 ### Feature knowledge and editorial navigation
 
 Start from the project overview, open features and scenarios, or go directly to engineering standards. The editorial navigation describes where readers go; coverage describes which source areas have been reviewed. Ship a corresponding knowledge update when behavior changes. Use `lumine-knowledge` to investigate and correct outdated or hard-to-find material. Editorial activation is an explicit migration after upgrading the Runtime. See [knowledge maintenance](skills/lumine-harness/assets/locales/en/skills/lumine-knowledge/references/maintenance.md).
+
+Sources are collapsed by default and expand to show real titles or meaningful descriptions, rather than internal identifiers. Controls follow the selected interface language; source titles retain their original language. Complete Markdown sources have a reading view and an original-text view, while registered excerpts keep their line limits. Source links support copying, reloading, and browser back and forward navigation.
+
+Knowledge maintenance starts with a reader's question, checks the actual changes, aligns text, diagrams, and entry points, then rereads from the home page or search. Structural checks, author checks, independent Agent reviews, and human use are recorded separately; passing a check does not establish that readers understand the result.

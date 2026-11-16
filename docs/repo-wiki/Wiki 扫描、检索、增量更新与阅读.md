@@ -1,7 +1,7 @@
 ---
 id: "lumine-wiki"
 title: "Wiki 扫描、检索、增量更新与阅读"
-summary: "Agent 决定读什么和写什么；知识地图、章节检索、来源观察与可恢复三方合并把认识安全沉淀为项目资产。"
+summary: "围绕读者问题持续核实和整理知识，联动更新正文、图解与入口；扫描与安全保存提供依据，但不代替 Agent 的语义判断。"
 type: "mechanism"
 status: "current"
 locale: "zh-CN"
@@ -30,6 +30,15 @@ flowchart LR
 
 重要缺口、过期或矛盾应在核实后形成相关知识增量；显式只读请求不写文件，没有新认识的小修可以零更新。检索不到已有内容时先考虑别名、关键词或结构，不立即复制另一篇。Wiki 分别维护已确认的领域语言、长期决策与已核实现状，Spec 维护目标，Plan 保留本次技术变化，运行证据仍在 Validation。
 
+<a id="reader-question-maintenance"></a>
+## 后续开发怎样持续维护知识
+
+一次维护先选一个真实读者问题，例如“这个能力从哪里开始，何时算完成”。从首页或模块入口读到答案，再对照本轮变更与必要来源，定位解释的缺口。来源指纹变化只是调查起点：排版、注释或路径变化不一定改变业务含义；即使文件未变，原有说明也可能遗漏例外或误解实现。工具检查通过不能代替这一步。
+
+Agent 按影响范围同时检查摘要、正文、术语、图解、导航与关联主题。新增能力补上可发现的落点；旧模块替换后核对入口及历史边界；流程变化要修正旧图与上下游说明；长页按读者的独立问题拆分并保留有效链接。规则的条件、否定和适用范围不能在整理中丢失；普通同步也不能悄悄改变规范效力。无需每轮重扫全库，明确只读时仅报告发现。
+
+候选保存后，从原来的入口重新走一遍阅读路径，检查读者能否找到并解释当前能力、限制及依据。能调用另一名未参与撰写的 Agent 时，让其独立检查这些问题；作者自检、独立复核、自动检查与人类阅读分别报告。将本次完成、保留与未解决内容写回原 Plan 和任务，不增加另一套维护台账。具体命令与字段见[维护与阅读知识](../../skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md)。
+
 <a id="hierarchy-and-sections"></a>
 ## 阅读路径和覆盖各管什么
 
@@ -57,7 +66,9 @@ Markdown 页面是三方合并主要单位。重要章节在标题前用 `<a id=
 
 以后文件内容、关联主题的定义、该主题关联 Wiki 文档的版本，或项目监控范围改变，旧处置在扫描结果中标为过期并重新进入待分类清单，原理由仍可查看；首次发现则标为待分类。即使先前判断为“已覆盖”或“暂缓”，关联解释正文变化后也须重新核实，不能直接沿用旧判断。分类输入采用预期文件指纹，避免把依据已变化的决定直接写入。仓库 ID 与相对路径通过登记根解析，忽略私有文件、Runtime 副本、备份和候选，真实路径不能越界。源码只能证明当前开发实现，不能证明已部署或外部服务运行。
 
-source observation 记录 checkedAt 与来源指纹；semantic review 另记正文 revision、来源指纹、范围、发现、限制、作者或独立 reviewer。旧版本审阅变为 outdated；未审阅不能因来源一致自动显示已核实。仅审阅可保存记录而不重写正文。结构检查的 notVerified 明确保留语义、运行和人类接受边界。
+来源观察记录核对时间与来源指纹；语义审阅另记正文版本、来源指纹、实际范围、发现、限制及作者或独立审阅者。正文或来源改变后，旧审阅不再适用；未审阅不能因来源一致自动显示已核实。仅审阅可保存记录而不重写正文：在允许写入观察的维护中先运行 `wiki scan --json`，再从 `wiki show <文档ID> --json` 原样取得 `revision` 和 `sourceObservation.sourceFingerprint`，按公开合同提交审阅，不猜测内部哈希。结构检查保留语义、运行和人类接受的未验证边界。
+
+来源的稳定 ID 用于关联，可选 `title` 用于帮助人识别资料，`note` 解释它支持本页哪项判断。真实英文资料保留英文标题，中文资料保留中文标题；文件范围、来源版本和规则效力不因显示名称改变。旧页缺少标题时阅读器可从 Markdown 派生，不需要为显示名称全库重写。
 
 <a id="protected-update"></a>
 ## 新建、拆页和更新怎么保存
@@ -119,8 +130,9 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
       "startLine": 1,
-      "endLine": 378,
-      "kind": "source"
+      "endLine": 484,
+      "kind": "source",
+      "title": "知识扫描、更新与审阅"
     },
     {
       "id": "files",
@@ -128,7 +140,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/files.ts",
       "startLine": 1,
       "endLine": 203,
-      "kind": "source"
+      "kind": "source",
+      "title": "来源快照与路径边界"
     },
     {
       "id": "merge",
@@ -136,7 +149,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/merge.ts",
       "startLine": 1,
       "endLine": 41,
-      "kind": "source"
+      "kind": "source",
+      "title": "生成内容与人工修订合并"
     },
     {
       "id": "documents",
@@ -144,7 +158,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
       "startLine": 1,
       "endLine": 139,
-      "kind": "source"
+      "kind": "source",
+      "title": "文档身份与内容解析"
     },
     {
       "id": "sections",
@@ -152,7 +167,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/sections.ts",
       "startLine": 1,
       "endLine": 32,
-      "kind": "source"
+      "kind": "source",
+      "title": "章节定位与检索文本"
     },
     {
       "id": "coverage",
@@ -160,7 +176,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/coverage.ts",
       "startLine": 1,
       "endLine": 42,
-      "kind": "source"
+      "kind": "source",
+      "title": "主题覆盖记录"
     },
     {
       "id": "search",
@@ -168,7 +185,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/search.ts",
       "startLine": 1,
       "endLine": 110,
-      "kind": "source"
+      "kind": "source",
+      "title": "知识检索与排序"
     },
     {
       "id": "transactions",
@@ -176,15 +194,17 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/transactions.ts",
       "startLine": 1,
       "endLine": 63,
-      "kind": "source"
+      "kind": "source",
+      "title": "知识事务与中断恢复"
     },
     {
       "id": "skill",
       "repoId": "project",
       "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
       "startLine": 1,
-      "endLine": 24,
-      "kind": "source"
+      "endLine": 33,
+      "kind": "source",
+      "title": "项目知识"
     },
     {
       "id": "server-search",
@@ -192,7 +212,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/server.ts",
       "startLine": 64,
       "endLine": 86,
-      "kind": "source"
+      "kind": "source",
+      "title": "本地阅读服务与来源读取"
     },
     {
       "id": "dispositions",
@@ -200,7 +221,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/dispositions.ts",
       "startLine": 1,
       "endLine": 80,
-      "kind": "source"
+      "kind": "source",
+      "title": "新增来源的处置记录"
     },
     {
       "id": "validation-allowlist",
@@ -208,7 +230,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/validation-documents.ts",
       "startLine": 1,
       "endLine": 57,
-      "kind": "source"
+      "kind": "source",
+      "title": "验证资料的检索范围"
     },
     {
       "id": "server-document",
@@ -216,7 +239,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/server.ts",
       "startLine": 86,
       "endLine": 93,
-      "kind": "source"
+      "kind": "source",
+      "title": "本地阅读服务与来源读取"
     },
     {
       "id": "reference-alias",
@@ -224,33 +248,47 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "path": "skills/lumine-harness/src/harness/wiki/references.ts",
       "startLine": 1,
       "endLine": 19,
-      "kind": "source"
+      "kind": "source",
+      "title": "文档与章节引用解析"
     },
     {
       "id": "knowledge-contract",
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md"
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
+      "title": "项目知识"
     },
     {
       "id": "document-contract",
       "repoId": "project",
-      "path": "skills/lumine-harness/assets/docs-seed/index.md"
+      "path": "skills/lumine-harness/assets/docs-seed/index.md",
+      "title": "文档导航与维护约定"
     },
     {
       "id": "storage",
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/wiki/storage.ts"
+      "path": "skills/lumine-harness/src/harness/wiki/storage.ts",
+      "title": "内容对象与持久基线"
     },
     {
       "id": "compaction",
       "repoId": "project",
-      "path": "skills/lumine-harness/src/harness/wiki/compaction.ts"
+      "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+      "title": "存储迁移与恢复"
     },
     {
       "id": "navigation",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/wiki/navigation.ts",
-      "kind": "source"
+      "kind": "source",
+      "title": "阅读目录与规范入口"
+    },
+    {
+      "id": "knowledge-maintenance",
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
+      "kind": "source",
+      "title": "维护与阅读知识",
+      "note": "以读者问题检查正文、图解、摘要、导航与来源的语义维护方法。"
     }
   ],
   "relations": [
@@ -339,6 +377,10 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
     {
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/wiki/compaction.ts"
+    },
+    {
+      "repoId": "project",
+      "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md"
     }
   ],
   "diagrams": [
@@ -377,7 +419,8 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "sources": [
         "files",
         "engine",
-        "dispositions"
+        "dispositions",
+        "knowledge-maintenance"
       ]
     },
     {
@@ -395,6 +438,20 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "sources": [
         "storage",
         "compaction"
+      ]
+    },
+    {
+      "id": "knowledge-producer",
+      "sources": [
+        "knowledge-contract",
+        "knowledge-maintenance"
+      ]
+    },
+    {
+      "id": "reader-question-maintenance",
+      "sources": [
+        "knowledge-maintenance",
+        "knowledge-contract"
       ]
     }
   ]

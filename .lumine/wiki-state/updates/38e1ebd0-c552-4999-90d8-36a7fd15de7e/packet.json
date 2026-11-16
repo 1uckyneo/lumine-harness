@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "38e1ebd0-c552-4999-90d8-36a7fd15de7e",
+    "createdAt": "2026-11-16T13:18:48.018Z",
+    "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+    "scope": [
+      "lumine-wiki-reader",
+      "lumine-wiki",
+      "lumine-workflow"
+    ],
+    "status": "applied",
+    "storageReceipt": true,
+    "units": [
+      {
+        "id": "lumine-wiki-reader",
+        "kind": "update",
+        "group": "knowledge-quality",
+        "path": "docs/repo-wiki/知识树、图解与来源阅读.md"
+      },
+      {
+        "id": "lumine-wiki",
+        "kind": "update",
+        "group": "knowledge-quality",
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md"
+      },
+      {
+        "id": "lumine-workflow",
+        "kind": "update",
+        "group": "knowledge-quality",
+        "path": "docs/repo-wiki/四个 Skill、产品方案与任务证据.md"
+      }
+    ],
+    "results": [
+      {
+        "id": "lumine-wiki-reader",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "2eb321023a085c2d01a0b62f34bd85dfe3a66f8d62da249862556eb5dd152dc2"
+      },
+      {
+        "id": "lumine-wiki",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "1713db3f2a463ed1d24c077fee2d769a8b63dadffa84576d19dd5a2150711618"
+      },
+      {
+        "id": "lumine-workflow",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "6c2e8545585e5799115500513a2bb0a584ce26bee8040429f9f3ff77d7b16ea3"
+      }
+    ],
+    "audit": {
+      "recordHash": "80703d9e9afc3d4201a56911f2ced30c980d377f16b67a0555e3e4985fe95ef1",
+      "unitHashes": [
+        {
+          "id": "lumine-wiki-reader",
+          "sha256": "3b5c159bafe3fc872c18bf70dd1ce83b20800fdee83b1b9bead998315bac4e44"
+        },
+        {
+          "id": "lumine-wiki",
+          "sha256": "1f07c4bb306c82da8e6097a48810c1089af34ae0a87420458c243f14ee89f01f"
+        },
+        {
+          "id": "lumine-workflow",
+          "sha256": "36d6d140ba52444141918bb5103ab8e51832838154b96e060e43f01300052ce5"
+        }
+      ]
+    }
+  }
+}

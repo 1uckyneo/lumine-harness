@@ -152,6 +152,10 @@ function parseDocument(markdown, relative, collection = "wiki") {
 			repoId: source.repoId,
 			path: source.path
 		};
+		if (source.title !== undefined) {
+			if (typeof source.title !== "string" || !source.title.trim() || source.title.length > 300 || /[\r\n\x00-\x1f]/.test(source.title)) throw new Error("SOURCE_TITLE_INVALID");
+			ref.title = source.title.trim();
+		}
 		if (typeof source.startLine === "number") ref.startLine = source.startLine;
 		if (typeof source.endLine === "number") ref.endLine = source.endLine;
 		if ([

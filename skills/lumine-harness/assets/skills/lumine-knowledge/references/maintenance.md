@@ -43,9 +43,29 @@
 
 重要标题前放独立 `<a id="稳定章节ID"></a>`，ID 不随标题变化；文末块可用 `sections: [{id: "章节ID", sources: ["来源ID"]}]` 关联精确依据。未关联时返回页面来源，不伪造章节证据。`relations` 使用 `{target: "文档ID#片段ID", kind: related|depends_on|decision, note: "关系说明"}`；目录父子归属只在知识地图维护。
 
-新建、拆页或调整目录时，使用 `wiki update prepare --manifest changes.json`。清单为 `schemaVersion: 1`，`changes` 包含 `kind: create|update`、`id`、新建所需 `path`、相关 `sourceRefs`、`watchScopes` 和可选 `group`。默认把新来源和监控范围加入旧集合；若源码搬迁，需要在 update 变更中显式设 `replaceSources: true`、`replaceWatchScopes: true`，并分别提供非空的新 `sourceRefs`、`watchScopes`。prepare 仍会检查替换后的来源存在，apply 仍会校验快照、候选与人工合并；不凭失效旧路径强行通过。可同时附 `coverage` 和 `referenceMoves`。每个新页预期不存在；同组正文、目录和身份变更不能半完成后冒充可用。`coverage.topics` 用 `id/title/parentId?/questions/sourceScopes/documentRefs/status/reason?`，数组顺序即同级顺序；状态为 planned／partial／covered／deferred，covered 必须有实际内容依据。
+新建、拆页或调整目录时，使用 `wiki update prepare --manifest changes.json`。清单为 `schemaVersion: 1`，`changes` 包含 `kind: create|update`、`id`、新建所需 `path`、相关 `sourceRefs`、`watchScopes` 和可选 `group`。默认把新来源和监控范围加入旧集合；若源码搬迁，需要在 update 变更中显式设 `replaceSources: true`、`replaceWatchScopes: true`，并分别提供非空的新 `sourceRefs`、`watchScopes`。prepare 仍会检查替换后的来源存在，apply 仍会校验快照、候选与人工合并；不凭失效旧路径强行通过。可同时附 `coverage` 和 `referenceMoves`。每个新页预期不存在；同组正文、目录和身份变更不能半完成后冒充可用。`coverage` 本身也有版本，形如 `{"schemaVersion":1,"topics":[...]}`，不能只传 topics；主题用 `id/title/parentId?/questions/sourceScopes/documentRefs/status/reason?`，数组顺序即同级顺序；状态为 planned／partial／covered／deferred，covered 必须有实际内容依据。
 
 纯语义审阅可用 `wiki update review --file review.json`，记录 `documentId/revision/sourceFingerprint/reviewedAt/reviewer/outcome/scope/findings/limitations`，不强迫重写正文。`reviewer` 记录真实的 agent 或 human、author 或 independent；不可把作者自检写成独立审阅。来源核对、语义审阅、运行验证分别说明。
+
+指纹从公开命令取得，不读取 Runtime 内部对象或自行拼接哈希。在已授权保存审阅时，先 `wiki scan --json` 核对当前来源（会保存观察；明确只读时不执行），再 `wiki show <文档ID> --json`。从后者原样取 `id`、`revision`、`sourceObservation.sourceFingerprint`，填入以下记录；`reviewedAt` 使用实际审阅时间。若指纹为空或期间正文／来源改变，重新核实而不是猜值。保存时 Runtime 会再次校验，失配须回到核实步骤。
+
+```json
+{
+  "documentId": "<show.id>",
+  "revision": "<show.revision>",
+  "sourceFingerprint": "<show.sourceObservation.sourceFingerprint>",
+  "reviewedAt": "<实际 ISO 时间>",
+  "reviewer": { "kind": "agent", "role": "author" },
+  "outcome": "reviewed",
+  "scope": ["实际核实的业务条件与适用范围"],
+  "findings": [],
+  "limitations": ["尚未执行的适用验证"]
+}
+```
+
+如果发现问题，`outcome` 用 `issues` 并填写非空 `findings`。例中的结果、角色、范围和限制必须按实际工作填写；纯审阅不改变上次生成基线，也不会将未修正的旧说明自动变成最新。
+
+知识实施复用 `lumine-run` 的任务合同，不另建任务格式。新记录的 `schemaVersion` 为 3，`goal` 和 `scope` 都是非空字符串（scope 不是路径数组或对象），`acceptanceRefs`、`evidence` 是数组；知识工作未完成时使用 `knowledge: {"required":true,"status":"pending","refs":["受影响文档ID"]}`。例如启动记录为 `{"schemaVersion":3,"taskId":"knowledge-maintenance","mode":"implement","goal":"让读者理解本次变化","scope":"受影响的功能说明、图和导航","acceptanceRefs":[],"evidence":[],"knowledge":{"required":true,"status":"pending","refs":[]}}`，通过 `task record <候选JSON>` 保存。它只是启动记录，不是完成证据；更新已有任务先 `task show <taskId>`，保留既有适用字段并在 `record` 时附原样 `--expect <recordHash>`。按项目实际模板和命令输出工作。
 
 只有实际保存且能够恢复的内容才算基线；新建采用“预期不存在”检查，更新采用三方比较。拆页同时维护总览、子页与引用。冲突和中断通过 `wiki update decide/recover` 处理，按命令帮助提供精确对象与原因，不强制覆盖人工修改。
 
@@ -72,7 +92,15 @@ AGENTS 明确授权的规范附件必须按任务完整读取，不由普通检�
 
 ## 维护阅读路径
 
-先运行 `wiki audit --json` 查未入目录、职责冲突与可读性线索。对照真实业务检查摘要、角色、入口、例外和图。需要拆页或替换时，维护旧引用、跨模块关系和失效状态。工具不能判断业务语义；作者和独立审阅分别取证。
+从本次交付、查询中发现的问题或明确整理请求开始，按影响范围维护，不要求每轮全库扫描。使用以下方法完成一条读者路径，不机械创建检查表或新文档：
+
+1. **确定读者要弄懂的事。** 先用一句话说清谁要了解什么，例如“使用者怎样接续失败的批量导出”。从现有首页、模块或场景进入，看看能否找到答案；查不到、答不全、不同入口说法不一致，都是需要调查的线索。新能力应有明确归属，不一定新建一页。
+2. **核对变化与依据。** 按需用 `wiki audit / scan / related` 缩小范围，再读实际来源和适用规范。`audit` 只检查结构、引用与变化线索，不能发现所有错误叙述。来源指纹改变不等于业务改变：格式、注释或无关代码变化经核实可保留原文并记录适用的来源观察／审阅；角色、条件、状态、术语或接口变化则必须复核相关解释。不能仅更新指纹来消除提示，也不能据提示批量重写或降低规范。
+3. **维护同一问题涉及的整组内容。** 同时检查正文、标题／摘要、图与等价文字、导航、关系和来源。跨模块变化沿角色交接或调用链查看相邻说明。摘要回答用途，正文解释正常路径和关键例外，图表达同一规则；重要安全条件不能因精简而丢失。只按读者独立问题拆页，保留入口和稳定引用；替代的旧说明标明历史及当前去向，避免两份现行规则。
+4. **从入口复读并核实。** 不看作者的修改清单，从首页或检索重新回答原问题，说明下一步、条件、失败／恢复和依据。涉及结构或关键规则变化时，优先让未参与撰写的 Agent 独立核对来源和阅读路径；有条件时再做真人阅读。分别记录作者检查、独立 Agent 和真人结果。发现遗漏就修正受影响内容再检验，不能把 CLI 通过当作语义或可用性验收。
+5. **按实际结果收口。** 在已有 Plan／Validation／任务知识处置中简记改变了哪些理解、核实了什么、还有什么未解决，不另建维护台账。纯审阅可用 `wiki update review`，仅变化了来源而解释仍成立时明确其依据。更新当前进度和下一步，保留历史证据的原范围；未修正的旧图、摘要或入口仍会误导时，不报告该项知识交付完成。
+
+正文和链接使用项目约定的主要语言；双语内容引用资料的真实标题，不根据 `guide`、`round`、`trial` 等内部编号猜测或直译标题。来源 `id` 是稳定机器身份，不能代替读者名称。新建或修订来源时用可选 `title` 保存可读标题：资料使用原题，源码使用已核实的职责名称；`note` 简述它支持什么判断，不把长篇验证声明当作标题。阅读器也可从 Markdown 原题取得标题，不能仅为补字段重写所有旧页。界面操作文字随当前语言呈现，切换界面语言不会翻译或改写知识真源。缺少语义标题时保留准确文件名，不伪造不存在的资料名称。
 
 先升级 Runtime，预演使用 `wiki storage compact --plan --editorial --output <plan.json> --json`，按文件指纹应用。这将配置升级到 schema 4，保留 workflowVersion 2 和对象存储格式。普通读取不升级。回退前先恢复版本围栏及后续编排变更，避免旧写入器读写新状态。
 
