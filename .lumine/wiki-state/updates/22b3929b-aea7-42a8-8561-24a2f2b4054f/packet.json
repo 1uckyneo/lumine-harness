@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "22b3929b-aea7-42a8-8561-24a2f2b4054f",
+    "createdAt": "2026-11-16T10:52:25.196Z",
+    "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+    "scope": [
+      "lumine-project-overview",
+      "lumine-wiki",
+      "lumine-wiki-reader",
+      "lumine-workflow"
+    ],
+    "status": "applied",
+    "storageReceipt": true,
+    "units": [
+      {
+        "id": "lumine-project-overview",
+        "kind": "create",
+        "group": "directory",
+        "path": "docs/repo-wiki/README.md"
+      },
+      {
+        "id": "lumine-wiki",
+        "kind": "update",
+        "group": "directory",
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md"
+      },
+      {
+        "id": "lumine-wiki-reader",
+        "kind": "update",
+        "group": "directory",
+        "path": "docs/repo-wiki/知识树、图解与来源阅读.md"
+      },
+      {
+        "id": "lumine-workflow",
+        "kind": "update",
+        "group": "directory",
+        "path": "docs/repo-wiki/四个 Skill、产品方案与任务证据.md"
+      }
+    ],
+    "results": [
+      {
+        "id": "lumine-project-overview",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "58484acaeb59f1c8f90746aba9acc6acf837203c0725fe7a126d1603dd7a423f"
+      },
+      {
+        "id": "lumine-wiki",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "b51c4f8daa506ad4167138745cb10f3a6885c3bbfe31d4a9fdbc4a4e5f6d77f7"
+      },
+      {
+        "id": "lumine-wiki-reader",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "7472187a6e5c4b9bc029c70a7d3cfdf421a05bd7f76d8fc0eeba0336ad99a709"
+      },
+      {
+        "id": "lumine-workflow",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "58e48bc4217df5e435ead10448c3c96891a2488b6324129754aa7e45f7ea13db"
+      }
+    ],
+    "audit": {
+      "recordHash": "d73df62826654fb143de2f80f357560acd83c241160273365b394fa79552e824",
+      "unitHashes": [
+        {
+          "id": "lumine-project-overview",
+          "sha256": "7455ceeda832dfbb6cbfc7259e077dc975abbbac551317cf0041a3c03f5a99bd"
+        },
+        {
+          "id": "lumine-wiki",
+          "sha256": "dc4d18c9b377d1dbc8d0f60af08bb05bafbf1a7b82c4a978e3c84c62c4ff2474"
+        },
+        {
+          "id": "lumine-wiki-reader",
+          "sha256": "bd79544eedfaeb87666dd0e1b29a1267abc18c4d09dac9fcba69e8bb98d71073"
+        },
+        {
+          "id": "lumine-workflow",
+          "sha256": "3984fcd3cbd218140bf70c5ccd19353f8f7b89948eb4fd39e0af9f48fc8c7e5e"
+        }
+      ]
+    }
+  }
+}

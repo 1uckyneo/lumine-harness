@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "overview": "lumine-project-overview",
+  "groups": [
+    {
+      "id": "understand",
+      "sections": [
+        {
+          "id": "lumine-capabilities",
+          "title": "核心能力",
+          "documents": [
+            "lumine-workflow",
+            "lumine-wiki",
+            "lumine-wiki-reader"
+          ]
+        },
+        {
+          "id": "lumine-systems",
+          "title": "组成与适配",
+          "documents": [
+            "lumine-architecture",
+            "lumine-root-config",
+            "lumine-adapters"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "operate",
+      "sections": [
+        {
+          "id": "lumine-how-to",
+          "title": "启用与日常协作",
+          "documents": [
+            "lumine-adoption",
+            "lumine-collaboration-guide",
+            "lumine-command-guide"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reference",
+      "sections": [
+        {
+          "id": "lumine-verification",
+          "title": "验证与恢复",
+          "documents": [
+            "lumine-task-check"
+          ]
+        }
+      ]
+    }
+  ],
+  "unlisted": [],
+  "norms": []
+}

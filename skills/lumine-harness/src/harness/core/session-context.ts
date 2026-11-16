@@ -26,7 +26,7 @@ export function buildSessionStartContext(input: SessionContextInput = {}): strin
     "Lumine 项目上下文：", `- 项目根：${root}`,
     `- 读取根 ${manifest.instructions} 作为共享工程规则入口。`,
     `- 规范 Skill：${manifest.skills}；使用 ./.lumine/cli skills search <query> 定位。`,
-    "- lumine-plan 负责需求与方案；lumine-run 负责实施、恢复、验证和诊断；lumine-knowledge 负责知识；lumine-design 负责视觉与交互。",
+    "- lumine-plan 负责需求与方案；lumine-run 负责实施、恢复、验证和诊断；lumine-knowledge 持续维护功能说明与知识编排；lumine-design 按问题选择视觉或交互验证方式。",
     `- 根据当前目标按需选择 Skill；评估下一步时读取 ${manifest.skills}/lumine-plan/references/stage-handoff.md 并核对实际成果。产品开发先确认 Spec；需要设计则确认设计后补充并确认 Spec，再确认 Exec Plan 后进入 Run；无需设计则确认 Spec 后进入 Exec Plan。阶段内自主推进，阶段间等待用户明确确认，笼统实施授权不代替确认。`,
     "- ‘是否可以进入下一步’是评估请求，不是推进确认。读取 Skill、文件状态和自动续跑不产生授权；Run 中及之后的范围内验证无需单独确认。",
     "- 按当前问题自主决定是否查询 ./.lumine/cli wiki query <query>；需要稳定背景时展开相关知识，矛盾或过期时核对源码。知识不是新的授权规则。",
@@ -38,7 +38,7 @@ export function buildSessionStartContext(input: SessionContextInput = {}): strin
     "Lumine project context:", `- Project root: ${root}`,
     `- Read root ${manifest.instructions} as the shared engineering instruction entry.`,
     `- Canonical Skills: ${manifest.skills}; discover with ./.lumine/cli skills search <query>.`,
-    "- lumine-plan owns requirements and plans; lumine-run owns implementation, recovery, verification and diagnosis; lumine-knowledge owns knowledge; lumine-design owns visual and interaction design.",
+    "- lumine-plan owns requirements and plans; lumine-run owns implementation, recovery, verification and diagnosis; lumine-knowledge maintains feature explanations and editorial structure; lumine-design selects the appropriate visual or interaction medium.",
     `- Select Skills by the current goal. To assess the next step, read ${manifest.skills}/lumine-plan/references/stage-handoff.md and inspect actual artifacts. Feature work requires Spec confirmation; if design is needed, confirm it, update and confirm the Spec, then confirm the Exec Plan before Run. Otherwise go from confirmed Spec to Exec Plan. Work autonomously within a stage and wait for explicit user confirmation between stages; broad implementation authorization is not a substitute.`,
     "- Asking whether the next step is ready requests an assessment, not permission to advance. Reading a Skill, document status and automatic continuation do not grant permission. In-scope verification during or after Run needs no separate confirmation.",
     "- Choose whether ./.lumine/cli wiki query <query> helps the current question; expand stable background when useful and verify source for stale or conflicting claims. Knowledge is not an authorization source.",
@@ -47,7 +47,7 @@ export function buildSessionStartContext(input: SessionContextInput = {}): strin
     "- Separate tool results, runtime evidence and human acceptance. Completion checks only the current task, not global project health.",
     "- Record WorkReport v2: done, continue or blocked with a concrete reason. Hosts that read the final answer accept one terminal WORK_STATUS: <status> line; explain a blocker and next step in prose or the structured report (an optional | <reason> suffix is accepted). Examples in the body do not control execution."
   ];
-  lines.push(zh ? "- 在现有授权内将已核实且可复用的稳定知识整理回 Wiki，避免把临时排错过程或未实施方案写成现状；纯查询不自动全量重写。" : "- Within existing authorization, preserve verified reusable knowledge in the Wiki; do not promote temporary debugging or proposed behavior to current implementation. A query does not authorize a full rewrite.");
+  lines.push(zh ? "- 交付业务行为时，按实际验证更新功能说明、图与导航；Knowledge 核查重要页面能否找到、流程是否一致以及哪些内容过时。只读查询仅报告发现。" : "- When delivering a behavior change, update feature explanations, diagrams and navigation using verified results. Knowledge checks placement, workflow consistency and stale content. Report findings for read-only requests.");
   if (manifest.migrationStatus && manifest.migrationStatus !== "complete") lines.push(zh ? "- 迁移尚未完整收口：可以检查、恢复并运行新 Hook 取得证据；真实宿主验证完成前，不宣称完整迁移已完成。" : "- Migration is not fully complete: checks, recovery and new Hook invocations may collect evidence; do not claim completed migration before actual host verification.");
   lines.push(zh ? "- 每个新请求使用 session show/begin 声明本轮模式；缺少可靠宿主轮次时 Agent 指定稳定 --request-id，续跑／Hook 重试用 --resume。可关联原 task，禁止手改会话 JSON；详见规范 lumine-run/references/request-scope.md。新请求不自动重建 Spec／Plan／task；继续功能或调整方向原位维护，仅复核受影响确认。" : "- Use session show/begin to declare the current request mode. Without a reliable host turn ID, supply an Agent-chosen stable --request-id; continuation/Hook retries use --resume. Reuse the existing task; never edit session JSON manually. See canonical lumine-run/references/request-scope.md. New requests do not recreate Spec/Plan/task; continue features and direction changes in place, reviewing only affected confirmations.");
   if (input.prompt) lines.push(buildSharedSkillCatalog(root, { query: input.prompt, limit: 3 }));

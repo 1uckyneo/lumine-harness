@@ -17,7 +17,7 @@ This file and the standards explicitly designated here govern actions. Standards
 ## Work and artifact entry points
 
 - [README](README.md): project setup and usage.
-- [Project Wiki](<{{wiki_entry}}>): architecture, current implementation, domain language, lasting decisions, and guides.
+- [Project Wiki](<{{wiki_entry}}>): start with the project and its features or capabilities, then find engineering rules, operating guides, implementation and evidence.
 - [Project document index](docs/index.md): Product Spec owns the product proposal and acceptance; Exec Plan derives technical approach, execution arrangements, and records from the Spec; Validation retains actual evidence.
 
 Read the entry point appropriate to the current task; a Skill name match is not a read:

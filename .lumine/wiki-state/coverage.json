@@ -9,6 +9,7 @@
         "规范源码如何进入安装和 Plugin 分发？"
       ],
       "documentRefs": [
+        "lumine-project-overview",
         "lumine-architecture"
       ],
       "sourceScopes": [

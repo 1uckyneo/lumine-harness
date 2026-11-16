@@ -16,7 +16,7 @@
     "noProgressThreshold": 2
   },
   "extensions": {},
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "workflowVersion": 2,
   "locale": "zh-CN",
   "topology": "library-or-cli",

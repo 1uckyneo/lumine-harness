@@ -105,3 +105,31 @@ test('historic proposals without knowledgeMode retain the original one-time conv
     assert.deepEqual(rollbackProposal(file).conflicts, []); assert.equal(readFileSync(path.join(f.root, 'docs/repo-wiki/旧资料.md'), 'utf8'), old);
   } finally { f.clean(); }
 });
+
+test('runtime upgrade retains an active editorial writer fence and blocks downgrade across the fence', () => {
+  const f = fixture();
+  try {
+    applyProposal(f.save(createProposal(f.root, { adapters: 'none', locale: 'zh-CN' })));
+    addHistoricalKnowledge(f);
+    const storage = planCompaction(f.root);
+    applyCompaction(f.root, storage, compactionPlanHash(storage));
+    const upgrade = createProposal(f.root, { mode: 'upgrade' });
+    const upgradeFile = f.save(upgrade);
+    applyProposal(upgradeFile);
+    const editorial = planCompaction(f.root, { editorial: true });
+    applyCompaction(f.root, editorial, compactionPlanHash(editorial));
+
+    const before = protectedBytes(f.root);
+    const next = createProposal(f.root, { mode: 'upgrade' });
+    assert.equal(next.project.schemaVersion, 4);
+    assert.equal(next.project.workflowVersion, 2);
+    assert.equal(next.knowledgeMode, 'preserve');
+    assert.throws(() => rollbackProposal(upgradeFile), /STORAGE_ROLLBACK_REQUIRED/);
+    assert.deepEqual(protectedBytes(f.root), before);
+    assert.equal(JSON.parse(readFileSync(path.join(f.root, '.lumine/project.json'), 'utf8')).schemaVersion, 4);
+
+    recoverCompaction(f.root, editorial.operationId, { rollback: true });
+    assert.deepEqual(rollbackProposal(upgradeFile).conflicts, []);
+    assert.equal(JSON.parse(readFileSync(path.join(f.root, '.lumine/project.json'), 'utf8')).schemaVersion, 3);
+  } finally { f.clean(); }
+});

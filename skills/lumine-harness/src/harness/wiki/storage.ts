@@ -1,6 +1,7 @@
 import { existsSync, lstatSync, readFileSync, readdirSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 import { atomicWrite, containedPath, hash, relativePath } from './files.ts';
+import { validateNavigation } from './navigation-contract.ts';
 
 export interface ObjectRef { $lumineObject: string; kind: 'text' | 'json'; bytes: number }
 export interface EncodedStorageRecord { record: unknown; objects: Map<string, string> }
@@ -38,8 +39,8 @@ export function storageEnabled(root: string): boolean {
   const file = containedPath(root, '.lumine/project.json', false);
   if (!existsSync(file)) return false;
   const config = JSON.parse(readFileSync(file, 'utf8')) as { schemaVersion?: number };
-  if (config.schemaVersion !== undefined && ![2, 3].includes(config.schemaVersion)) throw new Error('STORAGE_PROJECT_SCHEMA_UNSUPPORTED');
-  return config.schemaVersion === 3;
+  if (config.schemaVersion !== undefined && ![2, 3, 4].includes(config.schemaVersion)) throw new Error('STORAGE_PROJECT_SCHEMA_UNSUPPORTED');
+  return config.schemaVersion === 3 || config.schemaVersion === 4;
 }
 function receipt(value: unknown): unknown {
   if (!object(value)) return value;
@@ -58,6 +59,7 @@ function receipt(value: unknown): unknown {
       units: value.units.map(unit => { const item = unit as Record<string, unknown>; return { id: item.id, kind: item.kind, group: item.group, path: item.path }; }),
       results: results.map(result => { const { candidatePath: _path, ...entry } = result as Record<string, unknown>; return entry; }),
       ...(decisions.length ? { decisions } : {}),
+      ...(value.normativeChanges ? { normativeChanges: value.normativeChanges } : {}),
       ...(value.retainedCandidates ? { retainedCandidates: value.retainedCandidates } : {}),
       audit: { recordHash: hash(JSON.stringify(value)), unitHashes: value.units.map(unit => ({ id: (unit as Record<string, unknown>).id, sha256: hash(JSON.stringify(unit)) })) }
     };
@@ -183,6 +185,7 @@ export function validateStorageRecord(relative: string, value: any): void {
   else if (local === 'format.json') { if (value.schemaVersion !== 1 || value.knowledgeFormat !== 3) fail(); }
   else if (local === 'storage.json') { if (value.schemaVersion !== 1 || value.storageVersion !== 3 || value.objectAlgorithm !== 'sha256') fail(); }
   else if (local === 'coverage.json') { if (value.schemaVersion !== 1 || !Array.isArray(value.topics)) fail(); }
+  else if (local === 'navigation.json') validateNavigation(value);
   else if (local === 'source-dispositions.json') { if (value.schemaVersion !== 1) fail(); }
   else if (local === 'document-aliases.json') { if (value.schemaVersion !== undefined && ![1, 2].includes(value.schemaVersion)) fail(); }
   else fail();

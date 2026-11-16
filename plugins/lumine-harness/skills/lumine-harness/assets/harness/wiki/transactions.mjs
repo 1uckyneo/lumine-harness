@@ -46,7 +46,11 @@ function visibleJson(root, relative, fallback) {
 }
 function allowed(root, relative) {
 	const wikiRoot = wikiConfig(root).root;
-	return relative.startsWith(`${wikiRoot}/`) && relative.endsWith(".md") || /^\.lumine\/wiki-state\/(?:documents|observations|reviews)\/[a-f0-9]{64}\.json$/.test(relative) || [".lumine/wiki-state/coverage.json", ".lumine/wiki-state/document-aliases.json"].includes(relative);
+	return relative.startsWith(`${wikiRoot}/`) && relative.endsWith(".md") || /^\.lumine\/wiki-state\/(?:documents|observations|reviews)\/[a-f0-9]{64}\.json$/.test(relative) || [
+		".lumine/wiki-state/coverage.json",
+		".lumine/wiki-state/document-aliases.json",
+		".lumine/wiki-state/navigation.json"
+	].includes(relative);
 }
 function applyTransaction(root, transaction, failAfter) {
 	const journal = containedPath(root, `${JOURNALS}/${transaction.id}.json`, false);

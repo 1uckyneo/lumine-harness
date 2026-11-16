@@ -2,6 +2,9 @@
 // Source: skills/lumine-harness/src/harness/core/document-operations.ts
 import { loadProjectConfig, resolveProjectPath } from "./project-config.mjs";
 import { contentHash, parseDocumentMetadata, readProjectDocument, resolveDocument } from "./documents.mjs";
+import { withWikiLock } from "../wiki/files.mjs";
+import { assertStorageWritable } from "../wiki/storage.mjs";
+import { pendingTransactions } from "../wiki/transactions.mjs";
 import path from "node:path";
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
@@ -166,6 +169,9 @@ function prepareDocumentMove(root, doc, target, expectedHash, kind) {
 	if (!expectedHash || contentHash(doc.source) !== expectedHash) throw new Error("Document changed; provide --expect with the current content sha256");
 	const destination = path.relative(root, resolveProjectPath(root, target, "new document path")).split(path.sep).join("/");
 	if (!destination.endsWith(".md") || (kind === "document-rename" ? !allowedMutation(root, destination) : !lifecyclePaths(kind, doc.file, destination))) throw new Error(kind === "document-rename" ? "New document path must be inside a current document collection" : "Plan lifecycle target must be inside the matching plan collection");
+	const config = loadProjectConfig(root);
+	const wikiPath = (file) => file.startsWith(`${config.wiki.root}/`);
+	if (config.schemaVersion === 4 && kind === "document-rename" && wikiPath(doc.file) !== wikiPath(destination)) throw new Error("A Wiki document rename must preserve its collection and editorial placement");
 	if (destination.split("/").some((part) => /[<>:"|?*\x00-\x1f]/.test(part) || /[. ]$/.test(part) || /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part))) throw new Error("Document path is not portable across filesystems");
 	if (normalized(destination) === normalized(doc.file)) throw new Error("The new path collides with the current path after Unicode/case normalization; choose a distinct name");
 	const existing = [...new Set([...roots(root), "docs/exec-plans/completed"].flatMap((dir) => scanMarkdown(root, dir)))];
@@ -238,7 +244,7 @@ function withOperationLock(root, action) {
 }
 /** Every application or rollback checks the exact current bytes before writing. */
 function applyDocumentOperation(root, operation, rollback = false) {
-	return withOperationLock(root, () => {
+	return withWikiLock(root, () => withOperationLock(root, () => {
 		if (![
 			"document-rename",
 			"document-archive",
@@ -258,6 +264,23 @@ function applyDocumentOperation(root, operation, rollback = false) {
 			if (!allowedMutation(root, mutation.path) && !lifecycleEndpoint) throw new Error(`Invalid document operation target: ${mutation.path}`);
 		}
 		if (!rollback && operation.status === "complete" || rollback && operation.status === "rolled_back") return operation;
+		const config = loadProjectConfig(root);
+		const wikiPath = (file) => file.startsWith(`${config.wiki.root}/`);
+		assertStorageWritable(root);
+		if (config.schemaVersion === 4) {
+			if (pendingTransactions(root).length) throw new Error("Recover the pending Wiki transaction before applying a document operation");
+			const movesWiki = wikiPath(operation.from) || wikiPath(operation.to);
+			if (operation.kind === "document-rename" && movesWiki) {
+				if (wikiPath(operation.from) !== wikiPath(operation.to) && (!rollback || wikiPath(operation.to))) throw new Error("A Wiki document rename must preserve its collection and editorial placement");
+				const source = operation.mutations.find((item) => item.path === operation.from);
+				const destination = operation.mutations.find((item) => item.path === operation.to);
+				if (!source?.before || source.after !== null || destination?.before !== null || parseDocumentMetadata(source.before).id !== operation.documentId || destination.after !== movedDocumentText(source.before, operation.from, operation.to, operation.kind)) throw new Error("A Wiki document rename must preserve its identity and only rebase links");
+			}
+			for (const mutation of operation.mutations) {
+				if (mutation.path === operation.from || mutation.path === operation.to || !wikiPath(mutation.path)) continue;
+				if (mutation.before === null || mutation.after !== rewriteDocumentLinks(mutation.before, mutation.path, mutation.path, operation.from, operation.to)) throw new Error("A document operation may only rebase links in other Wiki pages");
+			}
+		}
 		operation.status = "applying";
 		delete operation.error;
 		saveOperation(root, operation);
@@ -281,7 +304,7 @@ function applyDocumentOperation(root, operation, rollback = false) {
 			saveOperation(root, operation);
 			throw new Error(`${operation.error} (operation ${operation.operationId}; use task doc-recover)`);
 		}
-	});
+	}));
 }
 function renameDocument(root, reference, target, expectedHash) {
 	const operation = prepareDocumentRename(root, reference, target, expectedHash);

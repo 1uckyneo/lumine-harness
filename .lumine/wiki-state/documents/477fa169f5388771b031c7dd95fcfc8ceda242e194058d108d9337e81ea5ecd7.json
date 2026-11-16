@@ -5,18 +5,18 @@
     "schemaVersion": 2,
     "id": "lumine-workflow",
     "path": "docs/repo-wiki/四个 Skill、产品方案与任务证据.md",
-    "generation": 13,
+    "generation": 14,
     "generatedMarkdown": {
-      "$lumineObject": "eb9e473783de84d8601b4c3c77ff6b60de53cb0ac9a4f11cb433a4caeb4247e1",
+      "$lumineObject": "a6ce6f6ebc36943de7c68d9cb865dfd8158106a10f84999d2d247f9513cfa2ac",
       "kind": "text",
-      "bytes": 21965
+      "bytes": 22452
     },
-    "appliedRevision": "eb9e473783de84d8601b4c3c77ff6b60de53cb0ac9a4f11cb433a4caeb4247e1",
+    "appliedRevision": "a6ce6f6ebc36943de7c68d9cb865dfd8158106a10f84999d2d247f9513cfa2ac",
     "sources": {
-      "$lumineObject": "495a696c0749a088460f8037765c8a2f13f9d516718554e6f658b0b8edcae960",
+      "$lumineObject": "d31cd5dc388b6e9d988cb04f59ac82e19784bcf41e36b5ca4b743ef1f76a2c8a",
       "kind": "json",
       "bytes": 6291
     },
-    "updatedAt": "2026-10-14T05:07:29.868Z"
+    "updatedAt": "2026-11-16T10:52:25.425Z"
   }
 }

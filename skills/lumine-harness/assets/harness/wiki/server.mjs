@@ -2,11 +2,11 @@
 // Source: skills/lumine-harness/src/harness/wiki/server.ts
 import { loadProjectConfig } from "../core/project-config.mjs";
 import { resolveHarnessRuntimeRoot } from "../core/runtime-layout.mjs";
-import { parseSections } from "./sections.mjs";
 import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConfig } from "./files.mjs";
+import { parseSections } from "./sections.mjs";
 import { baselineFor } from "./documents.mjs";
 import { searchKnowledgePage } from "./search.mjs";
-import { inspectKnowledge, mapKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from "./engine.mjs";
+import { inspectKnowledge, mapKnowledge, navigationKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from "./engine.mjs";
 import { isRegisteredValidationDocumentId, registeredValidationDocuments, showRegisteredValidation } from "./validation-documents.mjs";
 import path from "node:path";
 import { existsSync, readFileSync, realpathSync, statSync } from "node:fs";
@@ -84,7 +84,7 @@ async function serveWiki(root, options = {}) {
 					"wiki",
 					"spec",
 					"plan"
-				]), validation = registeredValidationDocuments(root);
+				], { includeHistoricalWiki: true }), validation = registeredValidationDocuments(root);
 				json(response, 200, {
 					issues: [...primary.issues, ...validation.issues],
 					documents: [...primary.documents, ...validation.documents].map(({ markdown: _markdown, body: _body, diagrams, sections, ...document }) => ({
@@ -97,6 +97,10 @@ async function serveWiki(root, options = {}) {
 			}
 			if (url.pathname === "/api/map") {
 				json(response, 200, mapKnowledge(root));
+				return;
+			}
+			if (url.pathname === "/api/navigation") {
+				json(response, 200, navigationKnowledge(root));
 				return;
 			}
 			if (url.pathname === "/api/related") {
@@ -142,7 +146,7 @@ async function serveWiki(root, options = {}) {
 					"wiki",
 					"spec",
 					"plan"
-				] : ["wiki"]);
+				] : ["wiki"], { includeHistoricalWiki: scope === "all" });
 				const validation = scope === "all" ? registeredValidationDocuments(root) : {
 					documents: [],
 					issues: []
@@ -158,7 +162,9 @@ async function serveWiki(root, options = {}) {
 						document.id,
 						document.path,
 						document.revision,
-						document.freshness
+						document.freshness,
+						document.editorialRole,
+						document.normativeScope
 					])
 				}));
 				const rawCursor = url.searchParams.get("cursor");

@@ -25,6 +25,7 @@ export interface CompactionPlan {
   schemaVersion: 1; kind: 'lumine-wiki-storage-compaction'; operationId: string; projectIdentity: string; runtimeFingerprint: string;
   inputFingerprint: string; inventory: StorageFile[]; changes: CompactionChange[]; protected: ProtectedStorage[];
   beforeBytes: number; afterBytes: number; savedBytes: number; reduction: number; sourceStorageVersion: number; targetStorageVersion: 3;
+  targetProjectSchemaVersion?: 4;
 }
 export interface CompactionResult { operationId: string; status: 'complete' | 'rolled_back'; backupDirectory: string; beforeBytes: number; afterBytes: number; changedFiles: number }
 export interface CompactionOptions { interruptAfterStep?: number; onStep?: (step: string) => void }
@@ -56,7 +57,7 @@ function readObject(root: string, ref: ObjectRef, virtual?: Map<string, string>)
 }
 function inventory(root: string): StorageFile[] {
   const config = JSON.parse(read(root, CONFIG));
-  if (![2, 3].includes(config.schemaVersion) || config.workflowVersion !== 2) throw new Error('STORAGE_PROJECT_VERSION_UNSUPPORTED');
+  if (![2, 3, 4].includes(config.schemaVersion) || config.workflowVersion !== 2) throw new Error('STORAGE_PROJECT_VERSION_UNSUPPORTED');
   const wikiRoot = config.wiki?.root ?? 'docs/repo-wiki';
   return [...walk(root, CONFIG), ...walk(root, '.lumine/root.json'), ...walk(root, '.gitignore'), ...walk(root, STATE), ...walk(root, wikiRoot)].sort((a, b) => a.path.localeCompare(b.path));
 }
@@ -134,7 +135,7 @@ export function inspectStorage(root: string): StorageInspection {
   return { ...check, storageVersion: existsSync(safe(root, MARKER)) ? 3 : 2, bytes: files.reduce((sum, file) => sum + file.bytes, 0), categories, packetStates, recoveryBytes: folderBytes(root, '.lumine-migrations'), gitHistoryBytes };
 }
 interface Conversion { plan: CompactionPlan; output: Map<string, string> }
-function conversion(root: string, operationId = `wiki-storage-${randomUUID()}`): Conversion {
+function conversion(root: string, operationId = `wiki-storage-${randomUUID()}`, editorial = false): Conversion {
   const checked = checkStorage(root); if (!checked.ok) throw new Error(`STORAGE_CHECK_FAILED: ${json(checked.issues)}`);
   const inputs = inventory(root), pinned = new Set<string>(), output = new Map<string, string>(), objects = new Map<string, string>(), protectedEntries: ProtectedStorage[] = [], packets = new Map<string, any>(), transactions = new Map<string, any>(), retained = new Map<string, any[]>();
   for (const entry of inputs.filter((file) => file.path.startsWith(`${STATE}/`))) {
@@ -219,7 +220,8 @@ function conversion(root: string, operationId = `wiki-storage-${randomUUID()}`):
   output.set(MARKER, marker);
   for (const relative of referenceGraph(root, output, objects)) output.set(relative, objects.get(relative) ?? read(root, relative));
   const config = JSON.parse(read(root, CONFIG));
-  output.set(CONFIG, config.schemaVersion === 3 ? read(root, CONFIG) : json({ ...config, schemaVersion: 3 }));
+  const targetProjectSchema = editorial || config.schemaVersion === 4 ? 4 : 3;
+  output.set(CONFIG, config.schemaVersion === targetProjectSchema ? read(root, CONFIG) : json({ ...config, schemaVersion: targetProjectSchema }));
   const oldIgnore = existsSync(safe(root, '.gitignore')) ? read(root, '.gitignore') : '';
   // Retaining this line on rollback protects the deliberately retained recovery bytes.
   const ignore = oldIgnore.split(/\r?\n/).some((line) => ['.lumine-migrations/', '/.lumine-migrations/'].includes(line.trim())) ? oldIgnore : oldIgnore + (oldIgnore && !oldIgnore.endsWith('\n') ? '\n' : '') + '.lumine-migrations/\n';
@@ -235,13 +237,13 @@ function conversion(root: string, operationId = `wiki-storage-${randomUUID()}`):
   }
   const beforeBytes = inputs.filter((file) => file.path.startsWith(`${STATE}/`)).reduce((sum, file) => sum + file.bytes, 0);
   const afterBytes = [...output].filter(([relative]) => relative.startsWith(`${STATE}/`)).reduce((sum, [, content]) => sum + Buffer.byteLength(content), 0);
-  return { output, plan: { schemaVersion: 1, kind: 'lumine-wiki-storage-compaction', operationId, projectIdentity: identity(root), runtimeFingerprint: runtimeFingerprint(), inputFingerprint: hash(json(inputs)), inventory: inputs, changes, protected: protectedEntries, beforeBytes, afterBytes, savedBytes: beforeBytes - afterBytes, reduction: beforeBytes ? (beforeBytes - afterBytes) / beforeBytes : 0, sourceStorageVersion: existsSync(safe(root, MARKER)) ? 3 : 2, targetStorageVersion: 3 } };
+  return { output, plan: { schemaVersion: 1, kind: 'lumine-wiki-storage-compaction', operationId, projectIdentity: identity(root), runtimeFingerprint: runtimeFingerprint(), inputFingerprint: hash(json(inputs)), inventory: inputs, changes, protected: protectedEntries, beforeBytes, afterBytes, savedBytes: beforeBytes - afterBytes, reduction: beforeBytes ? (beforeBytes - afterBytes) / beforeBytes : 0, sourceStorageVersion: existsSync(safe(root, MARKER)) ? 3 : 2, targetStorageVersion: 3, ...(targetProjectSchema === 4 ? { targetProjectSchemaVersion: 4 } : {}) } };
 }
-export function planCompaction(root: string): CompactionPlan { return withWikiLock(root, () => conversion(root).plan); }
+export function planCompaction(root: string, options: { editorial?: boolean } = {}): CompactionPlan { return withWikiLock(root, () => conversion(root, undefined, options.editorial).plan); }
 export function compactionPlanHash(plan: CompactionPlan | string): string { return hash(typeof plan === 'string' ? plan : json(plan)); }
 function validatePlan(root: string, plan: CompactionPlan, checkRuntime = true): void {
   if (plan.schemaVersion !== 1 || plan.kind !== 'lumine-wiki-storage-compaction' || !/^wiki-storage-[a-zA-Z0-9_-]+$/.test(plan.operationId) || plan.projectIdentity !== identity(root) || (checkRuntime && plan.runtimeFingerprint !== runtimeFingerprint())) throw new Error('STORAGE_PLAN_IDENTITY_OR_RUNTIME_CHANGED');
-  if (plan.targetStorageVersion !== 3 || hash(json(plan.inventory)) !== plan.inputFingerprint) throw new Error('STORAGE_PLAN_INVALID');
+  if (plan.targetStorageVersion !== 3 || (plan.targetProjectSchemaVersion !== undefined && plan.targetProjectSchemaVersion !== 4) || hash(json(plan.inventory)) !== plan.inputFingerprint) throw new Error('STORAGE_PLAN_INVALID');
   const seen = new Set<string>();
   for (const change of plan.changes) {
     safe(root, change.path);
@@ -337,7 +339,7 @@ export function applyCompaction(root: string, input: CompactionPlan | string, ex
       return recoverUnlocked(root, plan.operationId, false, steps(options));
     }
     verifyCurrent(root, plan, 'initial');
-    const rebuilt = conversion(root, plan.operationId);
+    const rebuilt = conversion(root, plan.operationId, plan.targetProjectSchemaVersion === 4);
     if (json(rebuilt.plan) !== json(plan)) throw new Error('STORAGE_PLAN_OUTPUT_CHANGED');
     const step = steps(options), journal = prepare(root, plan, rebuilt.output, step);
     return applyReady(root, plan, journal, step);
@@ -372,7 +374,7 @@ function recoverUnlocked(root: string, operationId: string, rollback: boolean, s
   if (journal.status === 'preparing') {
     if (plan.runtimeFingerprint !== runtimeFingerprint()) throw new Error('STORAGE_RECOVERY_RUNTIME_CHANGED: restore the planning Runtime or roll back this unstarted operation');
     // At this stage only .gitignore may differ. Reconstruct pure outputs from original state.
-    const rebuilt = conversion(root, operationId);
+    const rebuilt = conversion(root, operationId, plan.targetProjectSchemaVersion === 4);
     const filtered = (changes: CompactionChange[]) => changes.filter((change) => change.path !== '.gitignore');
     if (json(filtered(rebuilt.plan.changes)) !== json(filtered(plan.changes))) throw new Error('STORAGE_RECOVERY_INPUT_CHANGED');
     journal = prepare(root, plan, rebuilt.output, step);

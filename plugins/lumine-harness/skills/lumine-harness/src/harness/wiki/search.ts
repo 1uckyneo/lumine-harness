@@ -62,22 +62,26 @@ function directBody(document: ReaderDocument, section: Section): string {
 }
 export function searchKnowledge(documents: ReaderDocument[], query: string, limit: number, budget: number, offset = 0, bounded = true): { query: string; cards: KnowledgeCard[]; total: number; contextChars: number; noAnswer: boolean } {
   const terms = searchTerms(query);
-  if (!terms.length && query.trim()) return { query, cards: [], total: 0, contextChars: 2, noAnswer: true };
+  const normalizeName = (name: string) => name.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+  const name = normalizeName(query);
   const entries = documents.map((document) => {
+    const exact = name && normalizeName(document.title) === name ? 2 : name && document.aliases.some((alias) => normalizeName(alias) === name) ? 1 : 0;
     const titleTerms = searchTerms(`${document.title} ${document.aliases.join(' ')} ${document.tags.join(' ')}`);
     const metadata = `${document.summary} ${document.sources.map((source) => source.path + ' ' + (source.note ?? '')).join(' ')} ${document.relations.map((relation) => relation.target + ' ' + (relation.note ?? '')).join(' ')} ${document.diagrams.map((diagram) => `${diagram.title} ${diagram.caption} ${diagram.code}`).join(' ')}`;
     const sections = document.sections.length ? document.sections : [{ id: '', title: document.title, body: document.body, startLine: 1, endLine: document.body.split('\n').length, level: 1, stable: false, sources: [] }];
-    return { document, titleTerms, metadata, sections: sections.map((section) => ({ section, text: directBody(document, section), tokens: searchTerms(directBody(document, section)) })) };
+    return { document, exact, titleTerms, metadata: searchTerms(metadata), sections: sections.map((section) => {
+      const text = directBody(document, section);
+      return { section, text, tokens: searchTerms(text) };
+    }) };
   });
   const frequency = new Map<string, number>();
-  for (const term of terms) frequency.set(term, entries.filter((entry) => entry.titleTerms.includes(term) || searchTerms(entry.metadata).includes(term) || entry.sections.some((section) => section.tokens.includes(term))).length);
+  for (const term of terms) frequency.set(term, entries.filter((entry) => entry.titleTerms.includes(term) || entry.metadata.includes(term) || entry.sections.some((section) => section.tokens.includes(term))).length);
   const ranked = entries.map((entry) => {
-    const metadata = searchTerms(entry.metadata);
     const matchSet = new Set<string>();
     const sectionScores = entry.sections.map(({ section, text, tokens }) => {
       let score = 0;
       for (const term of terms) {
-        const inTitle = entry.titleTerms.includes(term), inSection = searchTerms(section.title).includes(term), inBody = tokens.includes(term), inMeta = metadata.includes(term);
+        const inTitle = entry.titleTerms.includes(term), inSection = searchTerms(section.title).includes(term), inBody = tokens.includes(term), inMeta = entry.metadata.includes(term);
         if (inTitle || inSection || inBody || inMeta) matchSet.add(term);
         const idf = Math.log(1 + (entries.length + 1) / ((frequency.get(term) ?? 0) + 1));
         score += idf * (inTitle ? 5 : 0) + idf * (inSection ? 3 : 0) + idf * (inBody ? 2 / (0.8 + tokens.length / 300) : 0) + idf * (inMeta ? 0.35 : 0);
@@ -86,8 +90,9 @@ export function searchKnowledge(documents: ReaderDocument[], query: string, limi
     }).sort((a, b) => b.score - a.score || a.section.startLine - b.section.startLine);
     const matched = [...matchSet], coverage = terms.length ? matched.length / terms.length : 1;
     const score = (sectionScores[0]?.score ?? 0) * coverage;
-    return { ...entry, matched, score, sectionScores, relevant: !terms.length || (matched.length > 0 && coverage >= 0.25) };
-  }).filter((entry) => entry.relevant).sort((a, b) => b.score - a.score || a.document.title.localeCompare(b.document.title));
+    return { ...entry, matched, score, sectionScores, relevant: entry.exact > 0 || !name || (matched.length > 0 && coverage >= 0.25) };
+  }).filter((entry) => entry.relevant).sort((a, b) => b.exact - a.exact || b.score - a.score ||
+    Number(b.document.status === 'current') - Number(a.document.status === 'current') || a.document.title.localeCompare(b.document.title));
   const cards: KnowledgeCard[] = [];
   for (const entry of ranked.slice(offset)) {
     if (cards.length >= limit) break;
@@ -96,6 +101,8 @@ export function searchKnowledge(documents: ReaderDocument[], query: string, limi
     const sectionSources = new Set(entry.sectionScores.slice(0, 2).flatMap((item) => item.section.sources));
     const sources = (sectionSources.size ? document.sources.filter((source) => sectionSources.has(source.id)) : document.sources).slice(0, 3);
     const item: KnowledgeCard = { id: document.id, title: document.title, summary: document.summary, type: document.type, status: document.status, collection: document.collection, locale: document.locale, path: document.path, revision: document.revision, freshness: document.freshness, repositories: document.repositories, tags: document.tags, sources, relations: document.relations.slice(0, 4), diagramIds: document.diagrams.map((diagram) => diagram.id), diagramTypes: [...new Set(document.diagrams.map((diagram) => diagram.code.split(/\s+/)[0]))], reason: entry.matched.join(', '), matches, checkedAt: document.checkedAt, sourceObservation: document.sourceObservation, semanticReview: document.semanticReview };
+    if (document.editorialRole) item.editorialRole = document.editorialRole;
+    if (document.normativeScope) item.normativeScope = document.normativeScope;
     if (bounded && JSON.stringify([...cards, item]).length > budget) { item.matches = item.matches.slice(0, 1).map((match) => ({ ...match, excerpt: snippet(match.excerpt, terms, 160) })); item.sources = item.sources.slice(0, 1); item.relations = []; item.summary = snippet(item.summary, terms, 180); }
     if (!bounded || JSON.stringify([...cards, item]).length <= budget) cards.push(item);
   }

@@ -23,6 +23,9 @@ Semantic review verifies actual sources and material relationships. Product Spec
 <!-- LH-KNOWLEDGE-06 -->
 Organize topics as answer, mechanism and diagrams, tradeoffs and limits, then sources. Stable sections expose concrete mechanisms and constraints, beyond whole-page introductions. The hierarchy, pages, sections, and cards share body text and the knowledge map; split complex topics. After investigating missing, stale, or contradictory content, write reusable verified findings back within authorization; explicit read-only requests receive a report only. No knowledge change is required when none was learned, and queries need no compulsory log. Protect human edits, useful candidates, and conflicts.
 
+<!-- LH-KNOWLEDGE-08 -->
+Prioritize human understanding. Start with the project purpose and direct links to features or capabilities; explain roles, entry points, states, exceptions, and cross-module workflows before exposing evidence. Review placement, summaries, diagrams, terminology, and prose together. Make authorized standards (especially security) visible under development and operation, with AGENTS as the authority route. Knowledge owns ongoing structure: split, merge, rename, reorder, archive, or add diagrams within the verified scope. Report only on read-only requests and keep local maintenance local.
+
 <!-- LH-KNOWLEDGE-07 -->
 When asked to open the knowledge base or start, restart, or stop its reader, read [Reader management](references/reader.md). Prefer reusing a service owned by the current project, and verify process ownership before stopping it. Direct Markdown reading and Agent retrieval need no server.
 

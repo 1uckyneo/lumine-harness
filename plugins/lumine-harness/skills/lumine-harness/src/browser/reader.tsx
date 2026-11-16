@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import type { CoverageMap, CoverageTopic, Diagram, KnowledgeDocument, Locale } from '../harness/wiki/types.ts';
-import { coverageSummary, shouldResetProject, splitReference, topicForDocument, topicPath, topicTree, type TopicNode } from '../harness/wiki/reader-model.ts';
+import type { CoverageMap, Diagram, EditorialNavigation, KnowledgeDocument, KnowledgeMap, Locale } from '../harness/wiki/types.ts';
+import { coverageSummary, shouldResetProject, splitReference } from '../harness/wiki/reader-model.ts';
 import {
-  api, copyText, decode, documentHref, download, formatDate, safeRead, safeWrite, translate, type Catalog,
+  api, copyText, decode, documentHref, download, formatDate, safeRead, safeWrite, translate, documentLabel, type Catalog,
   type CatalogDocument, type ReaderConfig, type ReferenceResult, type RelatedResult, type SourceResult,
 } from './reader-common.ts';
 import { MarkdownBody, ReferenceMarkdown } from './reader-markdown.tsx';
 import { DiagramDialog } from './reader-diagrams.tsx';
 import { SearchView } from './reader-search.tsx';
 
-type Route = { kind: 'home' } | { kind: 'search'; query: string; legacyCollection?: string } | { kind: 'topic'; id: string } | { kind: 'doc'; id: string; fragment: string };
-type Bootstrap = { config: ReaderConfig; catalog: CatalogDocument[]; map: CoverageMap; issues: NonNullable<Catalog['issues']> };
+type Route = { kind: 'home' } | { kind: 'search'; query: string; legacyCollection?: string } | { kind: 'topic'; id: string } | { kind: 'section'; id: string } | { kind: 'doc'; id: string; fragment: string };
+type Bootstrap = { config: ReaderConfig; catalog: CatalogDocument[]; map: CoverageMap; navigation: EditorialNavigation; issues: NonNullable<Catalog['issues']> };
 type DocumentResponse = KnowledgeDocument & { canonicalReference?: string };
 type Panel = { kind: 'source'; documentId: string; sourceId: string; focusStartLine?: number; focusEndLine?: number }
   | { kind: 'reference'; from: string; target: string }
@@ -21,6 +21,8 @@ function parseRoute(): Route {
   const params = new URL(location.href).searchParams;
   const id = params.get('doc');
   if (id) return { kind: 'doc', id, fragment: decode(location.hash.slice(1)) };
+  const section = params.get('section');
+  if (section) return { kind: 'section', id: section };
   const topic = params.get('topic');
   if (topic) return { kind: 'topic', id: topic };
   const legacyCollection = params.get('collection');
@@ -30,6 +32,15 @@ function parseRoute(): Route {
 
 function projectKey(projectId: string | null, suffix: string): string | null {
   return projectId ? `lumine:${projectId}:${suffix}` : null;
+}
+
+function projectTitle(data: Bootstrap): string | undefined {
+  const configured = data.config.displayName?.trim();
+  if (configured) return configured;
+  if (data.navigation.mode !== 'editorial') return;
+  return data.catalog.find((doc) =>
+    doc.collection === 'wiki' && doc.id === data.navigation.overview && doc.type === 'overview' && doc.status === 'current',
+  )?.title.trim() || undefined;
 }
 
 function statusMessage(doc: KnowledgeDocument, locale: Locale): string | null {
@@ -43,50 +54,105 @@ function statusMessage(doc: KnowledgeDocument, locale: Locale): string | null {
   return null;
 }
 
-function TopicTree({ nodes, map, catalog, route, expanded, onToggle, onTopic, onDocument, locale }: {
-  nodes: TopicNode[]; map: CoverageMap; catalog: CatalogDocument[]; route: Route; expanded: Set<string>;
-  onToggle: (id: string, open: boolean) => void; onTopic: (id: string) => void; onDocument: (id: string, fragment?: string) => void; locale: Locale;
-}) {
-  const t = (key: string) => translate(locale, key);
-  const selectedTopic = route.kind === 'topic' ? route.id : route.kind === 'doc' ? topicForDocument(map, route.id)?.id : undefined;
-  const node = (item: TopicNode) => {
-    const selected = selectedTopic === item.topic.id;
-    return <li key={item.topic.id} className="tree-topic"><details open={expanded.has(item.topic.id) || selected} onToggle={(event) => onToggle(item.topic.id, event.currentTarget.open)}>
-      <summary><span className="tree-chevron" aria-hidden="true">›</span><a href={`?topic=${encodeURIComponent(item.topic.id)}`} aria-current={selected ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onTopic(item.topic.id); }}>{item.topic.title}</a><span className={`topic-indicator ${item.topic.status}`} title={t(item.topic.status)} aria-label={t(item.topic.status)} /></summary>
-      <ul>{item.topic.documentRefs.map((reference) => {
-        const { id, fragment } = splitReference(reference);
-        const doc = catalog.find((entry) => entry.id === id);
-        return <li key={reference} className="tree-document"><a href={documentHref(id, fragment)} aria-current={route.kind === 'doc' && route.id === id ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onDocument(id, fragment); }}>{doc?.title ?? id}</a></li>;
-      })}{item.children.map(node)}</ul>
-    </details></li>;
-  };
-  return <ul className="knowledge-tree">{nodes.map(node)}</ul>;
+type EditorialSection = EditorialNavigation['groups'][number]['sections'][number];
+
+function sectionHref(id: string) { return `?section=${encodeURIComponent(id)}`; }
+
+function documentsFor(section: EditorialSection, catalog: CatalogDocument[]) {
+  const byId = new Map(catalog.map((doc) => [doc.id, doc]));
+  return section.documents.flatMap((id) => {
+    const doc = byId.get(id);
+    return doc ? [doc] : [];
+  });
 }
 
-function HomeView({ data, projectId, locale, onSearch, onTopic, onDocument, onCopy }: {
-  data: Bootstrap; projectId: string | null; locale: Locale;
-  onSearch: () => void; onTopic: (id: string) => void; onDocument: (id: string, fragment?: string) => void; onCopy: (value: string) => void;
+function EditorialSidebar({ data, route, locale, onSection, onDocument }: {
+  data: Bootstrap; route: Route; locale: Locale;
+  onSection: (id: string) => void; onDocument: (id: string) => void;
 }) {
   const t = (key: string) => translate(locale, key);
-  const projectName = data.config.displayName?.trim() || t('unknownProject');
-  const { roots } = topicTree(data.map);
-  const overview = data.map.topics.flatMap((item) => item.documentRefs).map(splitReference).find(({ id }) => data.catalog.some((doc) => doc.id === id))
-    ?? (data.catalog.find((doc) => doc.collection === 'wiki') ? { id: data.catalog.find((doc) => doc.collection === 'wiki')!.id, fragment: '' } : null);
+  return <nav className="editorial-nav" aria-label={t('tree')}>
+    {data.navigation.groups.map((group) => !!group.sections.length && <section key={group.id} aria-label={t(group.id)}>
+      <h2>{t(group.id)}</h2>
+      {group.sections.map((section) => {
+        const docs = documentsFor(section, data.catalog);
+        const active = route.kind === 'section' && route.id === section.id;
+        const expand = active || route.kind === 'doc' && section.documents.includes(route.id) || group.id === 'understand' && route.kind === 'home';
+        return <div className="nav-section" key={section.id}>
+          <a className="nav-section-link" href={sectionHref(section.id)} aria-current={active ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onSection(section.id); }}>{section.title}</a>
+          {expand && !!docs.length && <ul>{docs.map((doc) => <li key={doc.id}><a href={documentHref(doc.id)} aria-current={route.kind === 'doc' && route.id === doc.id ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onDocument(doc.id); }}>{doc.title}</a></li>)}</ul>}
+          {!expand && group.id === 'operate' && docs.some((doc) => doc.normativeScope) && <ul>
+            {docs.filter((doc) => doc.normativeScope).slice(0, 2).map((doc) => <li key={doc.id}><a href={documentHref(doc.id)} onClick={(event) => { event.preventDefault(); onDocument(doc.id); }}>{doc.title}</a></li>)}
+          </ul>}
+        </div>;
+      })}
+    </section>)}
+  </nav>;
+}
+
+function DocumentEntries({ docs, locale, onDocument }: {
+  docs: CatalogDocument[]; locale: Locale; onDocument: (id: string) => void;
+}) {
+  return <ul className="reading-entries">{docs.map((doc) => <li key={doc.id}>
+    <a href={documentHref(doc.id)} onClick={(event) => { event.preventDefault(); onDocument(doc.id); }}>
+      <div><strong>{doc.title}</strong>{doc.status === 'historical' || doc.status === 'proposed' ? <small>{translate(locale, doc.status)}</small> : null}</div>
+      <span className="entry-arrow" aria-hidden="true">↗</span>
+      {doc.summary && <p>{doc.summary}</p>}
+    </a>
+  </li>)}</ul>;
+}
+
+function HomeView({ data, projectId, locale, onSearch, onSection, onDocument, onCopy }: {
+  data: Bootstrap; projectId: string | null; locale: Locale;
+  onSearch: () => void; onSection: (id: string) => void; onDocument: (id: string) => void; onCopy: (value: string) => void;
+}) {
+  const t = (key: string) => translate(locale, key);
+  const projectName = projectTitle(data) || t('unknownProject');
+  const overview = data.catalog.find((doc) => doc.id === data.navigation.overview);
   const lastKey = projectKey(projectId, 'last-document');
   const lastId = lastKey ? safeRead(lastKey) : '';
-  const last = data.catalog.find((item) => item.id === lastId && item.collection === 'wiki');
-  const progress = coverageSummary(data.map, new Set(data.catalog.map((item) => item.id)));
+  const last = data.catalog.find((item) => item.id === lastId && item.collection === 'wiki' && item.status === 'current');
+  const understand = data.navigation.groups.find((group) => group.id === 'understand')?.sections ?? [];
+  const visibleSections = understand.filter((section) => documentsFor(section, data.catalog).some((doc) => doc.id !== overview?.id));
   return <div className="home-page">
-    <section className="home-hero"><span className="eyebrow">{t('knowledge')}</span><h1>{projectName}</h1><p>{t('intro')}</p>
-      <div className="hero-actions"><button className="primary" onClick={onSearch}>{t('search')}</button>{overview && <button onClick={() => onDocument(overview.id, overview.fragment)}>{t('overview')}</button>}</div>
+    <section className="home-hero">
+      <h1>{projectName}</h1>
+      {overview?.summary && <p>{overview.summary}</p>}
+      <div className="hero-actions">
+        {overview && <a className="primary" href={documentHref(overview.id)} onClick={(event) => { event.preventDefault(); onDocument(overview.id); }}>{t('overview')} <span aria-hidden="true">→</span></a>}
+        <button onClick={onSearch}>{t('search')} <kbd aria-hidden="true">/</kbd></button>
+      </div>
     </section>
-    {last && <section className="continue-reading"><span className="eyebrow">{t('continue')}</span><a href={documentHref(last.id)} onClick={(event) => { event.preventDefault(); onDocument(last.id); }}>{last.title} <span aria-hidden="true">→</span></a></section>}
-    <section className="home-topics"><header><h2>{t('topics')}</h2><button className="text-button" onClick={onSearch}>{t('browse')} →</button></header>
-      {roots.length ? <div className="topic-grid">{roots.map(({ topic }) => <a key={topic.id} href={`?topic=${encodeURIComponent(topic.id)}`} onClick={(event) => { event.preventDefault(); onTopic(topic.id); }}><span className="topic-status">{t(topic.status)}</span><strong>{topic.title}</strong><p>{topic.questions[0] ?? topic.reason ?? ''}</p></a>)}</div>
-        : <div className="status-panel"><p>{data.catalog.some((doc) => doc.collection === 'wiki') ? t('noMap') : t('empty')}</p><button onClick={() => onCopy(locale === 'zh-CN' ? '请根据当前项目的真实源码和现有知识目录，继续整理 Repo Wiki，并保留人工修改、冲突及已有决定。' : 'Continue the Repo Wiki from current project sources and its knowledge map. Preserve human edits, conflicts and prior decisions.')}>{t('copyResume')}</button></div>}
-      {!!progress.missing.length && <p className="subtle-note">{t('missing')} · {progress.missing.length}</p>}
-    </section>
+    {visibleSections.map((section) => {
+      const docs = documentsFor(section, data.catalog).filter((doc) => doc.id !== overview?.id);
+      return <section className="home-reading-section" key={section.id}>
+        <header><div><h2>{section.title}</h2>{section.description && <p>{section.description}</p>}</div>
+          {docs.length > 6 && <a href={sectionHref(section.id)} onClick={(event) => { event.preventDefault(); onSection(section.id); }}>{t('browse')} <span aria-hidden="true">→</span></a>}
+        </header>
+        <DocumentEntries docs={docs.slice(0, 6)} locale={locale} onDocument={onDocument} />
+      </section>;
+    })}
+    {!overview && !visibleSections.length && <section className="status-panel"><p>{data.catalog.length ? t('noMap') : t('empty')}</p><button onClick={() => onCopy(locale === 'zh-CN' ? '请根据当前项目的真实源码和已有文档整理 Repo Wiki，建立项目总览和业务入口。保留人工修改和已确认决定。' : 'Organize the Repo Wiki from the current project and its docs. Add an overview and capability entrances. Preserve human edits and decisions.')}>{t('copyResume')}</button></section>}
+    <div className="home-secondary">{data.navigation.groups.filter((group) => group.id !== 'understand' && group.sections.length).map((group) => <section key={group.id}>
+      <h2>{t(group.id)}</h2>
+      <ul>{group.sections.map((section) => <li key={section.id}><a href={sectionHref(section.id)} onClick={(event) => { event.preventDefault(); onSection(section.id); }}>{section.title} <span aria-hidden="true">→</span></a></li>)}</ul>
+    </section>)}</div>
+    {last && <p className="continue-reading">{t('continue')} <a href={documentHref(last.id)} onClick={(event) => { event.preventDefault(); onDocument(last.id); }}>{last.title} <span aria-hidden="true">→</span></a></p>}
   </div>;
+}
+
+function SectionView({ data, id, locale, onDocument, onHome }: {
+  data: Bootstrap; id: string; locale: Locale; onDocument: (id: string) => void; onHome: () => void;
+}) {
+  const t = (key: string) => translate(locale, key);
+  const group = data.navigation.groups.find((entry) => entry.sections.some((section) => section.id === id));
+  const section = group?.sections.find((entry) => entry.id === id);
+  if (!section || !group) return <div className="status-panel error"><p>{t('fragmentMissing')}</p><button onClick={onHome}>{t('home')}</button></div>;
+  const docs = documentsFor(section, data.catalog);
+  return <section className="topic-page"><header className="page-heading">
+    <p className="eyebrow">{t(group.id)}</p><h1>{section.title}</h1>{section.description && <p>{section.description}</p>}
+    </header>{docs.length ? <DocumentEntries docs={docs} locale={locale} onDocument={onDocument} /> : <p className="status-panel">{t('noTopicDocs')}</p>}
+  </section>;
 }
 
 function TopicView({ data, id, locale, onDocument, onTopic, onCopy }: {
@@ -131,11 +197,11 @@ function Related({ id, data, locale, onDocument, onTopic }: {
   </section>;
 }
 
-function DocumentView({ doc, data, locale, projectId, fragment, onDocument, onTopic, onSource, onReference, onDiagram, onText, onCopy, onMissing, onFragment }: {
+function DocumentView({ doc, data, locale, projectId, fragment, onDocument, onTopic, onSource, onReference, onDiagram, onCopy, onMissing, onFragment }: {
   doc: KnowledgeDocument; data: Bootstrap; locale: Locale; projectId: string | null; fragment: string;
   onDocument: (id: string, fragment?: string) => void; onTopic: (id: string) => void;
   onSource: (documentId: string, sourceId: string) => void; onReference: (from: string, target: string) => void;
-  onDiagram: (diagram: Diagram) => void; onText: (title: string, content: string) => void;
+  onDiagram: (diagram: Diagram) => void;
   onCopy: (value: string) => void; onMissing: () => void; onFragment: (fragment: string) => void;
 }) {
   const t = (key: string) => translate(locale, key);
@@ -155,18 +221,38 @@ function DocumentView({ doc, data, locale, projectId, fragment, onDocument, onTo
     const saved = Number(safeRead(scrollKey));
     requestAnimationFrame(() => window.scrollTo(0, Number.isFinite(saved) ? saved : 0));
   }, [doc.id, scrollKey]);
-  const sections = doc.sections.filter((section) => !(section.level === 1 && section.title === doc.title));
+  const firstHeading = doc.sections[0];
+  const titleId = firstHeading?.level === 1 && firstHeading.title === doc.title ? firstHeading.id : undefined;
+  const sections = doc.sections.filter((section) => section.id !== titleId);
   const review = doc.semanticReview;
+  const section = doc.sections.find((item) => item.id === (fragment || currentSection));
+  const handoff = () => {
+    const reference = `${doc.id}${section ? '#' + section.id : fragment ? '#' + fragment : ''}`;
+    const project = projectTitle(data) || projectId || t('unknownProject');
+    return locale === 'zh-CN' ? [
+      `请解释「${doc.title}${section ? ' / ' + section.title : ''}」当前如何运作，以及有哪些适用限制。`,
+      `项目 ${project}${projectId && projectId !== project ? ' (' + projectId + ')' : ''}`, `知识引用 ${reference}`, `内容版本 ${doc.revision}`,
+      '请沿知识库提供的来源核对关键结论。'
+    ].join('\n') : [
+      `Explain how "${doc.title}${section ? ' / ' + section.title : ''}" works today and which limitations apply.`,
+      `Project ${project}${projectId && projectId !== project ? ' (' + projectId + ')' : ''}`, `Knowledge reference ${reference}`, `Content revision ${doc.revision}`,
+      'Verify key conclusions against the linked sources.'
+    ].join('\n');
+  };
   return <div className="document-layout"><article className="document">
-    <header className="doc-header"><span className="eyebrow">{doc.collection === 'wiki' ? t('knowledge') : doc.collection === 'spec' ? t('specs') : doc.collection === 'plan' ? t('plans') : t('validation')}{doc.collection !== 'validation' && (doc.collection === 'wiki' || doc.status === 'proposed' || doc.status === 'historical') && ` · ${t(doc.status === 'proposed' || doc.status === 'historical' ? doc.status : 'implementation')}`}</span>
-      <h1>{doc.title}</h1><p className="doc-summary">{doc.summary}</p>
+    <header className="doc-header"><span className="eyebrow">{documentLabel(locale, doc)}</span>
+      <h1 id={titleId} tabIndex={titleId ? -1 : undefined}>{doc.title}</h1>{doc.summary && <p className="doc-summary">{doc.summary}</p>}{doc.normativeScope && <p className="normative-scope">{doc.normativeScope}</p>}
       {doc.collection === 'validation' && <p className="validation-note">{t('validationLimit')}</p>}
       {warning && <div className={`document-warning ${doc.freshness === 'conflict' ? 'danger' : ''}`} role="status">{warning} <button onClick={() => document.getElementById('document-evidence')?.scrollIntoView({ block: 'start' })}>{t('sourceDetails')}</button></div>}
-      <div className="doc-actions"><button onClick={() => onCopy(`${doc.id}${fragment ? `#${fragment}` : ''}`)}>{t('copiedReference')}</button><button onClick={() => onCopy(locale === 'zh-CN' ? `请结合知识 ${doc.id}（${doc.title}）及当前来源解释机制，指出证据和未覆盖范围。` : `Explain the mechanism using ${doc.id} (${doc.title}) and current sources. Identify evidence and limitations.`)}>{t('copyQuestion')}</button><button onClick={() => onCopy(locale === 'zh-CN' ? `请核实并更新知识 ${doc.id}（${doc.title}），保留人工修改，先核对当前来源。` : `Review and update knowledge ${doc.id} (${doc.title}). Verify current sources and preserve human edits.`)}>{t('copyEdit')}</button><button onClick={() => download(`${doc.title}.md`, doc.markdown, 'text/markdown;charset=utf-8')}>{t('exportMarkdown')}</button></div>
+      <div className="doc-actions">
+        <button onClick={() => onCopy(handoff())}>{t('copyQuestion')}</button>
+        <a href="#document-evidence" onClick={(event) => { event.preventDefault(); const evidence = document.getElementById('document-evidence'); evidence?.scrollIntoView(); evidence?.focus({ preventScroll: true }); }}>{t('sources')}</a>
+      </div>
     </header>
-    <MarkdownBody doc={doc} catalog={data.catalog} locale={locale} fragment={fragment} onDocument={onDocument} onFragment={onFragment} onSource={onSource} onReference={onReference} onDiagram={onDiagram} onDiagramText={(diagram) => onText(diagram.title, diagram.code)} onMissing={onMissing} onCurrentSection={currentSectionChanged} />
-    <section id="document-evidence" className="document-evidence"><h2>{t('sources')}</h2>
+    <MarkdownBody doc={doc} catalog={data.catalog} locale={locale} fragment={fragment} titleId={titleId} onDocument={onDocument} onFragment={onFragment} onSource={onSource} onReference={onReference} onDiagram={onDiagram} onMissing={onMissing} onCurrentSection={currentSectionChanged} />
+    <section id="document-evidence" className="document-evidence" tabIndex={-1}><h2>{t('sources')}</h2>
       <p>{t('sourceLimit')}</p>
+      <div className="doc-actions"><button onClick={() => onCopy(`${doc.id}${fragment ? `#${fragment}` : ''}`)}>{t('copiedReference')}</button><button onClick={() => download(`${doc.title}.md`, doc.markdown, 'text/markdown;charset=utf-8')}>{t('exportMarkdown')}</button></div>
       <details><summary>{t('pageSources')} · {doc.sources.length}</summary><div className="page-source-list">{doc.sources.map((source) => <button key={source.id} onClick={() => onSource(doc.id, source.id)}><strong>{source.id}</strong><span>{source.repoId} / {source.path}</span>{source.startLine && <small>L{source.startLine}{source.endLine ? `–${source.endLine}` : ''}</small>}</button>)}</div></details>
       <details><summary>{t('review')} · {t(review.status)}</summary><dl className="review-data"><div><dt>{t('checkedAt')}</dt><dd>{formatDate(locale, doc.checkedAt)}</dd></div>{review.reviewedAt && <div><dt>{t('review')}</dt><dd>{formatDate(locale, review.reviewedAt)} · {review.reviewer?.kind} / {review.reviewer?.role}</dd></div>}{(['scope', 'limitations', 'findings'] as const).map((key) => review[key]?.length ? <div key={key}><dt>{t(key)}</dt><dd><ul>{review[key]!.map((item) => <li key={item}>{item}</li>)}</ul></dd></div> : null)}</dl></details>
     </section>
@@ -221,7 +307,7 @@ function EvidenceDialog({ panel, locale, onClose, onDocument, onSource, onRefere
 
   const location = source ? `${source.source.repoId}:${source.source.path}#L${source.startLine}-L${source.endLine}` : '';
   const comparison = source ? !source.baselineFingerprint ? 'sourceUnknown' : source.baselineFingerprint === source.fingerprint ? 'sourceSame' : 'sourceDrift' : '';
-  return <dialog ref={dialog} className="evidence-dialog" aria-labelledby="evidence-dialog-title" onCancel={(event) => { event.preventDefault(); onClose(); }}>
+  return <dialog ref={dialog} className={panel.kind === 'source' ? 'evidence-dialog source-drawer' : 'evidence-dialog'} aria-labelledby="evidence-dialog-title" onCancel={(event) => { event.preventDefault(); onClose(); }}>
     <header className="dialog-header"><h2 id="evidence-dialog-title">{panel.kind === 'source' ? source?.source.id ?? t('sources') : panel.kind === 'text' ? panel.title : reference?.title ?? t('relatedDocuments')}</h2><button onClick={onClose}>{t('close')} ×</button></header>
     {pending && <p className="dialog-message" role="status">{t('loading')}</p>}
     {error && <div className="status-panel error" role="alert"><p>{error}</p><button onClick={() => setRetry((value) => value + 1)}>{t('retry')}</button></div>}
@@ -249,7 +335,6 @@ function ReaderApp() {
   const [projectNotice, setProjectNotice] = useState('');
   const [docState, setDocState] = useState<{ value: KnowledgeDocument | null; pending: boolean; error: string }>({ value: null, pending: false, error: '' });
   const [docRetry, setDocRetry] = useState(0);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [menuOpen, setMenuOpen] = useState(false);
   const [panel, setPanel] = useState<Panel | null>(null);
   const [diagram, setDiagram] = useState<Diagram | null>(null);
@@ -273,6 +358,7 @@ function ReaderApp() {
   }, [focusWorkspace]);
   const onDocument = useCallback((id: string, fragment = '') => navigate(documentHref(id, fragment)), [navigate]);
   const onTopic = useCallback((id: string) => { if (id) navigate(`?topic=${encodeURIComponent(id)}`); else navigate('/'); }, [navigate]);
+  const onSection = useCallback((id: string) => navigate(sectionHref(id)), [navigate]);
   const onHome = useCallback(() => navigate('/'), [navigate]);
   const onSearch = useCallback(() => navigate('?search=1'), [navigate]);
   const onFragment = useCallback((fragment: string) => {
@@ -280,7 +366,7 @@ function ReaderApp() {
     if (current.kind !== 'doc') return;
     const target = document.getElementById(fragment);
     if (!target && current.fragment === fragment) { notify(t('fragmentMissing')); return; }
-    history.replaceState({}, '', documentHref(current.id, fragment));
+    if (current.fragment !== fragment) history.pushState({}, '', documentHref(current.id, fragment));
     setRoute({ ...current, fragment });
     target?.scrollIntoView({ block: 'start' });
     target?.focus({ preventScroll: true });
@@ -293,7 +379,8 @@ function ReaderApp() {
   const loadBootstrap = useCallback(async () => {
     setRefreshing(true); setBootstrapError('');
     try {
-      const [config, catalog, map] = await Promise.all([api<ReaderConfig>('/api/config'), api<Catalog>('/api/catalog'), api<CoverageMap>('/api/map')]);
+      const [config, catalog, map] = await Promise.all([api<ReaderConfig>('/api/config'), api<Catalog>('/api/catalog'), api<KnowledgeMap>('/api/map')]);
+      const { navigation } = map;
       const previousProject = dataRef.current ? dataRef.current.config.projectId : safeRead('lumine:active-project') || null;
       const changed = shouldResetProject(dataRef.current !== null, previousProject, config.projectId);
       const languageKey = projectKey(config.projectId, 'ui-locale');
@@ -302,9 +389,7 @@ function ReaderApp() {
       if (changed) { setProjectNotice(translate(nextLocale, 'serviceChanged')); history.replaceState({}, '', '/'); setRoute({ kind: 'home' }); setDocState({ value: null, pending: false, error: '' }); setPanel(null); setDiagram(null); }
       safeWrite('lumine:active-project', config.projectId ?? '');
       setLocale(nextLocale);
-      const treeKey = projectKey(config.projectId, 'tree');
-      setExpanded(new Set(treeKey ? safeRead(treeKey).split('|').filter(Boolean) : []));
-      const next = { config, catalog: catalog.documents, map, issues: catalog.issues ?? [] };
+      const next = { config, catalog: catalog.documents, map, navigation, issues: [...catalog.issues ?? [], ...navigation.issues] };
       bootstrapRevision.current++;
       dataRef.current = next; setData(next);
       setBootstrapError('');
@@ -378,27 +463,17 @@ function ReaderApp() {
     if (!data) return;
     const current = route.kind === 'doc' ? data.catalog.find((item) => item.id === route.id)?.title
       : route.kind === 'topic' ? data.map.topics.find((item) => item.id === route.id)?.title
-        : route.kind === 'search' ? t('search') : t('home');
-    document.title = `${current ?? t('knowledge')} · ${data.config.displayName?.trim() || t('unknownProject')}`;
+        : route.kind === 'section' ? data.navigation.groups.flatMap((group) => group.sections).find((item) => item.id === route.id)?.title
+          : route.kind === 'search' ? t('search') : t('home');
+    document.title = `${current ?? t('knowledge')} · ${projectTitle(data) || t('unknownProject')}`;
     document.documentElement.lang = locale;
   }, [data, route, locale]);
 
   if (!data) return <div className="boot-shell"><p role="status">{bootstrapError || t('loading')}</p>{bootstrapError && <button onClick={() => void loadBootstrap()}>{t('retry')}</button>}</div>;
-  const projectName = data.config.displayName?.trim() || t('unknownProject');
-  const { roots, unresolved } = topicTree(data.map);
-  const topic = route.kind === 'topic' ? data.map.topics.find((item) => item.id === route.id)
-    : route.kind === 'doc' ? topicForDocument(data.map, route.id) : undefined;
-  const breadcrumbs = topic ? topicPath(data.map.topics, topic.id) : [];
+  const projectName = projectTitle(data) || t('unknownProject');
   const selectedDoc = route.kind === 'doc' ? data.catalog.find((item) => item.id === route.id) : null;
-  const updateTree = (id: string, open: boolean) => {
-    setExpanded((previous) => {
-      const next = new Set(previous);
-      if (open) next.add(id); else next.delete(id);
-      const key = projectKey(projectId, 'tree');
-      if (key) safeWrite(key, [...next].join('|'));
-      return next;
-    });
-  };
+  const activeSection = data.navigation.groups.flatMap((group) => group.sections)
+    .find((section) => route.kind === 'doc' ? section.documents.includes(route.id) : route.kind === 'section' && section.id === route.id);
   const closeMenu = () => { setMenuOpen(false); menuButton.current?.focus(); };
   const activeDoc = docState.value;
   const displayedDoc = route.kind === 'doc' && activeDoc?.id === route.id ? activeDoc : null;
@@ -410,32 +485,37 @@ function ReaderApp() {
         <button className="mobile-close" onClick={closeMenu}>{t('closeMenu')} ×</button>
         <a className="brand" href="/" onClick={(event) => { event.preventDefault(); onHome(); }}><span className="brand-mark" aria-hidden="true">L</span><span><strong>{projectName}</strong><small>{t('projectLibrary')}</small></span></a>
         <nav className="primary-nav" aria-label={t('knowledge')}><a href="/" aria-current={route.kind === 'home' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onHome(); }}>{t('home')}</a><a href="?search=1" aria-current={route.kind === 'search' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onSearch(); }}>{t('search')}</a></nav>
-        <div className="tree-region"><h2>{t('tree')}</h2>{roots.length ? <TopicTree nodes={roots} map={data.map} catalog={data.catalog} route={route} expanded={expanded} onToggle={updateTree} onTopic={onTopic} onDocument={onDocument} locale={locale} /> : <p className="tree-note">{t('noMap')}</p>}
-          {!!data.map.unmappedDocumentIds.length && <details className="unmapped"><summary>{t('unmapped')} · {data.map.unmappedDocumentIds.length}</summary><ul>{data.map.unmappedDocumentIds.map((id) => <li key={id}><a href={documentHref(id)} onClick={(event) => { event.preventDefault(); onDocument(id); }}>{data.catalog.find((item) => item.id === id)?.title ?? id}</a></li>)}</ul></details>}
-          {!!unresolved.length && <p className="tree-note warning">{t('unresolved')} · {unresolved.length}</p>}
-        </div>
+        <EditorialSidebar data={data} route={route} locale={locale} onSection={onSection} onDocument={onDocument} />
         <details className="secondary-nav"><summary>{t('relatedDocuments')}</summary><button onClick={() => navigate('?collection=spec')}>{t('specs')}</button><button onClick={() => navigate('?collection=plan')}>{t('plans')}</button></details>
         <details className="secondary-nav"><summary>{t('maintenance')}</summary><p>{t('coverageNote')}</p><p>{t('coverage')} · {coverageSummary(data.map, new Set(data.catalog.map((item) => item.id))).covered} / {data.map.topics.length}</p>{!!data.issues.length && <p className="warning">{t('missing')} · {data.issues.length}</p>}<button onClick={() => onCopy(locale === 'zh-CN' ? '请核对当前项目知识目录、已有正文、来源及待处理缺口，保留人工修改和冲突，继续受影响主题。' : 'Check the current knowledge tree, text, sources and open gaps; preserve human edits and conflicts, then continue affected topics.')}>{t('copyResume')}</button></details>
-        <p className="sidebar-foot">{locale === 'zh-CN' ? '本地只读 · 文本知识' : 'Local · Read only · Text knowledge'}</p>
       </aside>
-      <div className="main"><header className="topbar"><button ref={menuButton} className="mobile-menu" aria-label={t('menu')} aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>☰</button><nav className="breadcrumb" aria-label={t('path')}><a href="/" onClick={(event) => { event.preventDefault(); onHome(); }}>{projectName}</a>{breadcrumbs.map((item) => <span key={item.id}><span aria-hidden="true">/</span><a href={`?topic=${encodeURIComponent(item.id)}`} onClick={(event) => { event.preventDefault(); onTopic(item.id); }}>{item.title}</a></span>)}{selectedDoc && <span><span aria-hidden="true">/</span><span aria-current="page">{selectedDoc.title}</span></span>}</nav><div className="top-actions"><button className="top-search" onClick={onSearch}>{t('search')}</button><button onClick={() => void loadBootstrap()} disabled={refreshing}>{refreshing ? t('loading') : t('refresh')}</button><button onClick={() => { const next = locale === 'en' ? 'zh-CN' : 'en'; setLocale(next); const key = projectKey(projectId, 'ui-locale'); if (key) safeWrite(key, next); }} aria-label={t('language')}>{locale === 'en' ? '中文' : 'English'}</button></div></header>
+      <div className="main"><header className="topbar">
+        <button ref={menuButton} className="mobile-menu" aria-label={t('menu')} aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>☰</button>
+        <nav className="breadcrumb" aria-label={t('path')}>
+          <a href="/" onClick={(event) => { event.preventDefault(); onHome(); }}>{projectName}</a>
+          {activeSection && <span><span aria-hidden="true">/</span><a aria-current={route.kind === 'section' ? 'page' : undefined} href={sectionHref(activeSection.id)} onClick={(event) => { event.preventDefault(); onSection(activeSection.id); }}>{activeSection.title}</a></span>}
+          {selectedDoc && <span><span aria-hidden="true">/</span><span aria-current="page">{selectedDoc.title}</span></span>}
+        </nav>
+        <div className="top-actions"><button className="top-search" onClick={onSearch}>{t('search')} <kbd aria-hidden="true">/</kbd></button><button onClick={() => void loadBootstrap()} disabled={refreshing}>{refreshing ? t('loading') : t('refresh')}</button><button onClick={() => { const next = locale === 'en' ? 'zh-CN' : 'en'; setLocale(next); const key = projectKey(projectId, 'ui-locale'); if (key) safeWrite(key, next); }} aria-label={t('language')}>{locale === 'en' ? '中文' : 'English'}</button></div>
+      </header>
         <main className="workspace" id="workspace" tabIndex={-1}>
           {projectNotice && <div className="status-panel" role="status">{projectNotice}<button onClick={() => setProjectNotice('')}>{t('close')}</button></div>}
           {bootstrapError && <div className="status-panel error" role="alert">{bootstrapError}<button onClick={() => void loadBootstrap()}>{t('retry')}</button></div>}
-          {route.kind === 'home' && <HomeView data={data} projectId={projectId} locale={locale} onSearch={onSearch} onTopic={onTopic} onDocument={onDocument} onCopy={onCopy} />}
+          {route.kind === 'home' && <HomeView data={data} projectId={projectId} locale={locale} onSearch={onSearch} onSection={onSection} onDocument={onDocument} onCopy={onCopy} />}
           {route.kind === 'search' && <SearchView key={projectId ?? 'unregistered'} locale={locale} projectId={projectId} catalog={data.catalog} initialQuery={route.query} legacyCollection={route.legacyCollection} onDocument={onDocument} onCopy={onCopy} />}
+          {route.kind === 'section' && <SectionView data={data} id={route.id} locale={locale} onDocument={onDocument} onHome={onHome} />}
           {route.kind === 'topic' && <TopicView data={data} id={route.id} locale={locale} onDocument={onDocument} onTopic={onTopic} onCopy={onCopy} />}
           {route.kind === 'doc' && <>
             {docState.pending && !displayedDoc && <p className="loading-state" role="status">{t('loading')}</p>}
             {docState.error && <div className="status-panel error" role="alert"><p>{docState.error}</p><button onClick={() => setDocRetry((value) => value + 1)}>{t('retry')}</button><button onClick={onHome}>{t('home')}</button></div>}
-            {displayedDoc && <DocumentView key={displayedDoc.id} doc={displayedDoc} data={data} locale={locale} projectId={projectId} fragment={displayedDoc.id === route.id ? route.fragment : ''} onDocument={onDocument} onTopic={onTopic} onSource={onSource} onReference={onReference} onDiagram={setDiagram} onText={onText} onCopy={onCopy} onMissing={onFragmentMissing} onFragment={onFragment} />}
+            {displayedDoc && <DocumentView key={displayedDoc.id} doc={displayedDoc} data={data} locale={locale} projectId={projectId} fragment={displayedDoc.id === route.id ? route.fragment : ''} onDocument={onDocument} onTopic={onTopic} onSource={onSource} onReference={onReference} onDiagram={setDiagram} onCopy={onCopy} onMissing={onFragmentMissing} onFragment={onFragment} />}
           </>}
         </main>
       </div>
     </div>
     <div className={`toast ${toast ? 'visible' : ''}`} role="status" aria-live="polite">{toast}</div>
     {panel && <EvidenceDialog panel={panel} locale={locale} onClose={() => setPanel(null)} onDocument={onDocument} onSource={onSource} onReference={onReference} onCopy={onCopy} />}
-    {diagram && activeDoc && <DiagramDialog diagram={diagram} document={activeDoc} locale={locale} onClose={() => setDiagram(null)} onCopy={onCopy} onText={onText} />}
+    {diagram && activeDoc && <DiagramDialog diagram={diagram} document={activeDoc} locale={locale} onClose={() => setDiagram(null)} onCopy={onCopy} onText={(title, text) => { setDiagram(null); onText(title, text); }} />}
   </>;
 }
 

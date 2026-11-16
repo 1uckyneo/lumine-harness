@@ -28,7 +28,7 @@ export function visibleText(root: string, relative: string): string | null {
 export function visibleJson<T>(root: string, relative: string, fallback: T): T { const source = visibleText(root, relative); return source === null ? fallback : decodeStorageRecord<T>(root, JSON.parse(source)); }
 function allowed(root: string, relative: string): boolean {
   const wikiRoot = wikiConfig(root).root;
-  return (relative.startsWith(`${wikiRoot}/`) && relative.endsWith('.md')) || /^\.lumine\/wiki-state\/(?:documents|observations|reviews)\/[a-f0-9]{64}\.json$/.test(relative) || ['.lumine/wiki-state/coverage.json', '.lumine/wiki-state/document-aliases.json'].includes(relative);
+  return (relative.startsWith(`${wikiRoot}/`) && relative.endsWith('.md')) || /^\.lumine\/wiki-state\/(?:documents|observations|reviews)\/[a-f0-9]{64}\.json$/.test(relative) || ['.lumine/wiki-state/coverage.json', '.lumine/wiki-state/document-aliases.json', '.lumine/wiki-state/navigation.json'].includes(relative);
 }
 export function applyTransaction(root: string, transaction: WikiTransaction, failAfter?: number): void {
   const journal = containedPath(root, `${JOURNALS}/${transaction.id}.json`, false);

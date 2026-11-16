@@ -5,18 +5,18 @@
     "schemaVersion": 2,
     "id": "lumine-wiki-reader",
     "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
-    "generation": 13,
+    "generation": 14,
     "generatedMarkdown": {
-      "$lumineObject": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+      "$lumineObject": "5a0c6e34526a9bdb5477930eefad9b2dca8a8d56cfb0aebeae7f31365c0e5df9",
       "kind": "text",
-      "bytes": 14886
+      "bytes": 14992
     },
-    "appliedRevision": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+    "appliedRevision": "5a0c6e34526a9bdb5477930eefad9b2dca8a8d56cfb0aebeae7f31365c0e5df9",
     "sources": {
-      "$lumineObject": "b777af9a23c13368489aeaa34db92d9d76004708e088f8303f3b9a9a0a0b09bf",
+      "$lumineObject": "08d9f09c9e33683e77e41a9beecbd52676e877ade44b20767f2a1742fdde5a18",
       "kind": "json",
       "bytes": 4989
     },
-    "updatedAt": "2026-10-08T04:08:46.152Z"
+    "updatedAt": "2026-11-16T10:52:25.412Z"
   }
 }

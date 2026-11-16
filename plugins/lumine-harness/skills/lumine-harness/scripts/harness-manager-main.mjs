@@ -208,7 +208,7 @@ function createProposal(input, options = {}) {
 	const proposalId = randomUUID();
 	const project = convertLegacyProject(current, inspect.childRepositories);
 	Object.assign(project, {
-		schemaVersion: current.schemaVersion === 3 ? 3 : 2,
+		schemaVersion: current.schemaVersion === 4 || current.schemaVersion === 3 ? current.schemaVersion : 2,
 		workflowVersion: 2,
 		locale,
 		topology: inspect.topology,
@@ -577,7 +577,10 @@ function rollbackVerifiedProposal(p) {
 	const configOperation = p.operations.find((op) => op.path === ".lumine/project.json");
 	if (originalConfig && hash(Buffer.from(originalConfig.content, "base64")) !== configOperation?.before) throw new Error("STORAGE_ROLLBACK_CONFIG_BACKUP_INVALID: preserve the recovery journal and restore its verified configuration backup before rollback.");
 	const originalSchema = originalConfig ? JSON.parse(Buffer.from(originalConfig.content, "base64").toString("utf8")).schemaVersion : undefined;
-	if (existsSync(currentConfig) && readJson(currentConfig).schemaVersion === 3 && originalSchema !== 3) throw new Error("STORAGE_ROLLBACK_REQUIRED: use wiki storage recover <operation-id> --rollback before rolling back to the previous Runtime; schema 3 state must not be exposed to an older writer.");
+	const currentSchema = existsSync(currentConfig) ? readJson(currentConfig).schemaVersion : undefined;
+	if ((currentSchema === 3 || currentSchema === 4) && (originalSchema ?? 0) < currentSchema) {
+		throw new Error(`STORAGE_ROLLBACK_REQUIRED: use wiki storage recover <operation-id> --rollback before reinstalling an older Runtime that cannot write schema ${currentSchema}.`);
+	}
 	if (p.knowledgeMode === "preserve") verifyKnowledgeInputs(p);
 	else {
 		const knowledge = planKnowledgeMigration(p.targetRoot, p.project.wiki.root);

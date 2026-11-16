@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { inspectStorage, checkStorage, planCompaction, applyCompaction, recoverCompaction } from './wiki/compaction.ts';
 import path from 'node:path';
 import { requireHarnessRoot } from './core/root-resolver.ts';
-import { applyUpdate, checkWiki, loadWikiConfig, prepareUpdate, queryKnowledge, recordUpdateDecision, recoverWiki, scanWiki, showKnowledge, mapKnowledge, outlineKnowledge, relatedKnowledge, recordSemanticReview, inspectKnowledge } from './wiki/engine.ts';
+import { applyUpdate, auditKnowledge, checkWiki, loadWikiConfig, prepareUpdate, queryKnowledge, recordUpdateDecision, recoverWiki, scanWiki, showKnowledge, mapKnowledge, outlineKnowledge, relatedKnowledge, recordSemanticReview, inspectKnowledge } from './wiki/engine.ts';
 import { serveWiki } from './wiki/server.ts';
 import { recordSourceDisposition, type SourceDispositionAction } from './wiki/dispositions.ts';
 import { migrateWikiDocumentFormat, planWikiDocumentFormat } from './wiki/format-migration.ts';
@@ -16,16 +16,19 @@ async function runWikiCommand(argv: string[]): Promise<void> {
   const option = (name: string): string | undefined => { const index = args.indexOf(name); if (index < 0) return undefined; const value = args[index + 1]; if (!value || value.startsWith('--')) throw new Error(`OPTION_VALUE_REQUIRED:${name}`); args.splice(index, 2); return value; };
   const rootArg = option('--root'), limit = option('--limit'), maxChars = option('--max-chars'), repoId = option('--repo'), type = option('--type'), freshness = option('--freshness'), collection = option('--collection'), port = option('--port'), candidate = option('--candidate'), decision = option('--decision'), reason = option('--reason'), manifestFile = option('--manifest'), reviewFile = option('--file'), direction = option('--direction'), topic = option('--topic'), scope = option('--scope'), fingerprint = option('--fingerprint'), outputFile = option('--output'), applyFile = option('--apply'), expect = option('--expect');
   const flag = (name: string): boolean => { const index = args.indexOf(name); if (index < 0) return false; args.splice(index, 1); return true; };
-  const outline = flag('--outline'), full = flag('--full'), markdown = flag('--markdown'), storagePlan = flag('--plan'), rollback = flag('--rollback');
+  const outline = flag('--outline'), full = flag('--full'), markdown = flag('--markdown'), storagePlan = flag('--plan'), rollback = flag('--rollback'), editorial = flag('--editorial'), includeHistory = flag('--include-history');
   if (outline && full) throw new Error('SHOW_MODE_CONFLICT');
   const jsonIndex = args.indexOf('--json'); if (jsonIndex >= 0) args.splice(jsonIndex, 1);
   if (markdown && (args[0] !== 'map' || jsonIndex >= 0)) throw new Error('MARKDOWN_MODE_CONFLICT');
+  if (editorial && !(args[0] === 'storage' && args[1] === 'compact' && storagePlan && !applyFile)) throw new Error('NAVIGATION_PLAN_REQUIRED');
+  if (includeHistory && args[0] !== 'query') throw new Error('UNKNOWN_COMMAND');
   const root = requireHarnessRoot(rootArg ? { root: rootArg } : { cwd: process.cwd() }), config = loadWikiConfig(root);
   const output = (value: unknown): void => {
     if (jsonIndex >= 0 || !value || typeof value !== 'object') { process.stdout.write(`${JSON.stringify(value, null, 2)}\n`); return; }
     const data = value as Record<string, unknown>, zh = config.locale === 'zh-CN';
     let lines: string[];
     if (typeof data.markdown === 'string') lines = [data.markdown];
+    else if (data.navigation && Array.isArray(data.topics)) lines = [renderKnowledgeMapMarkdown(value as ReturnType<typeof mapKnowledge>, (reference) => showKnowledge(root, reference), { locale: config.locale, wikiRoot: config.root })];
     else if (Array.isArray(data.topics)) lines = [(zh ? '知识地图' : 'Knowledge map'), ...data.topics.map((topic: { title: string; id: string; parentId?: string; status: string; documentRefs: string[] }) => `${topic.parentId ? '  ' : ''}${topic.title} · ${topic.id} [${topic.status}] ${topic.documentRefs.join(', ')}`)];
     else if (data.coverage && Array.isArray(data.documents)) lines = data.documents.flatMap((doc: { id: string; title: string; sections: { id: string; title: string; level: number }[] }) => [`${doc.title} · ${doc.id}`, ...doc.sections.map((section) => `${'  '.repeat(section.level)}${section.title} · ${doc.id}#${section.id}`)]);
     else if (Array.isArray(data.relations)) lines = data.relations.map((relation: { target: string; title: string; kind: string; direction: string; note?: string }) => `${relation.direction} ${relation.kind}: ${relation.title} · ${relation.target}${relation.note ? ' — ' + relation.note : ''}`);
@@ -45,7 +48,7 @@ async function runWikiCommand(argv: string[]): Promise<void> {
       if (args[1] === 'inspect' && args.length === 2) result = inspectStorage(root);
       else if (args[1] === 'check' && args.length === 2) result = checkStorage(root);
       else if (args[1] === 'compact' && args.length === 2 && storagePlan && !applyFile) {
-        const plan = planCompaction(root), bytes = JSON.stringify(plan, null, 2) + '\n';
+        const plan = planCompaction(root, { editorial }), bytes = JSON.stringify(plan, null, 2) + '\n';
         if (outputFile) { writeFileSync(path.resolve(outputFile), bytes, { flag: 'wx' }); result = { planFile: outputFile, planSha256: createHash('sha256').update(bytes).digest('hex'), operationId: plan.operationId, beforeBytes: plan.beforeBytes, afterBytes: plan.afterBytes, savedBytes: plan.savedBytes, protectedRecords: plan.protected.length }; }
         else result = plan;
       } else if (args[1] === 'compact' && args.length === 2 && applyFile && expect && !storagePlan) result = applyCompaction(root, readFileSync(path.resolve(applyFile), 'utf8'), expect);
@@ -78,9 +81,10 @@ async function runWikiCommand(argv: string[]): Promise<void> {
       } else throw new Error('FORMAT_ACTION_REQUIRED');
       break;
     }
-    case 'query': output(queryKnowledge(root, args.slice(1).join(' '), { limit: limit ? Number(limit) : undefined, maxChars: maxChars ? Number(maxChars) : undefined, repoId, type, freshness: freshness as Freshness | undefined, collection: collection as Collection | undefined })); break;
+    case 'query': output(queryKnowledge(root, args.slice(1).join(' '), { limit: limit ? Number(limit) : undefined, maxChars: maxChars ? Number(maxChars) : undefined, repoId, type, freshness: freshness as Freshness | undefined, collection: collection as Collection | undefined, includeHistory })); break;
     case 'show': output(outline ? outlineKnowledge(root, args.slice(1).join(' ') || undefined) : showKnowledge(root, args.slice(1).join(' '))); break;
     case 'check': { const result = checkWiki(root); output(result); if (result.status === 'failed') process.exitCode = 1; break; }
+    case 'audit': { const result = auditKnowledge(root); output(result); if (result.status === 'failed') process.exitCode = 1; break; }
     case 'update':
       if (args[1] === 'prepare') output(prepareUpdate(root, args.slice(2), manifestFile ? JSON.parse(readFileSync(path.resolve(manifestFile), 'utf8')) as ChangeManifest : undefined));
       else if (args[1] === 'review') { if (!reviewFile) throw new Error('REVIEW_FILE_REQUIRED'); output(recordSemanticReview(root, JSON.parse(readFileSync(path.resolve(reviewFile), 'utf8')) as ReviewRecord)); }
@@ -102,7 +106,7 @@ async function runWikiCommand(argv: string[]): Promise<void> {
       for (const signal of ['SIGINT', 'SIGTERM'] as const) process.once(signal, () => { void result.close().then(() => process.exit(0)); });
       break;
     }
-    default: if (args[0] && !['help', '--help', '-h'].includes(args[0])) throw new Error('UNKNOWN_COMMAND'); output({ description: config.locale === 'zh-CN' ? '文本知识库：检索、核实、更新和阅读。' : 'Text knowledge: query, verify, update and read.', commands: ['wiki storage inspect|check', 'wiki storage compact --plan [--output plan.json]', 'wiki storage compact --apply <plan.json> --expect <plan-sha256>', 'wiki storage recover <operation-id> [--rollback]', 'wiki map [--markdown]', 'wiki related <id> [--direction in|out|both]', 'wiki show [id] --outline', 'wiki show <id#fragment>', 'wiki show <id> --full', 'wiki update prepare --manifest <changes.json>', 'wiki update review --file <review.json>', 'wiki scan', 'wiki classify <repo:path> --topic <id> --scope <repo:path> --fingerprint <sha256> --decision needs-explanation|covered|deferred --reason <text>', 'wiki format plan', 'wiki format apply <document-id>', 'wiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan]', 'wiki show <id|path|title>', 'wiki check', 'wiki update prepare [document-id...]', 'wiki update apply <packet-id> --candidate <json-file>', 'wiki update decide <packet-id> <document-id> --decision keep-current|defer --reason <text>', 'wiki update recover', 'wiki serve [--port 4318]'], options: ['--root <harness-root>', '--json'] });
+    default: if (args[0] && !['help', '--help', '-h'].includes(args[0])) throw new Error('UNKNOWN_COMMAND'); output({ description: config.locale === 'zh-CN' ? '文本知识库：检索、核实、更新和阅读。' : 'Text knowledge: query, verify, update and read.', commands: ['wiki storage inspect|check', 'wiki storage compact --plan [--editorial] [--output plan.json]', 'wiki storage compact --apply <plan.json> --expect <plan-sha256>', 'wiki storage recover <operation-id> [--rollback]', 'wiki map [--markdown]', 'wiki audit', 'wiki related <id> [--direction in|out|both]', 'wiki show [id] --outline', 'wiki show <id#fragment>', 'wiki show <id> --full', 'wiki update prepare --manifest <changes.json>', 'wiki update review --file <review.json>', 'wiki scan', 'wiki classify <repo:path> --topic <id> --scope <repo:path> --fingerprint <sha256> --decision needs-explanation|covered|deferred --reason <text>', 'wiki format plan', 'wiki format apply <document-id>', 'wiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan] [--include-history]', 'wiki show <id|path|title>', 'wiki check', 'wiki update prepare [document-id...]', 'wiki update apply <packet-id> --candidate <json-file>', 'wiki update decide <packet-id> <document-id> --decision keep-current|defer --reason <text>', 'wiki update recover', 'wiki serve [--port 4318]'], options: ['--root <harness-root>', '--json'] });
   }
 }
 export async function runWikiCli(argv = process.argv.slice(2)): Promise<void> {

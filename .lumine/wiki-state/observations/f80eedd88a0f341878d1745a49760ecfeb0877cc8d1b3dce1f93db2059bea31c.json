@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "id": "lumine-project-overview",
+    "revision": "24c096f55fc390cf4a291e7bec2e61274d4dcf921ac03ce0cc637520d51a7b7a",
+    "freshness": "current",
+    "checkedAt": "2026-11-16T10:52:25.386Z",
+    "sourceFingerprint": "eac794dc45e9a7378ee6e47ddc27b8c0240fa8e621496926ef4cf283f5dc4c21",
+    "sources": {
+      "$lumineObject": "eac794dc45e9a7378ee6e47ddc27b8c0240fa8e621496926ef4cf283f5dc4c21",
+      "kind": "json",
+      "bytes": 21427
+    }
+  }
+}

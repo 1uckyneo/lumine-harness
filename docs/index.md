@@ -9,7 +9,7 @@
 | Product Spec | `product-specs/` | 原位维护产品方案的目标、范围、场景、业务规则、验收标准与待决问题。 |
 | Exec Plan | `exec-plans/active/`，历史在 `completed/` | 承接适用 Spec／AC 的技术方案、取舍、执行与验证安排、进度及执行记录；链接详细证据。 |
 | 设计材料 | [设计资料](design-docs/index.md) | 可审阅的视觉、交互及适用范围；由 Spec／Plan 引用，不复制产品规则。 |
-| Repo Wiki | [知识入口](repo-wiki/) | 架构、实现、已确认领域语言与长期决策、规范、示例和指南；明确效力及实现状态。 |
+| Repo Wiki | [知识入口](repo-wiki/README.md) | 架构、实现、已确认领域语言与长期决策、规范、示例和指南；明确效力及实现状态。 |
 | Validation | `validation/` | 实际操作、结果、日期、代码／环境范围及原始证据；区分测试、运行、部署与用户接受。 |
 | 原始参考 | [参考资料](references/index.md) | 原始需求、接口手册和外部依据；Wiki 提炼并链接原件。 |
 | 历史资料 | `archives/` | 停用资料及历史语境，不作为当前规则、批准或运行证明。 |

@@ -1,124 +1,198 @@
 import { useEffect, useMemo, useRef } from 'react';
+import type { ReactNode } from 'react';
+import Markdown from 'react-markdown';
+import type { Components, ExtraProps } from 'react-markdown';
+import remarkDirective from 'remark-directive';
+import remarkGfm from 'remark-gfm';
 import type { Diagram, KnowledgeDocument, Locale, Section } from '../harness/wiki/types.ts';
-import { headingSections } from '../harness/wiki/reader-model.ts';
-import { decode, safeMarkdown, translate, type CatalogDocument } from './reader-common.ts';
+import { decode, documentHref, translate, type CatalogDocument } from './reader-common.ts';
 import { drawMermaid } from './reader-diagrams.tsx';
 
-function button(label: string, attribute: string, value: string): HTMLButtonElement {
-  const element = document.createElement('button');
-  element.type = 'button';
-  element.textContent = label;
-  element.setAttribute(attribute, value);
-  return element;
+type AstNode = {
+  type: string;
+  name?: string;
+  depth?: number;
+  lang?: string;
+  value?: string;
+  children?: AstNode[];
+  attributes?: Record<string, string | null>;
+  position?: { start: { line: number } };
+  data?: { hName?: string; hProperties?: Record<string, string> };
+};
+
+function editorialMarkup(sections: Section[], diagrams: Diagram[] = []) {
+  const sectionByLine = new Map(sections.map((section) => [section.startLine, section]));
+  return () => (tree: AstNode) => {
+    let nextDiagram = 0;
+    const visit = (node: AstNode) => {
+      if (node.type === 'heading') {
+        const section = sectionByLine.get(node.position?.start.line ?? 0);
+        if (section && section.level === node.depth) node.data = { hProperties: { 'data-section-id': section.id } };
+      } else if (node.type === 'code' && node.lang === 'mermaid') {
+        const diagram = diagrams[nextDiagram];
+        if (diagram && node.value?.trim() === diagram.code) {
+          nextDiagram++;
+          node.data = { hName: 'div', hProperties: { 'data-wiki-component': 'diagram', 'data-wiki-id': diagram.id } };
+          node.type = 'containerDirective';
+          delete node.value;
+        }
+      } else if (node.type === 'containerDirective' && ['steps', 'comparison', 'details'].includes(node.name ?? '')) {
+        node.data = {
+          hName: 'div',
+          hProperties: {
+            'data-wiki-component': node.name!,
+            'data-wiki-title': node.attributes?.title?.trim().slice(0, 100) ?? '',
+          },
+        };
+      }
+      node.children?.forEach(visit);
+    };
+    visit(tree);
+  };
 }
 
-function sourcePills(sourceIds: string[], label: string): HTMLDivElement {
-  const row = document.createElement('div');
-  row.className = 'source-pills';
-  for (const id of sourceIds) row.append(button(`${label} · ${id}`, 'data-source-id', id));
-  return row;
+function safeUrl(value: string): string {
+  // URL parsers strip several ASCII controls, and HTML treats backslashes as slashes in web URLs.
+  if (/[\x00-\x20\x7f\\]/.test(value) || value.startsWith('//')) return '';
+  if (/^https?:\/\//i.test(value) || /^source:[\p{L}\p{N}_.:-]+$/u.test(value)) return value;
+  return /^[^/?#]*:/.test(value) ? '' : value;
 }
 
-function diagramFigure(diagram: Diagram, locale: Locale): HTMLElement {
-  const figure = document.createElement('figure');
-  figure.className = 'diagram';
-  figure.id = diagram.id;
-  figure.tabIndex = -1;
-  const header = document.createElement('div');
-  header.className = 'diagram-header';
-  const title = document.createElement('strong');
-  title.textContent = diagram.title;
-  header.append(title, button(translate(locale, 'openDiagram'), 'data-diagram-id', diagram.id), button(translate(locale, 'viewMermaid'), 'data-diagram-source', diagram.id));
-  const canvas = document.createElement('div');
-  canvas.className = 'diagram-canvas';
-  canvas.setAttribute('role', 'group');
-  canvas.setAttribute('aria-label', diagram.title);
-  canvas.textContent = translate(locale, 'loading');
-  const caption = document.createElement('figcaption');
-  caption.textContent = diagram.caption;
-  const details = document.createElement('details');
-  const summary = document.createElement('summary');
-  summary.textContent = translate(locale, 'viewMermaid');
-  const pre = document.createElement('pre');
-  const code = document.createElement('code');
-  code.textContent = diagram.code;
-  pre.append(code);
-  details.append(summary, pre);
-  figure.append(header, canvas, caption);
-  if (diagram.sources.length) figure.append(sourcePills(diagram.sources, translate(locale, 'sources')));
-  figure.append(details);
-  return figure;
+function ordinaryClick(event: React.MouseEvent): boolean {
+  return !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0;
 }
 
-export function MarkdownBody({ doc, catalog, locale, fragment, onDocument, onFragment, onSource, onReference, onDiagram, onDiagramText, onMissing, onCurrentSection }: {
-  doc: KnowledgeDocument; catalog: CatalogDocument[]; locale: Locale; fragment: string;
+function SourcePills({ ids, label, onSource }: { ids: string[]; label: string; onSource: (id: string) => void }) {
+  if (!ids.length) return null;
+  return <div className="source-pills">{ids.map((id) => <button type="button" key={id} onClick={() => onSource(id)}>{label} · {id}</button>)}</div>;
+}
+
+function DiagramFigure({ diagram, locale, onOpen, onSource }: {
+  diagram: Diagram; locale: Locale; onOpen: () => void; onSource: (id: string) => void;
+}) {
+  const canvas = useRef<HTMLDivElement>(null);
+  const t = (key: string) => translate(locale, key);
+  useEffect(() => {
+    const target = canvas.current;
+    if (!target) return;
+    const render = () => { void drawMermaid(target, diagram, locale); };
+    if (!('IntersectionObserver' in window)) { render(); return; }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) { observer.disconnect(); render(); }
+    }, { rootMargin: '220px' });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [diagram, locale]);
+  return <figure className="diagram" id={diagram.id} tabIndex={-1}>
+    <header className="diagram-header"><strong>{diagram.title}</strong><button type="button" onClick={onOpen}>{t('openDiagram')}</button></header>
+    <div className="diagram-canvas" role="group" aria-label={diagram.title} ref={canvas}>{t('loading')}</div>
+    {diagram.caption && <figcaption>{diagram.caption}</figcaption>}
+    <SourcePills ids={diagram.sources} label={t('source')} onSource={onSource} />
+    <details><summary>{t('viewMermaid')}</summary><pre><code>{diagram.code}</code></pre></details>
+  </figure>;
+}
+
+function proseHeadings(sections: Section[], onSource?: (id: string) => void, sourceLabel = '', titleId?: string): Components {
+  const byId = new Map(sections.map((section) => [section.id, section]));
+  const heading = (Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') => ({ node, children }: ExtraProps & { children?: ReactNode }) => {
+    const id = node?.properties['data-section-id'] as string | undefined;
+    const section = id ? byId.get(id) : undefined;
+    return <>{!id || id !== titleId ? <Tag id={id} tabIndex={id ? -1 : undefined}>{children}</Tag> : null}
+      {section && onSource && <SourcePills ids={section.sources} label={sourceLabel} onSource={onSource} />}
+    </>;
+  };
+  return { h1: heading('h1'), h2: heading('h2'), h3: heading('h3'), h4: heading('h4'), h5: heading('h5'), h6: heading('h6') };
+}
+
+type ResolveLink = (href: string) => { href: string; open: () => void } | undefined;
+
+function proseComponents(resolveLink: ResolveLink, locale: Locale, showDiagram?: (id: string) => ReactNode): Components {
+  const link = (href: string | undefined, children: ReactNode) => {
+    if (!href) return <>{children}</>;
+    if (/^https?:\/\//i.test(href)) return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
+    const destination = resolveLink(href);
+    if (!destination) return <>{children}</>;
+    return <a href={destination.href} onClick={(event) => {
+      if (ordinaryClick(event)) { event.preventDefault(); destination.open(); }
+    }}>{children}</a>;
+  };
+  return {
+    a: ({ href, children }) => link(href, children),
+    img: ({ src, alt }) => link(src, alt || translate(locale, 'attachment')),
+    div: ({ node, children }) => {
+      const kind = node?.properties['data-wiki-component'];
+      const title = node?.properties['data-wiki-title'];
+      if (kind === 'diagram') return showDiagram?.(String(node?.properties['data-wiki-id'])) ?? null;
+      if (kind === 'details') return <details className="prose-details"><summary>{title || translate(locale, 'moreDetail')}</summary>{children}</details>;
+      if (kind === 'steps' || kind === 'comparison') return <section className={'prose-' + kind}>{title && <strong>{title}</strong>}{children}</section>;
+      return <div>{children}</div>;
+    },
+    table: ({ children }) => <div className="table-scroll" tabIndex={0} role="region" aria-label={translate(locale, 'table')}><table>{children}</table></div>,
+  };
+}
+
+export function MarkdownBody({ doc, catalog, locale, fragment, titleId, onDocument, onFragment, onSource, onReference, onDiagram, onMissing, onCurrentSection }: {
+  doc: KnowledgeDocument; catalog: CatalogDocument[]; locale: Locale; fragment: string; titleId?: string;
   onDocument: (id: string, fragment?: string) => void;
   onFragment: (fragment: string) => void;
   onSource: (documentId: string, sourceId: string) => void;
   onReference: (from: string, target: string) => void;
   onDiagram: (diagram: Diagram) => void;
-  onDiagramText: (diagram: Diagram) => void;
   onMissing: () => void;
   onCurrentSection: (id: string) => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const markup = useMemo(() => safeMarkdown(doc.body), [doc.body]);
-  const mountedFor = useRef('');
-
-  useEffect(() => {
-    const container = root.current;
-    if (!container) return;
-    container.innerHTML = markup;
-    const headings = [...container.querySelectorAll<HTMLElement>('h1,h2,h3,h4,h5,h6')];
-    for (const element of container.querySelectorAll('[id]')) element.removeAttribute('id');
-    headingSections(doc.sections, headings.map((heading) => Number(heading.tagName.slice(1))))
-      .forEach((section, index) => {
-        if (!section) return;
-        headings[index].id = section.id;
-        headings[index].tabIndex = -1;
-        if (section.sources.length) headings[index].after(sourcePills(section.sources, translate(locale, 'sectionSources')));
-      });
-    if (headings[0]?.textContent === doc.title) headings[0].classList.add('duplicate-title');
-
-    const diagrams: { canvas: Element; diagram: Diagram }[] = [];
-    let diagramIndex = 0;
-    for (const code of container.querySelectorAll('pre > code.language-mermaid')) {
-      const diagram = doc.diagrams[diagramIndex++];
-      if (!diagram) continue;
-      const figure = diagramFigure(diagram, locale);
-      code.parentElement?.replaceWith(figure);
-      diagrams.push({ canvas: figure.querySelector('.diagram-canvas')!, diagram });
-    }
-    const observers: IntersectionObserver[] = [];
-    if ('IntersectionObserver' in window) {
-      const drawing = new IntersectionObserver((entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            drawing.unobserve(entry.target);
-            const match = diagrams.find((item) => item.canvas === entry.target);
-            if (match) void drawMermaid(match.canvas, match.diagram, locale);
-          }
+  const plugins = useMemo(() => [remarkGfm, remarkDirective, editorialMarkup(doc.sections, doc.diagrams)], [doc.sections, doc.diagrams]);
+  const components = useMemo(() => {
+    const source = (id: string) => onSource(doc.id, id);
+    const resolve: ResolveLink = (href) => {
+      if (href.startsWith('source:')) {
+        const id = decode(href.slice(7));
+        return { href: documentHref(doc.id, 'source:' + id), open: () => source(id) };
+      }
+      if (href.startsWith('#')) {
+        const fragment = decode(href.slice(1));
+        return { href: documentHref(doc.id, fragment), open: () => onFragment(fragment) };
+      }
+      try {
+        const url = new URL(href, new URL('/' + doc.path, location.origin));
+        if (url.origin !== location.origin) return;
+        const refId = href.match(/^([^/?#]+)(?:#|$)/)?.[1];
+        const found = catalog.find((item) => item.path === decode(url.pathname).slice(1) || item.id === refId);
+        if (found) {
+          const fragment = decode(url.hash.slice(1));
+          return { href: documentHref(found.id, fragment), open: () => onDocument(found.id, fragment) };
         }
-      }, { rootMargin: '180px' });
-      diagrams.forEach(({ canvas }) => drawing.observe(canvas));
-      observers.push(drawing);
-      const contents = new IntersectionObserver((entries) => {
-        const entry = entries.find((item) => item.isIntersecting);
-        if (entry) onCurrentSection(entry.target.id);
-      }, { rootMargin: '-8% 0px -76% 0px' });
-      for (const heading of container.querySelectorAll('h2[id],h3[id]')) contents.observe(heading);
-      observers.push(contents);
-    } else diagrams.forEach(({ canvas, diagram }) => { void drawMermaid(canvas, diagram, locale); });
-    return () => { observers.forEach((item) => item.disconnect()); };
-  }, [doc.id, doc.revision, locale, markup, onCurrentSection]);
+        return { href: documentHref(doc.id), open: () => onReference(doc.id, href) };
+      } catch { return; }
+    };
+    return {
+      ...proseHeadings(doc.sections, source, translate(locale, 'sectionSources'), titleId),
+      ...proseComponents(resolve, locale, (id) => {
+        const diagram = doc.diagrams.find((entry) => entry.id === id);
+        return diagram && <DiagramFigure diagram={diagram} locale={locale} onOpen={() => onDiagram(diagram)} onSource={source} />;
+      }),
+    };
+  }, [catalog, doc, locale, titleId, onDocument, onFragment, onSource, onReference, onDiagram]);
 
   useEffect(() => {
-    const identity = `${doc.id}@${doc.revision}:${locale}#${fragment}`;
-    if (mountedFor.current === identity) return;
-    mountedFor.current = identity;
+    if (!root.current || !('IntersectionObserver' in window)) return;
+    const contents = new IntersectionObserver((entries) => {
+      const entry = entries.find((item) => item.isIntersecting);
+      if (entry) onCurrentSection(entry.target.id);
+    }, { rootMargin: '-8% 0px -76% 0px' });
+    for (const heading of root.current.querySelectorAll('h2[id],h3[id]')) contents.observe(heading);
+    return () => contents.disconnect();
+  }, [doc.id, doc.revision, locale, onCurrentSection]);
+
+  useEffect(() => {
     if (!fragment || fragment.startsWith('source:')) return;
-    const target = [...(root.current?.querySelectorAll<HTMLElement>('[id]') ?? [])].find((item) => item.id === fragment);
+    const target = titleId === fragment
+      ? document.getElementById(titleId)
+      : root.current?.querySelector<HTMLElement>('[id="' + CSS.escape(fragment) + '"]');
     if (!target) { onMissing(); return; }
+    const detail = target.closest('details');
+    if (detail) detail.open = true;
     let frame = 0;
     let active = true;
     let focused = false;
@@ -149,34 +223,11 @@ export function MarkdownBody({ doc, catalog, locale, fragment, onDocument, onFra
       window.removeEventListener('pointerdown', stop);
       window.removeEventListener('keydown', movedByKey);
     };
-  }, [doc.id, doc.revision, locale, fragment, onMissing]);
+  }, [doc.id, doc.revision, locale, fragment, titleId, onMissing]);
 
-  const clicked = (event: React.MouseEvent<HTMLDivElement>) => {
-    const target = event.target as HTMLElement;
-    const source = target.closest<HTMLElement>('[data-source-id]');
-    if (source) { onSource(doc.id, source.dataset.sourceId!); return; }
-    const diagram = target.closest<HTMLElement>('[data-diagram-id]');
-    if (diagram) { const found = doc.diagrams.find((item) => item.id === diagram.dataset.diagramId); if (found) onDiagram(found); return; }
-    const diagramText = target.closest<HTMLElement>('[data-diagram-source]');
-    if (diagramText) { const found = doc.diagrams.find((item) => item.id === diagramText.dataset.diagramSource); if (found) onDiagramText(found); return; }
-    const anchor = target.closest<HTMLAnchorElement>('a[href]');
-    if (!anchor || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const href = anchor.getAttribute('href') ?? '';
-    if (!href) return;
-    if (href.startsWith('#source:')) { event.preventDefault(); onSource(doc.id, decode(href.slice(8))); return; }
-    if (href.startsWith('#')) { event.preventDefault(); onFragment(decode(href.slice(1))); return; }
-    if (/^https?:\/\//i.test(href)) { anchor.target = '_blank'; anchor.rel = 'noopener noreferrer'; return; }
-    let url: URL;
-    try { url = new URL(href, new URL(doc.path, location.origin + '/')); }
-    catch { event.preventDefault(); return; }
-    event.preventDefault();
-    if (url.origin !== location.origin) return;
-    const found = catalog.find((item) => item.path === decode(url.pathname).slice(1));
-    if (found) onDocument(found.id, decode(url.hash.slice(1)));
-    else onReference(doc.id, href);
-  };
-
-  return <div className="prose" ref={root} onClick={clicked} />;
+  return <div ref={root} className="prose">
+    <Markdown skipHtml urlTransform={safeUrl} remarkPlugins={plugins} components={components}>{doc.body}</Markdown>
+  </div>;
 }
 
 export function ReferenceMarkdown({ markdown, sections, path, locale, fragment, onReference, onFragment }: {
@@ -185,23 +236,23 @@ export function ReferenceMarkdown({ markdown, sections, path, locale, fragment, 
 }) {
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const container = root.current;
-    if (!container) return;
-    container.innerHTML = safeMarkdown(markdown.replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/, ''));
-    const headings = [...container.querySelectorAll<HTMLElement>('h1,h2,h3,h4,h5,h6')];
-    headingSections(sections, headings.map((heading) => Number(heading.tagName.slice(1))))
-      .forEach((section, index) => { if (section) { headings[index].id = section.id; headings[index].tabIndex = -1; } });
-    if (fragment) requestAnimationFrame(() => {
-      const target = [...container.querySelectorAll<HTMLElement>('[id]')].find((item) => item.id === fragment);
-      target?.scrollIntoView({ block: 'start' }); target?.focus({ preventScroll: true });
+    if (!fragment) return;
+    const frame = requestAnimationFrame(() => {
+      const target = root.current?.querySelector<HTMLElement>('[id="' + CSS.escape(fragment) + '"]');
+      target?.scrollIntoView({ block: 'start' });
+      target?.focus({ preventScroll: true });
     });
-  }, [markdown, sections, locale, fragment]);
-  return <div className="prose reference-prose" ref={root} onClick={(event) => {
-    const anchor = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');
-    if (!anchor || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const href = anchor.getAttribute('href') ?? '';
-    if (href.startsWith('#')) { event.preventDefault(); onFragment(decode(href.slice(1))); }
-    else if (!/^https?:\/\//i.test(href)) { event.preventDefault(); onReference(path, href); }
-    else { anchor.target = '_blank'; anchor.rel = 'noopener noreferrer'; }
-  }} />;
+    return () => cancelAnimationFrame(frame);
+  }, [markdown, sections, fragment]);
+  const components = {
+    ...proseHeadings(sections),
+    ...proseComponents((href) => href.startsWith('#') ? {
+      href, open: () => onFragment(decode(href.slice(1))),
+    } : { href: '#', open: () => onReference(path, href) }, locale),
+  };
+  return <div className="prose reference-prose" ref={root}>
+    <Markdown skipHtml urlTransform={safeUrl} remarkPlugins={[remarkGfm, remarkDirective, editorialMarkup(sections)]} components={components}>
+      {markdown.replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/, '')}
+    </Markdown>
+  </div>;
 }

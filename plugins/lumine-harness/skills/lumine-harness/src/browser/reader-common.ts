@@ -1,5 +1,3 @@
-import { marked } from 'marked';
-import DOMPurify from 'dompurify';
 import type { CoverageMap, Diagram, KnowledgeCard, KnowledgeDocument, Locale, Section, SourceRef } from '../harness/wiki/types.ts';
 
 export type CatalogDocument = Omit<KnowledgeDocument, 'markdown' | 'body' | 'diagrams' | 'sections'> & {
@@ -16,17 +14,18 @@ export type SourceResult = { source: SourceRef; text: string; startLine: number;
 
 const dictionary: Record<Locale, Record<string, string>> = {
   'zh-CN': {
-    home: '项目首页', knowledge: '仓库知识', search: '搜索知识', tree: '知识目录', contents: '本页导航',
+    understand: '理解项目', operate: '开发与运行', reference: '查找与核实',
+    moreDetail: '更多说明', table: '表格，可横向滚动', home: '项目首页', knowledge: '仓库知识', search: '搜索知识', tree: '知识目录', contents: '本页导航',
     relatedDocuments: '关联文档', specs: '产品方案', plans: '执行计划', validation: '验证记录', maintenance: '知识维护',
-    browse: '浏览全部知识', overview: '总览入口', topics: '知识主题', continue: '继续阅读',
+    browse: '浏览全部知识', overview: '阅读项目概览', topics: '知识主题', continue: '继续阅读',
     projectLibrary: '项目知识库', intro: '从项目全貌理解机制，沿着来源核实结论。',
-    queryPlaceholder: '搜索机制、约定或代码标识符…', searchPrompt: '查找你想了解的机制',
+    queryPlaceholder: '搜索功能、流程或开发规范…', searchPrompt: '搜索知识库',
     allDocuments: '全体文档', wikiOnly: '仅仓库知识', filters: '筛选', clearFilters: '清除筛选',
     allRepos: '全部仓库', allTypes: '全部类型', allStates: '全部来源状态',
     loading: '正在载入…', loadError: '连接失败，已读内容仍可查看。请检查阅读服务后重试。',
     retry: '重试', empty: '尚未收录知识。可以复制整理指令继续建库。',
     noResults: '未找到相关知识。试试其他关键词，或查看知识目录。',
-    copyQuestion: '复制调查问题', copyResume: '复制继续整理指令', copied: '已复制',
+    copyQuestion: '复制给 Agent 的问题', copyResume: '复制继续整理指令', copied: '已复制',
     copyUnavailable: '剪贴板不可用，请从打开的文本窗口手动复制。',
     copyManually: '手动复制文本',
     results: '项结果', showing: '已显示', more: '继续查看', noMore: '已显示全部结果',
@@ -66,17 +65,18 @@ const dictionary: Record<Locale, Record<string, string>> = {
     unknownProject: '项目知识库',
   },
   en: {
-    home: 'Project home', knowledge: 'Repo Wiki', search: 'Search knowledge', tree: 'Knowledge tree', contents: 'On this page',
+    understand: 'Understand the project', operate: 'Develop and operate', reference: 'Find and verify',
+    moreDetail: 'More detail', table: 'Scrollable table', home: 'Project home', knowledge: 'Repo Wiki', search: 'Search knowledge', tree: 'Knowledge tree', contents: 'On this page',
     relatedDocuments: 'Related documents', specs: 'Product specs', plans: 'Execution plans', validation: 'Validation record', maintenance: 'Knowledge maintenance',
-    browse: 'Browse all knowledge', overview: 'Start with an overview', topics: 'Topics', continue: 'Continue reading',
+    browse: 'Browse all knowledge', overview: 'Read the project overview', topics: 'Topics', continue: 'Continue reading',
     projectLibrary: 'Project knowledge', intro: 'Understand the system from its map, then follow the sources behind each conclusion.',
-    queryPlaceholder: 'Search mechanisms, conventions or code identifiers…', searchPrompt: 'Find a mechanism or decision',
+    queryPlaceholder: 'Search features, workflows or engineering standards…', searchPrompt: 'Search the wiki',
     allDocuments: 'All documents', wikiOnly: 'Repo Wiki only', filters: 'Filters', clearFilters: 'Clear filters',
     allRepos: 'All repositories', allTypes: 'All types', allStates: 'All source states',
     loading: 'Loading…', loadError: 'Connection failed. Read content remains available. Check the reader service and retry.',
     retry: 'Try again', empty: 'No knowledge yet. Copy the continuation prompt to build the wiki.',
     noResults: 'No relevant knowledge found. Try other terms or explore the knowledge tree.',
-    copyQuestion: 'Copy investigation question', copyResume: 'Copy continuation prompt', copied: 'Copied',
+    copyQuestion: 'Copy question for an agent', copyResume: 'Copy continuation prompt', copied: 'Copied',
     copyUnavailable: 'Clipboard unavailable. Copy manually from the open text window.',
     copyManually: 'Copy text manually',
     results: 'results', showing: 'Showing', more: 'Show more', noMore: 'All results shown',
@@ -143,14 +143,20 @@ export async function api<T>(endpoint: string, signal?: AbortSignal): Promise<T>
   }
   return response.json() as Promise<T>;
 }
-export function safeMarkdown(markdown: string): string {
-  const renderer = new marked.Renderer();
-  renderer.html = () => '';
-  const linked = markdown.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '[$1]($2)').replace(/\]\(source:([^\s)]+)\)/g, '](#source:$1)');
-  return DOMPurify.sanitize(marked.parse(linked, { async: false, renderer }) as string, {
-    FORBID_TAGS: ['img', 'iframe', 'object', 'embed', 'style', 'script', 'video', 'audio', 'form', 'input', 'button'],
-    FORBID_ATTR: ['style', 'srcset', 'name'], ALLOW_DATA_ATTR: false,
-  });
+export function documentLabel(locale: Locale, doc: Pick<CatalogDocument, 'collection' | 'status' | 'type' | 'editorialRole' | 'normativeScope'>): string {
+  const t = (key: string) => translate(locale, key);
+  const labels: Record<string, [string, string]> = {
+    overview: ['项目概览', 'Overview'], business: ['业务功能', 'Business capability'],
+    scenario: ['业务场景', 'Workflow'], standard: ['工程规范', 'Engineering standard'],
+    guide: ['操作指南', 'Guide'], example: ['示例', 'Example'], implementation: ['实现说明', 'Implementation'],
+    decision: ['长期决定', 'Decision'], history: ['历史资料', 'History'],
+  };
+  const role = doc.editorialRole ? labels[doc.editorialRole]?.[locale === 'zh-CN' ? 0 : 1] : undefined;
+  const kind = doc.collection === 'wiki' ? role ?? typeLabel(locale, doc.type) :
+    t(doc.collection === 'spec' ? 'specs' : doc.collection === 'plan' ? 'plans' : 'validation');
+  const state = doc.status === 'proposed' || doc.status === 'historical' ? t(doc.status) : '';
+  const scope = doc.normativeScope ? (locale === 'zh-CN' ? '适用任务必读' : 'Required in scope') : '';
+  return [kind, state, scope].filter(Boolean).join(' · ');
 }
 export function download(name: string, content: string, mime = 'text/plain;charset=utf-8'): void {
   const url = URL.createObjectURL(new Blob([content], { type: mime }));

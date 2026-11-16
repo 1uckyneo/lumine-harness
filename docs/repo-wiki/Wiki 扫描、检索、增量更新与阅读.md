@@ -31,9 +31,9 @@ flowchart LR
 重要缺口、过期或矛盾应在核实后形成相关知识增量；显式只读请求不写文件，没有新认识的小修可以零更新。检索不到已有内容时先考虑别名、关键词或结构，不立即复制另一篇。Wiki 分别维护已确认的领域语言、长期决策与已核实现状，Spec 维护目标，Plan 保留本次技术变化，运行证据仍在 Validation。
 
 <a id="hierarchy-and-sections"></a>
-## 一份目录，多种阅读粒度
+## 阅读路径和覆盖各管什么
 
-`.lumine/wiki-state/coverage.json` 是主题层级唯一来源，topic 的 parentId 表达归属、数组表示同级顺序，问题和来源范围说明覆盖目标。planned／partial／covered／deferred 描述内容推进，deferred 需要理由。程序能检查引用和循环，不能判定“这个专题解释得足够深入”。页面只有一个主要位置，其他关联用有类型的 related／depends_on／decision；父子关系由目录派生。
+`.lumine/wiki-state/navigation.json` 是编辑维护的阅读路径。将实际页面放在理解项目、开发与运行、查找与核实下合适的小节。每页一个主要位置，省略时解释原因。已授权规范进入开发与运行，且根 AGENTS 或其授权索引负责规则路由。覆盖台账继续记录主题问题、源码范围及 planned／partial／covered／deferred。两者可以随同更新，验证语义仍需要回读来源。
 
 Markdown 页面是三方合并主要单位。重要章节在标题前用 `<a id="稳定ID"></a>` 固定身份，标题和文件改名不应改变该 ID。parser 识别代码围栏外的 H1—H6，记录层级、范围及可选来源关联。`show 文档ID#片段ID` 展开章节或图解，片段不存在返回错误，不静默退回全文；图 ID 与章节 ID 不能碰撞。章节没有独立审批状态机。
 
@@ -74,7 +74,7 @@ flowchart TB
   T --> D[正文 目录 基线 来源观察]
 ```
 
-含目录或引用移动的变更组一起处理。例如拆页同时修改总览、创建子页、更新 coverage 与旧引用映射；不能子页已出现而目录仍指向被删章节。应用前重新核对源码与配置，漂移则保留候选并重新评估。事务保存 before／after，读者在未完成组期间读取上一个完整版本；恢复接受预期旧值或本次输出，第三种修改保留冲突。各独立组分别报告，不把部分完成当全部完成。
+含目录或引用移动的变更组一起处理。例如拆页同时修改总览、创建子页、更新导航、覆盖与旧引用映射；不能子页已出现而目录仍指向被删章节。应用前重新核对源码与配置，漂移则保留候选并重新评估。事务保存 before／after，读者在未完成组期间读取上一个完整版本；恢复接受预期旧值或本次输出，第三种修改保留冲突。各独立组分别报告，不把部分完成当全部完成。
 
 <a id="durable-state-and-validation"></a>
 ## 什么能清理，怎样验证
@@ -90,7 +90,7 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
 
 无变化扫描保留共享观察时间，同包重复应用和恢复不产生新版本；实际来源变化仍会更新观察，真正的新语义审阅也会保存。回收只处理无当前状态、活动操作或恢复记录引用的对象，不按年龄删除。文档改名／归档回滚记录维持原格式。
 
-旧项目先升级双读 Runtime，再用 `wiki storage compact --plan --output <plan.json>` 审阅预计收益和精确清单，`--apply <plan.json> --expect <plan-sha256>` 应用；`inspect/check` 提供用量与完整性，`recover <operation-id>` 续跑，`--rollback` 回滚。迁移先将 project schemaVersion 提升为 3 阻止旧 writer，workflowVersion 保持 2；最后核验引用并回收。忽略的 `.lumine-migrations/` 保存原始字节，回滚遇后来人工修改停止覆盖。普通提交只减小当前状态和后续增长，恢复备份及 Git 历史需单独计量。
+旧项目先升级双读 Runtime，再用 `wiki storage compact --plan --output <plan.json>` 审阅预计收益和精确清单，`--apply <plan.json> --expect <plan-sha256>` 应用；`inspect/check` 提供用量与完整性，`recover <operation-id>` 续跑，`--rollback` 回滚。迁移先将 project schemaVersion 提升为 3 阻止旧 writer，workflowVersion 保持 2；最后核验引用并回收。忽略的 `.lumine-migrations/` 保存原始字节，回滚遇后来人工修改停止覆盖。普通提交只减小当前状态和后续增长，恢复备份及 Git 历史需单独计量。启用编辑编排使用同一迁移预演加 `--editorial`，在锁内设置项目 schema 4。使用显式候选提交新导航，保留 workflowVersion 2 与对象格式。
 
 <!-- lumine-wiki-metadata:v1
 {
@@ -245,6 +245,12 @@ Wiki 的磁盘存储将正文与来源快照按 SHA-256 保存为不可变对象
       "id": "compaction",
       "repoId": "project",
       "path": "skills/lumine-harness/src/harness/wiki/compaction.ts"
+    },
+    {
+      "id": "navigation",
+      "repoId": "project",
+      "path": "skills/lumine-harness/src/harness/wiki/navigation.ts",
+      "kind": "source"
     }
   ],
   "relations": [

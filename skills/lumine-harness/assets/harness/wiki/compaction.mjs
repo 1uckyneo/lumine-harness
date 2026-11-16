@@ -59,7 +59,11 @@ function readObject(root, ref, virtual) {
 }
 function inventory(root) {
 	const config = JSON.parse(read(root, CONFIG));
-	if (![2, 3].includes(config.schemaVersion) || config.workflowVersion !== 2) throw new Error("STORAGE_PROJECT_VERSION_UNSUPPORTED");
+	if (![
+		2,
+		3,
+		4
+	].includes(config.schemaVersion) || config.workflowVersion !== 2) throw new Error("STORAGE_PROJECT_VERSION_UNSUPPORTED");
 	const wikiRoot = config.wiki?.root ?? "docs/repo-wiki";
 	return [
 		...walk(root, CONFIG),
@@ -226,7 +230,7 @@ function inspectStorage(root) {
 		gitHistoryBytes
 	};
 }
-function conversion(root, operationId = `wiki-storage-${randomUUID()}`) {
+function conversion(root, operationId = `wiki-storage-${randomUUID()}`, editorial = false) {
 	const checked = checkStorage(root);
 	if (!checked.ok) throw new Error(`STORAGE_CHECK_FAILED: ${json(checked.issues)}`);
 	const inputs = inventory(root), pinned = new Set(), output = new Map(), objects = new Map(), protectedEntries = [], packets = new Map(), transactions = new Map(), retained = new Map();
@@ -418,9 +422,10 @@ function conversion(root, operationId = `wiki-storage-${randomUUID()}`) {
 	output.set(MARKER, marker);
 	for (const relative of referenceGraph(root, output, objects)) output.set(relative, objects.get(relative) ?? read(root, relative));
 	const config = JSON.parse(read(root, CONFIG));
-	output.set(CONFIG, config.schemaVersion === 3 ? read(root, CONFIG) : json({
+	const targetProjectSchema = editorial || config.schemaVersion === 4 ? 4 : 3;
+	output.set(CONFIG, config.schemaVersion === targetProjectSchema ? read(root, CONFIG) : json({
 		...config,
-		schemaVersion: 3
+		schemaVersion: targetProjectSchema
 	}));
 	const oldIgnore = existsSync(safe(root, ".gitignore")) ? read(root, ".gitignore") : "";
 	const ignore = oldIgnore.split(/\r?\n/).some((line) => [".lumine-migrations/", "/.lumine-migrations/"].includes(line.trim())) ? oldIgnore : oldIgnore + (oldIgnore && !oldIgnore.endsWith("\n") ? "\n" : "") + ".lumine-migrations/\n";
@@ -460,19 +465,20 @@ function conversion(root, operationId = `wiki-storage-${randomUUID()}`) {
 			savedBytes: beforeBytes - afterBytes,
 			reduction: beforeBytes ? (beforeBytes - afterBytes) / beforeBytes : 0,
 			sourceStorageVersion: existsSync(safe(root, MARKER)) ? 3 : 2,
-			targetStorageVersion: 3
+			targetStorageVersion: 3,
+			...targetProjectSchema === 4 ? { targetProjectSchemaVersion: 4 } : {}
 		}
 	};
 }
-function planCompaction(root) {
-	return withWikiLock(root, () => conversion(root).plan);
+function planCompaction(root, options = {}) {
+	return withWikiLock(root, () => conversion(root, undefined, options.editorial).plan);
 }
 function compactionPlanHash(plan) {
 	return hash(typeof plan === "string" ? plan : json(plan));
 }
 function validatePlan(root, plan, checkRuntime = true) {
 	if (plan.schemaVersion !== 1 || plan.kind !== "lumine-wiki-storage-compaction" || !/^wiki-storage-[a-zA-Z0-9_-]+$/.test(plan.operationId) || plan.projectIdentity !== identity(root) || checkRuntime && plan.runtimeFingerprint !== runtimeFingerprint()) throw new Error("STORAGE_PLAN_IDENTITY_OR_RUNTIME_CHANGED");
-	if (plan.targetStorageVersion !== 3 || hash(json(plan.inventory)) !== plan.inputFingerprint) throw new Error("STORAGE_PLAN_INVALID");
+	if (plan.targetStorageVersion !== 3 || plan.targetProjectSchemaVersion !== undefined && plan.targetProjectSchemaVersion !== 4 || hash(json(plan.inventory)) !== plan.inputFingerprint) throw new Error("STORAGE_PLAN_INVALID");
 	const seen = new Set();
 	for (const change of plan.changes) {
 		safe(root, change.path);
@@ -647,7 +653,7 @@ function applyCompaction(root, input, expectedSha256, options = {}) {
 			return recoverUnlocked(root, plan.operationId, false, steps(options));
 		}
 		verifyCurrent(root, plan, "initial");
-		const rebuilt = conversion(root, plan.operationId);
+		const rebuilt = conversion(root, plan.operationId, plan.targetProjectSchemaVersion === 4);
 		if (json(rebuilt.plan) !== json(plan)) throw new Error("STORAGE_PLAN_OUTPUT_CHANGED");
 		const step = steps(options), journal = prepare(root, plan, rebuilt.output, step);
 		return applyReady(root, plan, journal, step);
@@ -702,7 +708,7 @@ function recoverUnlocked(root, operationId, rollback, step) {
 	}
 	if (journal.status === "preparing") {
 		if (plan.runtimeFingerprint !== runtimeFingerprint()) throw new Error("STORAGE_RECOVERY_RUNTIME_CHANGED: restore the planning Runtime or roll back this unstarted operation");
-		const rebuilt = conversion(root, operationId);
+		const rebuilt = conversion(root, operationId, plan.targetProjectSchemaVersion === 4);
 		const filtered = (changes) => changes.filter((change) => change.path !== ".gitignore");
 		if (json(filtered(rebuilt.plan.changes)) !== json(filtered(plan.changes))) throw new Error("STORAGE_RECOVERY_INPUT_CHANGED");
 		journal = prepare(root, plan, rebuilt.output, step);

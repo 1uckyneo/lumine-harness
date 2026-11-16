@@ -17,7 +17,7 @@
 ## 工作与资料入口
 
 - [README](README.md)：项目启动与使用。
-- [项目 Wiki](<{{wiki_entry}}>)：架构、当前实现、领域语言、长期决策与使用指南。
+- [项目 Wiki](<{{wiki_entry}}>)：从项目用途进入业务功能或核心能力，查找开发运行指南、工程规范、实现与来源。
 - [项目资料导航](docs/index.md)：Product Spec 的产品方案与验收；Exec Plan 承接 Spec 的技术方案、执行安排与记录；Validation 保存实际证据。
 
 按当前任务实际读取适用入口，不以 Skill 名称命中代替读取：

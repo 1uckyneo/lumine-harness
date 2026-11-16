@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { splitReference, topicTree, type TopicNode } from './reader-model.ts';
-import type { CheckIssue, CoverageMap, KnowledgeDocument, Locale } from './types.ts';
+import type { CheckIssue, CoverageMap, KnowledgeDocument, KnowledgeMap, Locale } from './types.ts';
 
 const labels = {
   'zh-CN': { title: '仓库知识地图', derived: '目录由知识地图生成；层级和顺序以持久知识地图为准。', relative: '链接相对于', covered: '已整理', partial: '待完善', planned: '待整理', deferred: '已延后', missing: '引用内容暂缺', questions: '回答', reason: '原因', unmapped: '尚未编入目录', unresolved: '目录关系待修复', errors: '部分内容暂不可读', empty: '知识目录尚未建立；已有文档仍可阅读。', note: '整理状态不代表语义审阅、运行验证或产品交付已通过。' },
@@ -10,7 +10,7 @@ const text = (value: string): string => value.replace(/[\r\n]+/g, ' ').replace(/
 const code = (value: string): string => `\`${value.replaceAll('`', '').replace(/[\r\n]+/g, ' ')}\``;
 
 /** No source scan, model call or stored index: resolve stable identities at export time. */
-export function renderKnowledgeMapMarkdown(map: CoverageMap, resolve: (reference: string) => KnowledgeDocument, options: { locale: Locale; wikiRoot: string; issues?: CheckIssue[] }): string {
+export function renderKnowledgeMapMarkdown(map: CoverageMap | KnowledgeMap, resolve: (reference: string) => KnowledgeDocument, options: { locale: Locale; wikiRoot: string; issues?: CheckIssue[] }): string {
   const t = labels[options.locale], lines = [`# ${t.title}`, '', t.derived, '', `${t.relative} ${code(options.wikiRoot)}. ${t.note}`, ''];
   const link = (reference: string): string => {
     try {
@@ -21,6 +21,32 @@ export function renderKnowledgeMapMarkdown(map: CoverageMap, resolve: (reference
       return `[${text(document.title)}${title ? ` — ${text(title)}` : ''}](<${target}>) · ${code(`${document.id}${fragment ? `#${fragment}` : ''}`)}`;
     } catch { return `${code(reference)} · ${t.missing}`; }
   };
+  const navigation = 'navigation' in map ? map.navigation : undefined;
+  if (navigation?.mode === 'editorial') {
+    const groupLabels = options.locale === 'zh-CN'
+      ? { understand: '理解项目', operate: '开发与运行', reference: '查找与核实' }
+      : { understand: 'Understand', operate: 'Develop and operate', reference: 'Find and verify' };
+    lines.splice(2, 1, options.locale === 'zh-CN' ? '按阅读目标组织；覆盖情况见文末。' : 'Organized by reading goal, with source coverage below.');
+    if (navigation.overview) lines.push(link(navigation.overview), '');
+    for (const group of navigation.groups) {
+      if (!group.sections.length) continue;
+      lines.push(`## ${groupLabels[group.id]}`, '');
+      for (const section of group.sections) {
+        lines.push(`### ${text(section.title)}`, '');
+        if (section.description) lines.push(text(section.description), '');
+        for (const id of section.documents) {
+          const norm = navigation.norms.find((item) => item.id === id);
+          lines.push(`- ${link(id)}${norm ? ` · ${options.locale === 'zh-CN' ? '必读范围' : 'Required for'}：${text(norm.scope)}` : ''}`);
+        }
+        lines.push('');
+      }
+    }
+    if (navigation.unlisted.length) {
+      lines.push(`## ${options.locale === 'zh-CN' ? '独立索引资料' : 'Unlisted reference pages'}`, '');
+      lines.push(...navigation.unlisted.map((item) => `- ${link(item.id)} · ${text(item.reason)}`), '');
+    }
+    lines.push(`## ${options.locale === 'zh-CN' ? '来源覆盖' : 'Source coverage'}`, '');
+  }
   const render = ({ topic, children }: TopicNode, depth: number): void => {
     const indent = '  '.repeat(depth);
     lines.push(`${indent}- **${text(topic.title)}** · ${t[topic.status]}`);
@@ -32,7 +58,12 @@ export function renderKnowledgeMapMarkdown(map: CoverageMap, resolve: (reference
   const { roots, unresolved } = topicTree(map);
   if (!roots.length) lines.push(t.empty);
   for (const root of roots) render(root, 0);
-  if (map.unmappedDocumentIds.length) lines.push('', `## ${t.unmapped}`, '', ...map.unmappedDocumentIds.map((id) => `- ${link(id)}`));
+  if (map.unmappedDocumentIds.length) {
+    const heading = navigation?.mode === 'editorial'
+      ? (options.locale === 'zh-CN' ? '### 尚未关联来源覆盖主题' : '### No source coverage topic assigned')
+      : `## ${t.unmapped}`;
+    lines.push('', heading, '', ...map.unmappedDocumentIds.map((id) => `- ${link(id)}`));
+  }
   if (unresolved.length) lines.push('', `## ${t.unresolved}`, '', ...unresolved.map((topic) => `- ${text(topic.title)} · ${code(topic.id)}`));
   if (options.issues?.length) lines.push('', `## ${t.errors}`, '', ...options.issues.map((issue) => `- ${code(issue.document ?? issue.code)} · ${code(issue.code)}`));
   return `${lines.join('\n').trimEnd()}\n`;

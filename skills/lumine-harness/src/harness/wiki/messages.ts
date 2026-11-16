@@ -8,6 +8,11 @@ const diagnostics: Record<string, [string, string]> = {
   STORAGE_INPUT_CHANGED: ['预演后输入已变化，已保留当前内容；请重新预演并核对。', 'Inputs changed after planning. Current content is preserved; create and review a new plan.'],
   STORAGE_PLAN_HASH_MISMATCH: ['计划文件哈希不匹配，请核对 --expect 与原始计划字节。', 'Plan hash mismatch; check --expect against the original plan bytes.'],
   STORAGE_RECOVERY_CONFLICT: ['恢复目标有后续修改，未覆盖；请核对冲突及恢复清单。', 'Recovery found later changes and did not overwrite them; review conflicts and the recovery manifest.'],
+  NAVIGATION_MIGRATION_REQUIRED: ['请先用 wiki storage compact --plan --editorial 预演编排迁移，核对并应用清单后再提交编排。', 'Plan the editorial migration with wiki storage compact --plan --editorial, then review and apply it before submitting navigation.'],
+  NAVIGATION_PLAN_REQUIRED: ['--editorial 用于 wiki storage compact --plan。', '--editorial is an option for wiki storage compact --plan.'],
+  NAVIGATION_CHANGED: ['准备工作包后知识编排已变化，请保留现场并重新准备。', 'Navigation changed after preparation. Preserve it and prepare the update again.'],
+  NAVIGATION_INVALID: ['知识编排格式无效，请核对首页、阅读分组、独立索引和规范清单。', 'Invalid navigation. Check the overview, reading groups, unlisted pages and standards.'],
+  NORMATIVE_CHANGE_REQUIRED: ['涉及规范正文或权威的变更，请提供对应规范 ID 和明确理由。', 'Changing a standard or its authority requires a specific standard ID and reason.'],
 
   DOCUMENT_NOT_FOUND: ['未找到文档。请使用知识 ID、路径或无歧义标题。', 'Document not found. Use its ID, path or an unambiguous title.'],
   DOCUMENT_AMBIGUOUS: ['名称对应多个文档。请从候选中选择明确的文档 ID。', 'The name matches multiple documents. Select an explicit document ID.'],

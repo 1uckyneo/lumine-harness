@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { KnowledgeCard, Locale } from '../harness/wiki/types.ts';
-import { api, documentHref, safeRead, safeWrite, translate, typeLabel, type CatalogDocument, type SearchPage } from './reader-common.ts';
+import { api, documentHref, safeRead, safeWrite, translate, typeLabel, documentLabel, type CatalogDocument, type SearchPage } from './reader-common.ts';
 
 type Filters = { scope: 'wiki' | 'all'; repo: string; type: string; freshness: string };
 const initialFilters: Filters = { scope: 'wiki', repo: '', type: '', freshness: '' };
@@ -80,7 +80,7 @@ export function SearchView({ locale, projectId, catalog, initialQuery, legacyCol
   const allRepos = [...new Set(catalog.flatMap((doc) => doc.repositories))].sort();
   const allTypes = [...new Set(catalog.filter((doc) => filters.scope === 'all' || doc.collection === 'wiki').map((doc) => doc.type))].sort();
   const change = (key: keyof Filters, value: string) => setFilters((current) => ({ ...current, [key]: value }));
-  const submit = (event: React.FormEvent) => { event.preventDefault(); queryInput.current?.blur(); };
+  const submit = (event: React.FormEvent) => { event.preventDefault(); void search(null); };
 
   return <section className="search-page">
     <header className="page-heading"><span className="eyebrow">{t('knowledge')}</span><h1>{t('searchPrompt')}</h1></header>
@@ -107,16 +107,16 @@ export function SearchView({ locale, projectId, catalog, initialQuery, legacyCol
     </div>}
     <p className="result-count" role="status">{pending && !resultDocs.length ? t('loading') : `${t('showing')} ${resultDocs.length} / ${resultTotal} ${t('results')}`}</p>
     {error && <div className="status-panel error" role="alert"><p>{error}</p><button onClick={() => void search(null)}>{t('retry')}</button></div>}
-    {!pending && !error && !resultDocs.length && <div className="status-panel"><p>{catalog.length ? t('noResults') : t('empty')}</p><button onClick={() => onCopy(locale === 'zh-CN' ? `请调查当前项目中的“${query}”，核对源码与现有知识，并说明证据和未覆盖范围。` : `Investigate "${query}" in this project. Check source and existing knowledge, and explain evidence and limitations.`)}>{t('copyQuestion')}</button></div>}
+    {!pending && !error && !resultDocs.length && <div className="status-panel"><p>{catalog.length ? t('noResults') : t('empty')}</p><button onClick={() => onCopy(locale === 'zh-CN' ? `请调查项目 ${projectId ?? ''} 中的“${query}”，核对源码与现有知识，并说明证据和未覆盖范围。` : `Investigate "${query}" in project ${projectId ?? "(current project)"}. Check source and existing knowledge, and explain evidence and limitations.`)}>{t('copyQuestion')}</button></div>}
     <div className="search-results">{resultDocs.map(({ doc, hit }) => <article className="result-card" key={doc.id}>
-      <div className="result-meta"><span>{doc.collection === 'wiki' ? t('knowledge') : doc.collection === 'spec' ? t('specs') : doc.collection === 'plan' ? t('plans') : t('validation')}</span>{doc.collection !== 'validation' && doc.freshness !== 'current' && <span className={`status-text ${doc.freshness}`}>{t(doc.freshness)}</span>}</div>
+      <div className="result-meta"><span>{documentLabel(locale, doc)}</span>{doc.collection !== 'validation' && doc.freshness !== 'current' && <span className={`status-text ${doc.freshness}`}>{t(doc.freshness)}</span>}</div>
       <h2><a href={documentHref(doc.id)} onClick={(event) => { event.preventDefault(); onDocument(doc.id); }}>{doc.title}</a></h2>
       <p>{doc.summary}</p>
       {hit?.matches.map((match) => <div className="result-match" key={match.reference}>
         <a href={documentHref(doc.id, match.sectionId)} onClick={(event) => { event.preventDefault(); onDocument(doc.id, match.sectionId); }}>{match.title}</a>
         <p>{match.excerpt}</p>
       </div>)}
-      <small>{doc.repositories.join(' · ')}</small>
+      {doc.repositories.length > 1 && <small>{doc.repositories.join(' · ')}</small>}
     </article>)}</div>
     {query.trim() && hasMore && <button className="load-more" disabled={pending} onClick={() => void search(cursor)}>{pending ? t('loading') : t('more')}</button>}
     {query.trim() && !hasMore && !!resultDocs.length && <p className="end-note">{t('noMore')}</p>}

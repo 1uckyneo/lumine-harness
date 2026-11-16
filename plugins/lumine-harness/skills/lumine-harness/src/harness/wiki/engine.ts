@@ -1,6 +1,7 @@
 import { assertStorageWritable, decodeStorageRecord, gcStorageObjects, readStorageRecord, storageEnabled, storageRecordText, writeStorageRecord } from './storage.ts';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync, realpathSync, unlinkSync } from 'node:fs';
+import { loadProjectConfig } from '../core/project-config.ts';
 import { atomicWrite, configFingerprint, containedPath, hash, readJson, snapshotSources, wikiConfig, withWikiLock, writeJson, relativePath, repositoryRoot } from './files.ts';
 import { assertId, baselineFor, findDocument, formatWikiDocument, isStructuredWikiDocument, listDocuments, parseDocument } from './documents.ts';
 import { threeWayMerge } from './merge.ts';
@@ -8,10 +9,12 @@ import { resolveAliasReference } from './references.ts';
 import { searchKnowledge } from './search.ts';
 import { sourceDispositionStatuses } from './dispositions.ts';
 import { COVERAGE_PATH, readCoverage, validateCoverage } from './coverage.ts';
+import { NAVIGATION_PATH, validateNavigation, validateNormativeChanges } from './navigation-contract.ts';
+import { assertNormativeChanges, editorialPlacement, readNavigation, validateNavigationTargets } from './navigation.ts';
 import { applyTransaction, diskText, jsonText, pendingTransactions, recoverTransactions, statePath, visibleJson, visibleText, type Mutation } from './transactions.ts';
-import type { ApplyResult, Baseline, Candidate, ChangeDeclaration, ChangeManifest, CheckIssue, Collection, CoverageMap, Freshness, KnowledgeDocument, ObservationRecord, Relation, ReviewRecord, SemanticReview, SourceRef, SourceSnapshot, UpdatePacket, UpdateUnit, WatchScope } from './types.ts';
+import type { ApplyResult, Baseline, Candidate, ChangeDeclaration, ChangeManifest, CheckIssue, Collection, Freshness, KnowledgeDocument, KnowledgeMap, ObservationRecord, Relation, ReviewRecord, SemanticReview, SourceRef, SourceSnapshot, UpdatePacket, UpdateUnit, WatchScope } from './types.ts';
 
-export interface QueryOptions { limit?: number; maxChars?: number; repoId?: string; type?: string; freshness?: Freshness; collection?: Collection }
+export interface QueryOptions { limit?: number; maxChars?: number; repoId?: string; type?: string; freshness?: Freshness; collection?: Collection; includeHistory?: boolean }
 export const loadWikiConfig = wikiConfig;
 const snapshotEqual = (a: SourceSnapshot, b: SourceSnapshot): boolean => JSON.stringify(a) === JSON.stringify(b);
 export const sourceFingerprint = (snapshot: SourceSnapshot): string => hash(JSON.stringify(snapshot));
@@ -120,16 +123,21 @@ function observed(root: string, document: KnowledgeDocument, conflicts: Set<stri
   return { ...document, freshness, checkedAt, sourceObservation: { status: checkedAt ? 'observed' : 'not_observed', checkedAt, sourceFingerprint: fingerprint }, semanticReview };
 }
 /** Reading knowledge never walks source repositories. Freshness describes the last explicit observation. */
-export function inspectKnowledge(root: string, collections: Collection[] = ['wiki']): { documents: KnowledgeDocument[]; issues: CheckIssue[] } {
+export function inspectKnowledge(root: string, collections: Collection[] = ['wiki'], options: { includeHistoricalWiki?: boolean } = {}): { documents: KnowledgeDocument[]; issues: CheckIssue[] } {
   const issues: CheckIssue[] = [], conflicts = conflictIds(root), context = localObservationContext(root);
-  const documents = listDocuments(root, collections, { issues }).map((document) => observed(root, document, conflicts, context));
+  const otherCollections = collections.filter((item) => item !== 'wiki');
+  const allWiki = collections.includes('wiki') ? listDocuments(root, ['wiki'], { issues, includeHistorical: true }) : [];
+  const navigation = collections.includes('wiki') ? readNavigation(root, allWiki) : null;
+  const wiki = allWiki.map((document) => ({ ...document, ...editorialPlacement(document, navigation!) }))
+    .filter((document) => options.includeHistoricalWiki || document.editorialRole !== 'history');
+  const documents = [...wiki, ...listDocuments(root, otherCollections, { issues })].map((document) => observed(root, document, conflicts, context));
   return { documents, issues };
 }
 export function listKnowledge(root: string, collections: Collection[] = ['wiki']): KnowledgeDocument[] { return inspectKnowledge(root, collections).documents; }
 export function queryKnowledge(root: string, query: string, options: QueryOptions = {}) {
   for (const [name, value] of Object.entries({ limit: options.limit, maxChars: options.maxChars })) if (value !== undefined && (!Number.isSafeInteger(value) || value < 1)) throw new Error(`QUERY_BUDGET_INVALID:${name}`);
   const config = wikiConfig(root);
-  const documents = listKnowledge(root, [options.collection ?? 'wiki']).filter((document) => (!options.repoId || document.repositories.includes(options.repoId)) && (!options.type || document.type === options.type) && (!options.freshness || document.freshness === options.freshness));
+  const documents = inspectKnowledge(root, [options.collection ?? 'wiki'], { includeHistoricalWiki: options.includeHistory }).documents.filter((document) => (!options.repoId || document.repositories.includes(options.repoId)) && (!options.type || document.type === options.type) && (!options.freshness || document.freshness === options.freshness));
   return searchKnowledge(documents, query, Math.min(options.limit ?? config.maxCards, 30), Math.min(options.maxChars ?? config.maxContextChars, 200000));
 }
 export function resolveKnowledgeReference(root: string, reference: string): string {
@@ -138,6 +146,7 @@ export function resolveKnowledgeReference(root: string, reference: string): stri
 export function showKnowledge(root: string, reference: string): KnowledgeDocument {
   const resolved = resolveKnowledgeReference(root, reference), [id, fragment] = resolved.split('#');
   const document = observed(root, findDocument(root, id), conflictIds(root));
+  if (document.collection === 'wiki') Object.assign(document, editorialPlacement(document, navigationKnowledge(root)));
   if (!fragment) return document;
   const section = document.sections.find((item) => item.id === fragment);
   if (section) return { ...document, body: section.body, markdown: section.body, selection: { kind: 'section', id: fragment } };
@@ -145,7 +154,11 @@ export function showKnowledge(root: string, reference: string): KnowledgeDocumen
   if (diagram) { const markdown = `## ${diagram.title}\n\n${diagram.caption}\n\n\`\`\`mermaid\n${diagram.code}\n\`\`\`\n`; return { ...document, body: markdown, markdown, selection: { kind: 'diagram', id: fragment } }; }
   throw new Error(`FRAGMENT_NOT_FOUND:${document.id}:${fragment}`);
 }
-export function mapKnowledge(root: string): CoverageMap { return readCoverage(root, listKnowledge(root)); }
+export function navigationKnowledge(root: string) { return readNavigation(root, listDocuments(root, ['wiki'], { includeHistorical: true, issues: [] })); }
+export function mapKnowledge(root: string): KnowledgeMap {
+  const wiki = listDocuments(root, ['wiki'], { includeHistorical: true, issues: [] });
+  return { ...readCoverage(root, wiki.filter((document) => document.status !== 'historical')), navigation: readNavigation(root, wiki) };
+}
 export function outlineKnowledge(root: string, reference?: string) {
   const documents = reference ? [showKnowledge(root, reference.split('#')[0])] : listKnowledge(root);
   return { coverage: mapKnowledge(root), documents: documents.map((document) => ({ id: document.id, title: document.title, path: document.path, sections: document.sections.map(({ body: _body, ...section }) => section), diagrams: document.diagrams.map(({ code: _code, ...diagram }) => diagram) })) };
@@ -167,7 +180,9 @@ export function relatedKnowledge(root: string, reference: string, options: { dir
     try { const related = showKnowledge(root, target); return [{ target, kind: edge.kind, note: edge.note, direction: outgoing ? 'out' as const : 'in' as const, title: related.title, path: related.path, summary: related.summary }]; }
     catch { return [{ target, kind: edge.kind, note: edge.note, direction: outgoing ? 'out' as const : 'in' as const, title: target, path: '', summary: '', missing: true }]; }
   });
-  return { id: document.id, relations: selected };
+  const navigation = navigationKnowledge(root);
+  const placement = navigation.groups.flatMap((group) => group.sections.flatMap((section) => section.documents.includes(document.id) ? [{ groupId: group.id, sectionId: section.id, title: section.title, peers: section.documents.filter((id) => id !== document.id) }] : []))[0];
+  return { id: document.id, relations: selected, ...(placement ? { placement } : {}) };
 }
 export function scanWiki(root: string) {
   return withWikiLock(root, () => {
@@ -206,7 +221,8 @@ export function prepareUpdate(root: string, references: string[] = [], manifest?
     if (manifest && references.length) throw new Error('CHANGE_MANIFEST_WITH_REFERENCES');
     const existing = listDocuments(root, ['wiki'], { includeHistorical: true }), ids = new Set(existing.map((doc) => doc.id));
     const declarations: ChangeDeclaration[] = manifest?.changes ?? (references.length ? references.map((ref) => findDocument(root, ref, ['wiki'])) : existing).map((doc) => ({ kind: 'update' as const, id: doc.id }));
-    if (!declarations.length && !manifest?.coverage && !manifest?.referenceMoves?.length) throw new Error('UPDATE_SCOPE_EMPTY');
+    if (!declarations.length && !manifest?.coverage && !manifest?.referenceMoves?.length && manifest?.navigation === undefined) throw new Error('UPDATE_SCOPE_EMPTY');
+    if ((manifest?.navigation !== undefined || manifest?.normativeChanges !== undefined) && loadProjectConfig(root).schemaVersion !== 4) throw new Error('NAVIGATION_MIGRATION_REQUIRED');
     const selected = new Set<string>(), paths = new Set(existing.map((doc) => doc.path.normalize('NFC').toLowerCase())), cache = new Map<string, SourceSnapshot>();
     const units: UpdateUnit[] = declarations.map((change) => {
       assertId(change.id); if (selected.has(change.id) || !['create', 'update'].includes(change.kind)) throw new Error('CHANGE_DUPLICATE_OR_INVALID'); selected.add(change.id);
@@ -227,10 +243,15 @@ export function prepareUpdate(root: string, references: string[] = [], manifest?
       const scopes = uniqueScopes([...(change.replaceWatchScopes ? [] : document ? scopesFor(root, document) : change.watchScopes?.length ? [] : wikiConfig(root).watchScopes), ...(change.watchScopes ?? [])]);
       const sources = snapshotSources(root, refs, scopes, cache);
       if (sources.missing.length) throw new Error(`UPDATE_SOURCES_MISSING:${sources.missing.join(',')}`);
-      return { kind: change.kind, group: manifest?.coverage || manifest?.referenceMoves?.length ? 'directory' : change.group, id: change.id, path: target, currentMarkdown: document?.markdown ?? null, currentRevision: document?.revision ?? null, baseline: document ? baselineFor(root, document.id) : null, sources, sourceRefs: refs, watchScopes: scopes, replaceSources: change.replaceSources, replaceWatchScopes: change.replaceWatchScopes };
+      return { kind: change.kind, group: manifest?.coverage || manifest?.referenceMoves?.length || manifest?.navigation !== undefined || manifest?.normativeChanges?.length ? 'directory' : change.group, id: change.id, path: target, currentMarkdown: document?.markdown ?? null, currentRevision: document?.revision ?? null, baseline: document ? baselineFor(root, document.id) : null, sources, sourceRefs: refs, watchScopes: scopes, replaceSources: change.replaceSources, replaceWatchScopes: change.replaceWatchScopes };
     });
     const packet: UpdatePacket = { schemaVersion: 2, id: randomUUID(), createdAt: new Date().toISOString(), configFingerprint: configFingerprint(root), scope: units.map((unit) => unit.id), units, status: 'prepared', results: [] };
     if (manifest?.coverage) packet.coverage = { before: diskText(root, COVERAGE_PATH), content: validateCoverage(manifest.coverage) };
+    if (manifest?.navigation !== undefined) packet.navigation = { before: diskText(root, NAVIGATION_PATH), content: validateNavigation(manifest.navigation) };
+    if (manifest?.normativeChanges !== undefined) {
+      packet.normativeChanges = validateNormativeChanges(manifest.normativeChanges);
+      if (packet.normativeChanges.length) packet.normativeBase = hash(diskText(root, NAVIGATION_PATH) ?? '');
+    }
     if (manifest?.referenceMoves) { if (manifest.referenceMoves.some((move) => !move.from || !move.to || move.from === move.to)) throw new Error('REFERENCE_MOVE_INVALID'); packet.referenceMoves = { before: diskText(root, '.lumine/wiki-state/document-aliases.json'), entries: manifest.referenceMoves }; }
     writeStorageRecord(root, packetFile(root, packet.id), packet); return packet;
   });
@@ -247,6 +268,10 @@ export function recoverWiki(root: string): { recovered: string[] } {
         const journal = readStorageRecord<{ status: string; candidateHashes?: Record<string, string> } | null>(root, containedPath(root, `.lumine/wiki-state/transactions/${packet.id}-${hash(unit.group ?? unit.id).slice(0, 12)}.json`, false), null);
         if (journal?.status !== 'complete' || packet.results.some((item) => item.id === unit.id && item.status === 'applied')) continue;
         packet.results = packet.results.filter((item) => item.id !== unit.id); packet.results.push({ id: unit.id, status: 'applied', reason: 'Recovered complete change group.', ...(journal.candidateHashes?.[unit.id] ? { candidateHash: journal.candidateHashes[unit.id] } : {}) }); changed = true;
+      }
+      if (!packet.units.length && (packet.navigation || packet.coverage || packet.referenceMoves)) {
+        const directoryJournal = readStorageRecord<{ status: string } | null>(root, `.lumine/wiki-state/transactions/${packet.id}-${hash('directory').slice(0, 12)}.json`, null);
+        changed = directoryJournal?.status === 'complete';
       }
       if (changed) { packet.status = packet.units.every((unit) => packet.results.some((item) => item.id === unit.id && item.status === 'applied')) ? 'applied' : 'partial'; writeStorageRecord(root, file, packet, { receipt: true }); }
     }
@@ -391,6 +416,21 @@ export function applyUpdate(root: string, packetId: string, candidates: Candidat
           mutations.push({ path: COVERAGE_PATH, before: packet.coverage.before, after: jsonText(packet.coverage.content) });
         }
         if (group === 'directory' && packet.referenceMoves) mutations.push({ path: aliasPath, before: packet.referenceMoves.before, after: jsonText(aliases) });
+        const navigationSource = diskText(root, NAVIGATION_PATH);
+        const nextNavigation = group === 'directory' ? packet.navigation : undefined;
+        if ((navigationSource !== null || nextNavigation) && loadProjectConfig(root).schemaVersion !== 4) throw new Error('NAVIGATION_MIGRATION_REQUIRED');
+        if (nextNavigation && navigationSource !== nextNavigation.before) throw new Error('NAVIGATION_CHANGED');
+        if (packet.normativeBase && packet.normativeBase !== hash(navigationSource ?? '')) throw new Error('NAVIGATION_CHANGED');
+        const previousNavigation = navigationSource === null ? null : validateNavigation(JSON.parse(navigationSource));
+        const navigation = nextNavigation ? validateNavigation(nextNavigation.content) : previousNavigation;
+        if (navigation) {
+          const issues = validateNavigationTargets(navigation, prospective.values());
+          const existingIssues = new Set(previousNavigation ? validateNavigationTargets(previousNavigation, previous.values()).map((item) => `${item.code}:${item.document ?? ''}`) : []);
+          const issue = issues.find((item) => item.severity === 'error' && (nextNavigation || !existingIssues.has(`${item.code}:${item.document ?? ''}`) || changed.has(item.document ?? '')));
+          if (issue) throw new Error(`${issue.code}:${issue.document ?? ''}`);
+        }
+        assertNormativeChanges(previousNavigation, navigation, previous, prospective, validateNormativeChanges(packet.normativeChanges ?? []));
+        if (nextNavigation) mutations.push({ path: NAVIGATION_PATH, before: nextNavigation.before, after: jsonText(navigation) });
         applyTransaction(root, { schemaVersion: 1, id: `${packetId}-${hash(group).slice(0, 12)}`, status: 'pending', candidateHashes: Object.fromEntries(units.map(unit => [unit.id, hash(JSON.stringify(byId.get(unit.id)!))])), mutations }, options.failAfterWrites);
         recordLocalObservations(root, mutations.filter(mutation => mutation.path.startsWith('.lumine/wiki-state/observations/') && mutation.after).map(mutation => decodeStorageRecord<ObservationRecord>(root, JSON.parse(mutation.after!))), environment);
         for (const item of prepared) results.set(item.result.id, item.result);
@@ -415,6 +455,7 @@ export function recordUpdateDecision(root: string, packetId: string, id: string,
 }
 export function checkWiki(root: string): { status: 'passed' | 'failed'; issues: CheckIssue[]; checked: string[]; notVerified: string[] } {
   const { documents, issues } = inspectKnowledge(root), checked = documents.map((doc) => doc.id);
+  issues.push(...navigationKnowledge(root).issues);
   for (const document of documents) {
     for (const issue of document.issues) issues.push({ code: issue.split(':')[0], severity: 'error', document: document.id, message: issue });
     for (const relation of document.relations) try { showKnowledge(root, relation.target); } catch { issues.push({ code: 'RELATION_NOT_FOUND', severity: 'error', document: document.id, message: relation.target }); }
@@ -424,4 +465,19 @@ export function checkWiki(root: string): { status: 'passed' | 'failed'; issues: 
   catch (error) { issues.push({ code: 'COVERAGE_INVALID', severity: 'error', message: error instanceof Error ? error.message : 'COVERAGE_INVALID' }); }
   for (const id of pendingTransactions(root)) issues.push({ code: 'UPDATE_INCOMPLETE', severity: 'error', message: id });
   return { status: issues.some((issue) => issue.severity === 'error') ? 'failed' : 'passed', issues, checked, notVerified: ['semantic accuracy', 'runtime behavior', 'human acceptance'] };
+}
+
+/** Read-only editorial signals, with source and link diagnostics from the regular Wiki check. */
+export function auditKnowledge(root: string): ReturnType<typeof checkWiki> {
+  const checked = checkWiki(root);
+  const navigation = navigationKnowledge(root);
+  if (navigation.mode === 'legacy' && !navigation.issues.length) {
+    checked.issues.push({ code: 'NAVIGATION_LEGACY', severity: 'warning', message: 'Use an editorial manifest to record actual reader journeys and authorized standards.' });
+  }
+  try {
+    for (const topic of readCoverage(root).topics) if (topic.status === 'planned' || topic.status === 'partial') {
+      checked.issues.push({ code: 'COVERAGE_OPEN', severity: 'warning', document: topic.id, message: topic.title });
+    }
+  } catch { /* The regular check already reports invalid coverage. */ }
+  return checked;
 }

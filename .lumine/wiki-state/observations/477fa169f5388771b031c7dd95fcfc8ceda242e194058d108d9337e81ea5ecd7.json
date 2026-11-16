@@ -3,14 +3,14 @@
   "kind": "lumine-wiki-state",
   "value": {
     "id": "lumine-workflow",
-    "revision": "eb9e473783de84d8601b4c3c77ff6b60de53cb0ac9a4f11cb433a4caeb4247e1",
-    "checkedAt": "2026-10-14T05:07:30.062Z",
-    "sourceFingerprint": "495a696c0749a088460f8037765c8a2f13f9d516718554e6f658b0b8edcae960",
+    "revision": "a6ce6f6ebc36943de7c68d9cb865dfd8158106a10f84999d2d247f9513cfa2ac",
+    "freshness": "current",
+    "checkedAt": "2026-11-16T10:52:25.425Z",
+    "sourceFingerprint": "d31cd5dc388b6e9d988cb04f59ac82e19784bcf41e36b5ca4b743ef1f76a2c8a",
     "sources": {
-      "$lumineObject": "495a696c0749a088460f8037765c8a2f13f9d516718554e6f658b0b8edcae960",
+      "$lumineObject": "d31cd5dc388b6e9d988cb04f59ac82e19784bcf41e36b5ca4b743ef1f76a2c8a",
       "kind": "json",
       "bytes": 6291
-    },
-    "freshness": "current"
+    }
   }
 }

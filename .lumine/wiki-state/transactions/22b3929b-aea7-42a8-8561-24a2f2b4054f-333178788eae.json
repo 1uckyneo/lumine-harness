@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "22b3929b-aea7-42a8-8561-24a2f2b4054f-333178788eae",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "candidateHashes": {
+      "lumine-project-overview": "58484acaeb59f1c8f90746aba9acc6acf837203c0725fe7a126d1603dd7a423f",
+      "lumine-wiki": "b51c4f8daa506ad4167138745cb10f3a6885c3bbfe31d4a9fdbc4a4e5f6d77f7",
+      "lumine-wiki-reader": "7472187a6e5c4b9bc029c70a7d3cfdf421a05bd7f76d8fc0eeba0336ad99a709",
+      "lumine-workflow": "58e48bc4217df5e435ead10448c3c96891a2488b6324129754aa7e45f7ea13db"
+    },
+    "mutationHashes": [
+      {
+        "path": "docs/repo-wiki/README.md",
+        "beforeHash": null,
+        "afterHash": "24c096f55fc390cf4a291e7bec2e61274d4dcf921ac03ce0cc637520d51a7b7a"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/f80eedd88a0f341878d1745a49760ecfeb0877cc8d1b3dce1f93db2059bea31c.json",
+        "beforeHash": null,
+        "afterHash": "5ec567176df943e9c54de6c5ea7e3210a795ced2ee81964c550653fe504a30eb"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/f80eedd88a0f341878d1745a49760ecfeb0877cc8d1b3dce1f93db2059bea31c.json",
+        "beforeHash": null,
+        "afterHash": "6a4face64c7f53229cb995bb1ff3b53fde81a44fc3e6b45be650e2fc46ab52a8"
+      },
+      {
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+        "beforeHash": "af6288feb02d532871fde72124375da554d277a393e1ab5103d5f56312de6bd6",
+        "afterHash": "4f6497b90eb83a2d871d3c426e346327dbb26c17004ce4770194db73cd1506af"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/644f388d251fd2bd3cea369d7d36c63f688f22c24ccbb8a04fee423cf0fe6dac.json",
+        "beforeHash": "936229e68dd0664cb0e1f18509b149f61e72219740ddbaa6dcdafaca2404caff",
+        "afterHash": "c19802b2e76fb1300106aac1993be4bdaa95bedea8b4195029fa4a5996060877"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/644f388d251fd2bd3cea369d7d36c63f688f22c24ccbb8a04fee423cf0fe6dac.json",
+        "beforeHash": "b3ca2ea5572f2ad9c5a373143c15e444d80f8c6587c794964f20a53955798be0",
+        "afterHash": "4715a198e626268036e24a93951049f8bb22e14b06b8a14a4f0384430acbbb67"
+      },
+      {
+        "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+        "beforeHash": "ad701ef62640febde449cfee3a1d4b3a58d091f20a5d100706d07857a0e26fb6",
+        "afterHash": "5a0c6e34526a9bdb5477930eefad9b2dca8a8d56cfb0aebeae7f31365c0e5df9"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/898a5b13231c2c9c18873ec4012a34e8f2d6d47b30a94972fdcdc0d909d347e9.json",
+        "beforeHash": "7dc2d917a941c21c33a4bca10c259b2eac9646ac6029c52c8b9a8dd8f1c3d1ca",
+        "afterHash": "a48dc811fbb6c93b1972a61c01b1c88f75552e3867e94f19064f140e4e910cff"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/898a5b13231c2c9c18873ec4012a34e8f2d6d47b30a94972fdcdc0d909d347e9.json",
+        "beforeHash": "278399092078d17ea93e4518efcee446733e839d9ae91482291729f17665f730",
+        "afterHash": "131484b179450c598969eb54f25d852bc213d2f8415f1faa9063d3e25c417e84"
+      },
+      {
+        "path": "docs/repo-wiki/四个 Skill、产品方案与任务证据.md",
+        "beforeHash": "eb9e473783de84d8601b4c3c77ff6b60de53cb0ac9a4f11cb433a4caeb4247e1",
+        "afterHash": "a6ce6f6ebc36943de7c68d9cb865dfd8158106a10f84999d2d247f9513cfa2ac"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/477fa169f5388771b031c7dd95fcfc8ceda242e194058d108d9337e81ea5ecd7.json",
+        "beforeHash": "34ae95434b420312e86b71621358471312a1855e7e3c7376c46f701accfd3869",
+        "afterHash": "bc016ce6980eac8128090e200507bc7ecdb24d7489dcc5fbece3fe15f0002745"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/477fa169f5388771b031c7dd95fcfc8ceda242e194058d108d9337e81ea5ecd7.json",
+        "beforeHash": "0748116a42928881685deb38432fe0ad0e7faf25955da9465f469975a4c45c88",
+        "afterHash": "562c473c44f21ffd4e84a333fe1e4b6f4c759e8533e92c65a3b813d1a9dac059"
+      },
+      {
+        "path": ".lumine/wiki-state/coverage.json",
+        "beforeHash": "4f2f7bcc0338744e8e28dee6a55a96a2e68ef3d2744f224accd357d336228173",
+        "afterHash": "c10c917cab93343641d43861296997e09406bdc9fad8fc8a6b5fe9e548239685"
+      },
+      {
+        "path": ".lumine/wiki-state/navigation.json",
+        "beforeHash": null,
+        "afterHash": "a01ffef49d1dd8b32df43fd31811d7e60d90f3d06ad8d58a1cac0910a06e4bdb"
+      }
+    ]
+  }
+}

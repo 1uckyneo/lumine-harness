@@ -41,7 +41,7 @@ function resolveProjectPath(root, relative, name = "path") {
 function loadProjectConfig(root) {
 	const file = resolveProjectPath(root, ".lumine/project.json", "project config");
 	const raw = existsSync(file) ? object(JSON.parse(readFileSync(file, "utf8")), "project config") : {};
-	if (raw.schemaVersion !== undefined && raw.schemaVersion !== 2 && raw.schemaVersion !== 3) throw new Error("Unsupported project schemaVersion; use the upgrade tool.");
+	if (raw.schemaVersion !== undefined && raw.schemaVersion !== 2 && raw.schemaVersion !== 3 && raw.schemaVersion !== 4) throw new Error("Unsupported project schemaVersion; use the upgrade tool.");
 	if (raw.workflowVersion !== undefined && raw.workflowVersion !== 2) throw new Error("Unsupported workflowVersion");
 	const locale = raw.locale ?? "en";
 	if (locale !== "zh-CN" && locale !== "en") throw new Error("locale must be zh-CN or en");
@@ -94,7 +94,7 @@ function loadProjectConfig(root) {
 	const autonomy = raw.autonomy === undefined ? {} : object(raw.autonomy, "autonomy");
 	return {
 		...raw,
-		schemaVersion: raw.schemaVersion === 3 ? 3 : 2,
+		schemaVersion: raw.schemaVersion === 4 ? 4 : raw.schemaVersion === 3 ? 3 : 2,
 		locale,
 		displayName: typeof raw.displayName === "string" ? raw.displayName.trim() : undefined,
 		workflowVersion: 2,

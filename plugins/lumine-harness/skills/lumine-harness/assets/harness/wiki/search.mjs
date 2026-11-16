@@ -70,14 +70,10 @@ function directBody(document, section) {
 }
 function searchKnowledge(documents, query, limit, budget, offset = 0, bounded = true) {
 	const terms = searchTerms(query);
-	if (!terms.length && query.trim()) return {
-		query,
-		cards: [],
-		total: 0,
-		contextChars: 2,
-		noAnswer: true
-	};
+	const normalizeName = (name) => name.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase();
+	const name = normalizeName(query);
 	const entries = documents.map((document) => {
+		const exact = name && normalizeName(document.title) === name ? 2 : name && document.aliases.some((alias) => normalizeName(alias) === name) ? 1 : 0;
 		const titleTerms = searchTerms(`${document.title} ${document.aliases.join(" ")} ${document.tags.join(" ")}`);
 		const metadata = `${document.summary} ${document.sources.map((source) => source.path + " " + (source.note ?? "")).join(" ")} ${document.relations.map((relation) => relation.target + " " + (relation.note ?? "")).join(" ")} ${document.diagrams.map((diagram) => `${diagram.title} ${diagram.caption} ${diagram.code}`).join(" ")}`;
 		const sections = document.sections.length ? document.sections : [{
@@ -92,24 +88,27 @@ function searchKnowledge(documents, query, limit, budget, offset = 0, bounded = 
 		}];
 		return {
 			document,
+			exact,
 			titleTerms,
-			metadata,
-			sections: sections.map((section) => ({
-				section,
-				text: directBody(document, section),
-				tokens: searchTerms(directBody(document, section))
-			}))
+			metadata: searchTerms(metadata),
+			sections: sections.map((section) => {
+				const text = directBody(document, section);
+				return {
+					section,
+					text,
+					tokens: searchTerms(text)
+				};
+			})
 		};
 	});
 	const frequency = new Map();
-	for (const term of terms) frequency.set(term, entries.filter((entry) => entry.titleTerms.includes(term) || searchTerms(entry.metadata).includes(term) || entry.sections.some((section) => section.tokens.includes(term))).length);
+	for (const term of terms) frequency.set(term, entries.filter((entry) => entry.titleTerms.includes(term) || entry.metadata.includes(term) || entry.sections.some((section) => section.tokens.includes(term))).length);
 	const ranked = entries.map((entry) => {
-		const metadata = searchTerms(entry.metadata);
 		const matchSet = new Set();
 		const sectionScores = entry.sections.map(({ section, text, tokens }) => {
 			let score = 0;
 			for (const term of terms) {
-				const inTitle = entry.titleTerms.includes(term), inSection = searchTerms(section.title).includes(term), inBody = tokens.includes(term), inMeta = metadata.includes(term);
+				const inTitle = entry.titleTerms.includes(term), inSection = searchTerms(section.title).includes(term), inBody = tokens.includes(term), inMeta = entry.metadata.includes(term);
 				if (inTitle || inSection || inBody || inMeta) matchSet.add(term);
 				const idf = Math.log(1 + (entries.length + 1) / ((frequency.get(term) ?? 0) + 1));
 				score += idf * (inTitle ? 5 : 0) + idf * (inSection ? 3 : 0) + idf * (inBody ? 2 / (.8 + tokens.length / 300) : 0) + idf * (inMeta ? .35 : 0);
@@ -127,9 +126,9 @@ function searchKnowledge(documents, query, limit, budget, offset = 0, bounded = 
 			matched,
 			score,
 			sectionScores,
-			relevant: !terms.length || matched.length > 0 && coverage >= .25
+			relevant: entry.exact > 0 || !name || matched.length > 0 && coverage >= .25
 		};
-	}).filter((entry) => entry.relevant).sort((a, b) => b.score - a.score || a.document.title.localeCompare(b.document.title));
+	}).filter((entry) => entry.relevant).sort((a, b) => b.exact - a.exact || b.score - a.score || Number(b.document.status === "current") - Number(a.document.status === "current") || a.document.title.localeCompare(b.document.title));
 	const cards = [];
 	for (const entry of ranked.slice(offset)) {
 		if (cards.length >= limit) break;
@@ -165,6 +164,8 @@ function searchKnowledge(documents, query, limit, budget, offset = 0, bounded = 
 			sourceObservation: document.sourceObservation,
 			semanticReview: document.semanticReview
 		};
+		if (document.editorialRole) item.editorialRole = document.editorialRole;
+		if (document.normativeScope) item.normativeScope = document.normativeScope;
 		if (bounded && JSON.stringify([...cards, item]).length > budget) {
 			item.matches = item.matches.slice(0, 1).map((match) => ({
 				...match,

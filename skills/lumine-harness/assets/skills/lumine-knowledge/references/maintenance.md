@@ -69,3 +69,13 @@ AGENTS 明确授权的规范附件必须按任务完整读取，不由普通检�
 ```
 
 预演是只读操作，应用须核对精确清单、收益和受保护对象，并在当前授权内执行。expect 是计划文件原始字节的 SHA-256。对象按内容寻址复用，完成包／事务保留轻量回执，活动候选与三方生成基线仍受保护。不要手删 updates、transactions 或 objects；未知、损坏或并发变更先解决具体问题。迁移将项目 schemaVersion 升为 3，workflowVersion 仍为 2；旧 Runtime 拒绝写入。恢复资料留在已忽略的 .lumine-migrations，不能自动删除；回滚遇后续人工修改报告冲突，降级须先恢复旧状态与配置。当前状态、恢复备份和 Git 历史分别统计，普通提交不会抹去历史体积。
+
+## 维护阅读路径
+
+先运行 `wiki audit --json` 查未入目录、职责冲突与可读性线索。对照真实业务检查摘要、角色、入口、例外和图。需要拆页或替换时，维护旧引用、跨模块关系和失效状态。工具不能判断业务语义；作者和独立审阅分别取证。
+
+先升级 Runtime，预演使用 `wiki storage compact --plan --editorial --output <plan.json> --json`，按文件指纹应用。这将配置升级到 schema 4，保留 workflowVersion 2 和对象存储格式。普通读取不升级。回退前先恢复版本围栏及后续编排变更，避免旧写入器读写新状态。
+
+在现有变更清单附 `navigation`，含 `schemaVersion: 1`、当前首页的 Wiki ID `overview`、`groups`、`unlisted` 和 `norms`。group 的 id 为 understand、operate 或 reference，sections 以 `id/title/description?/documents` 列稳定文档 ID。每页一个主要位置或 `unlisted: [{id,reason}]`。历史留在查找与核实，当前业务与场景放在理解项目。
+
+`norms: [{id,scope}]` 登记由 AGENTS 授权且放在开发与运行的规范；以项目的实际规范索引为准。增加、减少或修改权威范围和规范正文时，先核对人已授权的具体规则，再附 `normativeChanges: [{id,reason}]`。工具记录变更意图，授权来自项目和用户。安全规范保持可见且可完整读取。只调整导航时 `changes` 和候选列表可为空，仍使用同一事务、检查和恢复方式。

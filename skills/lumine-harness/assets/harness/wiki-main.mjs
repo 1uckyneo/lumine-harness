@@ -3,10 +3,10 @@
 import { requireHarnessRoot } from "./core/root-resolver.mjs";
 import { applyCompaction, checkStorage, inspectStorage, planCompaction, recoverCompaction } from "./wiki/compaction.mjs";
 import { recordSourceDisposition } from "./wiki/dispositions.mjs";
-import { applyUpdate, checkWiki, inspectKnowledge, loadWikiConfig, mapKnowledge, outlineKnowledge, prepareUpdate, queryKnowledge, recordSemanticReview, recordUpdateDecision, recoverWiki, relatedKnowledge, scanWiki, showKnowledge } from "./wiki/engine.mjs";
-import { migrateWikiDocumentFormat, planWikiDocumentFormat } from "./wiki/format-migration.mjs";
+import { applyUpdate, auditKnowledge, checkWiki, inspectKnowledge, loadWikiConfig, mapKnowledge, outlineKnowledge, prepareUpdate, queryKnowledge, recordSemanticReview, recordUpdateDecision, recoverWiki, relatedKnowledge, scanWiki, showKnowledge } from "./wiki/engine.mjs";
 import { renderKnowledgeMapMarkdown } from "./wiki/map-markdown.mjs";
 import { serveWiki } from "./wiki/server.mjs";
+import { migrateWikiDocumentFormat, planWikiDocumentFormat } from "./wiki/format-migration.mjs";
 import { wikiDiagnostic, wikiStatus } from "./wiki/messages.mjs";
 import path from "node:path";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -30,11 +30,13 @@ async function runWikiCommand(argv) {
 		args.splice(index, 1);
 		return true;
 	};
-	const outline = flag("--outline"), full = flag("--full"), markdown = flag("--markdown"), storagePlan = flag("--plan"), rollback = flag("--rollback");
+	const outline = flag("--outline"), full = flag("--full"), markdown = flag("--markdown"), storagePlan = flag("--plan"), rollback = flag("--rollback"), editorial = flag("--editorial"), includeHistory = flag("--include-history");
 	if (outline && full) throw new Error("SHOW_MODE_CONFLICT");
 	const jsonIndex = args.indexOf("--json");
 	if (jsonIndex >= 0) args.splice(jsonIndex, 1);
 	if (markdown && (args[0] !== "map" || jsonIndex >= 0)) throw new Error("MARKDOWN_MODE_CONFLICT");
+	if (editorial && !(args[0] === "storage" && args[1] === "compact" && storagePlan && !applyFile)) throw new Error("NAVIGATION_PLAN_REQUIRED");
+	if (includeHistory && args[0] !== "query") throw new Error("UNKNOWN_COMMAND");
 	const root = requireHarnessRoot(rootArg ? { root: rootArg } : { cwd: process.cwd() }), config = loadWikiConfig(root);
 	const output = (value) => {
 		if (jsonIndex >= 0 || !value || typeof value !== "object") {
@@ -44,6 +46,10 @@ async function runWikiCommand(argv) {
 		const data = value, zh = config.locale === "zh-CN";
 		let lines;
 		if (typeof data.markdown === "string") lines = [data.markdown];
+		else if (data.navigation && Array.isArray(data.topics)) lines = [renderKnowledgeMapMarkdown(value, (reference) => showKnowledge(root, reference), {
+			locale: config.locale,
+			wikiRoot: config.root
+		})];
 		else if (Array.isArray(data.topics)) lines = [zh ? "知识地图" : "Knowledge map", ...data.topics.map((topic) => `${topic.parentId ? "  " : ""}${topic.title} · ${topic.id} [${topic.status}] ${topic.documentRefs.join(", ")}`)];
 		else if (data.coverage && Array.isArray(data.documents)) lines = data.documents.flatMap((doc) => [`${doc.title} · ${doc.id}`, ...doc.sections.map((section) => `${"  ".repeat(section.level)}${section.title} · ${doc.id}#${section.id}`)]);
 		else if (Array.isArray(data.relations)) lines = data.relations.map((relation) => `${relation.direction} ${relation.kind}: ${relation.title} · ${relation.target}${relation.note ? " — " + relation.note : ""}`);
@@ -85,7 +91,7 @@ async function runWikiCommand(argv) {
 			if (args[1] === "inspect" && args.length === 2) result = inspectStorage(root);
 			else if (args[1] === "check" && args.length === 2) result = checkStorage(root);
 			else if (args[1] === "compact" && args.length === 2 && storagePlan && !applyFile) {
-				const plan = planCompaction(root), bytes = JSON.stringify(plan, null, 2) + "\n";
+				const plan = planCompaction(root, { editorial }), bytes = JSON.stringify(plan, null, 2) + "\n";
 				if (outputFile) {
 					writeFileSync(path.resolve(outputFile), bytes, { flag: "wx" });
 					result = {
@@ -163,7 +169,8 @@ async function runWikiCommand(argv) {
 				repoId,
 				type,
 				freshness,
-				collection
+				collection,
+				includeHistory
 			}));
 			break;
 		case "show":
@@ -171,6 +178,12 @@ async function runWikiCommand(argv) {
 			break;
 		case "check": {
 			const result = checkWiki(root);
+			output(result);
+			if (result.status === "failed") process.exitCode = 1;
+			break;
+		}
+		case "audit": {
+			const result = auditKnowledge(root);
 			output(result);
 			if (result.status === "failed") process.exitCode = 1;
 			break;
@@ -214,10 +227,11 @@ async function runWikiCommand(argv) {
 				description: config.locale === "zh-CN" ? "文本知识库：检索、核实、更新和阅读。" : "Text knowledge: query, verify, update and read.",
 				commands: [
 					"wiki storage inspect|check",
-					"wiki storage compact --plan [--output plan.json]",
+					"wiki storage compact --plan [--editorial] [--output plan.json]",
 					"wiki storage compact --apply <plan.json> --expect <plan-sha256>",
 					"wiki storage recover <operation-id> [--rollback]",
 					"wiki map [--markdown]",
+					"wiki audit",
 					"wiki related <id> [--direction in|out|both]",
 					"wiki show [id] --outline",
 					"wiki show <id#fragment>",
@@ -228,7 +242,7 @@ async function runWikiCommand(argv) {
 					"wiki classify <repo:path> --topic <id> --scope <repo:path> --fingerprint <sha256> --decision needs-explanation|covered|deferred --reason <text>",
 					"wiki format plan",
 					"wiki format apply <document-id>",
-					"wiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan]",
+					"wiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan] [--include-history]",
 					"wiki show <id|path|title>",
 					"wiki check",
 					"wiki update prepare [document-id...]",

@@ -92,3 +92,7 @@ Skill 发现方式和 Hook 能力改变自动化方式，不改变 Spec、Plan�
 ## 当前请求的识别
 
 可靠宿主 userTurnId 用于识别新请求；缺少时由 Agent 调用公共 session begin/show，以稳定 request-id 声明模式及可选原任务。自动续跑／Hook 重试沿用作用域，各会话独立。本机作用域不复制 Spec／Plan；阶段确认仍按实际受影响范围处理。未知范围不能静默通过，实施仍校验绑定及证据。同一作用域禁止以诊断降级绕过。社区宿主的协议测试不等于真实宿主运行，专项证据见[验证记录](validation/Lumine状态瘦身与请求上下文验证.md)。
+
+## 新版知识编排
+
+Codex 与 Trae 使用同一套知识 Skill、只读阅读器和显式升级流程。先更新 Runtime，再预演项目 schema 4 的编排启用。产品 workflowVersion 保持 2。低版本 Runtime 会拒绝项目新格式。宿主协议用例和真实宿主回执各自记录，安装工具成功不代表宿主已加载新的 Hook。

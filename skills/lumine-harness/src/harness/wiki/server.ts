@@ -4,7 +4,7 @@ import path from 'node:path';
 import { resolveHarnessRuntimeRoot } from '../core/runtime-layout.ts';
 import { loadProjectConfig } from '../core/project-config.ts';
 import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConfig } from './files.ts';
-import { inspectKnowledge, mapKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from './engine.ts';
+import { inspectKnowledge, mapKnowledge, navigationKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from './engine.ts';
 import { searchKnowledgePage } from './search.ts';
 import { isRegisteredValidationDocumentId, registeredValidationDocuments, showRegisteredValidation } from './validation-documents.ts';
 import { baselineFor } from './documents.ts';
@@ -48,10 +48,11 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
       const url = new URL(request.url ?? '/', origin);
       if (url.pathname === '/api/config') { json(response, 200, { locale: config.locale, projectId, displayName: project.displayName ?? null, repositories: config.repositories.map((repo) => ({ id: repo.id })), maxCards: config.maxCards }); return; }
       if (url.pathname === '/api/catalog') {
-        const primary = inspectKnowledge(root, ['wiki', 'spec', 'plan']), validation = registeredValidationDocuments(root);
+        const primary = inspectKnowledge(root, ['wiki', 'spec', 'plan'], { includeHistoricalWiki: true }), validation = registeredValidationDocuments(root);
         json(response, 200, { issues: [...primary.issues, ...validation.issues], documents: [...primary.documents, ...validation.documents].map(({ markdown: _markdown, body: _body, diagrams, sections, ...document }) => ({ ...document, sections: sections.map(({ body: _sectionBody, ...section }) => section), diagrams: diagrams.map(({ code: _code, ...diagram }) => diagram) })) }); return;
       }
       if (url.pathname === '/api/map') { json(response, 200, mapKnowledge(root)); return; }
+      if (url.pathname === '/api/navigation') { json(response, 200, navigationKnowledge(root)); return; }
       if (url.pathname === '/api/related') {
         const id = url.searchParams.get('id') ?? '';
         json(response, 200, isRegisteredValidationDocumentId(root, id) ? { id: showRegisteredValidation(root, id).id, relations: [] } : relatedKnowledge(root, id)); return;
@@ -70,11 +71,11 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
         const repo = url.searchParams.get('repo') ?? '', type = url.searchParams.get('type') ?? '', freshness = url.searchParams.get('freshness') ?? '';
         if (freshness && !['current', 'stale', 'unverified', 'missing-source', 'conflict'].includes(freshness)) throw new Error('SEARCH_FILTER_INVALID');
         if (repo && !config.repositories.some((item) => item.id === repo)) throw new Error('SEARCH_FILTER_INVALID');
-        const primary = inspectKnowledge(root, scope === 'all' ? ['wiki', 'spec', 'plan'] : ['wiki']);
+        const primary = inspectKnowledge(root, scope === 'all' ? ['wiki', 'spec', 'plan'] : ['wiki'], { includeHistoricalWiki: scope === 'all' });
         const validation = scope === 'all' ? registeredValidationDocuments(root) : { documents: [], issues: [] };
         const documents = [...primary.documents, ...validation.documents]
           .filter((document) => (!repo || document.repositories.includes(repo)) && (!type || document.type === type) && (!freshness || document.freshness === freshness));
-        const fingerprint = hash(JSON.stringify({ query, scope, repo, type, freshness, documents: documents.map((document) => [document.id, document.path, document.revision, document.freshness]) }));
+        const fingerprint = hash(JSON.stringify({ query, scope, repo, type, freshness, documents: documents.map((document) => [document.id, document.path, document.revision, document.freshness, document.editorialRole, document.normativeScope]) }));
         const rawCursor = url.searchParams.get('cursor');
         const cursor = rawCursor ? decodeSearchCursor(rawCursor) : null;
         if (cursor && cursor.fingerprint !== fingerprint) throw new Error('SEARCH_CURSOR_STALE');

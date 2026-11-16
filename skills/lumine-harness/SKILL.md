@@ -31,3 +31,7 @@ Install the [stage handoff guidance](assets/locales/en/skills/lumine-plan/refere
 After first adoption, continue with `lumine-knowledge` for project-specific collaboration and operation guides, artifact integration, and major-module knowledge. Keep minimal root rules with direct Wiki/standards links; do not generate root ARCHITECTURE by default. Reuse or generate service extensions from project facts. Users may narrow or defer work. Report installation, content completion, and actual verification separately using existing Validation, coverage, and task knowledge; preserve recovery positions. Upgrades address affected guidance and gaps rather than regenerating the whole library.
 
 首次采用后接续 `lumine-knowledge`，交付项目化协作／操作指南、资料归位与主要模块知识。根规则保持最小并直达 Wiki／规范，不默认生成根 ARCHITECTURE；服务扩展按项目事实复用或生成。用户可缩小或延后。用已有 Validation、coverage 和 task knowledge 分别报告安装、内容完成、实际验证，保留恢复位置；升级处理受影响指引与缺口，不重新全库生成。
+
+Guide readers from a project overview to its actual features or capabilities. Initial adoption sets the editorial direction; everyday Knowledge maintains explanations, diagrams, navigation, and evidence as the project changes. Activate editorial navigation through the explicit versioned migration before applying editorial updates.
+
+首次采用按真实功能或核心能力建立读者路径。接入之后由 Knowledge 持续维护正文、图示、导航和证据。先通过显式迁移启用编排版本，再应用编排变更。

@@ -45,8 +45,8 @@ export async function drawMermaid(
         startOnLoad: false, securityLevel: 'strict', theme: 'base', htmlLabels: false,
         flowchart: { htmlLabels: false }, maxTextSize: 50_000, maxEdges: 300,
         themeVariables: {
-          primaryColor: '#EAF3ED', primaryTextColor: '#24302D', primaryBorderColor: '#91A99A',
-          lineColor: '#527662', fontFamily: 'system-ui, sans-serif', secondaryColor: '#F7F8F5',
+          primaryColor: '#F3E9DA', primaryTextColor: '#29251E', primaryBorderColor: '#B8896F',
+          lineColor: '#876B58', fontFamily: 'system-ui, sans-serif', secondaryColor: '#F7F3EB',
           tertiaryColor: '#FFFFFF',
         },
       });

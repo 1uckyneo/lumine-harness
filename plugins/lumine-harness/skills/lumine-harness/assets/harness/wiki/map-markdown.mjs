@@ -63,6 +63,38 @@ function renderKnowledgeMapMarkdown(map, resolve, options) {
 			return `${code(reference)} · ${t.missing}`;
 		}
 	};
+	const navigation = "navigation" in map ? map.navigation : undefined;
+	if (navigation?.mode === "editorial") {
+		const groupLabels = options.locale === "zh-CN" ? {
+			understand: "理解项目",
+			operate: "开发与运行",
+			reference: "查找与核实"
+		} : {
+			understand: "Understand",
+			operate: "Develop and operate",
+			reference: "Find and verify"
+		};
+		lines.splice(2, 1, options.locale === "zh-CN" ? "按阅读目标组织；覆盖情况见文末。" : "Organized by reading goal, with source coverage below.");
+		if (navigation.overview) lines.push(link(navigation.overview), "");
+		for (const group of navigation.groups) {
+			if (!group.sections.length) continue;
+			lines.push(`## ${groupLabels[group.id]}`, "");
+			for (const section of group.sections) {
+				lines.push(`### ${text(section.title)}`, "");
+				if (section.description) lines.push(text(section.description), "");
+				for (const id of section.documents) {
+					const norm = navigation.norms.find((item) => item.id === id);
+					lines.push(`- ${link(id)}${norm ? ` · ${options.locale === "zh-CN" ? "必读范围" : "Required for"}：${text(norm.scope)}` : ""}`);
+				}
+				lines.push("");
+			}
+		}
+		if (navigation.unlisted.length) {
+			lines.push(`## ${options.locale === "zh-CN" ? "独立索引资料" : "Unlisted reference pages"}`, "");
+			lines.push(...navigation.unlisted.map((item) => `- ${link(item.id)} · ${text(item.reason)}`), "");
+		}
+		lines.push(`## ${options.locale === "zh-CN" ? "来源覆盖" : "Source coverage"}`, "");
+	}
 	const render = ({ topic, children }, depth) => {
 		const indent = "  ".repeat(depth);
 		lines.push(`${indent}- **${text(topic.title)}** · ${t[topic.status]}`);
@@ -74,7 +106,10 @@ function renderKnowledgeMapMarkdown(map, resolve, options) {
 	const { roots, unresolved } = topicTree(map);
 	if (!roots.length) lines.push(t.empty);
 	for (const root of roots) render(root, 0);
-	if (map.unmappedDocumentIds.length) lines.push("", `## ${t.unmapped}`, "", ...map.unmappedDocumentIds.map((id) => `- ${link(id)}`));
+	if (map.unmappedDocumentIds.length) {
+		const heading = navigation?.mode === "editorial" ? options.locale === "zh-CN" ? "### 尚未关联来源覆盖主题" : "### No source coverage topic assigned" : `## ${t.unmapped}`;
+		lines.push("", heading, "", ...map.unmappedDocumentIds.map((id) => `- ${link(id)}`));
+	}
 	if (unresolved.length) lines.push("", `## ${t.unresolved}`, "", ...unresolved.map((topic) => `- ${text(topic.title)} · ${code(topic.id)}`));
 	if (options.issues?.length) lines.push("", `## ${t.errors}`, "", ...options.issues.map((issue) => `- ${code(issue.document ?? issue.code)} · ${code(issue.code)}`));
 	return `${lines.join("\n").trimEnd()}\n`;

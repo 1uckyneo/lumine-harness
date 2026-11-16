@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 3,
+  "taskId": "lumine-editorial-wiki-20261116",
+  "mode": "implement",
+  "goal": "重构 Lumine Repo Wiki 阅读、业务知识交付与持续编排能力并验证双源分发",
+  "scope": "用户于 2026-11-16 确认完整计划直接实施。先完成上游与隔离试点并发布，再采用同一版本改造工作流项目。",
+  "specRef": "lumine-wiki-product-experience",
+  "planRef": "lumine-editorial-wiki-execution",
+  "selectedSkills": [
+    "lumine-run",
+    "lumine-knowledge",
+    "lumine-design"
+  ],
+  "acceptanceRefs": [
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-015",
+      "baselineHash": "3ef8fb504de66054b837fc2b3a0478e8c3e7031c6b745098b2cd788056d8ed44"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-016",
+      "baselineHash": "bcf9e205c58dbda4ffddc2eafd3fed89d07c47d58458c98a1eaec78488447735"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-017",
+      "baselineHash": "5b5fcae9100fddf1184d05df9d2279b90c9451e34edee25a9ae7c6c766c3280d"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-018",
+      "baselineHash": "01a6fe9b37e8d9ed7b596bb102f0af2b8d1bedbbfd60b760dade3b7aeeeff8e4"
+    }
+  ],
+  "summary": "源头重构、自用迁移和隔离验证已完成，准备按同一提交发布两个公开源。",
+  "nextStep": "核验 GitHub 和 Gitee 的 main 指纹，再将正式发布用于工作流项目。",
+  "blockers": [],
+  "evidence": [
+    {
+      "artifact": "docs/validation/Repo Wiki编排与阅读器验证.md",
+      "sha256": "b2ac6253d9dfd4c78b052fadc3221e70f5dc43a14e56b6a663312cf9619de38f",
+      "outcome": "passed",
+      "observedAt": "2026-11-16T10:54:16.013Z",
+      "command": "Node 24 / 22 生成回归、类型与分发检查、真实 Chromium、冷 Agent、完整副本回滚及多仓演化",
+      "environment": "macOS arm64、Chromium、相同分发构建的实际工作树与隔离样本",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/navigation.ts",
+          "sha256": "6e1458bc1676db0c92f638bd7ca63d7aba45643da2f7f37237aabc4eb576115b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/map-markdown.ts",
+          "sha256": "59d6d971cb783fab40a384df6f8518d8fd110e0930289c701ea5f5e8d9bde8ce"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "3602c7f294ff43753961dcdb7a1ccf90c84ae28c6883b0b6c02fa9b602ce7d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "ecf2eb1212042ed19e8c85eb449442fbb5ec3da0635a5afaa80a58fe3455df7b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "156b3a7b9fbbc4089d0945d6005c9faacaaa2c828e12b66faa8d7a47e574f9a7"
+        },
+        {
+          "repoId": "project",
+          "path": ".lumine/wiki-state/navigation.json",
+          "sha256": "a01ffef49d1dd8b32df43fd31811d7e60d90f3d06ad8d58a1cac0910a06e4bdb"
+        }
+      ],
+      "limitations": "未取得独立真人使用回执或 Trae 真机 Hook 观察。",
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-015"
+    },
+    {
+      "artifact": "docs/validation/Repo Wiki编排与阅读器验证.md",
+      "sha256": "b2ac6253d9dfd4c78b052fadc3221e70f5dc43a14e56b6a663312cf9619de38f",
+      "outcome": "passed",
+      "observedAt": "2026-11-16T10:54:16.013Z",
+      "command": "Node 24 / 22 生成回归、类型与分发检查、真实 Chromium、冷 Agent、完整副本回滚及多仓演化",
+      "environment": "macOS arm64、Chromium、相同分发构建的实际工作树与隔离样本",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/navigation.ts",
+          "sha256": "6e1458bc1676db0c92f638bd7ca63d7aba45643da2f7f37237aabc4eb576115b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/map-markdown.ts",
+          "sha256": "59d6d971cb783fab40a384df6f8518d8fd110e0930289c701ea5f5e8d9bde8ce"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "3602c7f294ff43753961dcdb7a1ccf90c84ae28c6883b0b6c02fa9b602ce7d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "ecf2eb1212042ed19e8c85eb449442fbb5ec3da0635a5afaa80a58fe3455df7b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "156b3a7b9fbbc4089d0945d6005c9faacaaa2c828e12b66faa8d7a47e574f9a7"
+        },
+        {
+          "repoId": "project",
+          "path": ".lumine/wiki-state/navigation.json",
+          "sha256": "a01ffef49d1dd8b32df43fd31811d7e60d90f3d06ad8d58a1cac0910a06e4bdb"
+        }
+      ],
+      "limitations": "未取得独立真人使用回执或 Trae 真机 Hook 观察。",
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-016"
+    },
+    {
+      "artifact": "docs/validation/Repo Wiki编排与阅读器验证.md",
+      "sha256": "b2ac6253d9dfd4c78b052fadc3221e70f5dc43a14e56b6a663312cf9619de38f",
+      "outcome": "passed",
+      "observedAt": "2026-11-16T10:54:16.013Z",
+      "command": "Node 24 / 22 生成回归、类型与分发检查、真实 Chromium、冷 Agent、完整副本回滚及多仓演化",
+      "environment": "macOS arm64、Chromium、相同分发构建的实际工作树与隔离样本",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/navigation.ts",
+          "sha256": "6e1458bc1676db0c92f638bd7ca63d7aba45643da2f7f37237aabc4eb576115b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/map-markdown.ts",
+          "sha256": "59d6d971cb783fab40a384df6f8518d8fd110e0930289c701ea5f5e8d9bde8ce"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "3602c7f294ff43753961dcdb7a1ccf90c84ae28c6883b0b6c02fa9b602ce7d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "ecf2eb1212042ed19e8c85eb449442fbb5ec3da0635a5afaa80a58fe3455df7b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "156b3a7b9fbbc4089d0945d6005c9faacaaa2c828e12b66faa8d7a47e574f9a7"
+        },
+        {
+          "repoId": "project",
+          "path": ".lumine/wiki-state/navigation.json",
+          "sha256": "a01ffef49d1dd8b32df43fd31811d7e60d90f3d06ad8d58a1cac0910a06e4bdb"
+        }
+      ],
+      "limitations": "未取得独立真人使用回执或 Trae 真机 Hook 观察。",
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-017"
+    },
+    {
+      "artifact": "docs/validation/Repo Wiki编排与阅读器验证.md",
+      "sha256": "b2ac6253d9dfd4c78b052fadc3221e70f5dc43a14e56b6a663312cf9619de38f",
+      "outcome": "passed",
+      "observedAt": "2026-11-16T10:54:16.013Z",
+      "command": "Node 24 / 22 生成回归、类型与分发检查、真实 Chromium、冷 Agent、完整副本回滚及多仓演化",
+      "environment": "macOS arm64、Chromium、相同分发构建的实际工作树与隔离样本",
+      "codeRefs": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/navigation.ts",
+          "sha256": "6e1458bc1676db0c92f638bd7ca63d7aba45643da2f7f37237aabc4eb576115b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/map-markdown.ts",
+          "sha256": "59d6d971cb783fab40a384df6f8518d8fd110e0930289c701ea5f5e8d9bde8ce"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "3602c7f294ff43753961dcdb7a1ccf90c84ae28c6883b0b6c02fa9b602ce7d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "ecf2eb1212042ed19e8c85eb449442fbb5ec3da0635a5afaa80a58fe3455df7b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "156b3a7b9fbbc4089d0945d6005c9faacaaa2c828e12b66faa8d7a47e574f9a7"
+        },
+        {
+          "repoId": "project",
+          "path": ".lumine/wiki-state/navigation.json",
+          "sha256": "a01ffef49d1dd8b32df43fd31811d7e60d90f3d06ad8d58a1cac0910a06e4bdb"
+        }
+      ],
+      "limitations": "未取得独立真人使用回执或 Trae 真机 Hook 观察。",
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-018"
+    }
+  ],
+  "knowledge": {
+    "required": true,
+    "status": "synchronized",
+    "refs": [
+      "lumine-project-overview",
+      "lumine-wiki",
+      "lumine-wiki-reader",
+      "lumine-workflow"
+    ],
+    "sync": {
+      "contractVersion": 2,
+      "assessedAt": "2026-11-16T10:54:16.013Z",
+      "changedSources": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/navigation.ts",
+          "sha256": "6e1458bc1676db0c92f638bd7ca63d7aba45643da2f7f37237aabc4eb576115b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/map-markdown.ts",
+          "sha256": "59d6d971cb783fab40a384df6f8518d8fd110e0930289c701ea5f5e8d9bde8ce"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/compaction.ts",
+          "sha256": "3602c7f294ff43753961dcdb7a1ccf90c84ae28c6883b0b6c02fa9b602ce7d1e"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "ecf2eb1212042ed19e8c85eb449442fbb5ec3da0635a5afaa80a58fe3455df7b"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
+          "sha256": "156b3a7b9fbbc4089d0945d6005c9faacaaa2c828e12b66faa8d7a47e574f9a7"
+        },
+        {
+          "repoId": "project",
+          "path": ".lumine/wiki-state/navigation.json",
+          "sha256": "a01ffef49d1dd8b32df43fd31811d7e60d90f3d06ad8d58a1cac0910a06e4bdb"
+        }
+      ],
+      "verifiedScope": [
+        "读者导航与来源覆盖分离",
+        "功能交付及持续维护",
+        "实际阅读、来源和恢复"
+      ],
+      "decisions": [
+        {
+          "ref": "lumine-project-overview",
+          "action": "created",
+          "sha256": "24c096f55fc390cf4a291e7bec2e61274d4dcf921ac03ce0cc637520d51a7b7a",
+          "reason": "与新版阅读和日常知识维护合同同步，并保留文档来源。"
+        },
+        {
+          "ref": "lumine-wiki",
+          "action": "revised",
+          "sha256": "4f6497b90eb83a2d871d3c426e346327dbb26c17004ce4770194db73cd1506af",
+          "reason": "与新版阅读和日常知识维护合同同步，并保留文档来源。"
+        },
+        {
+          "ref": "lumine-wiki-reader",
+          "action": "revised",
+          "sha256": "5a0c6e34526a9bdb5477930eefad9b2dca8a8d56cfb0aebeae7f31365c0e5df9",
+          "reason": "与新版阅读和日常知识维护合同同步，并保留文档来源。"
+        },
+        {
+          "ref": "lumine-workflow",
+          "action": "revised",
+          "sha256": "a6ce6f6ebc36943de7c68d9cb865dfd8158106a10f84999d2d247f9513cfa2ac",
+          "reason": "与新版阅读和日常知识维护合同同步，并保留文档来源。"
+        }
+      ]
+    }
+  }
+}

@@ -92,3 +92,7 @@ The new entry points and CLI are exercised in an actual Codex session. Projects 
 ## Identifying the current request
 
 A reliable host userTurnId identifies new requests. Without one, the Agent uses public session begin/show with a stable request-id, mode and optional existing task. Automatic continuation and Hook retries reuse the scope; sessions remain independent. Local scopes do not duplicate Specs/Plans, and confirmation review stays limited to affected scope. Unknown scope cannot silently pass; implementation still validates task binding and evidence. A scope cannot downgrade implementation to diagnosis to bypass checks. Community-host protocol tests do not establish live host execution; see the [validation record](validation/Lumine状态瘦身与请求上下文验证.md).
+
+## Editorial Wiki navigation
+
+Codex and Trae share the Knowledge Skill, local read-only reader, and explicit upgrade path. Upgrade the Runtime before previewing editorial activation for project schema 4. The product workflowVersion remains 2. Older runtimes reject the upgraded project format. Record protocol tests and actual host receipts independently; a successful install does not establish that a host has loaded the updated hooks.

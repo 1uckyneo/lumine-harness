@@ -11,6 +11,8 @@ Read AGENTS.md, follow its authorized standards routing to read applicable inter
 <!-- LH-DESIGN-02 -->
 Choose the smallest useful material for unresolved visual, interaction, or feasibility questions, such as an HTML prototype, flow diagram, or explanation. Reuse external designs, references, and approved approaches. Do not regenerate attachments merely because the work enters another stage or require DESIGN, component maps, and multiple handoff formats together.
 
+Choose both the stage and the medium according to what needs validation. Skip design when there is no material question. Work in the actual web or native client using an isolated entry point, or use a standalone prototype, diagram, or image exploration as appropriate. Use synthetic mock data without real credentials or external writes, and keep mock paths outside production defaults. Interactive validation requires an operable result; production behavior needs separate evidence.
+
 <!-- LH-DESIGN-03 -->
 Identify the pages/states covered, related Spec, and confirmation scope; iterate autonomously within design. Present reviewable deliverables and unresolved choices, then ask the user to confirm the design and proceed to supplement the Spec. Do not repeat a valid confirmation for the same deliverables. Document status and Agent judgment cannot replace confirmation, and earlier broad authorization cannot authorize an immediate move into technical planning or implementation.
 
