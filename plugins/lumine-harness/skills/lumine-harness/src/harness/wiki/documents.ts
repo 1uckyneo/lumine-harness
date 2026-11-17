@@ -5,7 +5,7 @@ import { isMap, isPair, isSeq, parse as parseYaml, parseDocument as parseYamlDoc
 import { containedPath, hash, readJson, slash, wikiConfig } from './files.ts';
 import { parseSections } from './sections.ts';
 import { resolveAliasReference } from './references.ts';
-import { visibleText, visibleJson, statePath } from './transactions.ts';
+import { visibleText, visibleJson, statePath, withWikiReadScope, pendingDocumentPaths } from './transactions.ts';
 import type { Baseline, CheckIssue, Collection, Diagram, KnowledgeDocument, KnowledgeMeta, SourceRef } from './types.ts';
 
 const strings = (value: unknown): string[] => Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
@@ -84,6 +84,11 @@ export function parseDocument(markdown: string, relative: string, collection: Co
     tags: strings(value.tags), aliases: strings(value.aliases), repositories: strings(value.repositories),
     relations: [], sources: [], diagrams: [], watchScopes: []
   };
+  if (value.reading !== undefined) {
+    const intent = value.reading as Record<string, unknown>;
+    if (!intent || typeof intent !== 'object' || Array.isArray(intent) || typeof intent.question !== 'string' || !intent.question.trim() || intent.question.length > 2000 || ['audience', 'purpose'].some(key => intent[key] !== undefined && (typeof intent[key] !== 'string' || !(intent[key] as string).trim() || (intent[key] as string).length > 2000))) throw new Error('READING_INTENT_INVALID');
+    meta.reading = { question: intent.question, ...(typeof intent.audience === 'string' ? { audience: intent.audience } : {}), ...(typeof intent.purpose === 'string' ? { purpose: intent.purpose } : {}) };
+  }
   for (const relation of Array.isArray(value.relations) ? value.relations : []) {
     if (!relation || typeof relation !== 'object' || typeof relation.target !== 'string' || !['depends_on', 'decision', 'related'].includes(relation.kind)) throw new Error('RELATION_INVALID');
     meta.relations.push({ target: relation.target, kind: relation.kind, ...(typeof relation.note === 'string' ? { note: relation.note } : {}) });
@@ -142,14 +147,24 @@ export function parseDocument(markdown: string, relative: string, collection: Co
   }
   return { ...meta, diagrams, sections, path: relative, collection, body, markdown, revision: hash(markdown), freshness: 'unverified', issues, checkedAt: null, sourceObservation: { status: 'not_observed', checkedAt: null, sourceFingerprint: null }, semanticReview: { status: 'unreviewed' } };
 }
+const parsedDocuments = new Map<string, { revision: string; document: KnowledgeDocument }>();
 export function listDocuments(root: string, collections: Collection[] = ['wiki'], options: { includeHistorical?: boolean; issues?: CheckIssue[] } = {}): KnowledgeDocument[] {
+  let issues: CheckIssue[] | undefined;
+  const documents = withWikiReadScope(root, () => {
+    issues = options.issues ? [] : undefined;
+    return listDocumentsInScope(root, collections, { ...options, issues });
+  });
+  if (issues) options.issues!.push(...issues);
+  return documents;
+}
+function listDocumentsInScope(root: string, collections: Collection[], options: { includeHistorical?: boolean; issues?: CheckIssue[] }): KnowledgeDocument[] {
   const config = wikiConfig(root), result: KnowledgeDocument[] = [];
   const roots: Record<Collection, string | null> = { wiki: config.root, spec: 'docs/product-specs', plan: 'docs/exec-plans', validation: null };
   for (const collection of collections) {
     const relativeRoot = roots[collection];
     if (!relativeRoot) continue; // Validation pages are read only from the explicit allowlist.
     const directory = containedPath(root, relativeRoot, false);
-    if (!existsSync(directory)) continue;
+    const files = new Set<string>();
     const visit = (directoryPath: string): void => {
       for (const entry of readdirSync(directoryPath, { withFileTypes: true })) {
         if (entry.isSymbolicLink() || entry.name.startsWith('.')) continue;
@@ -158,22 +173,32 @@ export function listDocuments(root: string, collections: Collection[] = ['wiki']
           if (collection === 'plan' && !options.includeHistorical && /^(completed|archived|history|historical)$/i.test(entry.name)) continue;
           visit(file); continue;
         }
-        if (!entry.name.endsWith('.md') || !statSync(file).isFile()) continue;
-        const relative = slash(path.relative(root, file));
-        const markdown = visibleText(root, relative);
-        if (markdown === null) continue;
-        // Navigation-only index pages have no knowledge identity and are not cards.
-        if (collection === 'wiki' && !/^---\r?\n/.test(markdown) && /^(?:index|README)\.md$/i.test(entry.name)) continue;
-        try {
-          const document = parseDocument(markdown, relative, collection);
-          if (!['historical', 'archived', 'completed'].includes(document.status) || options.includeHistorical) result.push(document);
-        } catch (error) {
-          if (!options.issues) throw error;
-          options.issues.push({ code: 'DOCUMENT_INVALID', severity: 'error', document: relative, message: error instanceof Error ? error.message : 'DOCUMENT_INVALID' });
-        }
+        if (entry.name.endsWith('.md') && statSync(file).isFile()) files.add(slash(path.relative(root, file)));
       }
     };
-    visit(directory);
+    if (existsSync(directory)) visit(directory);
+    if (collection === 'wiki') for (const relative of pendingDocumentPaths(root)) files.add(relative);
+    for (const relative of files) {
+      const markdown = visibleText(root, relative);
+      if (markdown === null) continue;
+      // Navigation-only index pages have no knowledge identity and are not cards.
+      if (collection === 'wiki' && !/^---\r?\n/.test(markdown) && /^(?:index|README)\.md$/i.test(path.basename(relative))) continue;
+      try {
+        const key = `${path.resolve(root)}\0${collection}\0${relative}`, revision = hash(markdown);
+        let cached = parsedDocuments.get(key);
+        if (!cached || cached.revision !== revision) {
+          cached = { revision, document: parseDocument(markdown, relative, collection) };
+          if (parsedDocuments.size >= 1000) parsedDocuments.delete(parsedDocuments.keys().next().value!);
+          parsedDocuments.set(key, cached);
+        }
+        // Consumers add observations and placement; never let them mutate the cached parse.
+        const document = structuredClone(cached.document);
+        if (!['historical', 'archived', 'completed'].includes(document.status) || options.includeHistorical) result.push(document);
+      } catch (error) {
+        if (!options.issues) throw error;
+        options.issues.push({ code: 'DOCUMENT_INVALID', severity: 'error', document: relative, message: error instanceof Error ? error.message : 'DOCUMENT_INVALID' });
+      }
+    }
   }
   const ids = new Map<string, number>(), paths = new Map<string, number>();
   for (const document of result) { ids.set(document.id, (ids.get(document.id) ?? 0) + 1); const normalized = document.path.normalize('NFC').toLocaleLowerCase('en'); paths.set(normalized, (paths.get(normalized) ?? 0) + 1); }

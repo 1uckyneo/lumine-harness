@@ -1,25 +1,24 @@
 {
-  "documentId": "lumine-root-config",
-  "revision": "0ec9380a3efa66a53c17a15565ec1f11e3f622b188e24bf18f5dc501d4c8bc0e",
-  "sourceFingerprint": "1f805b16f12faefd76643e4e8f3d235bd724d103e025c6f6d1f9610079452665",
-  "reviewedAt": "2026-09-29T07:41:25.052Z",
-  "reviewer": {
-    "kind": "agent",
-    "role": "independent"
-  },
-  "outcome": "reviewed",
-  "scope": [
-    "显式根/cwd/workspaceRoots 解析顺序、schema 与迁移状态约束",
-    "安装项目与源仓自用的规范 Skill/Runtime 位置",
-    "仓库 ID、默认监控范围、缺失仓库与路径真实边界",
-    "会话文件身份与指针、项目任务资产及用户授权边界"
-  ],
-  "findings": [],
-  "limitations": [
-    "本 reviewer 未撰写这八篇正文，但参与了 Wiki Runtime 实现；本记录是内容作者之外的语义复核，不宣称对自身 Runtime 的完全独立代码审计。",
-    "结论限定当前工作树与所列机制，不证明部署、真实宿主自动续跑、外部服务或人类接受。",
-    "未重做全部官方宿主协议网页检索或遍历个人会话日志；已有历史宿主陈述未因此升级为本轮真实运行证据。",
-    "浏览器交互由专项验证单独记录，本审阅对阅读器仅核对源码与已执行定向测试。",
-    "未将结构检查或来源哈希一致当作全部正文/全部执行路径语义正确；未列入 scope 的实现细节不在本轮独立审阅保证内。"
-  ]
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "documentId": "lumine-root-config",
+    "revision": "0fd724d6898ef538057f173c6bf44a4b59e0a124218a24d3eba5e07c0cb0d60e",
+    "sourceFingerprint": "e32b2908e54e2e38aa8338cfd78b5d30c9b49c5acb389eeb10511f6a0c95c8a0",
+    "reviewedAt": "2026-11-17T05:23:51.773Z",
+    "reviewer": {
+      "kind": "agent",
+      "role": "author"
+    },
+    "outcome": "reviewed",
+    "scope": [
+      "说明顺序、内部来源标识、来源与稳定章节保留",
+      "版本与恢复条件保留；采用文章补齐当前 schema 4"
+    ],
+    "findings": [],
+    "limitations": [
+      "作者自审；没有新读者或目标日常模型评价",
+      "配置和源码检查不表示真实宿主已验收"
+    ]
+  }
 }

@@ -5,18 +5,18 @@
     "schemaVersion": 2,
     "id": "lumine-architecture",
     "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
-    "generation": 10,
+    "generation": 12,
     "generatedMarkdown": {
-      "$lumineObject": "d9d515971bec5e2610dfbd80202d64c2b200006dcab5222f6a00f8fb997fce3a",
+      "$lumineObject": "57da81c022069ed7d685e3a681acc1b73a6a302b9ac57ea2a1b0290f9c63e91d",
       "kind": "text",
-      "bytes": 15734
+      "bytes": 16364
     },
-    "appliedRevision": "d9d515971bec5e2610dfbd80202d64c2b200006dcab5222f6a00f8fb997fce3a",
+    "appliedRevision": "57da81c022069ed7d685e3a681acc1b73a6a302b9ac57ea2a1b0290f9c63e91d",
     "sources": {
-      "$lumineObject": "bc6b824099602c18df2384c5020ccb1ee59752816c0ac6a023246cd97c0b4fdf",
+      "$lumineObject": "0020ed8f3a1f945b2402c4de9cb50bfd39d557c29f58c7744cfd6a1591064238",
       "kind": "json",
       "bytes": 8277
     },
-    "updatedAt": "2026-10-13T10:36:22.638Z"
+    "updatedAt": "2026-11-17T05:49:02.210Z"
   }
 }

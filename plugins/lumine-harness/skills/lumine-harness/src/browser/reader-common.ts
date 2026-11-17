@@ -10,7 +10,8 @@ export type ReaderMap = CoverageMap;
 export type SearchPage = { query: string; cards: KnowledgeCard[]; total: number; hasMore: boolean; nextCursor: string | null };
 export type RelatedResult = { id: string; relations: { target: string; kind: string; note?: string; direction: string; title?: string; path?: string; summary?: string }[] };
 export type ReferenceResult = { kind: 'document' | 'markdown' | 'attachment' | 'source'; id?: string; path: string; markdown?: string; title?: string; revision?: string; fragment?: string; referenceFrom?: string; sections?: Section[]; documentId?: string; sourceId?: string; focusStartLine?: number; focusEndLine?: number };
-export type SourceResult = { source: SourceRef; title?: string; markdown?: { body: string; sections: Section[]; title: string; path: string; referenceFrom?: string }; text: string; startLine: number; endLine: number; totalLines: number; fingerprint: string; baselineFingerprint: string | null; observedAt: string | null; readAt: string };
+export type HighlightResult = { tokens: { content: string; color?: string }[][]; background?: string; foreground?: string };
+export type SourceResult = { source: SourceRef; title?: string; markdown?: { body: string; sections: Section[]; title: string; path: string; referenceFrom?: string }; text: string; highlighted?: HighlightResult; startLine: number; endLine: number; totalLines: number; fingerprint: string; baselineFingerprint: string | null; observedAt: string | null; readAt: string };
 
 export type EvidencePanel = { kind: 'source'; documentId: string; sourceId: string; focusStartLine?: number; focusEndLine?: number }
   | { kind: 'reference'; from: string; target: string };
@@ -84,7 +85,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     current: '最近观察时来源未变', stale: '来源有变化', 'missing-source': '来源缺失',
     review: '内容审阅', reviewed: '有适用审阅记录', unreviewed: '尚无适用审阅',
     issues: '审阅发现问题', outdated: '审阅版本已变化', sourceLimit: '源码对应文件版本；部署和实际运行仍需各自证据。',
-    sourceSame: '当前文件与知识基线相同；这不等于解释已得到语义核实。',
+    sourceSame: '与知识库记录的来源版本一致。',
     sourceDrift: '当前文件与知识基线不同，请重新核实结论。',
     sourceUnknown: '没有这项来源的知识基线，无法判断是否变化。',
     sourceVersion: '当前文件指纹', baselineVersion: '知识基线指纹', checkedAt: '来源上次观察',
@@ -137,7 +138,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     current: 'Sources unchanged at last observation', stale: 'Sources changed', 'missing-source': 'Source missing',
     review: 'Semantic review', reviewed: 'Applicable review recorded', unreviewed: 'No applicable review',
     issues: 'Review found issues', outdated: 'Review is out of date', sourceLimit: 'Code reflects a file version. Deployment and runtime behavior need their own evidence.',
-    sourceSame: 'The file matches the knowledge baseline; this does not establish semantic correctness.',
+    sourceSame: 'Matches the source version recorded by the knowledge base.',
     sourceDrift: 'The current file differs from the knowledge baseline. Recheck the conclusion.',
     sourceUnknown: 'No knowledge baseline exists for this source, so changes cannot be determined.',
     sourceVersion: 'Current file fingerprint', baselineVersion: 'Knowledge baseline fingerprint', checkedAt: 'Sources last observed',

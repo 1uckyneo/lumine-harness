@@ -3,14 +3,14 @@
   "kind": "lumine-wiki-state",
   "value": {
     "id": "lumine-adapters",
-    "revision": "c4505f7da8323b9a4fb62b161c27fba387cd6c0dbaf3b6bcd44b6a5d7d9c258d",
-    "checkedAt": "2026-09-30T07:03:47.320Z",
-    "sourceFingerprint": "c25a950f8c69e54c50e12a7f2150607828979b87b389dc3012e43c0a1db88408",
+    "revision": "dba4eecd8e8af0d9d5c7bb2ef5714b9168d68d9d586cbac39a699762659819c2",
+    "freshness": "current",
+    "checkedAt": "2026-11-17T05:49:02.181Z",
+    "sourceFingerprint": "8228e640cf928fd36ebd95d150c44c525337469ce89f50d75b1718a034dc4f8c",
     "sources": {
-      "$lumineObject": "c25a950f8c69e54c50e12a7f2150607828979b87b389dc3012e43c0a1db88408",
+      "$lumineObject": "8228e640cf928fd36ebd95d150c44c525337469ce89f50d75b1718a034dc4f8c",
       "kind": "json",
       "bytes": 16881
-    },
-    "freshness": "current"
+    }
   }
 }

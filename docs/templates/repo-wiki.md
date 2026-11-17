@@ -5,43 +5,41 @@ summary: "{{summary}}"
 type: architecture
 status: current
 locale: zh-CN
-tags: []
-aliases: []
-repositories: ["{{repo_id}}"]
-sources:
-  - id: source-1
-    repoId: "{{repo_id}}"
-    path: "{{relative_source_path}}"
-relations: []
-sections: []
-watchScopes:
-  - repoId: "{{repo_id}}"
-    path: "{{module_relative_path}}"
-diagrams: []
 ---
 
 # {{title}}
 
-<a id="section-1"></a>
+<!-- 先读 lumine-knowledge 的「写作与编排」「阅读表达」。这是元数据与稳定锚点示意，不是每篇文章必须照填的提纲。选择实际职责的 type，current/proposed/historical 与事实一致；规范效力来自 AGENTS 授权，不由 type 产生。用连贯正文先回答主要问题，再解释必要概念与条件。业务过程、操作指南、技术机制与工程规范采用不同顺序，不把所有页面写成技术取舍清单。 -->
 
-## 这个主题回答什么
+{{直接回答读者问题的导语}}
 
-<!-- 直接回答真实问题，再解释适用范围。摘要由 frontmatter 复用给卡片，不另存卡片正文。创建实际知识前替换全部占位符、核实来源及 current/proposed/historical 状态。 -->
+<a id="{{stable_section_id}}"></a>
+## {{读者接下来需要理解的问题}}
 
-<a id="section-2"></a>
+{{依据实际来源解释过程、条件、结果及重要例外}}
 
-## 机制与图解
+<!-- 只增加有解释价值的章节、图或声明式内容块。Mermaid 在文末 diagrams 中按顺序登记 id/title/caption/sources，前置稳定锚点；显式 lumine-view 可表达步骤、比较、术语、代码、补充与已登记解释器。来源的显示标题用读者可理解的职责，技术路径保持准确；内部来源编号不进入叙述。不要把写作检查单、评分和模板注释保留到交付正文。 -->
 
-<!-- 围绕来源解释关键路径。需要图时写 Mermaid fenced block，并按出现顺序在 diagrams 中登记 {id, title, caption, sources: [source-1]}。图是文本真源，不另存图片或缩略图。 -->
-
-<a id="section-3"></a>
-
-## 技术取舍与限制
-
-<!-- 说明依据、理由、代价、修改边界和未验证范围。代码推导的设计理由明确标为推断。 -->
-
-<a id="section-4"></a>
-
-## 来源与关联
-
-<!-- 引用具体来源及相关 Wiki、Spec、Plan；源码、运行观察和部署结论分开。 -->
+<!-- lumine-wiki-metadata:v1
+{
+  "reading": {
+    "question": "{{本页主要回答什么}}",
+    "audience": "{{读者及已有背景}}",
+    "purpose": "{{读完能理解或完成什么}}"
+  },
+  "tags": [],
+  "aliases": [],
+  "repositories": ["{{repo_id}}"],
+  "sources": [
+    { "id": "source-1", "repoId": "{{repo_id}}", "path": "{{relative_source_path}}", "title": "{{来源职责}}" }
+  ],
+  "relations": [],
+  "sections": [
+    { "id": "{{stable_section_id}}", "sources": ["source-1"] }
+  ],
+  "watchScopes": [
+    { "repoId": "{{repo_id}}", "path": "{{module_relative_path}}" }
+  ],
+  "diagrams": []
+}
+-->

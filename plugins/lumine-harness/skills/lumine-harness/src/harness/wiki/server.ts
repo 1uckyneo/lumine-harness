@@ -10,8 +10,11 @@ import { isRegisteredValidationDocumentId, registeredValidationDocuments, showRe
 import { baselineFor, parseDocument } from './documents.ts';
 import { parseSections } from './sections.ts';
 import type { Collection, Freshness } from './types.ts';
+import { highlightCode, sourceLanguage } from './highlight.ts';
+import { readExplainer, explainerFonts } from './explainers.ts';
+import { contextKnowledge, impactKnowledge } from './context.ts';
 
-const MIME: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.woff2': 'font/woff2' };
+const MIME: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 function json(response: ServerResponse, status: number, body: unknown): void { response.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); response.end(JSON.stringify(body)); }
 interface SearchCursor { version: 1; fingerprint: string; offset: number }
 function decodeSearchCursor(value: string): SearchCursor {
@@ -35,17 +38,42 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
   const assets = options.assetsRoot ?? readerAssets(), config = wikiConfig(root), project = loadProjectConfig(root);
   const marker = JSON.parse(readFileSync(containedPath(root, '.lumine/root.json'), 'utf8')) as { projectId?: unknown };
   const projectId = typeof marker.projectId === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,119}$/.test(marker.projectId) ? marker.projectId : null;
+  const fonts = explainerFonts(assets);
   let origin = '';
-  const server = createServer((request, response) => {
+  const server = createServer(async (request, response) => {
     response.setHeader('x-content-type-options', 'nosniff');
     response.setHeader('referrer-policy', 'no-referrer');
     response.setHeader('cross-origin-resource-policy', 'same-origin');
-    response.setHeader('content-security-policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'none'; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
-    if (request.headers.host !== origin.replace('http://', '') || (request.headers.origin && request.headers.origin !== origin)) { json(response, 403, { code: 'ORIGIN_REJECTED' }); return; }
+    response.setHeader('content-security-policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
+    if (request.headers.host !== origin.replace('http://', '')) { json(response, 403, { code: 'ORIGIN_REJECTED' }); return; }
     if (!['GET', 'HEAD'].includes(request.method ?? '')) { response.setHeader('allow', 'GET, HEAD'); json(response, 405, { code: 'READ_ONLY' }); return; }
     try {
       if ((request.url?.length ?? 0) > 8192) throw new Error('REQUEST_TOO_LONG');
       const url = new URL(request.url ?? '/', origin);
+      if (url.origin !== origin || url.username || url.password) { json(response, 403, { code: 'ORIGIN_REJECTED' }); return; }
+      if (request.headers.origin && request.headers.origin !== origin) {
+        // An opaque explainer has Origin:null. Only verified public font bytes
+        // receive CORS permission; APIs, arbitrary assets and other origins do not.
+        const font = request.headers.origin === 'null' && !url.search ? fonts.read(url.pathname) : null;
+        if (!font) { json(response, 403, { code: 'ORIGIN_REJECTED' }); return; }
+        response.writeHead(200, { 'content-type': 'font/woff2', 'access-control-allow-origin': 'null', vary: 'Origin', 'cross-origin-resource-policy': 'cross-origin', 'cache-control': 'public, max-age=31536000, immutable', etag: '"' + font.fingerprint + '"' });
+        response.end(request.method === 'HEAD' ? undefined : font.bytes); return;
+      }
+      if (url.pathname === '/api/highlight') {
+        json(response, 200, await highlightCode(url.searchParams.get('code') ?? '', url.searchParams.get('language') ?? 'text')); return;
+      }
+      if (url.pathname === '/api/context') { json(response, 200, contextKnowledge(root, url.searchParams.get('q') ?? '', { reference: url.searchParams.get('id') ?? undefined })); return; }
+      if (url.pathname === '/api/impact') {
+        const changes = url.searchParams.getAll('path').map((value) => { const index = value.indexOf(':'); if (index < 1) throw new Error('IMPACT_PATH_INVALID'); return { repoId: value.slice(0, index), path: value.slice(index + 1) }; });
+        json(response, 200, impactKnowledge(root, changes)); return;
+      }
+      if (url.pathname === '/api/explainer') {
+        const document = showKnowledge(root, url.searchParams.get('document') ?? '');
+        const { html } = readExplainer(root, document.id, url.searchParams.get('asset') ?? '');
+        const presentation = fonts.decorate(html, origin);
+        response.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'content-security-policy': presentation.csp, 'cache-control': 'no-cache' });
+        response.end(request.method === 'HEAD' ? undefined : presentation.html); return;
+      }
       if (url.pathname === '/api/config') { json(response, 200, { locale: config.locale, projectId, displayName: project.displayName ?? null, repositories: config.repositories.map((repo) => ({ id: repo.id })), maxCards: config.maxCards }); return; }
       if (url.pathname === '/api/catalog') {
         const primary = inspectKnowledge(root, ['wiki', 'spec', 'plan'], { includeHistoricalWiki: true }), validation = registeredValidationDocuments(root);
@@ -181,7 +209,12 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
           catch { /* Invalid document metadata does not make the original evidence unreadable. */ }
         }
         const title = source.title ?? parsed?.title;
-        json(response, 200, { source, ...excerpt, title,
+        let highlighted: Awaited<ReturnType<typeof highlightCode>> | undefined;
+        if (!completeMarkdown && excerpt.text.length <= 100_000) {
+          try { highlighted = await highlightCode(excerpt.text, sourceLanguage(source.path)); }
+          catch { /* Highlighting is optional; valid source evidence must remain readable. */ }
+        }
+        json(response, 200, { source, ...excerpt, title, highlighted,
           ...(parsed ? { markdown: { body: parsed.body, sections: parsed.sections, title: parsed.title, path: sourceRelative, referenceFrom: `${document.id}#source:${source.id}` } } : {}),
           baselineFingerprint: baseline?.sources.fingerprints[`${source.repoId}:${source.path}`] ?? null, observedAt: document.checkedAt, readAt: new Date().toISOString() }); return;
       }
@@ -190,6 +223,7 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
       if (!relative || relative.split('/').some((segment) => segment === '..' || segment.startsWith('.')) || !MIME[path.extname(relative)]) throw new Error('ASSET_NOT_ALLOWED');
       const file = containedPath(assets, relative);
       if (!statSync(file).isFile()) throw new Error('ASSET_NOT_FOUND');
+      if (path.extname(file) === '.woff2') response.setHeader('vary', 'Origin');
       response.writeHead(200, { 'content-type': MIME[path.extname(file)], 'cache-control': 'no-cache' });
       if (request.method === 'HEAD') response.end(); else response.end(readFileSync(file));
     } catch (error) {

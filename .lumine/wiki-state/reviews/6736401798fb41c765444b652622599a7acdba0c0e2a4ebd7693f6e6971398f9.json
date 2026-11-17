@@ -1,19 +1,23 @@
 {
-  "documentId": "lumine-adoption",
-  "revision": "d23cb42ea84c85563a458f833b190de23e1dc27d45d0b16f4e95fc9cadf51e2e",
-  "sourceFingerprint": "aeb4696f0afab365aef8042397834a60fc6352462bddbee80734719b88961b37",
-  "reviewedAt": "2026-10-14T05:07:29.995Z",
-  "reviewer": {
-    "kind": "agent",
-    "role": "independent"
-  },
-  "outcome": "reviewed",
-  "scope": [
-    "本轮Skill路由、任务复用与有效绑定、CLI指引、资料入口与旧文档安全退休的增量说明；对照当前真实入口/Run/CLI/manager相关来源"
-  ],
-  "findings": [],
-  "limitations": [
-    "仅本轮入口、资料组织与迁移的限定语义审阅；不是该页全部实现来源、业务运行、部署或宿主Hook验收。",
-    "保留无关既有欠账，不以来源刷新或语义review证明全库已通过。"
-  ]
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "documentId": "lumine-adoption",
+    "revision": "20e5a349412849cb4dfcab3cb832995bc69357d1a72d6530abfabefa2f801d09",
+    "sourceFingerprint": "5305f0b5af006658157bcffa665de1ad4f25e18ec195a1e83ced3a338762364d",
+    "reviewedAt": "2026-11-17T05:24:24.233Z",
+    "reviewer": {
+      "kind": "agent",
+      "role": "author"
+    },
+    "outcome": "reviewed",
+    "scope": [
+      "采用说明整理后的来源核实",
+      "存储 schema 3 与编排 schema 4 的边界"
+    ],
+    "findings": [],
+    "limitations": [
+      "作者自审；未代替独立读者或日常目标模型测试"
+    ]
+  }
 }

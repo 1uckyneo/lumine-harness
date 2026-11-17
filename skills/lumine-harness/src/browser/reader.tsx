@@ -1,5 +1,8 @@
+import './fonts.css';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Button as AriaButton, Dialog, DialogTrigger, Heading, Modal, ModalOverlay, Popover } from 'react-aria-components';
+import { BookOpen, Copy, Focus, List, Menu, PanelLeftOpen, RefreshCw, Search, X } from 'lucide-react';
 import type { CoverageMap, Diagram, EditorialNavigation, KnowledgeDocument, KnowledgeMap, Locale } from '../harness/wiki/types.ts';
 import { coverageSummary, shouldResetProject, splitReference } from '../harness/wiki/reader-model.ts';
 import {
@@ -183,13 +186,21 @@ function Related({ id, data, locale, onDocument, onTopic }: {
   const [result, setResult] = useState<RelatedResult | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
+  const boundary = useRef<HTMLElement>(null);
+  const [visible, setVisible] = useState(false);
   useEffect(() => {
+    const observer = new IntersectionObserver((entries) => { if (entries.some((entry) => entry.isIntersecting)) { setVisible(true); observer.disconnect(); } }, { rootMargin: '300px' });
+    if (boundary.current) observer.observe(boundary.current);
+    return () => observer.disconnect();
+  }, [id]);
+  useEffect(() => {
+    if (!visible) return;
     const controller = new AbortController();
     setResult(null); setError(false);
     void api<RelatedResult>(`/api/related?id=${encodeURIComponent(id)}`, controller.signal).then(setResult).catch(() => { if (!controller.signal.aborted) setError(true); });
     return () => controller.abort();
-  }, [id, retry]);
-  return <section className="related-section"><h2>{t('relatedDocuments')}</h2>
+  }, [id, retry, visible]);
+  return <section ref={boundary} className="related-section"><h2>{t('relatedDocuments')}</h2>
     {error && <div className="status-panel error"><p>{t('loadError')}</p><button onClick={() => setRetry((current) => current + 1)}>{t('retry')}</button></div>}
     {!error && !result && <p role="status">{t('loading')}</p>}
     {result && (result.relations.length ? <div className="related-list">{result.relations.map((relation, index) => <div key={`${relation.target}-${index}`}>
@@ -210,15 +221,10 @@ function DocumentView({ doc, data, locale, projectId, fragment, onDocument, onTo
 }) {
   const t = (key: string) => translate(locale, key);
   const [currentSection, setCurrentSection] = useState('');
-  const [contentsOpen, setContentsOpen] = useState(() => window.matchMedia('(min-width: 1181px)').matches);
-  useEffect(() => {
-    const media = window.matchMedia('(min-width: 1181px)');
-    const sync = () => setContentsOpen(media.matches);
-    media.addEventListener('change', sync);
-    return () => media.removeEventListener('change', sync);
-  }, []);
+
   const currentSectionChanged = useCallback((id: string) => setCurrentSection(id), []);
   const warning = statusMessage(doc, locale);
+  const quietStatus = doc.freshness === 'unverified';
   const scrollKey = projectKey(projectId, `scroll:${doc.id}`);
   useEffect(() => {
     if (fragment || !scrollKey) return;
@@ -243,14 +249,16 @@ function DocumentView({ doc, data, locale, projectId, fragment, onDocument, onTo
       'Verify key conclusions against the linked sources.'
     ].join('\n');
   };
+  const contents = <nav aria-label={t('contents')}>{sections.length ? sections.map((entry) => <a key={entry.id} className={`toc-level-${Math.min(entry.level, 4)}`} href={`#${encodeURIComponent(entry.id)}`} aria-current={currentSection === entry.id ? 'location' : undefined} onClick={(event) => { event.preventDefault(); onFragment(entry.id); }}>{entry.title}</a>) : <p>{t('noToc')}</p>}</nav>;
   return <div className="document-layout"><article className="document">
     <header className="doc-header"><span className="eyebrow">{documentLabel(locale, doc)}</span>
       <h1 id={titleId} tabIndex={titleId ? -1 : undefined}>{doc.title}</h1>{doc.summary && <p className="doc-summary">{doc.summary}</p>}{doc.normativeScope && <p className="normative-scope">{doc.normativeScope}</p>}
       {doc.collection === 'validation' && <p className="validation-note">{t('validationLimit')}</p>}
-      {warning && <div className={`document-warning ${doc.freshness === 'conflict' ? 'danger' : ''}`} role="status">{warning} <button onClick={() => document.getElementById('document-evidence')?.scrollIntoView({ block: 'start' })}>{t('sourceDetails')}</button></div>}
+      {warning && <div className={quietStatus ? 'document-source-note' : `document-warning ${doc.freshness === 'conflict' ? 'danger' : ''}`} role="status">{quietStatus ? locale === 'zh-CN' ? '来源尚未复核' : 'Sources have not been reviewed' : warning} <button onClick={() => document.getElementById('document-evidence')?.scrollIntoView({ block: 'start' })}>{t('sourceDetails')}</button></div>}
       <div className="doc-actions">
-        <button onClick={() => onCopy(handoff())}>{t('copyQuestion')}</button>
+        <button className="quiet-action" onClick={() => onCopy(handoff())}><Copy size={15} aria-hidden="true" />{t('copyQuestion')}</button>
         <a href="#document-evidence" onClick={(event) => { event.preventDefault(); const evidence = document.getElementById('document-evidence'); evidence?.scrollIntoView(); evidence?.focus({ preventScroll: true }); }}>{t('sources')}</a>
+        <div className="compact-contents"><DialogTrigger><AriaButton className="quiet-action"><List size={16} aria-hidden="true" />{t('contents')}</AriaButton><Popover className="contents-popover" placement="bottom end"><Dialog aria-label={t('contents')}>{contents}</Dialog></Popover></DialogTrigger></div>
       </div>
     </header>
     <MarkdownBody doc={doc} catalog={data.catalog} locale={locale} fragment={fragment} titleId={titleId} onDocument={onDocument} onFragment={onFragment} onSource={onSource} onReference={onReference} onDiagram={onDiagram} onMissing={onMissing} onCurrentSection={currentSectionChanged} />
@@ -261,7 +269,7 @@ function DocumentView({ doc, data, locale, projectId, fragment, onDocument, onTo
       <details><summary>{t('review')} · {t(review.status)}</summary><dl className="review-data"><div><dt>{t('checkedAt')}</dt><dd>{formatDate(locale, doc.checkedAt)}</dd></div>{review.reviewedAt && <div><dt>{t('review')}</dt><dd>{formatDate(locale, review.reviewedAt)} · {review.reviewer?.kind} / {review.reviewer?.role}</dd></div>}{(['scope', 'limitations', 'findings'] as const).map((key) => review[key]?.length ? <div key={key}><dt>{t(key)}</dt><dd><ul>{review[key]!.map((item) => <li key={item}>{item}</li>)}</ul></dd></div> : null)}</dl></details>
     </section>
     <Related id={doc.id} data={data} locale={locale} onDocument={onDocument} onTopic={onTopic} />
-  </article><aside className="doc-aside"><details open={contentsOpen} onToggle={(event) => setContentsOpen(event.currentTarget.open)}><summary>{t('contents')}</summary><nav aria-label={t('contents')}>{sections.length ? sections.map((section) => <a key={section.id} className={`toc-level-${Math.min(section.level, 4)}`} href={`#${encodeURIComponent(section.id)}`} aria-current={currentSection === section.id ? 'location' : undefined} onClick={(event) => { event.preventDefault(); onFragment(section.id); }}>{section.title}</a>) : <p>{t('noToc')}</p>}</nav></details></aside></div>;
+  </article><aside className="doc-aside"><p className="contents-title">{t('contents')}</p>{contents}</aside></div>;
 }
 
 function EvidenceDialog({ panel, catalog, locale, onClose, onDocument, onSource, onReference, onCopy }: {
@@ -270,19 +278,13 @@ function EvidenceDialog({ panel, catalog, locale, onClose, onDocument, onSource,
   onReference: (from: string, target: string) => void; onCopy: (value: string) => void;
 }) {
   const t = (key: string) => translate(locale, key);
-  const dialog = useRef<HTMLDialogElement>(null);
-  const originFocus = useRef<HTMLElement | null>(null);
+  const dialog = useRef<HTMLDivElement>(null);
   const [source, setSource] = useState<SourceResult | null>(null);
   const [reference, setReference] = useState<ReferenceResult | null>(null);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
   const [retry, setRetry] = useState(0);
   const [raw, setRaw] = useState(false);
-  useEffect(() => {
-    originFocus.current = document.activeElement as HTMLElement | null;
-    dialog.current?.showModal();
-    return () => { dialog.current?.close(); originFocus.current?.focus(); };
-  }, []);
   useEffect(() => {
     const controller = new AbortController();
     setSource(null); setReference(null); setError(''); setRaw(panel.kind === 'source' && panel.focusStartLine !== undefined);
@@ -313,23 +315,24 @@ function EvidenceDialog({ panel, catalog, locale, onClose, onDocument, onSource,
   const location = source ? `${source.source.repoId}:${source.source.path}#L${source.startLine}-L${source.endLine}` : '';
   const comparison = source ? !source.baselineFingerprint ? 'sourceUnknown' : source.baselineFingerprint === source.fingerprint ? 'sourceSame' : 'sourceDrift' : '';
   const readingMarkdown = source?.markdown;
-  return <dialog ref={dialog} className={panel.kind === 'source' && !readingMarkdown ? 'evidence-dialog source-drawer' : 'evidence-dialog'} aria-labelledby="evidence-dialog-title" onCancel={(event) => { event.preventDefault(); onClose(); }}>
-    <header className="dialog-header"><h2 id="evidence-dialog-title">{panel.kind === 'source' ? source ? sourceTitle(source.source, catalog, locale, source.title) : t('sources') : panel.kind === 'text' ? panel.title : reference?.title ?? t('relatedDocuments')}</h2><button onClick={onClose}>{t('close')} ×</button></header>
+  return <ModalOverlay className="reader-overlay" isOpen isDismissable onOpenChange={(open) => { if (!open) onClose(); }}><Modal className={panel.kind === 'source' && !readingMarkdown ? 'evidence-dialog source-drawer' : 'evidence-dialog'}><Dialog ref={dialog} aria-labelledby="evidence-dialog-title">
+    <header className="dialog-header"><Heading slot="title" id="evidence-dialog-title">{panel.kind === 'source' ? source ? sourceTitle(source.source, catalog, locale, source.title) : t('sources') : panel.kind === 'text' ? panel.title : reference?.title ?? t('relatedDocuments')}</Heading><AriaButton className="icon-button" aria-label={t('close')} onPress={onClose}><X size={20} /></AriaButton></header>
     {pending && <p className="dialog-message" role="status">{t('loading')}</p>}
     {error && <div className="status-panel error" role="alert"><p>{error}</p><button onClick={() => setRetry((value) => value + 1)}>{t('retry')}</button></div>}
     {panel.kind === 'text' && <pre className="text-content" tabIndex={0}>{panel.content}</pre>}
     {source && panel.kind === 'source' && <>
-      <div className="dialog-tools">{readingMarkdown && <div className="reading-modes" role="group" aria-label={t('sourceDetails')}><button aria-pressed={!raw} onClick={() => setRaw(false)}>{t('readingView')}</button><button aria-pressed={raw} onClick={() => setRaw(true)}>{t('rawView')}</button></div>}<button onClick={() => onCopy(window.location.href)}>{t('copyLink')}</button></div>
+      <div className="dialog-tools">{readingMarkdown && <div className="reading-modes" role="group" aria-label={t('sourceDetails')}><button aria-pressed={!raw} onClick={() => setRaw(false)}>{t('readingView')}</button><button aria-pressed={raw} onClick={() => setRaw(true)}>{t('rawView')}</button></div>}<button onClick={() => onCopy(window.location.href)}>{t('copyLink')}</button><button onClick={() => onCopy(source.text)}><Copy size={15} aria-hidden="true" />{locale === 'zh-CN' ? '复制源码' : 'Copy source'}</button></div>
       <p className={`source-comparison ${comparison === 'sourceDrift' ? 'warning' : ''}`}>{t(comparison)}</p>
+      {(!readingMarkdown || raw) && <p className="source-location"><code>{source.source.path}</code><span> : {source.startLine}–{source.endLine}</span></p>}
       {readingMarkdown && !raw ? <ReferenceMarkdown markdown={readingMarkdown.body} sections={readingMarkdown.sections} path={readingMarkdown.referenceFrom ?? readingMarkdown.path} locale={locale} onReference={onReference} onFragment={(fragment) => dialog.current?.querySelector(`[id="${CSS.escape(fragment)}"]`)?.scrollIntoView({ block: 'start' })} /> : <>{source.startLine > 1 || source.endLine < source.totalLines ? <p className="dialog-message subtle-note">{t('sourceScope')}</p> : null}<div className="source-lines" tabIndex={0}>{source.text.split('\n').map((line, index) => {
         const number = source.startLine + index;
-        return <div key={number} data-source-line={number} className={panel.focusStartLine !== undefined && number >= panel.focusStartLine && number <= (panel.focusEndLine ?? panel.focusStartLine) ? 'source-line-target' : ''}><span className="line-number" aria-hidden="true">{number}</span><code>{line || ' '}</code></div>;
+        return <div key={number} data-source-line={number} className={panel.focusStartLine !== undefined && number >= panel.focusStartLine && number <= (panel.focusEndLine ?? panel.focusStartLine) ? 'source-line-target' : ''}><span className="line-number" aria-hidden="true">{number}</span><code>{source.highlighted?.tokens[index]?.map((token, tokenIndex) => <span key={tokenIndex} style={token.color && /^#[0-9a-f]{3,8}$/i.test(token.color) ? { color: token.color } : undefined}>{token.content}</span>) ?? (line || ' ')}</code></div>;
       })}</div></>}
       <details className="evidence-metadata"><summary>{t('evidenceDetails')}</summary><p className="dialog-path">{location}</p><div className="dialog-tools"><button onClick={() => onCopy(location)}>{t('copyLocation')}</button><button onClick={() => onCopy(`${panel.documentId}#source:${panel.sourceId}`)}>{t('copiedReference')}</button></div><dl className="source-versions"><div><dt>{t('sourceVersion')}</dt><dd><code>{source.fingerprint}</code></dd></div><div><dt>{t('baselineVersion')}</dt><dd><code>{source.baselineFingerprint ?? '—'}</code></dd></div><div><dt>{t('checkedAt')}</dt><dd>{formatDate(locale, source.observedAt)}</dd></div><div><dt>{t('readAt')}</dt><dd>{formatDate(locale, source.readAt)}</dd></div></dl></details>
     </>}
     {reference && reference.kind === 'markdown' && <><div className="dialog-tools"><div className="reading-modes" role="group" aria-label={t('sourceDetails')}><button aria-pressed={!raw} onClick={() => setRaw(false)}>{t('readingView')}</button><button aria-pressed={raw} onClick={() => setRaw(true)}>{t('rawView')}</button></div><button onClick={() => onCopy(window.location.href)}>{t('copyLink')}</button><button onClick={() => download(`${reference.title ?? 'reference'}.md`, reference.markdown ?? '', 'text/markdown;charset=utf-8')}>{t('exportMarkdown')}</button></div>{raw ? <pre className="text-content" tabIndex={0}>{reference.markdown}</pre> : <ReferenceMarkdown markdown={reference.markdown ?? ''} sections={reference.sections ?? []} path={reference.referenceFrom ?? reference.path} locale={locale} fragment={reference.fragment} onReference={onReference} onFragment={(fragment) => dialog.current?.querySelector(`[id="${CSS.escape(fragment)}"]`)?.scrollIntoView({ block: 'start' })} />}<details className="evidence-metadata"><summary>{t('evidenceDetails')}</summary><p className="dialog-path">{reference.path} · {reference.revision}</p></details></>}
     {reference && reference.kind === 'attachment' && <div className="dialog-message"><p>{t('attachment')}</p><code>{reference.path}</code></div>}
-  </dialog>;
+  </Dialog></Modal></ModalOverlay>;
 }
 
 function ReaderApp() {
@@ -342,6 +345,7 @@ function ReaderApp() {
   const [docState, setDocState] = useState<{ value: KnowledgeDocument | null; pending: boolean; error: string }>({ value: null, pending: false, error: '' });
   const [docRetry, setDocRetry] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [focusReading, setFocusReading] = useState(false);
   const [panel, setPanel] = useState<Panel | null>(() => parseEvidence(location.href));
   const [diagram, setDiagram] = useState<Diagram | null>(null);
   const [toast, setToast] = useState('');
@@ -433,18 +437,19 @@ function ReaderApp() {
     if (route.kind !== 'doc' || !data) return;
     const controller = new AbortController();
     const revision = bootstrapRevision.current;
-    const requested = `${route.id}${route.fragment ? `#${route.fragment}` : ''}`;
+    const requestedId = route.id, requestedFragment = route.fragment;
     setDocState((previous) => ({ ...previous, pending: true, error: '' }));
-    void api<DocumentResponse>(`/api/document?${new URLSearchParams({ id: route.id, fragment: route.fragment, full: '1' })}`, controller.signal)
+    void api<DocumentResponse>(`/api/document?${new URLSearchParams({ id: requestedId, fragment: requestedFragment, full: '1' })}`, controller.signal)
       .then((value) => { if (!controller.signal.aborted && revision === bootstrapRevision.current) {
         const current = parseRoute();
-        if (current.kind !== 'doc' || `${current.id}${current.fragment ? `#${current.fragment}` : ''}` !== requested) return;
+        if (current.kind !== 'doc' || current.id !== requestedId) return;
         setDocState({ value, pending: false, error: '' });
         const key = projectKey(data.config.projectId, 'last-document');
         if (key && value.collection === 'wiki') safeWrite(key, value.id);
-        const canonical = value.canonicalReference ?? `${value.id}${route.fragment ? `#${route.fragment}` : ''}`;
-        if (canonical !== requested) {
-          const { id, fragment } = splitReference(canonical);
+        const canonical = splitReference(value.canonicalReference ?? `${value.id}${requestedFragment ? '#' + requestedFragment : ''}`);
+        const resolvedFragment = current.fragment === requestedFragment ? canonical.fragment : current.fragment;
+        if (canonical.id !== requestedId || resolvedFragment !== current.fragment) {
+          const id = canonical.id, fragment = resolvedFragment;
           const currentEvidence = parseEvidence(location.href);
           history.replaceState(history.state, '', currentEvidence ? evidenceHref(currentEvidence, documentHref(id, fragment)) : documentHref(id, fragment));
           setRoute({ kind: 'doc', id, fragment });
@@ -452,7 +457,7 @@ function ReaderApp() {
       } })
       .catch(() => { if (!controller.signal.aborted && revision === bootstrapRevision.current) setDocState((previous) => ({ ...previous, pending: false, error: translate(locale, 'loadError') })); });
     return () => controller.abort();
-  }, [route.kind === 'doc' ? `${route.id}#${route.fragment}` : '', data, docRetry]);
+  }, [route.kind === 'doc' ? route.id : '', data, docRetry]);
   useEffect(() => {
     if (route.kind !== 'doc' || docState.value?.id !== route.id) return;
     const key = projectKey(projectId, `scroll:${route.id}`);
@@ -468,6 +473,12 @@ function ReaderApp() {
       setPanel(next);
     }
   }, [route.kind === 'doc' ? route.id : '', route.kind === 'doc' ? route.fragment : '', docState.value?.id]);
+  useEffect(() => {
+    const wide = window.matchMedia('(min-width: 980px)');
+    const close = () => { if (wide.matches) setMenuOpen(false); };
+    wide.addEventListener('change', close);
+    return () => wide.removeEventListener('change', close);
+  }, []);
   useEffect(() => {
     if (!menuOpen) return;
     document.querySelector<HTMLElement>('.mobile-close')?.focus();
@@ -494,7 +505,7 @@ function ReaderApp() {
       : route.kind === 'topic' ? data.map.topics.find((item) => item.id === route.id)?.title
         : route.kind === 'section' ? data.navigation.groups.flatMap((group) => group.sections).find((item) => item.id === route.id)?.title
           : route.kind === 'search' ? t('search') : t('home');
-    document.title = `${current ?? t('knowledge')} · ${projectTitle(data) || t('unknownProject')}`;
+    document.title = `${current ?? t('knowledge')} · ${projectTitle(data) || t('unknownProject')} · Lumine`;
     document.documentElement.lang = locale;
   }, [data, route, locale]);
 
@@ -508,24 +519,24 @@ function ReaderApp() {
   const displayedDoc = route.kind === 'doc' && activeDoc?.id === route.id ? activeDoc : null;
   return <>
     <a className="skip-link" href="#workspace">{t('skip')}</a>
-    <div className={`shell ${menuOpen ? 'menu-open' : ''}`}>
+    <div className={`shell ${menuOpen ? 'menu-open' : ''} ${focusReading ? 'focus-reading' : ''}`}>
       {menuOpen && <button className="nav-backdrop" aria-label={t('closeMenu')} onClick={closeMenu} />}
-      <aside className="sidebar" aria-label={t('tree')}>
-        <button className="mobile-close" onClick={closeMenu}>{t('closeMenu')} ×</button>
-        <a className="brand" href="/" onClick={(event) => { event.preventDefault(); onHome(); }}><span className="brand-mark" aria-hidden="true">L</span><span><strong>{projectName}</strong><small>{t('projectLibrary')}</small></span></a>
-        <nav className="primary-nav" aria-label={t('knowledge')}><a href="/" aria-current={route.kind === 'home' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onHome(); }}>{t('home')}</a><a href="?search=1" aria-current={route.kind === 'search' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onSearch(); }}>{t('search')}</a></nav>
+      <aside className="sidebar" role={menuOpen ? 'dialog' : undefined} aria-modal={menuOpen || undefined} aria-label={t('tree')}>
+        <button className="mobile-close icon-button" aria-label={t('closeMenu')} onClick={closeMenu}><X size={20} /></button>
+        <a className="brand" href="/" onClick={(event) => { event.preventDefault(); onHome(); }}><img className="brand-mark" src="/brand.svg" width="36" height="36" alt="" /><span><strong>{projectName}</strong><small>Lumine · {t('projectLibrary')}</small></span></a>
+        <nav className="primary-nav" aria-label={t('knowledge')}><a href="/" aria-current={route.kind === 'home' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onHome(); }}><BookOpen size={17} aria-hidden="true" />{t('home')}</a><a href="?search=1" aria-current={route.kind === 'search' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); onSearch(); }}><Search size={17} aria-hidden="true" />{t('search')}</a></nav>
         <EditorialSidebar data={data} route={route} locale={locale} onSection={onSection} onDocument={onDocument} />
         <details className="secondary-nav"><summary>{t('relatedDocuments')}</summary><button onClick={() => navigate('?collection=spec')}>{t('specs')}</button><button onClick={() => navigate('?collection=plan')}>{t('plans')}</button></details>
         <details className="secondary-nav"><summary>{t('maintenance')}</summary><p>{t('coverageNote')}</p><p>{t('coverage')} · {coverageSummary(data.map, new Set(data.catalog.map((item) => item.id))).covered} / {data.map.topics.length}</p>{!!data.issues.length && <p className="warning">{t('missing')} · {data.issues.length}</p>}<button onClick={() => onCopy(locale === 'zh-CN' ? '请核对当前项目知识目录、已有正文、来源及待处理缺口，保留人工修改和冲突，继续受影响主题。' : 'Check the current knowledge tree, text, sources and open gaps; preserve human edits and conflicts, then continue affected topics.')}>{t('copyResume')}</button></details>
       </aside>
-      <div className="main"><header className="topbar">
-        <button ref={menuButton} className="mobile-menu" aria-label={t('menu')} aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>☰</button>
+      <div className="main" inert={menuOpen}><header className="topbar">
+        <button ref={menuButton} className="mobile-menu" aria-label={t('menu')} aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}><Menu size={20} /></button>
         <nav className="breadcrumb" aria-label={t('path')}>
           <a href="/" onClick={(event) => { event.preventDefault(); onHome(); }}>{projectName}</a>
           {activeSection && <span><span aria-hidden="true">/</span><a aria-current={route.kind === 'section' ? 'page' : undefined} href={sectionHref(activeSection.id)} onClick={(event) => { event.preventDefault(); onSection(activeSection.id); }}>{activeSection.title}</a></span>}
           {selectedDoc && <span><span aria-hidden="true">/</span><span aria-current="page">{selectedDoc.title}</span></span>}
         </nav>
-        <div className="top-actions"><button className="top-search" onClick={onSearch}>{t('search')} <kbd aria-hidden="true">/</kbd></button><button onClick={() => void loadBootstrap()} disabled={refreshing}>{refreshing ? t('loading') : t('refresh')}</button><button onClick={() => { const next = locale === 'en' ? 'zh-CN' : 'en'; setLocale(next); const key = projectKey(projectId, 'ui-locale'); if (key) safeWrite(key, next); }} aria-label={t('language')}>{locale === 'en' ? '中文' : 'English'}</button></div>
+        <div className="top-actions"><button className="top-search" onClick={onSearch}><Search size={16} aria-hidden="true" />{t('search')} <kbd aria-hidden="true">/</kbd></button><button className="icon-button focus-toggle" aria-pressed={focusReading} aria-label={locale === 'zh-CN' ? focusReading ? '退出专注阅读' : '专注阅读' : focusReading ? 'Leave focus reading' : 'Focus reading'} title={locale === 'zh-CN' ? '专注阅读' : 'Focus reading'} onClick={() => setFocusReading((value) => !value)}>{focusReading ? <PanelLeftOpen size={18} /> : <Focus size={18} />}</button><button className="icon-button" aria-label={refreshing ? t('loading') : t('refresh')} title={t('refresh')} onClick={() => void loadBootstrap()} disabled={refreshing}><RefreshCw size={17} className={refreshing ? 'is-refreshing' : ''} /></button><button onClick={() => { const next = locale === 'en' ? 'zh-CN' : 'en'; setLocale(next); const key = projectKey(projectId, 'ui-locale'); if (key) safeWrite(key, next); }} aria-label={locale === 'en' ? 'Switch interface language: 中文' : '切换界面语言：English'}>{locale === 'en' ? '中文' : 'English'}</button></div>
       </header>
         <main className="workspace" id="workspace" tabIndex={-1}>
           {projectNotice && <div className="status-panel" role="status">{projectNotice}<button onClick={() => setProjectNotice('')}>{t('close')}</button></div>}

@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { isValidElement, useEffect, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import type { Components, ExtraProps } from 'react-markdown';
-import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import type { Diagram, KnowledgeDocument, Locale, Section } from '../harness/wiki/types.ts';
 import { decode, documentHref, evidenceHref, sourceTitle, translate, type CatalogDocument } from './reader-common.ts';
 import { drawMermaid } from './reader-diagrams.tsx';
+import { ArticleView, CodeSnippet } from './reader-article.tsx';
 
 type AstNode = {
   type: string;
@@ -28,6 +28,14 @@ function editorialMarkup(sections: Section[], diagrams: Diagram[] = []) {
       if (node.type === 'heading') {
         const section = sectionByLine.get(node.position?.start.line ?? 0);
         if (section && section.level === node.depth) node.data = { hProperties: { 'data-section-id': section.id } };
+      } else if (node.type === 'paragraph' && node.children?.length) {
+        // A standalone author anchor contributes identity, never an empty paragraph's vertical spacing.
+        const anchorOnly = node.children.every((child) => child.type === 'html' || (child.type === 'text' && !child.value?.trim()));
+        const anchor = anchorOnly && /^\s*<a\s+id=["']([\p{L}\p{N}_.:-]+)["']\s*>\s*<\/a>\s*$/u.exec(node.children.map((child) => child.value ?? '').join(''));
+        if (anchor) {
+          node.data = { hName: 'span', hProperties: sections.some((section) => section.id === anchor[1]) ? { 'data-wiki-anchor': anchor[1] } : { id: anchor[1], 'data-wiki-anchor': anchor[1] } };
+          node.type = 'lumineAnchor'; node.children = [];
+        }
       } else if (node.type === 'code' && node.lang === 'mermaid') {
         const diagram = diagrams[nextDiagram];
         if (diagram && node.value?.trim() === diagram.code) {
@@ -36,14 +44,11 @@ function editorialMarkup(sections: Section[], diagrams: Diagram[] = []) {
           node.type = 'containerDirective';
           delete node.value;
         }
-      } else if (node.type === 'containerDirective' && ['steps', 'comparison', 'details'].includes(node.name ?? '')) {
-        node.data = {
-          hName: 'div',
-          hProperties: {
-            'data-wiki-component': node.name!,
-            'data-wiki-title': node.attributes?.title?.trim().slice(0, 100) ?? '',
-          },
-        };
+      } else if (node.type === 'code' && node.lang === 'lumine-view') {
+        node.data = { hName: 'div', hProperties: { 'data-wiki-component': 'view', 'data-wiki-value': node.value ?? '' } };
+        node.type = 'lumineView';
+        node.children = [];
+        delete node.value;
       }
       node.children?.forEach(visit);
     };
@@ -80,38 +85,51 @@ function DiagramFigure({ diagram, doc, catalog, locale, onOpen, onSource }: {
   useEffect(() => {
     const target = canvas.current;
     if (!target) return;
-    const render = () => { void drawMermaid(target, diagram, locale); };
-    if (!('IntersectionObserver' in window)) { render(); return; }
+    let active = true;
+    let highlighted: string[] = [];
+    const mark = () => {
+      for (const node of target.querySelectorAll<SVGGElement>('g.node')) {
+        const id = node.dataset.nodeId || node.getAttribute('data-id') || node.id.replace(/^(?:.*-)?flowchart-(.+)-\d+$/, '$1');
+        const selected = highlighted.includes(id);
+        node.classList.toggle('is-explained', selected);
+        node.setAttribute('data-explanation-muted', String(highlighted.length > 0 && !selected));
+      }
+    };
+    const focus = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      if (!detail || detail.diagramId !== diagram.id || !Array.isArray(detail.nodeIds)) return;
+      highlighted = detail.nodeIds.filter((id: unknown): id is string => typeof id === 'string');
+      mark();
+    };
+    window.addEventListener('lumine:diagram-focus', focus);
+    const render = () => { void drawMermaid(target, diagram, locale).then(() => { if (active) mark(); }); };
+    if (!('IntersectionObserver' in window)) { render(); return () => { active = false; window.removeEventListener('lumine:diagram-focus', focus); }; }
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) { observer.disconnect(); render(); }
     }, { rootMargin: '220px' });
     observer.observe(target);
-    return () => observer.disconnect();
+    return () => { active = false; observer.disconnect(); window.removeEventListener('lumine:diagram-focus', focus); };
   }, [diagram, locale]);
   return <figure className="diagram" id={diagram.id} tabIndex={-1}>
     <header className="diagram-header"><strong>{diagram.title}</strong><button type="button" onClick={onOpen}>{t('openDiagram')}</button></header>
-    <div className="diagram-canvas" role="group" aria-label={diagram.title} ref={canvas}>{t('loading')}</div>
+    <div className="diagram-canvas" role="group" tabIndex={0} aria-label={diagram.title} ref={canvas}>{t('loading')}</div>
     {diagram.caption && <figcaption>{diagram.caption}</figcaption>}
     <SourceLinks ids={diagram.sources} label={t('sources')} doc={doc} catalog={catalog} locale={locale} onSource={onSource} />
     <details><summary>{t('viewMermaid')}</summary><pre><code>{diagram.code}</code></pre></details>
   </figure>;
 }
 
-function proseHeadings(sections: Section[], renderSources?: (ids: string[]) => ReactNode, titleId?: string): Components {
-  const byId = new Map(sections.map((section) => [section.id, section]));
+function proseHeadings(sections: Section[], titleId?: string): Components {
   const heading = (Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') => ({ node, children }: ExtraProps & { children?: ReactNode }) => {
     const id = node?.properties['data-section-id'] as string | undefined;
-    const section = id ? byId.get(id) : undefined;
-    return <>{!id || id !== titleId ? <Tag id={id} tabIndex={id ? -1 : undefined}>{children}</Tag> : null}
-      {section && renderSources?.(section.sources)}
-    </>;
+    return !id || id !== titleId ? <Tag id={id} tabIndex={id ? -1 : undefined}>{children}</Tag> : null;
   };
   return { h1: heading('h1'), h2: heading('h2'), h3: heading('h3'), h4: heading('h4'), h5: heading('h5'), h6: heading('h6') };
 }
 
 type ResolveLink = (href: string) => { href: string; open: () => void } | undefined;
 
-function proseComponents(resolveLink: ResolveLink, locale: Locale, showDiagram?: (id: string) => ReactNode): Components {
+function proseComponents(resolveLink: ResolveLink, locale: Locale, showDiagram?: (id: string) => ReactNode, showView?: (value: string) => ReactNode): Components {
   const link = (href: string | undefined, children: ReactNode) => {
     if (!href) return <>{children}</>;
     if (/^https?:\/\//i.test(href)) return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
@@ -126,11 +144,18 @@ function proseComponents(resolveLink: ResolveLink, locale: Locale, showDiagram?:
     img: ({ src, alt }) => link(src, alt || translate(locale, 'attachment')),
     div: ({ node, children }) => {
       const kind = node?.properties['data-wiki-component'];
-      const title = node?.properties['data-wiki-title'];
       if (kind === 'diagram') return showDiagram?.(String(node?.properties['data-wiki-id'])) ?? null;
-      if (kind === 'details') return <details className="prose-details"><summary>{title || translate(locale, 'moreDetail')}</summary>{children}</details>;
-      if (kind === 'steps' || kind === 'comparison') return <section className={'prose-' + kind}>{title && <strong>{title}</strong>}{children}</section>;
+      if (kind === 'view') return showView?.(String(node?.properties['data-wiki-value'])) ?? <pre>{String(node?.properties['data-wiki-value'])}</pre>;
       return <div>{children}</div>;
+    },
+    pre: ({ children }) => {
+      const child = Array.isArray(children) ? children[0] : children;
+      if (isValidElement<{ className?: string; children?: ReactNode }>(child)) {
+        const language = /(?:^|\s)language-([^\s]+)/.exec(child.props.className ?? '')?.[1] ?? 'text';
+        const code = typeof child.props.children === 'string' ? child.props.children.replace(/\n$/, '') : undefined;
+        if (code !== undefined) return <CodeSnippet code={code} language={language} locale={locale} />;
+      }
+      return <pre>{children}</pre>;
     },
     table: ({ children }) => <div className="table-scroll" tabIndex={0} role="region" aria-label={translate(locale, 'table')}><table>{children}</table></div>,
   };
@@ -147,7 +172,7 @@ export function MarkdownBody({ doc, catalog, locale, fragment, titleId, onDocume
   onCurrentSection: (id: string) => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const plugins = useMemo(() => [remarkGfm, remarkDirective, editorialMarkup(doc.sections, doc.diagrams)], [doc.sections, doc.diagrams]);
+  const plugins = useMemo(() => [remarkGfm, editorialMarkup(doc.sections, doc.diagrams)], [doc.sections, doc.diagrams]);
   const components = useMemo(() => {
     const source = (id: string) => onSource(doc.id, id);
     const resolve: ResolveLink = (href) => {
@@ -172,11 +197,11 @@ export function MarkdownBody({ doc, catalog, locale, fragment, titleId, onDocume
       } catch { return; }
     };
     return {
-      ...proseHeadings(doc.sections, (ids) => <SourceLinks ids={ids} label={translate(locale, 'sectionSources')} doc={doc} catalog={catalog} locale={locale} onSource={source} />, titleId),
+      ...proseHeadings(doc.sections, titleId),
       ...proseComponents(resolve, locale, (id) => {
         const diagram = doc.diagrams.find((entry) => entry.id === id);
         return diagram && <DiagramFigure diagram={diagram} doc={doc} catalog={catalog} locale={locale} onOpen={() => onDiagram(diagram)} onSource={source} />;
-      }),
+      }, (value) => <ArticleView value={value} documentId={doc.id} locale={locale} onSource={source} prose={(text) => <Markdown skipHtml urlTransform={safeUrl} remarkPlugins={[remarkGfm]} components={proseComponents(resolve, locale)}>{text}</Markdown>} />),
     };
   }, [catalog, doc, locale, titleId, onDocument, onFragment, onSource, onReference, onDiagram]);
 
@@ -232,6 +257,7 @@ export function MarkdownBody({ doc, catalog, locale, fragment, titleId, onDocume
 
   return <div ref={root} className="prose">
     <Markdown skipHtml urlTransform={safeUrl} remarkPlugins={plugins} components={components}>{doc.body}</Markdown>
+    {doc.sections.some((section) => section.sources.length > 0) && <details className="article-section-sources"><summary>{translate(locale, 'sources')}</summary>{doc.sections.filter((section) => section.sources.length > 0).map((section) => <div key={section.id}><strong>{section.title}</strong><SourceLinks ids={section.sources} label={translate(locale, 'sectionSources')} doc={doc} catalog={catalog} locale={locale} onSource={(id) => onSource(doc.id, id)} /></div>)}</details>}
   </div>;
 }
 
@@ -254,7 +280,7 @@ export function ReferenceMarkdown({ markdown, sections, path, locale, fragment, 
     ...proseComponents((href) => ({ href: evidenceHref({ kind: 'reference', from: path, target: href }, location.href), open: () => onReference(path, href) }), locale),
   };
   return <div className="prose reference-prose" ref={root}>
-    <Markdown skipHtml urlTransform={safeUrl} remarkPlugins={[remarkGfm, remarkDirective, editorialMarkup(sections)]} components={components}>
+    <Markdown skipHtml urlTransform={safeUrl} remarkPlugins={[remarkGfm, editorialMarkup(sections)]} components={components}>
       {markdown.replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/, '')}
     </Markdown>
   </div>;

@@ -1,6 +1,15 @@
 import type { Locale } from './types.ts';
 
 const diagnostics: Record<string, [string, string]> = {
+  CONTEXT_QUESTION_REQUIRED: ['请提供要理解或开发的问题，长度不超过 4000 字符。', 'Provide the question or task, within 4000 characters.'],
+  CONTEXT_BUDGET_INVALID: ['条数须为 1–30，文本预算须为 1000–200000 字符。', 'Use 1–30 results and a 1000–200000 character budget.'],
+  CONTEXT_BUDGET_TOO_SMALL: ['当前预算无法保留必要上下文和规范引用，请增加 --max-chars。', 'The budget cannot preserve essential context and rule references. Increase --max-chars.'],
+  CONTEXT_REFERENCE_NOT_FOUND: ['未找到指定背景文档或章节，请先用 wiki show --outline 核实。', 'Context reference not found. Inspect wiki show --outline.'],
+  IMPACT_CHANGES_REQUIRED: ['请提供 1–1000 个变更路径，包括已删除文件的原路径。', 'Provide 1–1000 changed paths, including original paths of deleted files.'],
+  IMPACT_REPOSITORY_UNKNOWN: ['变更路径的仓库未登记，请核对仓库标识。', 'The changed path uses an unregistered repository. Check its repository ID.'],
+  IMPACT_PATH_INVALID: ['使用 仓库标识:相对路径，例如 project:src/service.ts。', 'Use repository-id:relative-path, for example project:src/service.ts.'],
+  UPDATE_BRIEFING_INVALID: ['工作包说明须包含读者问题，可补充阅读对象、页面职责及需保留的内容。', 'The update briefing requires a reader question, with optional audience, purpose and preserved material.'],
+  READING_INTENT_INVALID: ['阅读目标须包含 question，可补充 audience 和 purpose。', 'Reading intent requires question, with optional audience and purpose.'],
   STORAGE_ACTION_REQUIRED: ['请选择 inspect、check、compact --plan／--apply 或 recover，并提供精确清单哈希。', 'Choose inspect, check, compact --plan/--apply or recover, with the exact plan hash.'],
   STORAGE_CHECK_FAILED: ['存储完整性检查失败，原始资料已保留；请先执行 storage check 定位问题。', 'Storage integrity failed. Originals are preserved; use storage check to locate the issue.'],
   STORAGE_OBJECT_CORRUPT: ['内容对象校验失败，不能用当前正文替代基线；请检查恢复资料。', 'Content object verification failed. Current text cannot replace the baseline; inspect recovery material.'],

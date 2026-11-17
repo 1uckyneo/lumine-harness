@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "3905c298-8e08-45d4-b09c-19956e881052",
+    "createdAt": "2026-11-17T05:23:51.559Z",
+    "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+    "scope": [
+      "lumine-adapters",
+      "lumine-architecture",
+      "lumine-root-config",
+      "lumine-adoption"
+    ],
+    "status": "applied",
+    "storageReceipt": true,
+    "units": [
+      {
+        "id": "lumine-adapters",
+        "kind": "update",
+        "group": "reader-explanation-review",
+        "path": "docs/repo-wiki/Adapter 公共协议与各宿主差异.md"
+      },
+      {
+        "id": "lumine-architecture",
+        "kind": "update",
+        "group": "reader-explanation-review",
+        "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md"
+      },
+      {
+        "id": "lumine-root-config",
+        "kind": "update",
+        "group": "reader-explanation-review",
+        "path": "docs/repo-wiki/项目配置、根解析与多仓身份.md"
+      },
+      {
+        "id": "lumine-adoption",
+        "kind": "update",
+        "group": "reader-explanation-review",
+        "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md"
+      }
+    ],
+    "results": [
+      {
+        "id": "lumine-adapters",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "93e381222549cceaec16d2d15e428696eb26dbb6315be9092a08022bc0ddd152"
+      },
+      {
+        "id": "lumine-architecture",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "b4e3e5742d08ee87626ccc8fcec1b60ddb98b20210d79fd9fdf9ecacdeefa493"
+      },
+      {
+        "id": "lumine-root-config",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "222a777f0ef651f2335129cb59fa17d317118edcd13d30a8d3132b9d9d1fd6b9"
+      },
+      {
+        "id": "lumine-adoption",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "2affb9df72102ff5791ed09ebf343d60c029e533612acd93a402d2feec338cba"
+      }
+    ],
+    "audit": {
+      "recordHash": "7b43de80041885545f7b750009c1542bdb71614819762e55eaba36c34f169d40",
+      "unitHashes": [
+        {
+          "id": "lumine-adapters",
+          "sha256": "ecf8b8cdbdff81c9c1561afb8999388ab90a2d16a4e559deb8877807feb659a5"
+        },
+        {
+          "id": "lumine-architecture",
+          "sha256": "fe35d5e5813eabb390bf6e972de973fefb07c0911b1b69d0716773fc0125c783"
+        },
+        {
+          "id": "lumine-root-config",
+          "sha256": "f87b5fc704c927930ec69001e455b5d84e6d1ec4d1984e50f95277b2575f3200"
+        },
+        {
+          "id": "lumine-adoption",
+          "sha256": "701643fa504f5dd68c1aefb717e010e1e79b0275b6b7a3032378a4a98690a9e2"
+        }
+      ]
+    }
+  }
+}

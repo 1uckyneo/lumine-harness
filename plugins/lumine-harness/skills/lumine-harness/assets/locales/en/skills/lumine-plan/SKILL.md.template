@@ -28,3 +28,5 @@ For changes to business behavior, identify the affected feature or scenario page
 Review product and technical consistency, testable acceptance, and missing boundaries. Runtime checks validate structure and references, not semantic quality. Lead with conclusions and current decisions, omit irrelevant sections, and link to logs rather than copying them. Follow the project language; readable filenames and stable identities are separate.
 
 Use [current request scope](../lumine-run/references/request-scope.md) before work and closeout. New requests do not automatically replace persistent tasks or restart the product workflow.
+
+For a new capability or behavior change, identify the reader question and affected knowledge topic from actual responsibilities and relationships. A menu list is not a universal knowledge structure. `wiki context` can supply existing knowledge. Maintain rules and knowledge destinations in the same Spec; implementation claims still require Run verification.

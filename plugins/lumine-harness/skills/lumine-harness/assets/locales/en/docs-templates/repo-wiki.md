@@ -9,42 +9,34 @@ locale: en
 
 # {{title}}
 
-<!-- New prose/topic filenames follow locale with independent stable IDs. Choose a type for architecture, guide, standard, example, domain language, or lasting decision; type alone grants no authority. Distinguish confirmed concepts/rules from implemented facts; proposals are not current facts. Preserve complete terms/contexts and necessary ADRs in related topics without domain/decisions directories. Standards need explicit AGENTS authorization; relate Wiki pages through prose/relations, not mutual sources/watchScopes. -->
+<!-- Read lumine-knowledge's writing and reading-expression guides first. This demonstrates metadata and stable anchors, not a mandatory outline. Choose the actual page role and current/proposed/historical state. Normative authority comes from AGENTS, never from type alone. Answer the reader's question before introducing necessary concepts and conditions. Business journeys, procedures, mechanisms and standards need different explanation orders. -->
 
-<a id="section-1"></a>
+{{A direct opening answer to the reader's question}}
 
-## The question this topic answers
+<a id="{{stable_section_id}}"></a>
+## {{The next question the reader needs answered}}
 
-<!-- Answer a real question directly, then state applicability. Cards reuse the frontmatter summary rather than maintaining another body. Replace every placeholder and verify sources and current/proposed/historical status before creating real knowledge. -->
+{{Explain the process, conditions, result and important exceptions using verified sources}}
 
-<a id="section-2"></a>
-
-## Mechanism and diagrams
-
-<!-- Explain key paths from evidence. Add Mermaid fenced blocks when useful and register {id, title, caption, sources: [source-1]} in diagrams in block order. Diagram text is canonical; do not save separate images or thumbnails. -->
-
-<a id="section-3"></a>
-
-## Technical choices and limits
-
-<!-- Explain evidence, reasons, costs, change boundaries, and unverified scope. Label rationale inferred from code as inference. -->
-
-<a id="section-4"></a>
-
-## Sources and related work
-
-<!-- Cite specific sources and related Wiki, Specs, and Plans. Distinguish source implementation, observed operation, and deployment conclusions. The structured block below is for source lookup, not displayed body text. -->
+<!-- Add sections, diagrams or declared view blocks only when they explain something. Register each Mermaid diagram by order with id/title/caption/sources and a stable preceding anchor. Explicit lumine-view fences support steps, comparisons, terms, code, details and registered explainers. Use meaningful source display titles while preserving exact paths; keep internal source IDs out of prose. Remove these authoring notes, placeholders and checklists from the delivered page. -->
 
 <!-- lumine-wiki-metadata:v1
 {
+  "reading": {
+    "question": "{{The principal reader question}}",
+    "audience": "{{The reader and their prior knowledge}}",
+    "purpose": "{{What the reader should understand or accomplish}}"
+  },
   "tags": [],
   "aliases": [],
   "repositories": ["{{repo_id}}"],
   "sources": [
-    { "id": "source-1", "repoId": "{{repo_id}}", "path": "{{relative_source_path}}" }
+    { "id": "source-1", "repoId": "{{repo_id}}", "path": "{{relative_source_path}}", "title": "{{Source responsibility}}" }
   ],
   "relations": [],
-  "sections": [],
+  "sections": [
+    { "id": "{{stable_section_id}}", "sources": ["source-1"] }
+  ],
   "watchScopes": [
     { "repoId": "{{repo_id}}", "path": "{{module_relative_path}}" }
   ],

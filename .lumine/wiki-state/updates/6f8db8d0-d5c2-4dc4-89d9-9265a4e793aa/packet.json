@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "6f8db8d0-d5c2-4dc4-89d9-9265a4e793aa",
+    "createdAt": "2026-11-17T05:49:02.146Z",
+    "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+    "scope": [
+      "lumine-adapters",
+      "lumine-architecture"
+    ],
+    "status": "applied",
+    "storageReceipt": true,
+    "units": [
+      {
+        "id": "lumine-adapters",
+        "kind": "update",
+        "path": "docs/repo-wiki/Adapter 公共协议与各宿主差异.md"
+      },
+      {
+        "id": "lumine-architecture",
+        "kind": "update",
+        "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md"
+      }
+    ],
+    "results": [
+      {
+        "id": "lumine-adapters",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "37b3ea06a572e1668010fdeb693ab6a57ababc2ed0110cc88dc38ed4fee8a14c"
+      },
+      {
+        "id": "lumine-architecture",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "90875ed3b8f9df60c9fb4920cb541d75a62c1a9ada223ff4f7e04de8fae4338c"
+      }
+    ],
+    "audit": {
+      "recordHash": "b626baa5a05b805f29992cdbecf00f65842d72aaa3fe505bf968192c45a9b52b",
+      "unitHashes": [
+        {
+          "id": "lumine-adapters",
+          "sha256": "e30bde4eca17ba56fb302b0ca8d10aecf7e05c70a5bb0845728b7d872ab2139c"
+        },
+        {
+          "id": "lumine-architecture",
+          "sha256": "f27e6c73e136aede91c0642763352cfa869e37c7d2e9c40ba6931c37b36bddda"
+        }
+      ]
+    }
+  }
+}

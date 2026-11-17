@@ -1,4 +1,5 @@
 import type { KnowledgeCard, KnowledgeMatch, ReaderDocument, Section } from './types.ts';
+import { viewMarkdownText } from './view-blocks.ts';
 const segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
 const STOP = new Set(('a an and are as at be by can could do does for from how i in into is it me my of on or our please should that the their this to was we what when where which who why will with would you your 这个 那个 这些 那些 怎么 怎样 如何 为什么 什么 是否 可以 需要 进行 处理 提示 页面 项目 功能 使用 相关 一个 一下 我们 以及 还有').split(' '));
 function stem(word: string): string {
@@ -17,6 +18,7 @@ export function searchTerms(text: string): string[] {
 }
 const sentenceSegmenter = new Intl.Segmenter('zh', { granularity: 'sentence' });
 function plain(text: string): string {
+  text = viewMarkdownText(text);
   const lines: string[] = [];
   let fence: { char: string; size: number; diagram: boolean } | null = null;
   for (const line of text.split(/\r?\n/)) {
@@ -70,7 +72,7 @@ export function searchKnowledge(documents: ReaderDocument[], query: string, limi
     const metadata = `${document.summary} ${document.sources.map((source) => source.path + ' ' + (source.note ?? '')).join(' ')} ${document.relations.map((relation) => relation.target + ' ' + (relation.note ?? '')).join(' ')} ${document.diagrams.map((diagram) => `${diagram.title} ${diagram.caption} ${diagram.code}`).join(' ')}`;
     const sections = document.sections.length ? document.sections : [{ id: '', title: document.title, body: document.body, startLine: 1, endLine: document.body.split('\n').length, level: 1, stable: false, sources: [] }];
     return { document, exact, titleTerms, metadata: searchTerms(metadata), sections: sections.map((section) => {
-      const text = directBody(document, section);
+      const text = viewMarkdownText(directBody(document, section));
       return { section, text, tokens: searchTerms(text) };
     }) };
   });

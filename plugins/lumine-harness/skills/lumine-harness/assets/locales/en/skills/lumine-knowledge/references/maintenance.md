@@ -105,3 +105,11 @@ After upgrading the Runtime, preview with `wiki storage compact --plan --editori
 Add `navigation` to a change manifest with `schemaVersion: 1`, `overview` (current Wiki ID), `groups`, `unlisted` and `norms`. Groups use the understand, operate, and reference IDs, with sections holding `id/title/description?/documents`. Give each page one primary position or a stated `unlisted: [{id,reason}]` reason. Place current business features and scenarios under understand and historical content under reference.
 
 Register AGENTS-authorized standards under operate with `norms: [{id,scope}]`. For changes to their text, scope, or authority, confirm the applicable authorization and supply `normativeChanges: [{id,reason}]`. The tool records intent; authority comes from the project and user. Keep security standards visible and readable in full. A navigation-only change can use an empty `changes` list and empty candidates with the same transaction and recovery.
+
+## Reading intent and change input
+
+Use `wiki context "reader question" --json` when project context is needed, then follow sections, relations and full-rule references. Supply actual changes, including deleted paths, with `wiki impact <repository-id:relative-path...> --json`. Unmatched paths are reported separately and never mean no impact. Relations guide investigation; they do not decide whether prose must change.
+
+A change manifest may include `briefing: {"question":"What must be explained?","audience":"Readers","purpose":"What they should understand","preserve":["Human corrections and conditions to retain"]}`. Prepared units also expose current prose, the generated baseline and human differences, related topics, sections and diagrams. This is writing input, not a second fact ledger. Persist a page's reading role in its existing Markdown footer as `reading: {question, audience?, purpose?}`; reuse it during routine maintenance instead of reshaping the whole knowledge structure after one prompt.
+
+See the complete [writing method](写作与编排.md) and [reading-expression contract](阅读表达.md). Replace template headings with actual reader questions rather than publishing a mechanical outline.

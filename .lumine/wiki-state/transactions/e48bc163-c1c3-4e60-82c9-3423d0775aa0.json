@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "e48bc163-c1c3-4e60-82c9-3423d0775aa0",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "mutationHashes": [
+      {
+        "path": ".lumine/wiki-state/reviews/6736401798fb41c765444b652622599a7acdba0c0e2a4ebd7693f6e6971398f9.json",
+        "beforeHash": "1f45a140797f290aebddcfb22bf9c306f476f619cc9bbf0c2203f34a14f978de",
+        "afterHash": "2b44ab2ab5f383525e8d155aa17633940a85db2d73f4829ddbcf9e0b3f6db2f9"
+      }
+    ]
+  }
+}

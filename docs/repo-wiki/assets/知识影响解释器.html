@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>观察知识影响范围</title>
+<style>
+:root{color-scheme:light;font:15px/1.6 'Noto Sans SC Variable','PingFang SC',sans-serif;color:#25231f;background:#faf9f6}*{box-sizing:border-box}body{margin:0;padding:24px}h1{font-size:19px;font-weight:500;margin:0 0 8px}p{margin:0 0 16px;color:#68625b}.controls{display:flex;gap:18px;flex-wrap:wrap;align-items:end;margin:22px 0}label{display:grid;gap:5px}select{padding:8px 30px 8px 10px;font:inherit;max-width:100%;border:1px solid #c9c2b5;border-radius:5px;background:#fff;color:inherit}.relation{display:flex;gap:8px;align-items:center;font-size:13px;padding:8px 0}input{accent-color:#9a472f;width:17px;height:17px}input:focus-visible,select:focus-visible{outline:2px solid #9a472f;outline-offset:3px}.graph{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr) 24px minmax(0,1fr);align-items:center;margin:28px 0}.node{border:1px solid #d5cec2;border-radius:8px;padding:16px 10px;text-align:center;background:#fff;min-height:104px;display:flex;flex-direction:column;justify-content:center;gap:4px}.node strong{font-weight:500;font-size:16px}.node span{font-size:12px;color:#68625b}.node[data-state=direct]{border:2px solid #9a472f;background:#f5e8e1}.node[data-state=related]{border-color:#82755c;background:#f2eee5}.edge{text-align:center;color:#8a8170}.edge[data-active=false]{opacity:.2}.result{border-top:1px solid #e0d9cd;padding-top:18px}h2{font-size:16px;font-weight:500;margin:0 0 10px}.result ul{margin:0;padding-left:20px}.result li{margin:8px 0}.note{font-size:13px;margin:20px 0 0}.legend{display:flex;gap:18px;font-size:12px;margin-top:14px;color:#68625b}.legend span:before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;background:#9a472f;margin-right:6px}.legend span+span:before{background:#82755c}@media(max-width:480px){body{padding:18px}.graph{gap:4px;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) 14px minmax(0,1fr)}.node{padding:12px 5px}.node strong{font-size:14px}.node span{font-size:11px}.controls{gap:8px}}
+</style>
+</head>
+<body>
+<h1>一个变化，为什么只检查这些页面？</h1>
+<p>这是一条缩小的示例知识链。选择变化来源，观察直接命中与一层关系扩展。</p>
+<div class="controls">
+ <label>哪个文件发生变化？
+  <select id="change"><option value="mechanism">机制说明引用的实现</option><option value="guide">操作指南引用的入口</option><option value="unknown">未登记范围的文件</option></select>
+ </label>
+ <label class="relation"><input id="relation" type="checkbox" checked>登记“机制说明 ↔ 操作指南”关系</label>
+</div>
+<div class="graph" aria-label="机制说明与操作指南相关，操作指南与专题说明相关">
+ <div class="node" id="mechanism"><strong>机制说明</strong><span>尚未进入候选</span></div>
+ <span class="edge" id="first-edge" aria-hidden="true">↔</span>
+ <div class="node" id="guide"><strong>操作指南</strong><span>尚未进入候选</span></div>
+ <span class="edge" aria-hidden="true">↔</span>
+ <div class="node" id="topic"><strong>专题说明</strong><span>尚未进入候选</span></div>
+</div>
+<div class="legend"><span>直接命中</span><span>相邻候选</span></div>
+<section class="result" aria-live="polite" aria-atomic="true"><h2>这次需要核对</h2><ul id="results"></ul></section>
+<p class="note">候选只是调查范围，不代表必须改写。核实后一起维护正文、摘要、图解、导航、关系及来源；仍然准确的内容可以保留。</p>
+<script>
+(() => {
+ const asset = 'knowledge-impact-explorer';
+ const change = document.getElementById('change');
+ const relation = document.getElementById('relation');
+ const names = {mechanism:'机制说明',guide:'操作指南',topic:'专题说明'};
+ const update = () => {
+  const selected = change.value;
+  const direct = new Set(selected === 'unknown' ? [] : [selected]);
+  const candidates = new Map([...direct].map(id => [id,'direct']));
+  const edges = relation.checked ? [['mechanism','guide'],['guide','topic']] : [['guide','topic']];
+  for(const [from,to] of edges) {
+   if(direct.has(from) && !direct.has(to)) candidates.set(to,'related');
+   if(direct.has(to) && !direct.has(from)) candidates.set(from,'related');
+  }
+  for(const id of Object.keys(names)) {
+   const node = document.getElementById(id), state = candidates.get(id) || 'none';
+   node.dataset.state = state;
+   node.querySelector('span').textContent = state === 'direct' ? '直接命中来源' : state === 'related' ? '核对相邻关系' : '本次未列入候选';
+  }
+  document.getElementById('first-edge').dataset.active = String(relation.checked);
+  const results = document.getElementById('results');
+  results.replaceChildren();
+  const append = text => {const item = document.createElement('li');item.textContent=text;results.append(item)};
+  if(!direct.size) append('文件没有命中已登记来源或范围，单独列为未命中。Agent 仍需判断是否存在新能力或知识缺口。');
+  for(const [id,state] of candidates) append(state === 'direct' ? names[id]+'直接引用变化来源，先核实它描述的行为与条件。' : names[id]+'与直接命中的页面相邻，需要核对交接或相关解释是否变化。');
+  if(selected === 'mechanism' && relation.checked) append('专题说明距离直接命中两层，工具不会继续自动扩散；有实际业务依据时，再由 Agent 深入调查。');
+  if(selected === 'mechanism' && !relation.checked) append('取消登记关系后，工具没有依据自动推荐操作指南。它们是否实际有关，仍要按真实项目核实。');
+  parent.postMessage({type:'lumine:resize',asset,height:Math.min(900,Math.max(180,document.documentElement.scrollHeight))},'*');
+ };
+ change.addEventListener('change',update);relation.addEventListener('change',update);
+ window.addEventListener('message',event=>{
+  if(event.source!==parent || !event.data || event.data.type!=='lumine:input' || event.data.asset!==asset)return;
+  const next=event.data.input && event.data.input.changed;
+  if(['mechanism','guide','unknown'].includes(next))change.value=next;
+  update();
+ });
+ update();parent.postMessage({type:'lumine:ready',asset},'*');
+})();
+</script>
+</body>
+</html>

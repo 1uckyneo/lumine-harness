@@ -35,3 +35,7 @@ After first adoption, continue with `lumine-knowledge` for project-specific coll
 Guide readers from a project overview to its actual features or capabilities. Initial adoption sets the editorial direction; everyday Knowledge maintains explanations, diagrams, navigation, and evidence as the project changes. Activate editorial navigation through the explicit versioned migration before applying editorial updates.
 
 首次采用按真实功能或核心能力建立读者路径。接入之后由 Knowledge 持续维护正文、图示、导航和证据。先通过显式迁移启用编排版本，再应用编排变更。
+
+First-time knowledge planning uses project responsibilities, implicit constraints and real collaboration paths rather than copying directory trees or a user-provided menu list. Provide representative explanations and maintainable source relationships; subsequent `lumine-knowledge` work uses the same context and impact tools without restarting adoption.
+
+首次规划依据项目职责、隐含约束与真实协作路径，不直接复制目录树或用户举例的菜单。先做好代表性解释与可维护的来源关系；日常 `lumine-knowledge` 复用上下文和影响工具，不重跑接入。

@@ -31,7 +31,7 @@ export default defineConfig({
   outDir,
   format: ["esm"],
   platform: "node",
-  deps: { neverBundle: ["yaml", "ignore"] },
+  deps: { neverBundle: ["yaml", "ignore", /^shiki(?:\/|$)/] },
   target: "node22",
   unbundle: true,
   clean: true,

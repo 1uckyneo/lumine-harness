@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "id": "reader-explanation",
+    "revision": "01ba2a768546e126e5e538db09f512c43fc0e20c730a29785a36a2fda2207eb0",
+    "freshness": "current",
+    "checkedAt": "2026-11-17T05:06:23.035Z",
+    "sourceFingerprint": "684074349989b35a3c7031e75388e699511bb5485c5cec71f68f262d86e35dbe",
+    "sources": {
+      "$lumineObject": "684074349989b35a3c7031e75388e699511bb5485c5cec71f68f262d86e35dbe",
+      "kind": "json",
+      "bytes": 4099
+    }
+  }
+}

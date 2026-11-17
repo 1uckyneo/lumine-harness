@@ -5,18 +5,18 @@
     "schemaVersion": 2,
     "id": "lumine-command-guide",
     "path": "docs/repo-wiki/guides/常用指令与阅读器.md",
-    "generation": 4,
+    "generation": 5,
     "generatedMarkdown": {
-      "$lumineObject": "41102a9784e7ff75f0a8d97cba585c6f353cec9f0ab8f1fcd08b7c6b60f9c70b",
+      "$lumineObject": "737c6b47567d1e004f022d37a7787d70b96d72ff4fc3e974beaaefd9f3d7c67a",
       "kind": "text",
-      "bytes": 3716
+      "bytes": 4253
     },
-    "appliedRevision": "41102a9784e7ff75f0a8d97cba585c6f353cec9f0ab8f1fcd08b7c6b60f9c70b",
+    "appliedRevision": "737c6b47567d1e004f022d37a7787d70b96d72ff4fc3e974beaaefd9f3d7c67a",
     "sources": {
-      "$lumineObject": "5c1c7d81d228dfb3f42a2e1888d58b8fb55de23f960e45a7fc07ac7e21ee5c0a",
+      "$lumineObject": "bd2afc4a9c0a8cf9c1f3e452c6f97c656492f755e3bdb1f3338f642dc33dfb7f",
       "kind": "json",
-      "bytes": 1992
+      "bytes": 2119
     },
-    "updatedAt": "2026-10-14T05:07:29.960Z"
+    "updatedAt": "2026-11-17T05:06:23.023Z"
   }
 }

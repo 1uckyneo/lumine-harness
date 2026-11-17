@@ -26,10 +26,15 @@ export interface EditorialNavigation extends NavigationContent { mode: 'editoria
 export interface EditorialPlacement { editorialRole?: EditorialRole; normativeScope?: string }
 export interface KnowledgeMap extends CoverageMap { navigation: EditorialNavigation }
 export interface ReviewRecord { documentId: string; revision: string; sourceFingerprint: string; reviewedAt: string; reviewer: { kind: 'agent' | 'human'; role: 'author' | 'independent' }; outcome: 'reviewed' | 'issues'; scope: string[]; findings: string[]; limitations: string[] }
+/** Optional editorial intent; facts and rules remain in the article and its sources. */
+export interface ReadingIntent { question: string; audience?: string; purpose?: string }
+export interface UpdateBriefing extends ReadingIntent { preserve?: string[] }
+export interface UnitBriefing { intent?: ReadingIntent; questions: string[]; role: EditorialRole; related: string[]; sections: string[]; diagrams: string[]; humanEdits: boolean; normativeScope?: string }
 export interface SemanticReview extends Partial<Omit<ReviewRecord, 'outcome' | 'documentId'>> { status: 'unreviewed' | 'reviewed' | 'issues' | 'outdated' }
 export interface SourceObservation { status: 'observed' | 'not_observed'; checkedAt: string | null; sourceFingerprint: string | null }
 export interface ObservationRecord { id: string; revision: string; freshness: Freshness; checkedAt: string; sourceFingerprint: string; sources: SourceSnapshot }
 export interface KnowledgeMeta {
+  reading?: ReadingIntent;
   id: string; title: string; summary: string; type: string; status: string; locale: Locale;
   tags: string[]; aliases: string[]; repositories: string[]; sources: SourceRef[];
   relations: Relation[]; diagrams: Omit<Diagram, 'code'>[]; watchScopes: WatchScope[];
@@ -44,9 +49,9 @@ export interface WikiConfig { root: string; locale: Locale; repositories: { id: 
 export interface Baseline { schemaVersion: 2; id: string; path: string; generation: number; generatedMarkdown: string; appliedRevision: string; sources: SourceSnapshot; updatedAt: string }
 export interface ChangeDeclaration { kind: 'create' | 'update'; id: string; path?: string; sourceRefs?: SourceRef[]; watchScopes?: WatchScope[]; replaceSources?: boolean; replaceWatchScopes?: boolean; group?: string }
 export interface NormativeChange { id: string; reason: string }
-export interface ChangeManifest { schemaVersion: 1; changes: ChangeDeclaration[]; coverage?: CoverageContent; navigation?: NavigationContent; normativeChanges?: NormativeChange[]; referenceMoves?: { from: string; to: string }[] }
-export interface UpdateUnit { kind?: 'create' | 'update'; group?: string; id: string; path: string; currentMarkdown: string | null; currentRevision: string | null; baseline: Baseline | null; sources: SourceSnapshot; sourceRefs: SourceRef[]; watchScopes: WatchScope[]; replaceSources?: boolean; replaceWatchScopes?: boolean }
-export interface UpdatePacket { storageReceipt?: boolean; retainedCandidates?: { id: string; path: string; reason: string }[]; schemaVersion: 2; id: string; createdAt: string; configFingerprint: string; scope: string[]; units: UpdateUnit[]; status: 'prepared' | 'partial' | 'applied'; results: ApplyResult[]; coverage?: { before: string | null; content: CoverageContent }; navigation?: { before: string | null; content: NavigationContent }; normativeChanges?: NormativeChange[]; normativeBase?: string; referenceMoves?: { before: string | null; entries: { from: string; to: string }[] }; decisions?: { id: string; action: 'keep-current' | 'defer'; reason: string; at: string }[] }
+export interface ChangeManifest { schemaVersion: 1; changes: ChangeDeclaration[]; briefing?: UpdateBriefing; coverage?: CoverageContent; navigation?: NavigationContent; normativeChanges?: NormativeChange[]; referenceMoves?: { from: string; to: string }[] }
+export interface UpdateUnit { kind?: 'create' | 'update'; group?: string; id: string; path: string; currentMarkdown: string | null; currentRevision: string | null; baseline: Baseline | null; sources: SourceSnapshot; sourceRefs: SourceRef[]; watchScopes: WatchScope[]; replaceSources?: boolean; replaceWatchScopes?: boolean; briefing?: UnitBriefing }
+export interface UpdatePacket { briefing?: UpdateBriefing; storageReceipt?: boolean; retainedCandidates?: { id: string; path: string; reason: string }[]; schemaVersion: 2; id: string; createdAt: string; configFingerprint: string; scope: string[]; units: UpdateUnit[]; status: 'prepared' | 'partial' | 'applied'; results: ApplyResult[]; coverage?: { before: string | null; content: CoverageContent }; navigation?: { before: string | null; content: NavigationContent }; normativeChanges?: NormativeChange[]; normativeBase?: string; referenceMoves?: { before: string | null; entries: { from: string; to: string }[] }; decisions?: { id: string; action: 'keep-current' | 'defer'; reason: string; at: string }[] }
 export interface Candidate { id: string; markdown: string; path?: string; review?: ReviewRecord }
 export interface ApplyResult { id: string; status: 'applied' | 'conflict' | 'source-drift' | 'config-drift' | 'invalid' | 'protected' | 'pending'; reason: string; candidatePath?: string; previousCandidatePath?: string; candidateHash?: string }
 export interface CheckIssue { code: string; severity: 'error' | 'warning'; document?: string; message: string }

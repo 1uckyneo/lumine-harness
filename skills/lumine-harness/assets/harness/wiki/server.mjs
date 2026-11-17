@@ -5,9 +5,12 @@ import { resolveHarnessRuntimeRoot } from "../core/runtime-layout.mjs";
 import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConfig } from "./files.mjs";
 import { parseSections } from "./sections.mjs";
 import { baselineFor, parseDocument } from "./documents.mjs";
+import { explainerFonts, readExplainer } from "./explainers.mjs";
 import { searchKnowledgePage } from "./search.mjs";
 import { inspectKnowledge, mapKnowledge, navigationKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from "./engine.mjs";
+import { contextKnowledge, impactKnowledge } from "./context.mjs";
 import { isRegisteredValidationDocumentId, registeredValidationDocuments, showRegisteredValidation } from "./validation-documents.mjs";
+import { highlightCode, sourceLanguage } from "./highlight.mjs";
 import path from "node:path";
 import { existsSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { createServer } from "node:http";
@@ -18,7 +21,8 @@ const MIME = {
 	".js": "text/javascript; charset=utf-8",
 	".css": "text/css; charset=utf-8",
 	".json": "application/json; charset=utf-8",
-	".woff2": "font/woff2"
+	".woff2": "font/woff2",
+	".svg": "image/svg+xml"
 };
 function json(response, status, body) {
 	response.writeHead(status, {
@@ -51,13 +55,14 @@ async function serveWiki(root, options = {}) {
 	const assets = options.assetsRoot ?? readerAssets(), config = wikiConfig(root), project = loadProjectConfig(root);
 	const marker = JSON.parse(readFileSync(containedPath(root, ".lumine/root.json"), "utf8"));
 	const projectId = typeof marker.projectId === "string" && /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,119}$/.test(marker.projectId) ? marker.projectId : null;
+	const fonts = explainerFonts(assets);
 	let origin = "";
-	const server = createServer((request, response) => {
+	const server = createServer(async (request, response) => {
 		response.setHeader("x-content-type-options", "nosniff");
 		response.setHeader("referrer-policy", "no-referrer");
 		response.setHeader("cross-origin-resource-policy", "same-origin");
-		response.setHeader("content-security-policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'none'; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
-		if (request.headers.host !== origin.replace("http://", "") || request.headers.origin && request.headers.origin !== origin) {
+		response.setHeader("content-security-policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
+		if (request.headers.host !== origin.replace("http://", "")) {
 			json(response, 403, { code: "ORIGIN_REJECTED" });
 			return;
 		}
@@ -69,6 +74,59 @@ async function serveWiki(root, options = {}) {
 		try {
 			if ((request.url?.length ?? 0) > 8192) throw new Error("REQUEST_TOO_LONG");
 			const url = new URL(request.url ?? "/", origin);
+			if (url.origin !== origin || url.username || url.password) {
+				json(response, 403, { code: "ORIGIN_REJECTED" });
+				return;
+			}
+			if (request.headers.origin && request.headers.origin !== origin) {
+				const font = request.headers.origin === "null" && !url.search ? fonts.read(url.pathname) : null;
+				if (!font) {
+					json(response, 403, { code: "ORIGIN_REJECTED" });
+					return;
+				}
+				response.writeHead(200, {
+					"content-type": "font/woff2",
+					"access-control-allow-origin": "null",
+					vary: "Origin",
+					"cross-origin-resource-policy": "cross-origin",
+					"cache-control": "public, max-age=31536000, immutable",
+					etag: "\"" + font.fingerprint + "\""
+				});
+				response.end(request.method === "HEAD" ? undefined : font.bytes);
+				return;
+			}
+			if (url.pathname === "/api/highlight") {
+				json(response, 200, await highlightCode(url.searchParams.get("code") ?? "", url.searchParams.get("language") ?? "text"));
+				return;
+			}
+			if (url.pathname === "/api/context") {
+				json(response, 200, contextKnowledge(root, url.searchParams.get("q") ?? "", { reference: url.searchParams.get("id") ?? undefined }));
+				return;
+			}
+			if (url.pathname === "/api/impact") {
+				const changes = url.searchParams.getAll("path").map((value) => {
+					const index = value.indexOf(":");
+					if (index < 1) throw new Error("IMPACT_PATH_INVALID");
+					return {
+						repoId: value.slice(0, index),
+						path: value.slice(index + 1)
+					};
+				});
+				json(response, 200, impactKnowledge(root, changes));
+				return;
+			}
+			if (url.pathname === "/api/explainer") {
+				const document = showKnowledge(root, url.searchParams.get("document") ?? "");
+				const { html } = readExplainer(root, document.id, url.searchParams.get("asset") ?? "");
+				const presentation = fonts.decorate(html, origin);
+				response.writeHead(200, {
+					"content-type": "text/html; charset=utf-8",
+					"content-security-policy": presentation.csp,
+					"cache-control": "no-cache"
+				});
+				response.end(request.method === "HEAD" ? undefined : presentation.html);
+				return;
+			}
 			if (url.pathname === "/api/config") {
 				json(response, 200, {
 					locale: config.locale,
@@ -334,10 +392,17 @@ async function serveWiki(root, options = {}) {
 					} catch {}
 				}
 				const title = source.title ?? parsed?.title;
+				let highlighted;
+				if (!completeMarkdown && excerpt.text.length <= 1e5) {
+					try {
+						highlighted = await highlightCode(excerpt.text, sourceLanguage(source.path));
+					} catch {}
+				}
 				json(response, 200, {
 					source,
 					...excerpt,
 					title,
+					highlighted,
 					...parsed ? { markdown: {
 						body: parsed.body,
 						sections: parsed.sections,
@@ -359,6 +424,7 @@ async function serveWiki(root, options = {}) {
 			if (!relative || relative.split("/").some((segment) => segment === ".." || segment.startsWith(".")) || !MIME[path.extname(relative)]) throw new Error("ASSET_NOT_ALLOWED");
 			const file = containedPath(assets, relative);
 			if (!statSync(file).isFile()) throw new Error("ASSET_NOT_FOUND");
+			if (path.extname(file) === ".woff2") response.setHeader("vary", "Origin");
 			response.writeHead(200, {
 				"content-type": MIME[path.extname(file)],
 				"cache-control": "no-cache"

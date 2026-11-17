@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "7839f478-b7e6-4ffa-be98-ed2f594ab35f",
+    "createdAt": "2026-11-17T05:24:24.170Z",
+    "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+    "scope": [
+      "lumine-adoption"
+    ],
+    "status": "applied",
+    "storageReceipt": true,
+    "units": [
+      {
+        "id": "lumine-adoption",
+        "kind": "update",
+        "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md"
+      }
+    ],
+    "results": [
+      {
+        "id": "lumine-adoption",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "c54d0abd9f81dbdbca2beaa13c55616a33e28f7c5c095b1f0ccc1d91f291e2f9"
+      }
+    ],
+    "audit": {
+      "recordHash": "3c571c9cdc2c3671a3befe8c6e1f0d45e6e705f29dff1828ef5b2cf60487653c",
+      "unitHashes": [
+        {
+          "id": "lumine-adoption",
+          "sha256": "0d7caffe8145de6526223adbc6920b1d6b0cf02397d4741ea3e00735d120ad54"
+        }
+      ]
+    }
+  }
+}

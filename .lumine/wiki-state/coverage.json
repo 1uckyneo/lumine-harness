@@ -476,6 +476,23 @@
         "lumine-command-guide"
       ],
       "status": "covered"
+    },
+    {
+      "id": "lumine-knowledge-impact",
+      "title": "变化与知识维护",
+      "questions": [
+        "修改代码以后，Lumine 怎样帮助 Agent 找到需要维护的知识？"
+      ],
+      "documentRefs": [
+        "reader-explanation"
+      ],
+      "sourceScopes": [
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/harness/wiki/context.ts"
+        }
+      ],
+      "status": "covered"
     }
   ]
 }

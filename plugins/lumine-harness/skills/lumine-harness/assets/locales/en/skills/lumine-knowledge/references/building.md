@@ -21,3 +21,5 @@ Have a reviewer who did not write the content answer mechanism, change-impact, f
 ## Verify the reading path
 
 Begin from the home page, find the relevant capability, then explain a real cross-module scenario including roles, transitions, and exceptions. Give modules a concise introduction, entry point, important rules, limits, and provenance as applicable. Distinguish current implementation, plans, history, and verification. Evaluate independent readers, cold-start Agents, and later updates.
+
+Before arranging initial pages, state each page's principal reader question, audience and purpose in its existing `reading` metadata. Reuse coverage for topic ownership and source scopes, and relations for dependencies and handoffs. Check whether these questions explain the whole project before committing to navigation. Menus, source paths and gaps named by the user are investigation clues, not a universal structure. Follow the [complete examples and rereading method](写作与编排.md); do not add a separate planning ledger or duplicate fact store.

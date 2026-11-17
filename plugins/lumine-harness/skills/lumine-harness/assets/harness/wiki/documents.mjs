@@ -2,7 +2,7 @@
 // Source: skills/lumine-harness/src/harness/wiki/documents.ts
 import { containedPath, hash, slash, wikiConfig } from "./files.mjs";
 import { validateStorageRecord } from "./storage.mjs";
-import { statePath, visibleJson, visibleText } from "./transactions.mjs";
+import { pendingDocumentPaths, statePath, visibleJson, visibleText, withWikiReadScope } from "./transactions.mjs";
 import { parseSections } from "./sections.mjs";
 import { resolveAliasReference } from "./references.mjs";
 import path from "node:path";
@@ -131,6 +131,15 @@ function parseDocument(markdown, relative, collection = "wiki") {
 		diagrams: [],
 		watchScopes: []
 	};
+	if (value.reading !== undefined) {
+		const intent = value.reading;
+		if (!intent || typeof intent !== "object" || Array.isArray(intent) || typeof intent.question !== "string" || !intent.question.trim() || intent.question.length > 2e3 || ["audience", "purpose"].some((key) => intent[key] !== undefined && (typeof intent[key] !== "string" || !intent[key].trim() || intent[key].length > 2e3))) throw new Error("READING_INTENT_INVALID");
+		meta.reading = {
+			question: intent.question,
+			...typeof intent.audience === "string" ? { audience: intent.audience } : {},
+			...typeof intent.purpose === "string" ? { purpose: intent.purpose } : {}
+		};
+	}
 	for (const relation of Array.isArray(value.relations) ? value.relations : []) {
 		if (!relation || typeof relation !== "object" || typeof relation.target !== "string" || ![
 			"depends_on",
@@ -236,7 +245,20 @@ function parseDocument(markdown, relative, collection = "wiki") {
 		semanticReview: { status: "unreviewed" }
 	};
 }
+const parsedDocuments = new Map();
 function listDocuments(root, collections = ["wiki"], options = {}) {
+	let issues;
+	const documents = withWikiReadScope(root, () => {
+		issues = options.issues ? [] : undefined;
+		return listDocumentsInScope(root, collections, {
+			...options,
+			issues
+		});
+	});
+	if (issues) options.issues.push(...issues);
+	return documents;
+}
+function listDocumentsInScope(root, collections, options) {
 	const config = wikiConfig(root), result = [];
 	const roots = {
 		wiki: config.root,
@@ -248,7 +270,7 @@ function listDocuments(root, collections = ["wiki"], options = {}) {
 		const relativeRoot = roots[collection];
 		if (!relativeRoot) continue;
 		const directory = containedPath(root, relativeRoot, false);
-		if (!existsSync(directory)) continue;
+		const files = new Set();
 		const visit = (directoryPath) => {
 			for (const entry of readdirSync(directoryPath, { withFileTypes: true })) {
 				if (entry.isSymbolicLink() || entry.name.startsWith(".")) continue;
@@ -258,30 +280,42 @@ function listDocuments(root, collections = ["wiki"], options = {}) {
 					visit(file);
 					continue;
 				}
-				if (!entry.name.endsWith(".md") || !statSync(file).isFile()) continue;
-				const relative = slash(path.relative(root, file));
-				const markdown = visibleText(root, relative);
-				if (markdown === null) continue;
-				if (collection === "wiki" && !/^---\r?\n/.test(markdown) && /^(?:index|README)\.md$/i.test(entry.name)) continue;
-				try {
-					const document = parseDocument(markdown, relative, collection);
-					if (![
-						"historical",
-						"archived",
-						"completed"
-					].includes(document.status) || options.includeHistorical) result.push(document);
-				} catch (error) {
-					if (!options.issues) throw error;
-					options.issues.push({
-						code: "DOCUMENT_INVALID",
-						severity: "error",
-						document: relative,
-						message: error instanceof Error ? error.message : "DOCUMENT_INVALID"
-					});
-				}
+				if (entry.name.endsWith(".md") && statSync(file).isFile()) files.add(slash(path.relative(root, file)));
 			}
 		};
-		visit(directory);
+		if (existsSync(directory)) visit(directory);
+		if (collection === "wiki") for (const relative of pendingDocumentPaths(root)) files.add(relative);
+		for (const relative of files) {
+			const markdown = visibleText(root, relative);
+			if (markdown === null) continue;
+			if (collection === "wiki" && !/^---\r?\n/.test(markdown) && /^(?:index|README)\.md$/i.test(path.basename(relative))) continue;
+			try {
+				const key = `${path.resolve(root)}\0${collection}\0${relative}`, revision = hash(markdown);
+				let cached = parsedDocuments.get(key);
+				if (!cached || cached.revision !== revision) {
+					cached = {
+						revision,
+						document: parseDocument(markdown, relative, collection)
+					};
+					if (parsedDocuments.size >= 1e3) parsedDocuments.delete(parsedDocuments.keys().next().value);
+					parsedDocuments.set(key, cached);
+				}
+				const document = structuredClone(cached.document);
+				if (![
+					"historical",
+					"archived",
+					"completed"
+				].includes(document.status) || options.includeHistorical) result.push(document);
+			} catch (error) {
+				if (!options.issues) throw error;
+				options.issues.push({
+					code: "DOCUMENT_INVALID",
+					severity: "error",
+					document: relative,
+					message: error instanceof Error ? error.message : "DOCUMENT_INVALID"
+				});
+			}
+		}
 	}
 	const ids = new Map(), paths = new Map();
 	for (const document of result) {

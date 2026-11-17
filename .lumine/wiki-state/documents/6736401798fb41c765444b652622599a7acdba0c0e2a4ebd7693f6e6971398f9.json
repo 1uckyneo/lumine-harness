@@ -5,18 +5,18 @@
     "schemaVersion": 2,
     "id": "lumine-adoption",
     "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
-    "generation": 15,
+    "generation": 17,
     "generatedMarkdown": {
-      "$lumineObject": "e01bcac621138a48afd4c32607e620e955f8d4258e3096d50fb24352cb54c954",
+      "$lumineObject": "20e5a349412849cb4dfcab3cb832995bc69357d1a72d6530abfabefa2f801d09",
       "kind": "text",
-      "bytes": 17673
+      "bytes": 18848
     },
-    "appliedRevision": "e01bcac621138a48afd4c32607e620e955f8d4258e3096d50fb24352cb54c954",
+    "appliedRevision": "20e5a349412849cb4dfcab3cb832995bc69357d1a72d6530abfabefa2f801d09",
     "sources": {
-      "$lumineObject": "e3ceb324c6654e8da9b3c061d8b52aab88b8ee3020515207b6c469aee79cc5ef",
+      "$lumineObject": "5305f0b5af006658157bcffa665de1ad4f25e18ec195a1e83ced3a338762364d",
       "kind": "json",
-      "bytes": 7725
+      "bytes": 7855
     },
-    "updatedAt": "2026-11-04T10:50:21.217Z"
+    "updatedAt": "2026-11-17T05:24:24.188Z"
   }
 }

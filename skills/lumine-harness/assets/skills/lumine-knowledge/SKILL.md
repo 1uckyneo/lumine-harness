@@ -9,13 +9,13 @@ description: 定位实现、查询和维护 Repo Wiki，或打开、启动、重
 先读 `AGENTS.md` 的基础约束与规范入口，使用已确认 Harness 根和 `.lumine/project.json` 配置。Wiki 默认在 `docs/repo-wiki/`，以配置为准；不能把最近 Git 根当多仓 Harness 根。检索不会替代必须读取的项目规则。
 
 <!-- LH-KNOWLEDGE-02 -->
-围绕当前问题自主选择目录、章节检索、直接读 Markdown 或源码；不要求先查 Wiki，不按调用次数判断合规。需要工具时用 `wiki map / query / show / related` 按需展开。结果最多六条并受上下文预算限制；检查范围、来源和时效，必要时重述中英文或代码标识符查询。详见[调查与检索](references/investigation.md)。
+围绕当前问题自主选择目录、章节检索、直接读 Markdown 或源码；不要求先查 Wiki，不按调用次数判断合规。需要项目背景时可用 `wiki context` 准备问题相关章节、完整规范入口及上下游，再用 `wiki map / query / show / related` 沿需要调查。变化后可用 `wiki impact` 定位影响候选；命令结果不替代语义判断。结果最多六条并受上下文预算限制；检查范围、来源和时效，必要时重述中英文或代码标识符查询。详见[调查与检索](references/investigation.md)。
 
 <!-- LH-KNOWLEDGE-03 -->
-首次建库读取[理解项目与建库](references/building.md)，默认深入覆盖所有主要模块，目录由项目决定；用户可以缩小范围或延后。采用／升级同时读取[采用交付与验收](references/delivery.md)，服务扩展按需读取[服务指导](references/services.md)。维护读取[知识维护](references/maintenance.md)。Agent／模型理解来源、判断过期影响、撰写正文和 Mermaid；`scan` 只提供变化线索，`update` 只校验并保护性保存 Agent 的文本，不调用模型生产知识。无活动 Agent 时只登记待处理内容。
+首次建库读取[理解项目与建库](references/building.md)，默认深入覆盖所有主要模块，目录由项目决定；用户可以缩小范围或延后。采用／升级同时读取[采用交付与验收](references/delivery.md)，服务扩展按需读取[服务指导](references/services.md)。维护读取[知识维护](references/maintenance.md)，写作与结构调整同时读取[写作与编排](references/写作与编排.md)中的七步方法和三类完整示范。Agent／模型理解来源、判断过期影响、撰写正文和 Mermaid；`scan` 只提供变化线索，`update` 只校验并保护性保存 Agent 的文本，不调用模型生产知识。无活动 Agent 时只登记待处理内容。
 
 <!-- LH-KNOWLEDGE-04 -->
-正文、摘要、Mermaid 文本和来源是人／Agent 共用的一份内容。卡片由 HTML DOM 呈现，图由浏览器即时渲染。知识扫描、生成、更新、查询和审阅只接收文本，不调用图片生成、截图识别或视觉模型，不生成卡片图片或缩略图文件，不把渲染后的 SVG 送入模型。文本复制／导出使用 Markdown 或 Mermaid。浏览器专项 UI 验证与知识流水线分开。
+正文、摘要、Mermaid 文本和来源是人／Agent 共用的一份内容。需要图文联动、比较或就地代码时使用明确的 `lumine-view` 声明块，格式见[阅读表达](references/阅读表达.md)；专用交互资源经登记、隔离显示并提供完整文字，不能触发真实写入。卡片由 HTML DOM 呈现，图由浏览器即时渲染。知识扫描、生成、更新、查询和审阅只接收文本，不调用图片生成、截图识别或视觉模型，不生成卡片图片或缩略图文件，不把渲染后的 SVG 送入模型。文本复制／导出使用 Markdown 或 Mermaid。浏览器专项 UI 验证与知识流水线分开。
 
 <!-- LH-KNOWLEDGE-05 -->
 语义审阅须核对实际来源和重要关系。Product Spec 描述产品方案、目标、范围、场景、规则与验收，Exec Plan 承接 Spec／AC 的技术方案、取舍、执行安排、进度及记录；Wiki 区分已知实现、已确认领域语言与长期决定、使用指南、AGENTS 授权规范及讲解示例。确认的语言不证明实现已落地，拟议方案不能写成现状。普通知识同步不得据遗留代码放宽规范或授权；规范变化复核相关内容。设计理由缺乏记录时标为推断，源码不能证明部署与运行结果。

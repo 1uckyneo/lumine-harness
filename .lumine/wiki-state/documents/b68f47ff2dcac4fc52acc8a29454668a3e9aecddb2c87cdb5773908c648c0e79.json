@@ -5,18 +5,18 @@
     "schemaVersion": 2,
     "id": "lumine-root-config",
     "path": "docs/repo-wiki/项目配置、根解析与多仓身份.md",
-    "generation": 3,
+    "generation": 4,
     "generatedMarkdown": {
-      "$lumineObject": "e105e76836aceddcbd5443d3ac74f8824c9b4dfde2b73d4fa52cba265b2d1289",
+      "$lumineObject": "0fd724d6898ef538057f173c6bf44a4b59e0a124218a24d3eba5e07c0cb0d60e",
       "kind": "text",
-      "bytes": 12060
+      "bytes": 12325
     },
-    "appliedRevision": "e105e76836aceddcbd5443d3ac74f8824c9b4dfde2b73d4fa52cba265b2d1289",
+    "appliedRevision": "0fd724d6898ef538057f173c6bf44a4b59e0a124218a24d3eba5e07c0cb0d60e",
     "sources": {
-      "$lumineObject": "bb313debe9fcc4fb9a53998a68b38f6c80d3c1b8245bced72b511e2832ffa4f3",
+      "$lumineObject": "e32b2908e54e2e38aa8338cfd78b5d30c9b49c5acb389eeb10511f6a0c95c8a0",
       "kind": "json",
       "bytes": 2457
     },
-    "updatedAt": "2026-09-29T19:34:37.007Z"
+    "updatedAt": "2026-11-17T05:23:51.613Z"
   }
 }

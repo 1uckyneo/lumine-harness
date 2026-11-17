@@ -1,20 +1,24 @@
 {
-  "documentId": "lumine-architecture",
-  "revision": "d9d515971bec5e2610dfbd80202d64c2b200006dcab5222f6a00f8fb997fce3a",
-  "sourceFingerprint": "bc6b824099602c18df2384c5020ccb1ee59752816c0ac6a023246cd97c0b4fdf",
-  "reviewedAt": "2026-10-13T10:38:56.011Z",
-  "reviewer": {
-    "kind": "agent",
-    "role": "independent"
-  },
-  "outcome": "reviewed",
-  "scope": [
-    "本轮修订的资料角色、直接来源、提问回写与确认边界",
-    "架构入口、采用分发和指南与已声明规范相符"
-  ],
-  "findings": [],
-  "limitations": [
-    "独立reviewer未撰写被审阅页面；相关修正已增量复核",
-    "不替代业务全库审阅、真实宿主Hook、自动续跑或用户接受"
-  ]
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "documentId": "lumine-architecture",
+    "revision": "e46056627638fa6db29160d56e647c62e987f5b7c73e744e7cd749cb366bdf88",
+    "sourceFingerprint": "0020ed8f3a1f945b2402c4de9cb50bfd39d557c29f58c7744cfd6a1591064238",
+    "reviewedAt": "2026-11-17T05:23:51.734Z",
+    "reviewer": {
+      "kind": "agent",
+      "role": "author"
+    },
+    "outcome": "reviewed",
+    "scope": [
+      "说明顺序、内部来源标识、来源与稳定章节保留",
+      "版本与恢复条件保留；采用文章补齐当前 schema 4"
+    ],
+    "findings": [],
+    "limitations": [
+      "作者自审；没有新读者或目标日常模型评价",
+      "配置和源码检查不表示真实宿主已验收"
+    ]
+  }
 }

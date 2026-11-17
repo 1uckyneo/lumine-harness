@@ -4,15 +4,18 @@ import { loadProjectConfig } from "../core/project-config.mjs";
 import { atomicWrite, configFingerprint, containedPath, hash, readJson, relativePath, repositoryRoot, snapshotSources, wikiConfig, withWikiLock, writeJson } from "./files.mjs";
 import { NAVIGATION_PATH, validateNavigation, validateNormativeChanges } from "./navigation-contract.mjs";
 import { assertStorageWritable, decodeStorageRecord, gcStorageObjects, readStorageRecord, storageEnabled, storageRecordText, writeStorageRecord } from "./storage.mjs";
-import { applyTransaction, diskText, jsonText, pendingTransactions, recoverTransactions, statePath, visibleJson } from "./transactions.mjs";
+import { applyTransaction, diskText, jsonText, pendingTransactions, recoverTransactions, statePath, visibleJson, withWikiReadScope } from "./transactions.mjs";
 import { COVERAGE_PATH, readCoverage, validateCoverage } from "./coverage.mjs";
 import { resolveAliasReference } from "./references.mjs";
 import { assertId, baselineFor, findDocument, formatWikiDocument, isStructuredWikiDocument, listDocuments, parseDocument } from "./documents.mjs";
 import { threeWayMerge } from "./merge.mjs";
+import { parseViewBlock, viewFences } from "./view-blocks.mjs";
+import { readExplainer } from "./explainers.mjs";
 import { searchKnowledge } from "./search.mjs";
 import { sourceDispositionStatuses } from "./dispositions.mjs";
 import { assertNormativeChanges, editorialPlacement, readNavigation, validateNavigationTargets } from "./navigation.mjs";
-import { existsSync, readdirSync, realpathSync, unlinkSync } from "node:fs";
+import path from "node:path";
+import { existsSync, readFileSync, readdirSync, realpathSync, unlinkSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 
 //#region skills/lumine-harness/src/harness/wiki/engine.ts
@@ -32,7 +35,15 @@ function conflictIds(root) {
 	if (!existsSync(folder)) return ids;
 	for (const entry of readdirSync(folder, { withFileTypes: true })) {
 		if (!entry.isDirectory() || entry.isSymbolicLink()) continue;
-		const packet = readStorageRecord(root, packetFile(root, entry.name), null);
+		const file = packetFile(root, entry.name);
+		if (!existsSync(file)) continue;
+		const raw = JSON.parse(readFileSync(file, "utf8"));
+		const packet = raw?.kind === "lumine-wiki-state" && raw.schemaVersion === 3 ? raw.value : raw;
+		if (packet?.schemaVersion !== 2 || ![
+			"prepared",
+			"partial",
+			"applied"
+		].includes(packet.status)) throw new Error("UPDATE_RECORD_INVALID");
 		if (packet?.status !== "applied") {
 			for (const result of packet?.results ?? []) if ([
 				"conflict",
@@ -183,6 +194,9 @@ function observed(root, document, conflicts, context = localObservationContext(r
 }
 /** Reading knowledge never walks source repositories. Freshness describes the last explicit observation. */
 function inspectKnowledge(root, collections = ["wiki"], options = {}) {
+	return withWikiReadScope(root, () => inspectKnowledgeInScope(root, collections, options));
+}
+function inspectKnowledgeInScope(root, collections, options) {
 	const issues = [], conflicts = conflictIds(root), context = localObservationContext(root);
 	const otherCollections = collections.filter((item) => item !== "wiki");
 	const allWiki = collections.includes("wiki") ? listDocuments(root, ["wiki"], {
@@ -216,9 +230,29 @@ function resolveKnowledgeReference(root, reference) {
 	return resolveAliasReference(reference, visibleJson(root, ".lumine/wiki-state/document-aliases.json", {}));
 }
 function showKnowledge(root, reference) {
+	return withWikiReadScope(root, () => showKnowledgeInScope(root, reference));
+}
+function documentFromSnapshot(documents, reference) {
+	const id = reference.split("#")[0];
+	const exact = documents.filter((document) => document.id === id || document.path === id);
+	if (exact.length === 1) return exact[0];
+	const names = documents.filter((document) => document.title === id || path.basename(document.path, ".md") === id);
+	if (names.length === 1) return names[0];
+	if (names.length > 1) throw new Error(`DOCUMENT_AMBIGUOUS:${names.map((document) => document.id).join(",")}`);
+	throw new Error("DOCUMENT_NOT_FOUND");
+}
+function showKnowledgeInScope(root, reference) {
 	const resolved = resolveKnowledgeReference(root, reference), [id, fragment] = resolved.split("#");
-	const document = observed(root, findDocument(root, id), conflictIds(root));
-	if (document.collection === "wiki") Object.assign(document, editorialPlacement(document, navigationKnowledge(root)));
+	const documents = listDocuments(root, [
+		"wiki",
+		"spec",
+		"plan"
+	], {
+		includeHistorical: true,
+		issues: []
+	});
+	const document = observed(root, documentFromSnapshot(documents, id), conflictIds(root));
+	if (document.collection === "wiki") Object.assign(document, editorialPlacement(document, readNavigation(root, documents.filter((document) => document.collection === "wiki"))));
 	if (!fragment) return document;
 	const section = document.sections.find((item) => item.id === fragment);
 	if (section) return {
@@ -246,20 +280,22 @@ function showKnowledge(root, reference) {
 	throw new Error(`FRAGMENT_NOT_FOUND:${document.id}:${fragment}`);
 }
 function navigationKnowledge(root) {
-	return readNavigation(root, listDocuments(root, ["wiki"], {
+	return withWikiReadScope(root, () => readNavigation(root, listDocuments(root, ["wiki"], {
 		includeHistorical: true,
 		issues: []
-	}));
+	})));
 }
 function mapKnowledge(root) {
-	const wiki = listDocuments(root, ["wiki"], {
-		includeHistorical: true,
-		issues: []
+	return withWikiReadScope(root, () => {
+		const wiki = listDocuments(root, ["wiki"], {
+			includeHistorical: true,
+			issues: []
+		});
+		return {
+			...readCoverage(root, wiki.filter((document) => document.status !== "historical")),
+			navigation: readNavigation(root, wiki)
+		};
 	});
-	return {
-		...readCoverage(root, wiki.filter((document) => document.status !== "historical")),
-		navigation: readNavigation(root, wiki)
-	};
 }
 function outlineKnowledge(root, reference) {
 	const documents = reference ? [showKnowledge(root, reference.split("#")[0])] : listKnowledge(root);
@@ -275,18 +311,30 @@ function outlineKnowledge(root, reference) {
 	};
 }
 function relatedKnowledge(root, reference, options = {}) {
-	const document = showKnowledge(root, reference.split("#")[0]), direction = options.direction ?? "both";
+	return withWikiReadScope(root, () => relatedKnowledgeInScope(root, reference, options));
+}
+function relatedKnowledgeInScope(root, reference, options) {
+	const docs = listDocuments(root, [
+		"wiki",
+		"spec",
+		"plan"
+	], {
+		includeHistorical: true,
+		issues: []
+	});
+	const aliases = visibleJson(root, ".lumine/wiki-state/document-aliases.json", {});
+	const resolve = (reference) => resolveAliasReference(reference, aliases);
+	const document = documentFromSnapshot(docs, resolve(reference.split("#")[0])), direction = options.direction ?? "both";
 	if (![
 		"in",
 		"out",
 		"both"
 	].includes(direction)) throw new Error("RELATION_DIRECTION_INVALID");
-	const docs = listKnowledge(root, [
-		"wiki",
-		"spec",
-		"plan"
-	]);
-	const edges = docs.flatMap((doc) => doc.relations.map((relation) => ({
+	const edges = docs.filter((doc) => doc.id === document.id || ![
+		"historical",
+		"archived",
+		"completed"
+	].includes(doc.status)).flatMap((doc) => doc.relations.map((relation) => ({
 		from: doc.id,
 		...relation
 	})));
@@ -301,11 +349,12 @@ function relatedKnowledge(root, reference, options = {}) {
 		});
 	}
 	const selected = edges.flatMap((edge) => {
-		const outgoing = edge.from === document.id, incoming = resolveKnowledgeReference(root, edge.target).split("#")[0] === document.id;
+		const outgoing = edge.from === document.id, incoming = resolve(edge.target).split("#")[0] === document.id;
 		if (!(outgoing && direction !== "in") && !(incoming && direction !== "out")) return [];
 		const target = outgoing ? edge.target : edge.from;
 		try {
-			const related = showKnowledge(root, target);
+			const resolved = resolve(target), related = documentFromSnapshot(docs, resolved), fragment = resolved.split("#")[1];
+			if (fragment && ![...related.sections, ...related.diagrams].some((item) => item.id === fragment)) throw new Error("FRAGMENT_NOT_FOUND");
 			return [{
 				target,
 				kind: edge.kind,
@@ -328,7 +377,7 @@ function relatedKnowledge(root, reference, options = {}) {
 			}];
 		}
 	});
-	const navigation = navigationKnowledge(root);
+	const navigation = readNavigation(root, docs.filter((document) => document.collection === "wiki"));
 	const placement = navigation.groups.flatMap((group) => group.sections.flatMap((section) => section.documents.includes(document.id) ? [{
 		groupId: group.id,
 		sectionId: section.id,
@@ -413,7 +462,15 @@ function prepareUpdate(root, references = [], manifest) {
 		recoverTransactions(root);
 		if (manifest && (manifest.schemaVersion !== 1 || !Array.isArray(manifest.changes))) throw new Error("CHANGE_MANIFEST_INVALID");
 		if (manifest && references.length) throw new Error("CHANGE_MANIFEST_WITH_REFERENCES");
+		if (manifest?.briefing) {
+			const brief = manifest.briefing;
+			if (typeof brief.question !== "string" || !brief.question.trim() || brief.question.length > 2e3 || ["audience", "purpose"].some((key) => {
+				const value = brief[key];
+				return value !== undefined && (typeof value !== "string" || !value.trim() || value.length > 2e3);
+			}) || brief.preserve !== undefined && (!Array.isArray(brief.preserve) || brief.preserve.length > 100 || brief.preserve.some((item) => typeof item !== "string" || !item.trim() || item.length > 2e3))) throw new Error("UPDATE_BRIEFING_INVALID");
+		}
 		const existing = listDocuments(root, ["wiki"], { includeHistorical: true }), ids = new Set(existing.map((doc) => doc.id));
+		const coverage = readCoverage(root), navigation = readNavigation(root, existing);
 		const declarations = manifest?.changes ?? (references.length ? references.map((ref) => findDocument(root, ref, ["wiki"])) : existing).map((doc) => ({
 			kind: "update",
 			id: doc.id
@@ -445,6 +502,23 @@ function prepareUpdate(root, references = [], manifest) {
 			const scopes = uniqueScopes([...change.replaceWatchScopes ? [] : document ? scopesFor(root, document) : change.watchScopes?.length ? [] : wikiConfig(root).watchScopes, ...change.watchScopes ?? []]);
 			const sources = snapshotSources(root, refs, scopes, cache);
 			if (sources.missing.length) throw new Error(`UPDATE_SOURCES_MISSING:${sources.missing.join(",")}`);
+			const baseline = document ? baselineFor(root, document.id) : null;
+			const placement = document ? editorialPlacement(document, navigation) : {};
+			const intent = manifest?.briefing ?? document?.reading;
+			const briefing = {
+				...intent ? { intent: {
+					question: intent.question,
+					...intent.audience ? { audience: intent.audience } : {},
+					...intent.purpose ? { purpose: intent.purpose } : {}
+				} } : {},
+				questions: coverage.topics.filter((topic) => topic.documentRefs.some((ref) => ref.split("#")[0] === change.id)).flatMap((topic) => topic.questions),
+				role: placement.editorialRole ?? "implementation",
+				related: [...new Set([...document?.relations.map((relation) => relation.target) ?? [], ...existing.filter((other) => other.relations.some((relation) => relation.target.split("#")[0] === change.id)).map((other) => other.id)])],
+				sections: document?.sections.map((section) => `${document.id}#${section.id}`) ?? [],
+				diagrams: document?.diagrams.map((diagram) => `${document.id}#${diagram.id}`) ?? [],
+				humanEdits: Boolean(document && (!baseline || baseline.generatedMarkdown !== document.markdown)),
+				...placement.normativeScope ? { normativeScope: placement.normativeScope } : {}
+			};
 			return {
 				kind: change.kind,
 				group: manifest?.coverage || manifest?.referenceMoves?.length || manifest?.navigation !== undefined || manifest?.normativeChanges?.length ? "directory" : change.group,
@@ -452,12 +526,13 @@ function prepareUpdate(root, references = [], manifest) {
 				path: target,
 				currentMarkdown: document?.markdown ?? null,
 				currentRevision: document?.revision ?? null,
-				baseline: document ? baselineFor(root, document.id) : null,
+				baseline,
 				sources,
 				sourceRefs: refs,
 				watchScopes: scopes,
 				replaceSources: change.replaceSources,
-				replaceWatchScopes: change.replaceWatchScopes
+				replaceWatchScopes: change.replaceWatchScopes,
+				briefing
 			};
 		});
 		const packet = {
@@ -470,6 +545,7 @@ function prepareUpdate(root, references = [], manifest) {
 			status: "prepared",
 			results: []
 		};
+		if (manifest?.briefing) packet.briefing = structuredClone(manifest.briefing);
 		if (manifest?.coverage) packet.coverage = {
 			before: diskText(root, COVERAGE_PATH),
 			content: validateCoverage(manifest.coverage)
@@ -898,9 +974,42 @@ function recordUpdateDecision(root, packetId, id, action, reason) {
 	});
 }
 function checkWiki(root) {
+	return withWikiReadScope(root, () => checkWikiInScope(root));
+}
+function checkWikiInScope(root) {
 	const { documents, issues } = inspectKnowledge(root), checked = documents.map((doc) => doc.id);
 	issues.push(...navigationKnowledge(root).issues);
 	for (const document of documents) {
+		const blockIds = new Set([...document.sections, ...document.diagrams].map((item) => item.id));
+		const offset = document.markdown.slice(0, document.markdown.indexOf(document.body)).split("\n").length - 1;
+		for (const fence of viewFences(document.body)) {
+			try {
+				const block = parseViewBlock(fence.value);
+				if (blockIds.has(block.id)) throw new Error(`VIEW_ID_DUPLICATE:${block.id}`);
+				blockIds.add(block.id);
+				const source = (id) => {
+					if (id && !document.sources.some((source) => source.id === id)) throw new Error(`VIEW_SOURCE_UNKNOWN:${id}`);
+				};
+				if (block.type === "steps") {
+					if (block.diagram && !document.diagrams.some((diagram) => diagram.id === block.diagram)) throw new Error(`VIEW_DIAGRAM_UNKNOWN:${block.diagram}`);
+					for (const step of block.items) {
+						source(step.source);
+						source(step.code?.source);
+					}
+				}
+				if (block.type === "code") source(block.source);
+				if (block.type === "explainer") readExplainer(root, document.id, block.asset);
+			} catch (error) {
+				const detail = error instanceof Error ? error.message : "VIEW_BLOCK_INVALID";
+				const message = /^(VIEW_|EXPLAINER_|PATH_|SYMLINK_)/.test(detail) ? detail : "VIEW_BLOCK_INVALID";
+				issues.push({
+					code: "VIEW_BLOCK_INVALID",
+					severity: "error",
+					document: document.id,
+					message: `${document.path}:${fence.line + offset}: ${message}`
+				});
+			}
+		}
 		for (const issue of document.issues) issues.push({
 			code: issue.split(":")[0],
 			severity: "error",

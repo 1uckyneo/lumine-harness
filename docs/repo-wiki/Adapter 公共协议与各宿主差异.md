@@ -15,9 +15,18 @@ locale: "zh-CN"
 
 Lumine 的公共 Core 决定任务模式、证据、Skill 读取关联和停止策略。Adapter 接收某个 Agent 应用的事件，转换为 Core 能理解的输入，再把结果转换回该应用支持的输出。它不会成为另一份工程规则，也不会复制业务 Skill 正文。
 
-外部 Node Hook 使用与 CLI 相同的版本策略：支持 Node 22.x 从 22.18.0 起、Node 24.x 从 24.11.0 起，推荐 Node 24 LTS。低语法入口在读取事件输入、查找项目根与动态加载实现之前拒绝不支持的进程；不会为失败的入口写入新的宿主执行证据。Hook 的错误返回仍受各宿主失败行为约束，宿主放行不等于 Harness 已执行。 Codex、Qoder、Trae、Cursor 的静态配置命令同样先预检，再定位 Runtime；协议模板保留各自事件、匹配条件、超时和状态文案，由共同定位器生成命令，避免根定位绕过版本检查。
+外部 Hook 运行于本地 Node，嵌入式插件则受所在应用的运行环境约束。先确认入口实际运行，再判断协议结果；应用放行一次操作，并不证明 Hook 已经成功执行。
 
-OpenCode 在宿主进程中嵌入 Core，入口先区分实际 runtime：真正的 Node 遵循 Node 策略，Bun 的兼容 Node 版本不用于硬拒绝 Bun，也不用于宣称 Bun 已验证。内部插件实现放在 `.lumine/adapters/opencode/`，插件发现目录只保留薄入口；共同 Core 被导入时不全局硬拦截嵌入宿主。
+```lumine-view
+version: 1
+type: details
+id: adapter-runtime-details
+title: "运行环境和各入口的版本检查"
+body: |
+  外部 Node Hook 使用与 CLI 相同的版本策略：支持 Node 22.x 从 22.18.0 起、Node 24.x 从 24.11.0 起，推荐 Node 24 LTS。低语法入口在读取事件输入、查找项目根与动态加载实现之前拒绝不支持的进程；不会为失败的入口写入新的宿主执行证据。Hook 的错误返回仍受各宿主失败行为约束，宿主放行不等于 Harness 已执行。 Codex、Qoder、Trae、Cursor 的静态配置命令同样先预检，再定位 Runtime；协议模板保留各自事件、匹配条件、超时和状态文案，由共同定位器生成命令，避免根定位绕过版本检查。
+
+  OpenCode 在宿主进程中嵌入 Core，入口先区分实际 runtime：真正的 Node 遵循 Node 策略，Bun 的兼容 Node 版本不用于硬拒绝 Bun，也不用于宣称 Bun 已验证。内部插件实现放在 `.lumine/adapters/opencode/`，插件发现目录只保留薄入口；共同 Core 被导入时不全局硬拦截嵌入宿主。
+```
 
 这是一条重要的可维护性边界：增加宿主应主要增加协议转换与能力声明，而不是再实现一套“什么算完成”。但共用 Core 不能让宿主凭空提供事件。没有停止前控制点的应用只能做审计；没有工具读取事件的应用不能证明 Skill 已读；需要用户启用 Hook 的应用也不能因为项目里已有配置就视为接入完成。
 
@@ -57,7 +66,7 @@ flowchart LR
 | DeepSeek Harness | profile Hook bridge 与原生 Skill 读取线索 | `decision: block`，工具前检查已选能力 | 仓库回归仅覆盖注明的协议版本，开发预览不等于全部发布版兼容 |
 | OpenCode | system transform、压缩上下文、工具审计、`session.idle` | 没有对等 Stop Gate；需要人发起下一轮 | idle 已发生在停止之后，不能宣称能阻止过早结束 |
 
-这张表以当前仓库实现为准。CodeBuddy 的 Stop 字段还核对了[官方 Hook 参考](https://www.codebuddy.ai/docs/cli/hooks)：该事件的 `continue: false` 用来阻止停止；不能照搬其他事件或产品对 `continue` 的解释。它只补足协议依据，不构成本地真实运行验收。
+不同应用中的同名字段可能含义不同。例如 CodeBuddy 的 Stop 使用 `continue: false` 阻止停止，依据见[官方 Hook 参考](https://www.codebuddy.ai/docs/cli/hooks)。这张表描述协议；实际应用是否接受输出，需要对应的运行记录。
 
 Qoder、CodeBuddy 和 ZCode 使用 Adapter 定位规范 Skill 文件；DeepSeek 的工具后事件还接收原生 Skill 加载线索。读取判断针对实际选择的 Skill 与当前文件内容，不能用关键词搜索结果替代已读记录。所有宿主使用相同项目资料，不生成各自可编辑的 Skill 副本。
 
@@ -70,9 +79,18 @@ Kimi 需要用户级配置：安装器先构造临时 TOML、调用可用校验�
 
 `adapter status`、`doctor` 和 `verify` 回答不同问题：能否开始使用、配置或设置哪里有缺口、真实记录证明了哪些能力。输出中 `repository_checked` 只表示仓库实现检查；`runtime_observed` 才表示在具体会话中观察到事件；`behavior_verified` 需要适用行为证据。`not_tested`、`not_observable` 和 `not_applicable` 不应显示成通过。
 
-`adapter status` 还分别返回检查命令进程和已有宿主事件的实际 runtime。验证事件记录 `processRuntime`，读取时重新核对 Node 支持策略；缺少实际进程记录仍为未观察，最新宿主事件使用不支持的 Node 则返回连接问题与升级动作。仅在终端运行新 Node、保存配置或旧事件中标记通过，都不能替代当前宿主版本证据。Bun 与未知 runtime 的正式支持保持未验证。
+诊断结果会区分实际运行环境、宿主可观察的事件和应用未提供的能力。无法观察某个动作时，应保留这个边界，而不是把它直接等同于失败或成功。
 
-Skill 选择声明与宿主观察分开。任务绑定的 `readObservability: not_observable` 明确表达协议缺口，`read: false` 只表示未观察到；Codex 不会仅因此阻塞证据充分的任务完成。探针也不会把 Agent 自报的读取标签升成该宿主的真实读取能力证明。
+```lumine-view
+version: 1
+type: details
+id: adapter-observation-details
+title: "怎样解释运行环境与 Skill 读取证据"
+body: |
+  `adapter status` 还分别返回检查命令进程和已有宿主事件的实际 runtime。验证事件记录 `processRuntime`，读取时重新核对 Node 支持策略；缺少实际进程记录仍为未观察，最新宿主事件使用不支持的 Node 则返回连接问题与升级动作。仅在终端运行新 Node、保存配置或旧事件中标记通过，都不能替代当前宿主版本证据。Bun 与未知 runtime 的正式支持保持未验证。
+
+  Skill 选择声明与宿主观察分开。任务绑定的 `readObservability: not_observable` 明确表达协议缺口，`read: false` 只表示未观察到；Codex 不会仅因此阻塞证据充分的任务完成。探针也不会把 Agent 自报的读取标签升成该宿主的真实读取能力证明。
+```
 
 “需要人工设置”是 Adapter 就绪诊断的一种情况，不属于公共 `WORK_STATUS` 的新状态；若阻塞当前任务，Agent 用 `blocked` 并解释具体设置步骤。
 
@@ -99,7 +117,7 @@ sequenceDiagram
 
 当前大多数 Adapter 输出不会让宿主自动回传这个内部请求 ID。因此仓库测试能验证关联规则，真实能力仍可能是未证实。不能为了让面板变绿而自行伪造回执；后续应在宿主提供可信关联机制时适配，并用真实会话验证。
 
-现有历史验收明确：父项目刷新 Codex 后观察到 SessionStart，源仓在真实 Codex 会话运行新 CLI；独立源仓完整 SessionStart／Stop 链、自动续跑及社区应用行为没有因此全部验证。此页保留这一边界；本次三态升级的测试也不能追溯改写旧探针为新协议实测通过。
+已有历史记录包括采用项目刷新 Codex 后的 SessionStart，以及源码仓真实会话中的 CLI 调用。它们各自证明已记录的步骤，不覆盖完整 SessionStart／Stop 链、自动续跑或其他社区应用；后来的协议测试也不能改写旧记录的验证范围。
 
 <a id="adapters-failure"></a>
 ## 异常与恢复先定位在哪一层

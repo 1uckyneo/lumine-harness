@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "reader-explanation",
+    "path": "docs/repo-wiki/变化如何定位知识影响.md",
+    "generation": 1,
+    "generatedMarkdown": {
+      "$lumineObject": "01ba2a768546e126e5e538db09f512c43fc0e20c730a29785a36a2fda2207eb0",
+      "kind": "text",
+      "bytes": 9571
+    },
+    "appliedRevision": "01ba2a768546e126e5e538db09f512c43fc0e20c730a29785a36a2fda2207eb0",
+    "sources": {
+      "$lumineObject": "684074349989b35a3c7031e75388e699511bb5485c5cec71f68f262d86e35dbe",
+      "kind": "json",
+      "bytes": 4099
+    },
+    "updatedAt": "2026-11-17T05:06:23.035Z"
+  }
+}

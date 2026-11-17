@@ -171,8 +171,9 @@ async function main(): Promise<void> {
       ...process.env,
       LUMINE_RUNTIME_STAGE: stageRoot,
     });
-    for (const dependency of ["yaml", "ignore"])
-      await build({
+    const dependencyInputs = new Set<string>();
+    for (const dependency of ["yaml", "ignore", "shiki"]) {
+      const bundled = await build({
         entryPoints: [path.join(sourceRoot, `harness/vendor/${dependency}.ts`)],
         outfile: path.join(stageRoot, `harness/vendor/${dependency}.mjs`),
         bundle: true,
@@ -183,7 +184,10 @@ async function main(): Promise<void> {
           js: 'import { createRequire as vendorCreateRequire } from "node:module"; const require = vendorCreateRequire(import.meta.url);',
         },
         legalComments: "inline",
+        metafile: true,
       });
+      for (const input of Object.keys(bundled.metafile!.inputs)) dependencyInputs.add(input);
+    }
     // Rebuild only launchers and their pure prerequisites with old syntax.
     // The implementation remains node22; dispatchers copied on their own bundle the guard.
     for (const artifact of runtimeArtifacts(repoRoot).filter((item) => item.bootstrap)) {
@@ -195,9 +199,19 @@ async function main(): Promise<void> {
       repoRoot,
       "skills/lumine-harness/assets/harness/THIRD-PARTY-LICENSES.txt",
     );
-    const serverLicenses = ["yaml", "ignore"]
-      .map((name) => {
-        const directory = path.join(repoRoot, "node_modules", name);
+    const dependencyDirectories = new Map<string, string>();
+    for (const input of dependencyInputs) {
+      let directory = path.dirname(path.resolve(repoRoot, input));
+      while (directory !== repoRoot && directory !== path.dirname(directory)) {
+        if (existsSync(path.join(directory, 'package.json'))) {
+          const manifest = JSON.parse(readFileSync(path.join(directory, 'package.json'), 'utf8'));
+          dependencyDirectories.set(`${manifest.name}@${manifest.version}`, directory); break;
+        }
+        directory = path.dirname(directory);
+      }
+    }
+    const serverLicenses = [...dependencyDirectories.entries()].sort(([a], [b]) => a.localeCompare(b))
+      .map(([, directory]) => {
         const pkg = JSON.parse(
           readFileSync(path.join(directory, "package.json"), "utf8"),
         );

@@ -3,14 +3,14 @@
   "kind": "lumine-wiki-state",
   "value": {
     "id": "lumine-project-overview",
-    "revision": "24c096f55fc390cf4a291e7bec2e61274d4dcf921ac03ce0cc637520d51a7b7a",
+    "revision": "be4df7767c46217b66bbe9477942708ce87f548396468972dba68c8fc996f2d3",
     "freshness": "current",
-    "checkedAt": "2026-11-16T10:52:25.386Z",
-    "sourceFingerprint": "eac794dc45e9a7378ee6e47ddc27b8c0240fa8e621496926ef4cf283f5dc4c21",
+    "checkedAt": "2026-11-17T05:39:14.218Z",
+    "sourceFingerprint": "e4a92cdb58da2f4a154f28ef4d6392d7d92d93673aa9f0909168df58dfbf48fc",
     "sources": {
-      "$lumineObject": "eac794dc45e9a7378ee6e47ddc27b8c0240fa8e621496926ef4cf283f5dc4c21",
+      "$lumineObject": "e4a92cdb58da2f4a154f28ef4d6392d7d92d93673aa9f0909168df58dfbf48fc",
       "kind": "json",
-      "bytes": 21427
+      "bytes": 24015
     }
   }
 }

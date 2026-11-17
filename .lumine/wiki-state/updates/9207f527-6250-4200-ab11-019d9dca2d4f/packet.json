@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "9207f527-6250-4200-ab11-019d9dca2d4f",
+    "createdAt": "2026-11-17T05:39:14.164Z",
+    "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+    "scope": [
+      "lumine-project-overview"
+    ],
+    "status": "applied",
+    "storageReceipt": true,
+    "units": [
+      {
+        "id": "lumine-project-overview",
+        "kind": "update",
+        "path": "docs/repo-wiki/README.md"
+      }
+    ],
+    "results": [
+      {
+        "id": "lumine-project-overview",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "ecefe3f7f34f2b6d8e3fb7be01c5c68ebd5bbd54744aaf80971eada9295afd60"
+      }
+    ],
+    "audit": {
+      "recordHash": "f952d19e92bc1c7207da639e98f7cba128d3b0f9217e9b202e11520b95155c68",
+      "unitHashes": [
+        {
+          "id": "lumine-project-overview",
+          "sha256": "49379bbacf972d73378b8024d09aa8e5179083c2a0579bee54a62d49c819450e"
+        }
+      ]
+    }
+  }
+}

@@ -4,6 +4,7 @@ import { requireHarnessRoot } from "./core/root-resolver.mjs";
 import { applyCompaction, checkStorage, inspectStorage, planCompaction, recoverCompaction } from "./wiki/compaction.mjs";
 import { recordSourceDisposition } from "./wiki/dispositions.mjs";
 import { applyUpdate, auditKnowledge, checkWiki, inspectKnowledge, loadWikiConfig, mapKnowledge, outlineKnowledge, prepareUpdate, queryKnowledge, recordSemanticReview, recordUpdateDecision, recoverWiki, relatedKnowledge, scanWiki, showKnowledge } from "./wiki/engine.mjs";
+import { contextKnowledge, impactKnowledge } from "./wiki/context.mjs";
 import { renderKnowledgeMapMarkdown } from "./wiki/map-markdown.mjs";
 import { serveWiki } from "./wiki/server.mjs";
 import { migrateWikiDocumentFormat, planWikiDocumentFormat } from "./wiki/format-migration.mjs";
@@ -23,7 +24,7 @@ async function runWikiCommand(argv) {
 		args.splice(index, 2);
 		return value;
 	};
-	const rootArg = option("--root"), limit = option("--limit"), maxChars = option("--max-chars"), repoId = option("--repo"), type = option("--type"), freshness = option("--freshness"), collection = option("--collection"), port = option("--port"), candidate = option("--candidate"), decision = option("--decision"), reason = option("--reason"), manifestFile = option("--manifest"), reviewFile = option("--file"), direction = option("--direction"), topic = option("--topic"), scope = option("--scope"), fingerprint = option("--fingerprint"), outputFile = option("--output"), applyFile = option("--apply"), expect = option("--expect");
+	const rootArg = option("--root"), limit = option("--limit"), maxChars = option("--max-chars"), reference = option("--reference"), repoId = option("--repo"), type = option("--type"), freshness = option("--freshness"), collection = option("--collection"), port = option("--port"), candidate = option("--candidate"), decision = option("--decision"), reason = option("--reason"), manifestFile = option("--manifest"), reviewFile = option("--file"), direction = option("--direction"), topic = option("--topic"), scope = option("--scope"), fingerprint = option("--fingerprint"), outputFile = option("--output"), applyFile = option("--apply"), expect = option("--expect");
 	const flag = (name) => {
 		const index = args.indexOf(name);
 		if (index < 0) return false;
@@ -50,10 +51,42 @@ async function runWikiCommand(argv) {
 			locale: config.locale,
 			wikiRoot: config.root
 		})];
-		else if (Array.isArray(data.topics)) lines = [zh ? "知识地图" : "Knowledge map", ...data.topics.map((topic) => `${topic.parentId ? "  " : ""}${topic.title} · ${topic.id} [${topic.status}] ${topic.documentRefs.join(", ")}`)];
+		else if (Array.isArray(data.topics) && !data.ruleRouting && !data.candidateOnly) lines = [zh ? "知识地图" : "Knowledge map", ...data.topics.map((topic) => `${topic.parentId ? "  " : ""}${topic.title} · ${topic.id} [${topic.status}] ${topic.documentRefs.join(", ")}`)];
 		else if (data.coverage && Array.isArray(data.documents)) lines = data.documents.flatMap((doc) => [`${doc.title} · ${doc.id}`, ...doc.sections.map((section) => `${"  ".repeat(section.level)}${section.title} · ${doc.id}#${section.id}`)]);
 		else if (Array.isArray(data.relations)) lines = data.relations.map((relation) => `${relation.direction} ${relation.kind}: ${relation.title} · ${relation.target}${relation.note ? " — " + relation.note : ""}`);
-		else if (Array.isArray(data.cards)) lines = [(data.noAnswer ? zh ? "未找到可靠匹配，请改写问题或直接核实源码。" : "No reliable match. Reformulate the query or inspect source directly." : zh ? "相关知识" : "Related knowledge") + ` (${data.cards.length}/${data.total})`, ...data.cards.flatMap((card) => [
+		else if (data.ruleRouting) {
+			const context = value;
+			lines = [
+				zh ? `任务背景：${context.question}` : `Task context: ${context.question}`,
+				...context.cards.flatMap((card) => [
+					`\n${card.title} · ${card.id}`,
+					card.summary,
+					...card.matches.map((match) => `${match.reference}\n${match.excerpt}`)
+				]),
+				zh ? "\n适用规范必须按 AGENTS.md 路由完整读取；下列条目不是规则摘要。" : "\nRead applicable rules in full through AGENTS.md; these references are not rule summaries.",
+				...context.requiredReading.map((rule) => `${rule.title} · ${rule.reference} — ${rule.scope}`),
+				...context.related.map((item) => `${zh ? "关联" : "Related"}: ${item.title} · ${item.reference}${item.reason ? " — " + item.reason : ""}`),
+				context.noAnswer ? zh ? "当前知识未覆盖这个问题，请沿源码和测试核实。" : "No matching knowledge. Investigate source and tests." : "",
+				`${zh ? "继续阅读" : "Continue"}: wiki show <id#section>`
+			];
+		} else if (data.candidateOnly) {
+			const impact = value;
+			lines = [
+				zh ? "知识影响候选；逐项判断语义变化后再更新。" : "Knowledge impact candidates; assess semantic changes before updating.",
+				...impact.candidates.flatMap((item) => [
+					`\n${item.title} · ${item.id}`,
+					...item.reasons.map((reason) => `${zh ? {
+						source: "直接来源",
+						scope: "关注范围",
+						topic: "所属主题",
+						relation: "关联机制"
+					}[reason.kind] : reason.kind}: ${reason.reference}`),
+					...item.sections,
+					...item.diagrams
+				]),
+				...impact.unmatched.map((file) => `${zh ? "尚无知识归属" : "No knowledge ownership"}: ${file.repoId}:${file.path}`)
+			];
+		} else if (Array.isArray(data.cards)) lines = [(data.noAnswer ? zh ? "未找到可靠匹配，请改写问题或直接核实源码。" : "No reliable match. Reformulate the query or inspect source directly." : zh ? "相关知识" : "Related knowledge") + ` (${data.cards.length}/${data.total})`, ...data.cards.flatMap((card) => [
 			`\n${card.title} · ${card.id} [${wikiStatus(card.freshness, config.locale)}]`,
 			card.summary,
 			...(card.matches ?? []).map((match) => `${match.title} · ${match.reference}\n${match.excerpt}`),
@@ -86,6 +119,23 @@ async function runWikiCommand(argv) {
 		process.stdout.write(`${lines.join("\n")}\n`);
 	};
 	switch (args[0]) {
+		case "context":
+			output(contextKnowledge(root, args.slice(1).join(" "), {
+				limit: limit ? Number(limit) : undefined,
+				maxChars: maxChars ? Number(maxChars) : undefined,
+				reference
+			}));
+			break;
+		case "impact":
+			output(impactKnowledge(root, args.slice(1).map((file) => {
+				const divider = file.indexOf(":");
+				if (divider < 1) throw new Error("IMPACT_PATH_INVALID");
+				return {
+					repoId: file.slice(0, divider),
+					path: file.slice(divider + 1)
+				};
+			})));
+			break;
 		case "storage": {
 			let result;
 			if (args[1] === "inspect" && args.length === 2) result = inspectStorage(root);
@@ -226,6 +276,8 @@ async function runWikiCommand(argv) {
 			output({
 				description: config.locale === "zh-CN" ? "文本知识库：检索、核实、更新和阅读。" : "Text knowledge: query, verify, update and read.",
 				commands: [
+					"wiki context <question> [--reference id] [--max-chars 12000]",
+					"wiki impact <repo:path...>",
 					"wiki storage inspect|check",
 					"wiki storage compact --plan [--editorial] [--output plan.json]",
 					"wiki storage compact --apply <plan.json> --expect <plan-sha256>",

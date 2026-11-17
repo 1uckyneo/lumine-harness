@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "7839f478-b7e6-4ffa-be98-ed2f594ab35f-6736401798fb",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "candidateHashes": {
+      "lumine-adoption": "c54d0abd9f81dbdbca2beaa13c55616a33e28f7c5c095b1f0ccc1d91f291e2f9"
+    },
+    "mutationHashes": [
+      {
+        "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+        "beforeHash": "9899c4660c7dc4f4676691e4dd6086607a48632a0c44ea00b45c033e78e08b16",
+        "afterHash": "20e5a349412849cb4dfcab3cb832995bc69357d1a72d6530abfabefa2f801d09"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/6736401798fb41c765444b652622599a7acdba0c0e2a4ebd7693f6e6971398f9.json",
+        "beforeHash": "16ce43ef1e8c235e96adb37cdb6122bab0f2e345b7be019e92fe96ffbd4544ed",
+        "afterHash": "b581ad676be79ba447435606364567ffdaf3f2ad28bd463033b613d309c076c8"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/6736401798fb41c765444b652622599a7acdba0c0e2a4ebd7693f6e6971398f9.json",
+        "beforeHash": "6959e55c342b12f71411f39a0e1972aa9656f95ebd9b981f7b3f1b4007a55946",
+        "afterHash": "26067df3910469f78511ba42a2b8d7d976e7aabaf20358450100ce98b80d642e"
+      }
+    ]
+  }
+}

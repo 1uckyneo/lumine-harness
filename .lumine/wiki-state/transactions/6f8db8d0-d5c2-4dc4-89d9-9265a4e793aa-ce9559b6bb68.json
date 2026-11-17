@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "6f8db8d0-d5c2-4dc4-89d9-9265a4e793aa-ce9559b6bb68",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "candidateHashes": {
+      "lumine-architecture": "90875ed3b8f9df60c9fb4920cb541d75a62c1a9ada223ff4f7e04de8fae4338c"
+    },
+    "mutationHashes": [
+      {
+        "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+        "beforeHash": "e46056627638fa6db29160d56e647c62e987f5b7c73e744e7cd749cb366bdf88",
+        "afterHash": "57da81c022069ed7d685e3a681acc1b73a6a302b9ac57ea2a1b0290f9c63e91d"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/ce9559b6bb68e6cf640171fe03f7722138038b72da987b33249c27d0fda324fb.json",
+        "beforeHash": "b245dae3e910514cfa530b0397f4e885cc27b8f5ce9012ca74c7228ff99b6af7",
+        "afterHash": "3c1a721ebfba5c3b2a962a09d5ef22a33316f4ae56891423d161398d61d5df36"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/ce9559b6bb68e6cf640171fe03f7722138038b72da987b33249c27d0fda324fb.json",
+        "beforeHash": "426eacf013a59c0a0f6c6562f36d38819746426b54197c34600011fd3da59c18",
+        "afterHash": "166c0219ac4867bd80f83fe80d2143f60ee25e43db2b80df9ffba4df6bb86f1d"
+      }
+    ]
+  }
+}

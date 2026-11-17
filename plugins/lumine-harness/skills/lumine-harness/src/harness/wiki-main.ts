@@ -8,13 +8,14 @@ import { serveWiki } from './wiki/server.ts';
 import { recordSourceDisposition, type SourceDispositionAction } from './wiki/dispositions.ts';
 import { migrateWikiDocumentFormat, planWikiDocumentFormat } from './wiki/format-migration.ts';
 import { renderKnowledgeMapMarkdown } from './wiki/map-markdown.ts';
+import { contextKnowledge, impactKnowledge } from './wiki/context.ts';
 import { wikiDiagnostic, wikiStatus } from './wiki/messages.ts';
 import type { Candidate, ChangeManifest, Collection, Freshness, ReviewRecord } from './wiki/types.ts';
 
 async function runWikiCommand(argv: string[]): Promise<void> {
   const args = [...argv];
   const option = (name: string): string | undefined => { const index = args.indexOf(name); if (index < 0) return undefined; const value = args[index + 1]; if (!value || value.startsWith('--')) throw new Error(`OPTION_VALUE_REQUIRED:${name}`); args.splice(index, 2); return value; };
-  const rootArg = option('--root'), limit = option('--limit'), maxChars = option('--max-chars'), repoId = option('--repo'), type = option('--type'), freshness = option('--freshness'), collection = option('--collection'), port = option('--port'), candidate = option('--candidate'), decision = option('--decision'), reason = option('--reason'), manifestFile = option('--manifest'), reviewFile = option('--file'), direction = option('--direction'), topic = option('--topic'), scope = option('--scope'), fingerprint = option('--fingerprint'), outputFile = option('--output'), applyFile = option('--apply'), expect = option('--expect');
+  const rootArg = option('--root'), limit = option('--limit'), maxChars = option('--max-chars'), reference = option('--reference'), repoId = option('--repo'), type = option('--type'), freshness = option('--freshness'), collection = option('--collection'), port = option('--port'), candidate = option('--candidate'), decision = option('--decision'), reason = option('--reason'), manifestFile = option('--manifest'), reviewFile = option('--file'), direction = option('--direction'), topic = option('--topic'), scope = option('--scope'), fingerprint = option('--fingerprint'), outputFile = option('--output'), applyFile = option('--apply'), expect = option('--expect');
   const flag = (name: string): boolean => { const index = args.indexOf(name); if (index < 0) return false; args.splice(index, 1); return true; };
   const outline = flag('--outline'), full = flag('--full'), markdown = flag('--markdown'), storagePlan = flag('--plan'), rollback = flag('--rollback'), editorial = flag('--editorial'), includeHistory = flag('--include-history');
   if (outline && full) throw new Error('SHOW_MODE_CONFLICT');
@@ -29,9 +30,25 @@ async function runWikiCommand(argv: string[]): Promise<void> {
     let lines: string[];
     if (typeof data.markdown === 'string') lines = [data.markdown];
     else if (data.navigation && Array.isArray(data.topics)) lines = [renderKnowledgeMapMarkdown(value as ReturnType<typeof mapKnowledge>, (reference) => showKnowledge(root, reference), { locale: config.locale, wikiRoot: config.root })];
-    else if (Array.isArray(data.topics)) lines = [(zh ? '知识地图' : 'Knowledge map'), ...data.topics.map((topic: { title: string; id: string; parentId?: string; status: string; documentRefs: string[] }) => `${topic.parentId ? '  ' : ''}${topic.title} · ${topic.id} [${topic.status}] ${topic.documentRefs.join(', ')}`)];
+    else if (Array.isArray(data.topics) && !data.ruleRouting && !data.candidateOnly) lines = [(zh ? '知识地图' : 'Knowledge map'), ...data.topics.map((topic: { title: string; id: string; parentId?: string; status: string; documentRefs: string[] }) => `${topic.parentId ? '  ' : ''}${topic.title} · ${topic.id} [${topic.status}] ${topic.documentRefs.join(', ')}`)];
     else if (data.coverage && Array.isArray(data.documents)) lines = data.documents.flatMap((doc: { id: string; title: string; sections: { id: string; title: string; level: number }[] }) => [`${doc.title} · ${doc.id}`, ...doc.sections.map((section) => `${'  '.repeat(section.level)}${section.title} · ${doc.id}#${section.id}`)]);
     else if (Array.isArray(data.relations)) lines = data.relations.map((relation: { target: string; title: string; kind: string; direction: string; note?: string }) => `${relation.direction} ${relation.kind}: ${relation.title} · ${relation.target}${relation.note ? ' — ' + relation.note : ''}`);
+    else if (data.ruleRouting) {
+      const context = value as ReturnType<typeof contextKnowledge>;
+      lines = [zh ? `任务背景：${context.question}` : `Task context: ${context.question}`,
+        ...context.cards.flatMap(card => [`\n${card.title} · ${card.id}`, card.summary, ...card.matches.map(match => `${match.reference}\n${match.excerpt}`)]),
+        zh ? '\n适用规范必须按 AGENTS.md 路由完整读取；下列条目不是规则摘要。' : '\nRead applicable rules in full through AGENTS.md; these references are not rule summaries.',
+        ...context.requiredReading.map(rule => `${rule.title} · ${rule.reference} — ${rule.scope}`),
+        ...context.related.map(item => `${zh ? '关联' : 'Related'}: ${item.title} · ${item.reference}${item.reason ? ' — ' + item.reason : ''}`),
+        context.noAnswer ? (zh ? '当前知识未覆盖这个问题，请沿源码和测试核实。' : 'No matching knowledge. Investigate source and tests.') : '',
+        `${zh ? '继续阅读' : 'Continue'}: wiki show <id#section>`];
+    }
+    else if (data.candidateOnly) {
+      const impact = value as ReturnType<typeof impactKnowledge>;
+      lines = [zh ? '知识影响候选；逐项判断语义变化后再更新。' : 'Knowledge impact candidates; assess semantic changes before updating.',
+        ...impact.candidates.flatMap(item => [`\n${item.title} · ${item.id}`, ...item.reasons.map(reason => `${zh ? ({ source: '直接来源', scope: '关注范围', topic: '所属主题', relation: '关联机制' }[reason.kind]) : reason.kind}: ${reason.reference}`), ...item.sections, ...item.diagrams]),
+        ...impact.unmatched.map(file => `${zh ? '尚无知识归属' : 'No knowledge ownership'}: ${file.repoId}:${file.path}`)];
+    }
     else if (Array.isArray(data.cards)) lines = [(data.noAnswer ? (zh ? '未找到可靠匹配，请改写问题或直接核实源码。' : 'No reliable match. Reformulate the query or inspect source directly.') : (zh ? '相关知识' : 'Related knowledge')) + ` (${data.cards.length}/${data.total})`, ...data.cards.flatMap((card: { id: string; title: string; summary: string; freshness: string; reason: string; matches: { title: string; excerpt: string; reference: string }[]; sources: { repoId: string; path: string }[] }) => [`\n${card.title} · ${card.id} [${wikiStatus(card.freshness, config.locale)}]`, card.summary, ...(card.matches ?? []).map((match) => `${match.title} · ${match.reference}\n${match.excerpt}`), ...(card.reason ? [`${zh ? '匹配' : 'Matched'}: ${card.reason}`] : []), ...card.sources.map((source) => `  ${source.repoId}:${source.path}`)])];
     else if (Array.isArray(data.units)) lines = [zh ? '更新工作包已保存；核实来源后提交文本候选。' : 'Update packet saved. Verify sources before submitting text candidates.', `.lumine/wiki-state/updates/${data.id}/packet.json`, ...data.units.map((unit: { id: string; path: string }) => `${unit.id} · ${unit.path}`)];
     else if (Array.isArray(data.results)) lines = [`${zh ? '更新状态' : 'Update status'}: ${wikiStatus(String(data.status), config.locale)}`, ...data.results.map((result: { id: string; status: string; reason: string }) => `${result.id} [${wikiStatus(result.status, config.locale)}] ${result.reason}`)];
@@ -43,6 +60,8 @@ async function runWikiCommand(argv: string[]): Promise<void> {
     process.stdout.write(`${lines.join('\n')}\n`);
   };
   switch (args[0]) {
+    case 'context': output(contextKnowledge(root, args.slice(1).join(' '), { limit: limit ? Number(limit) : undefined, maxChars: maxChars ? Number(maxChars) : undefined, reference })); break;
+    case 'impact': output(impactKnowledge(root, args.slice(1).map(file => { const divider = file.indexOf(':'); if (divider < 1) throw new Error('IMPACT_PATH_INVALID'); return { repoId: file.slice(0, divider), path: file.slice(divider + 1) }; }))); break;
     case 'storage': {
       let result: unknown;
       if (args[1] === 'inspect' && args.length === 2) result = inspectStorage(root);
@@ -106,7 +125,7 @@ async function runWikiCommand(argv: string[]): Promise<void> {
       for (const signal of ['SIGINT', 'SIGTERM'] as const) process.once(signal, () => { void result.close().then(() => process.exit(0)); });
       break;
     }
-    default: if (args[0] && !['help', '--help', '-h'].includes(args[0])) throw new Error('UNKNOWN_COMMAND'); output({ description: config.locale === 'zh-CN' ? '文本知识库：检索、核实、更新和阅读。' : 'Text knowledge: query, verify, update and read.', commands: ['wiki storage inspect|check', 'wiki storage compact --plan [--editorial] [--output plan.json]', 'wiki storage compact --apply <plan.json> --expect <plan-sha256>', 'wiki storage recover <operation-id> [--rollback]', 'wiki map [--markdown]', 'wiki audit', 'wiki related <id> [--direction in|out|both]', 'wiki show [id] --outline', 'wiki show <id#fragment>', 'wiki show <id> --full', 'wiki update prepare --manifest <changes.json>', 'wiki update review --file <review.json>', 'wiki scan', 'wiki classify <repo:path> --topic <id> --scope <repo:path> --fingerprint <sha256> --decision needs-explanation|covered|deferred --reason <text>', 'wiki format plan', 'wiki format apply <document-id>', 'wiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan] [--include-history]', 'wiki show <id|path|title>', 'wiki check', 'wiki update prepare [document-id...]', 'wiki update apply <packet-id> --candidate <json-file>', 'wiki update decide <packet-id> <document-id> --decision keep-current|defer --reason <text>', 'wiki update recover', 'wiki serve [--port 4318]'], options: ['--root <harness-root>', '--json'] });
+    default: if (args[0] && !['help', '--help', '-h'].includes(args[0])) throw new Error('UNKNOWN_COMMAND'); output({ description: config.locale === 'zh-CN' ? '文本知识库：检索、核实、更新和阅读。' : 'Text knowledge: query, verify, update and read.', commands: ["wiki context <question> [--reference id] [--max-chars 12000]", "wiki impact <repo:path...>", 'wiki storage inspect|check', 'wiki storage compact --plan [--editorial] [--output plan.json]', 'wiki storage compact --apply <plan.json> --expect <plan-sha256>', 'wiki storage recover <operation-id> [--rollback]', 'wiki map [--markdown]', 'wiki audit', 'wiki related <id> [--direction in|out|both]', 'wiki show [id] --outline', 'wiki show <id#fragment>', 'wiki show <id> --full', 'wiki update prepare --manifest <changes.json>', 'wiki update review --file <review.json>', 'wiki scan', 'wiki classify <repo:path> --topic <id> --scope <repo:path> --fingerprint <sha256> --decision needs-explanation|covered|deferred --reason <text>', 'wiki format plan', 'wiki format apply <document-id>', 'wiki query <text> [--limit 6] [--repo id] [--collection wiki|spec|plan] [--include-history]', 'wiki show <id|path|title>', 'wiki check', 'wiki update prepare [document-id...]', 'wiki update apply <packet-id> --candidate <json-file>', 'wiki update decide <packet-id> <document-id> --decision keep-current|defer --reason <text>', 'wiki update recover', 'wiki serve [--port 4318]'], options: ['--root <harness-root>', '--json'] });
   }
 }
 export async function runWikiCli(argv = process.argv.slice(2)): Promise<void> {

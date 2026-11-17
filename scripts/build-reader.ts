@@ -119,8 +119,10 @@ async function main(): Promise<void> {
       metafile: true,
       legalComments: "external",
       chunkNames: "chunks/[name]-[hash]",
+      assetNames: "fonts/[name]-[hash]",
+      loader: { '.woff2': 'file', '.woff': 'file' },
     });
-    for (const f of ["index.html", "styles.css"])
+    for (const f of ["index.html", "styles.css", "brand.svg", "favicon-16.svg", "favicon-32.svg"])
       copyFileSync(path.join(src, f), path.join(stage, f));
     const seen = new Set<string>(),
       licenses: string[] = [];

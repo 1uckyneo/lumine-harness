@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "6f8db8d0-d5c2-4dc4-89d9-9265a4e793aa-6c9bf4aba1b6",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "candidateHashes": {
+      "lumine-adapters": "37b3ea06a572e1668010fdeb693ab6a57ababc2ed0110cc88dc38ed4fee8a14c"
+    },
+    "mutationHashes": [
+      {
+        "path": "docs/repo-wiki/Adapter 公共协议与各宿主差异.md",
+        "beforeHash": "cbfc294d93b5357be5291ea40cafd5098c23997e24385c846359509e78f2916a",
+        "afterHash": "dba4eecd8e8af0d9d5c7bb2ef5714b9168d68d9d586cbac39a699762659819c2"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/6c9bf4aba1b6ca2b24f3c89c04df4e4616762e60d8ebb4a50afd3ed046cd0dbc.json",
+        "beforeHash": "c1f5e98f95e2e4253df6ffc37063206e767681050a36b1c0f1c70cdff18bdaf3",
+        "afterHash": "6a8e36147d17a8c14a094f1c1c6f070f528ab853a90526d3bb5bb4dc71ea8eb2"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/6c9bf4aba1b6ca2b24f3c89c04df4e4616762e60d8ebb4a50afd3ed046cd0dbc.json",
+        "beforeHash": "f65f3c511a7a303bda9bdc3a66346460a93577002d727a0ae9382199e02a5176",
+        "afterHash": "fd28d571f35b7cdc7e086f5a7cc909a2e35e9aae232c486861d8913e6f2af270"
+      }
+    ]
+  }
+}

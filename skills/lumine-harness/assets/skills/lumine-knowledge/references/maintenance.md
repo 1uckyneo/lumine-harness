@@ -107,3 +107,11 @@ AGENTS 明确授权的规范附件必须按任务完整读取，不由普通检�
 在现有变更清单附 `navigation`，含 `schemaVersion: 1`、当前首页的 Wiki ID `overview`、`groups`、`unlisted` 和 `norms`。group 的 id 为 understand、operate 或 reference，sections 以 `id/title/description?/documents` 列稳定文档 ID。每页一个主要位置或 `unlisted: [{id,reason}]`。历史留在查找与核实，当前业务与场景放在理解项目。
 
 `norms: [{id,scope}]` 登记由 AGENTS 授权且放在开发与运行的规范；以项目的实际规范索引为准。增加、减少或修改权威范围和规范正文时，先核对人已授权的具体规则，再附 `normativeChanges: [{id,reason}]`。工具记录变更意图，授权来自项目和用户。安全规范保持可见且可完整读取。只调整导航时 `changes` 和候选列表可为空，仍使用同一事务、检查和恢复方式。
+
+## 阅读意图与变化输入
+
+需要项目背景时，使用 `wiki context "读者问题" --json`，沿返回的章节、关系和完整规范入口继续核实。实际变化通过 `wiki impact <仓库ID:相对路径...> --json` 提供，也接受已删除路径；未命中单独报告，不能解释为没有影响。关系只提供调查方向，不直接决定是否改写。
+
+维护清单可增加 `briefing: {"question":"本次要解释什么","audience":"读者","purpose":"读完理解什么","preserve":["须保留的人工纠正与条件"]}`。每个准备单元还提供当前原文、生成基线及人工差异、相关主题、章节和图的位置。字段是写作输入，不是新的事实台账。页面长期阅读职责使用同一 Markdown 文末元数据的 `reading: {question, audience?, purpose?}`；普通更改复用原意图，不由一次提示词重塑整个目录。
+
+完整方法和不同文章范式见[写作与编排](写作与编排.md)；声明式内容和解释器登记见[阅读表达](阅读表达.md)。格式示例中的标题要替换成真实读者问题，不能交付机械模板章节。

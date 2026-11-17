@@ -36,3 +36,5 @@ When delivering a change in business behavior, use the plan's knowledge targets 
 Parallel writers need exclusive file ownership, inputs, acceptance, and stopping conditions. Integrate serially and verify runtime behavior after relevant changes are integrated. Preserve repository, read-only business, and publication boundaries; implementation authorization does not imply permission to commit, push, deploy, or perform other external actions.
 
 Use [current request scope](references/request-scope.md) before work and closeout. New requests do not automatically replace persistent tasks or restart the product workflow.
+
+For knowledge delivery, `wiki impact` maps changed sources to candidate body, diagram, summary, relation and rule locations. Candidates do not authorize automatic rewriting. Follow the Knowledge writing method to verify and update the related set, preserve human corrections, and never claim semantic completion by refreshing fingerprints alone.

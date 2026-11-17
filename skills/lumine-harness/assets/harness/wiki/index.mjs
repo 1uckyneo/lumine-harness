@@ -5,7 +5,8 @@ import { parseSections } from "./sections.mjs";
 import { validateCoverage } from "./coverage.mjs";
 import { baselineFor, findDocument, listDocuments, parseDocument } from "./documents.mjs";
 import { applyUpdate, auditKnowledge, checkWiki, inspectKnowledge, listKnowledge, loadWikiConfig, mapKnowledge, navigationKnowledge, outlineKnowledge, prepareUpdate, queryKnowledge, recordSemanticReview, recordUpdateDecision, recoverWiki, relatedKnowledge, resolveKnowledgeReference, scanWiki, showKnowledge, sourceFingerprint } from "./engine.mjs";
+import { contextKnowledge, impactKnowledge } from "./context.mjs";
 import { serveWiki } from "./server.mjs";
 import "./types.mjs";
 
-export { applyUpdate, auditKnowledge, baselineFor, checkWiki, containedPath, findDocument, inspectKnowledge, listDocuments, listKnowledge, loadWikiConfig, mapKnowledge, navigationKnowledge, outlineKnowledge, parseDocument, parseSections, prepareUpdate, queryKnowledge, readSource, recordSemanticReview, recordUpdateDecision, recoverWiki, relatedKnowledge, resolveKnowledgeReference, scanWiki, serveWiki, showKnowledge, snapshotSources, sourceFingerprint, sourcePath, validateCoverage };
+export { applyUpdate, auditKnowledge, baselineFor, checkWiki, containedPath, contextKnowledge, findDocument, impactKnowledge, inspectKnowledge, listDocuments, listKnowledge, loadWikiConfig, mapKnowledge, navigationKnowledge, outlineKnowledge, parseDocument, parseSections, prepareUpdate, queryKnowledge, readSource, recordSemanticReview, recordUpdateDecision, recoverWiki, relatedKnowledge, resolveKnowledgeReference, scanWiki, serveWiki, showKnowledge, snapshotSources, sourceFingerprint, sourcePath, validateCoverage };

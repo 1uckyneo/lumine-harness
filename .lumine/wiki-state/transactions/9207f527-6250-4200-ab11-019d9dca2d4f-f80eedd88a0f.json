@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "9207f527-6250-4200-ab11-019d9dca2d4f-f80eedd88a0f",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "candidateHashes": {
+      "lumine-project-overview": "ecefe3f7f34f2b6d8e3fb7be01c5c68ebd5bbd54744aaf80971eada9295afd60"
+    },
+    "mutationHashes": [
+      {
+        "path": "docs/repo-wiki/README.md",
+        "beforeHash": "24c096f55fc390cf4a291e7bec2e61274d4dcf921ac03ce0cc637520d51a7b7a",
+        "afterHash": "be4df7767c46217b66bbe9477942708ce87f548396468972dba68c8fc996f2d3"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/f80eedd88a0f341878d1745a49760ecfeb0877cc8d1b3dce1f93db2059bea31c.json",
+        "beforeHash": "5ec567176df943e9c54de6c5ea7e3210a795ced2ee81964c550653fe504a30eb",
+        "afterHash": "2a70289d739b10a254c6ed65334d374c81cce617b141df020b8cc60a0cab6aa8"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/f80eedd88a0f341878d1745a49760ecfeb0877cc8d1b3dce1f93db2059bea31c.json",
+        "beforeHash": "6a4face64c7f53229cb995bb1ff3b53fde81a44fc3e6b45be650e2fc46ab52a8",
+        "afterHash": "1744a67537ceb2ab8c0d192e2df1927b563cbb72d53c4cde9854b0e4834727c5"
+      }
+    ]
+  }
+}

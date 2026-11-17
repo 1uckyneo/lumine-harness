@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "3905c298-8e08-45d4-b09c-19956e881052-71eb3135a3e2",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "candidateHashes": {
+      "lumine-adapters": "93e381222549cceaec16d2d15e428696eb26dbb6315be9092a08022bc0ddd152",
+      "lumine-architecture": "b4e3e5742d08ee87626ccc8fcec1b60ddb98b20210d79fd9fdf9ecacdeefa493",
+      "lumine-root-config": "222a777f0ef651f2335129cb59fa17d317118edcd13d30a8d3132b9d9d1fd6b9",
+      "lumine-adoption": "2affb9df72102ff5791ed09ebf343d60c029e533612acd93a402d2feec338cba"
+    },
+    "mutationHashes": [
+      {
+        "path": "docs/repo-wiki/Adapter 公共协议与各宿主差异.md",
+        "beforeHash": "c4505f7da8323b9a4fb62b161c27fba387cd6c0dbaf3b6bcd44b6a5d7d9c258d",
+        "afterHash": "cbfc294d93b5357be5291ea40cafd5098c23997e24385c846359509e78f2916a"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/6c9bf4aba1b6ca2b24f3c89c04df4e4616762e60d8ebb4a50afd3ed046cd0dbc.json",
+        "beforeHash": "4269a7bd4eea73e4cfd0602a1b22add689fcf4958bf841a6592a14359a29a532",
+        "afterHash": "c1f5e98f95e2e4253df6ffc37063206e767681050a36b1c0f1c70cdff18bdaf3"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/6c9bf4aba1b6ca2b24f3c89c04df4e4616762e60d8ebb4a50afd3ed046cd0dbc.json",
+        "beforeHash": "ee3ef60e41ab101d171fa91d883a97adf9b3f623c00cd26c7775adfbea2bcfd4",
+        "afterHash": "f65f3c511a7a303bda9bdc3a66346460a93577002d727a0ae9382199e02a5176"
+      },
+      {
+        "path": "docs/repo-wiki/Core、Skill、Adapter 与构建分发.md",
+        "beforeHash": "d9d515971bec5e2610dfbd80202d64c2b200006dcab5222f6a00f8fb997fce3a",
+        "afterHash": "e46056627638fa6db29160d56e647c62e987f5b7c73e744e7cd749cb366bdf88"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/ce9559b6bb68e6cf640171fe03f7722138038b72da987b33249c27d0fda324fb.json",
+        "beforeHash": "06c043ac74917cbbec49d697cd703d376ae41b2158fbb891b2681b68baf2f751",
+        "afterHash": "b245dae3e910514cfa530b0397f4e885cc27b8f5ce9012ca74c7228ff99b6af7"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/ce9559b6bb68e6cf640171fe03f7722138038b72da987b33249c27d0fda324fb.json",
+        "beforeHash": "a653127a12cc1caeab12592530eedd5c7b33af239de23364b636705327d39ed3",
+        "afterHash": "426eacf013a59c0a0f6c6562f36d38819746426b54197c34600011fd3da59c18"
+      },
+      {
+        "path": "docs/repo-wiki/项目配置、根解析与多仓身份.md",
+        "beforeHash": "e105e76836aceddcbd5443d3ac74f8824c9b4dfde2b73d4fa52cba265b2d1289",
+        "afterHash": "0fd724d6898ef538057f173c6bf44a4b59e0a124218a24d3eba5e07c0cb0d60e"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/b68f47ff2dcac4fc52acc8a29454668a3e9aecddb2c87cdb5773908c648c0e79.json",
+        "beforeHash": "2b19bfd0d23332b98edfbef19c3e9af5c476e46a0f3253f8a21cd5ac9fea33ee",
+        "afterHash": "7083d7429c5917fede1c8029496dc4815f667c9dce8b893cbd88f2cabafff6fd"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/b68f47ff2dcac4fc52acc8a29454668a3e9aecddb2c87cdb5773908c648c0e79.json",
+        "beforeHash": "6ed0980e780c213abcb9e17fcb6076f8704cf622b12e539e44a86b465b04d94a",
+        "afterHash": "2c673e6d239732217a52de63b55ea4346d3c1a8be9d0496debe4c7937b2d8399"
+      },
+      {
+        "path": "docs/repo-wiki/首次采用、升级与迁移恢复.md",
+        "beforeHash": "e01bcac621138a48afd4c32607e620e955f8d4258e3096d50fb24352cb54c954",
+        "afterHash": "9899c4660c7dc4f4676691e4dd6086607a48632a0c44ea00b45c033e78e08b16"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/6736401798fb41c765444b652622599a7acdba0c0e2a4ebd7693f6e6971398f9.json",
+        "beforeHash": "812634c01ae5f15c0f213d59f13ea8886d81f1e483178c51962e54435b8bf971",
+        "afterHash": "16ce43ef1e8c235e96adb37cdb6122bab0f2e345b7be019e92fe96ffbd4544ed"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/6736401798fb41c765444b652622599a7acdba0c0e2a4ebd7693f6e6971398f9.json",
+        "beforeHash": "1b6b5b1296b40272be34dbdd94be08bc4478b3d108aa4c0761d7eeff27d1f1ec",
+        "afterHash": "6959e55c342b12f71411f39a0e1972aa9656f95ebd9b981f7b3f1b4007a55946"
+      }
+    ]
+  }
+}

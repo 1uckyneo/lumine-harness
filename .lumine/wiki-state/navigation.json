@@ -11,7 +11,8 @@
           "documents": [
             "lumine-workflow",
             "lumine-wiki",
-            "lumine-wiki-reader"
+            "lumine-wiki-reader",
+            "reader-explanation"
           ]
         },
         {

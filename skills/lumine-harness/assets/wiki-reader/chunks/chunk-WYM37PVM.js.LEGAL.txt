@@ -1,0 +1,78 @@
+Bundled license information:
+
+react/cjs/react.production.js:
+  /**
+   * @license React
+   * react.production.js
+   *
+   * Copyright (c) Meta Platforms, Inc. and affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
+react-dom/cjs/react-dom.production.js:
+  /**
+   * @license React
+   * react-dom.production.js
+   *
+   * Copyright (c) Meta Platforms, Inc. and affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
+use-sync-external-store/cjs/use-sync-external-store-shim.production.js:
+  /**
+   * @license React
+   * use-sync-external-store-shim.production.js
+   *
+   * Copyright (c) Meta Platforms, Inc. and affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
+react/cjs/react-jsx-runtime.production.js:
+  /**
+   * @license React
+   * react-jsx-runtime.production.js
+   *
+   * Copyright (c) Meta Platforms, Inc. and affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
+lucide-react/dist/esm/shared/src/utils/toKebabCase.mjs:
+lucide-react/dist/esm/shared/src/utils/toLucideIconData.mjs:
+lucide-react/dist/esm/shared/src/utils/toCamelCase.mjs:
+lucide-react/dist/esm/shared/src/utils/toPascalCase.mjs:
+lucide-react/dist/esm/shared/src/utils/mergeClasses.mjs:
+lucide-react/dist/esm/shared/src/build/defaultAttributes.mjs:
+lucide-react/dist/esm/shared/src/build/buildLucideIconNode.mjs:
+lucide-react/dist/esm/shared/src/build/buildLucideIconForReact.mjs:
+lucide-react/dist/esm/shared/src/utils/hasA11yProp.mjs:
+lucide-react/dist/esm/context.mjs:
+lucide-react/dist/esm/Icon.mjs:
+lucide-react/dist/esm/createLucideIcon.mjs:
+lucide-react/dist/esm/icons/book-open.mjs:
+lucide-react/dist/esm/icons/copy.mjs:
+lucide-react/dist/esm/icons/expand.mjs:
+lucide-react/dist/esm/icons/focus.mjs:
+lucide-react/dist/esm/icons/list.mjs:
+lucide-react/dist/esm/icons/menu.mjs:
+lucide-react/dist/esm/icons/panel-left-open.mjs:
+lucide-react/dist/esm/icons/refresh-cw.mjs:
+lucide-react/dist/esm/icons/rotate-ccw.mjs:
+lucide-react/dist/esm/icons/search.mjs:
+lucide-react/dist/esm/icons/x.mjs:
+lucide-react/dist/esm/icons/zoom-in.mjs:
+lucide-react/dist/esm/icons/zoom-out.mjs:
+lucide-react/dist/esm/lucide-react.mjs:
+  /**
+   * @license lucide-react v1.73.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Search } from 'lucide-react';
+import { Button, Tab, TabList, TabPanel, Tabs } from 'react-aria-components';
 import type { KnowledgeCard, Locale } from '../harness/wiki/types.ts';
 import { api, documentHref, safeRead, safeWrite, translate, typeLabel, documentLabel, type CatalogDocument, type SearchPage } from './reader-common.ts';
 
@@ -19,6 +21,7 @@ export function SearchView({ locale, projectId, catalog, initialQuery, legacyCol
 }) {
   const t = (key: string) => translate(locale, key);
   const [query, setQuery] = useState(initialQuery);
+  const [expandedHits, setExpandedHits] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<Filters>(() => {
     const saved = loadFilters(projectId);
     return legacyCollection === 'spec' || legacyCollection === 'plan' ? { ...saved, scope: 'all', type: legacyCollection === 'spec' ? 'product-spec' : 'exec-plan' } : saved;
@@ -88,12 +91,9 @@ export function SearchView({ locale, projectId, catalog, initialQuery, legacyCol
       <label htmlFor="wiki-query" className="sr-only">{t('search')}</label>
       <input ref={queryInput} id="wiki-query" type="search" autoComplete="off" value={query} placeholder={t('queryPlaceholder')}
         onChange={(event) => { setQuery(event.target.value); history.replaceState({}, '', `?search=1${event.target.value ? `&q=${encodeURIComponent(event.target.value)}` : ''}`); }} />
-      <button type="submit">{t('search')}</button>
+      <Button type="submit"><Search size={17} aria-hidden="true" />{t('search')}</Button>
     </form>
-    <div className="search-scope" role="group" aria-label={t('relatedDocuments')}>
-      <button aria-pressed={filters.scope === 'wiki'} onClick={() => change('scope', 'wiki')}>{t('wikiOnly')}</button>
-      <button aria-pressed={filters.scope === 'all'} onClick={() => change('scope', 'all')}>{t('allDocuments')}</button>
-    </div>
+    <Tabs className="search-scope" selectedKey={filters.scope} onSelectionChange={(key) => change('scope', String(key))}><TabList aria-label={t('relatedDocuments')}><Tab id="wiki">{t('wikiOnly')}</Tab><Tab id="all">{t('allDocuments')}</Tab></TabList><TabPanel id="wiki" /><TabPanel id="all" /></Tabs>
     <details className="search-filters"><summary>{t('filters')}{filterCount ? ` · ${filterCount}` : ''}</summary>
       <div className="filter-controls">
         <label>{t('allRepos')}<select value={filters.repo} onChange={(event) => change('repo', event.target.value)}><option value="">{t('allRepos')}</option>{allRepos.map((repo) => <option key={repo} value={repo}>{repo}</option>)}</select></label>
@@ -103,7 +103,7 @@ export function SearchView({ locale, projectId, catalog, initialQuery, legacyCol
       </div>
     </details>
     {filterCount > 0 && <div className="active-filters" aria-label={t('filters')}>
-      {(['repo', 'type', 'freshness'] as const).filter((key) => filters[key]).map((key) => <button key={key} onClick={() => change(key, '')}>{filters[key]} ×</button>)}
+      {(['repo', 'type', 'freshness'] as const).filter((key) => filters[key]).map((key) => <button key={key} onClick={() => change(key, '')}>{key === 'type' ? typeLabel(locale, filters[key]) : key === 'freshness' ? t(filters[key]) : filters[key]} ×</button>)}
     </div>}
     <p className="result-count" role="status">{pending && !resultDocs.length ? t('loading') : `${t('showing')} ${resultDocs.length} / ${resultTotal} ${t('results')}`}</p>
     {error && <div className="status-panel error" role="alert"><p>{error}</p><button onClick={() => void search(null)}>{t('retry')}</button></div>}
@@ -111,11 +111,12 @@ export function SearchView({ locale, projectId, catalog, initialQuery, legacyCol
     <div className="search-results">{resultDocs.map(({ doc, hit }) => <article className="result-card" key={doc.id}>
       <div className="result-meta"><span>{documentLabel(locale, doc)}</span>{doc.collection !== 'validation' && doc.freshness !== 'current' && <span className={`status-text ${doc.freshness}`}>{t(doc.freshness)}</span>}</div>
       <h2><a href={documentHref(doc.id)} onClick={(event) => { event.preventDefault(); onDocument(doc.id); }}>{doc.title}</a></h2>
-      <p>{doc.summary}</p>
-      {hit?.matches.map((match) => <div className="result-match" key={match.reference}>
+      {(!hit?.matches.length || expandedHits.has(doc.id)) && <p className="result-excerpt">{doc.summary}</p>}
+      {hit?.matches.slice(0, expandedHits.has(doc.id) ? undefined : 1).map((match) => <div className="result-match" key={match.reference}>
         <a href={documentHref(doc.id, match.sectionId)} onClick={(event) => { event.preventDefault(); onDocument(doc.id, match.sectionId); }}>{match.title}</a>
-        <p>{match.excerpt}</p>
+        <p className={expandedHits.has(doc.id) ? undefined : "result-excerpt"}>{match.excerpt}</p>
       </div>)}
+      {!!hit && hit.matches.length > 1 && <Button className="quiet-action" aria-expanded={expandedHits.has(doc.id)} onPress={() => setExpandedHits((previous) => { const next = new Set(previous); if (next.has(doc.id)) next.delete(doc.id); else next.add(doc.id); return next; })}>{expandedHits.has(doc.id) ? locale === 'zh-CN' ? '收起匹配' : 'Fewer matches' : locale === 'zh-CN' ? `查看其余 ${hit.matches.length - 1} 处匹配` : `Show ${hit.matches.length - 1} more matches`}</Button>}
       {doc.repositories.length > 1 && <small>{doc.repositories.join(' · ')}</small>}
     </article>)}</div>
     {query.trim() && hasMore && <button className="load-more" disabled={pending} onClick={() => void search(cursor)}>{pending ? t('loading') : t('more')}</button>}

@@ -3,14 +3,14 @@
   "kind": "lumine-wiki-state",
   "value": {
     "id": "lumine-architecture",
-    "revision": "d9d515971bec5e2610dfbd80202d64c2b200006dcab5222f6a00f8fb997fce3a",
-    "checkedAt": "2026-10-13T10:38:56.038Z",
-    "sourceFingerprint": "bc6b824099602c18df2384c5020ccb1ee59752816c0ac6a023246cd97c0b4fdf",
+    "revision": "57da81c022069ed7d685e3a681acc1b73a6a302b9ac57ea2a1b0290f9c63e91d",
+    "freshness": "current",
+    "checkedAt": "2026-11-17T05:49:02.210Z",
+    "sourceFingerprint": "0020ed8f3a1f945b2402c4de9cb50bfd39d557c29f58c7744cfd6a1591064238",
     "sources": {
-      "$lumineObject": "bc6b824099602c18df2384c5020ccb1ee59752816c0ac6a023246cd97c0b4fdf",
+      "$lumineObject": "0020ed8f3a1f945b2402c4de9cb50bfd39d557c29f58c7744cfd6a1591064238",
       "kind": "json",
       "bytes": 8277
-    },
-    "freshness": "current"
+    }
   }
 }

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "id": "knowledge-impact-explorer",
+      "documentId": "reader-explanation",
+      "path": "知识影响解释器.html",
+      "title": "观察知识影响范围",
+      "text": "工具先按来源、监控范围或主题范围确定直接候选，再沿登记关系向两侧扩展一层。未命中的变化单独列出；候选不代表必须改写，Agent 继续核实行为与条件。"
+    }
+  ]
+}

@@ -3,12 +3,12 @@
   "kind": "lumine-wiki-state",
   "value": {
     "id": "lumine-root-config",
-    "revision": "e105e76836aceddcbd5443d3ac74f8824c9b4dfde2b73d4fa52cba265b2d1289",
+    "revision": "0fd724d6898ef538057f173c6bf44a4b59e0a124218a24d3eba5e07c0cb0d60e",
     "freshness": "current",
-    "checkedAt": "2026-09-30T04:48:00.244Z",
-    "sourceFingerprint": "bb313debe9fcc4fb9a53998a68b38f6c80d3c1b8245bced72b511e2832ffa4f3",
+    "checkedAt": "2026-11-17T05:23:51.613Z",
+    "sourceFingerprint": "e32b2908e54e2e38aa8338cfd78b5d30c9b49c5acb389eeb10511f6a0c95c8a0",
     "sources": {
-      "$lumineObject": "bb313debe9fcc4fb9a53998a68b38f6c80d3c1b8245bced72b511e2832ffa4f3",
+      "$lumineObject": "e32b2908e54e2e38aa8338cfd78b5d30c9b49c5acb389eeb10511f6a0c95c8a0",
       "kind": "json",
       "bytes": 2457
     }
