@@ -63,18 +63,18 @@
       "baselineHash": "95c5540b321249cffefaea37042043352d46e997c9fc48f0edeb7e5fc55f7d1b"
     }
   ],
-  "summary": "源头知识底层、中文阅读与解释组件已实现；完整及定向回归、浏览器、独立维护审查及完整项目副本内容集成已记录。双源发布、正式项目采用与相应AC仍待完成，旧证据保留在原验证文档及Git历史。",
-  "nextStep": "发布同一源提交到两源并核验，再让项目采用并补充真实项目阅读、性能与发行记录。",
+  "summary": "源头三条主线与正式项目采用已完成：双源发布、当前知识重组、实际浏览器与独立复读、候选保护和性能证据均已记录；原有验证限制保留。",
+  "nextStep": "本轮已授权交付完成；保留真实宿主、特定日常模型与独立真人长期评价的验证边界。项目Git发布仍需后续明确指令。",
   "blockers": [],
   "evidence": [
     {
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-015",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
-      "outcome": "not_verified",
-      "observedAt": "2026-11-17T06:00:45.019Z",
-      "command": "已形成并独立复读试点业务候选；正式项目采用与首页业务阅读验收待执行",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
+      "outcome": "passed",
+      "observedAt": "2026-11-17T06:16:10.902Z",
+      "command": "正式项目从首页到概念、协作、业务及平台的实际浏览器阅读；17页独立复读与4页作者源码核查，来源和规范可追溯",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
         {
@@ -118,15 +118,15 @@
           "sha256": "004ff55d1fd114fc3c7e298cb383c89889bb4f329214f936964ff827d0f6c512"
         }
       ],
-      "limitations": "源侧文档与合成样本不能代替真实项目知识应用及阅读验收。"
+      "limitations": "Agent复读和实际浏览器操作，不冒充独立真人或业务运行验收。"
     },
     {
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-016",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
       "outcome": "passed",
-      "observedAt": "2026-11-17T06:00:45.019Z",
+      "observedAt": "2026-11-17T06:16:10.902Z",
       "command": "wiki-evolution 连续六类公开维护回归；无前文背景 SDK/CLI 维护与独立源码复核；12组内存替身断言",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
@@ -197,9 +197,9 @@
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-017",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
       "outcome": "passed",
-      "observedAt": "2026-11-17T06:00:45.019Z",
+      "observedAt": "2026-11-17T06:16:10.902Z",
       "command": "完整Runtime回归344通过1跳过；最终生成核心54项；659操作完整副本中断/恢复/回滚保护1713文件；22篇知识集成保护原319文件、202链接无失效",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
@@ -260,10 +260,10 @@
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-018",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
-      "outcome": "not_verified",
-      "observedAt": "2026-11-17T06:00:45.019Z",
-      "command": "设计载体与通用合成样本已核对；同一main双源发布及正式项目来源记录待执行",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
+      "outcome": "passed",
+      "observedAt": "2026-11-17T06:16:10.902Z",
+      "command": "设计方式按目标选择；三类项目使用不同导航；实现957294a分别发布GitHub/Gitee并读取相同SHA，正式项目采用该发行",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
         {
@@ -342,16 +342,16 @@
           "sha256": "16d57fd4f0d7cbd130f0d7f06fc787d6745daa4ab319c6457968a752285aff1f"
         }
       ],
-      "limitations": "未读取发布后远端SHA，不能提前声明双源一致或已正式采用。"
+      "limitations": "未增加真实客户端应用或图片探索的独立产品，真实Trae宿主仍待验收。"
     },
     {
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-019",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
-      "outcome": "not_verified",
-      "observedAt": "2026-11-17T06:00:45.019Z",
-      "command": "context/impact规范完整性和跨模块关系回归通过；Lumine自用与SDK/CLI样本已读；目标项目新结构待正式采用验证",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
+      "outcome": "passed",
+      "observedAt": "2026-11-17T06:16:10.902Z",
+      "command": "Lumine自用、正式管理项目和SDK/CLI样本采用不同组织；真实context/impact与源码回归验证相关上下文、完整规范入口、直接和关联影响",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
         {
@@ -415,15 +415,15 @@
           "sha256": "004ff55d1fd114fc3c7e298cb383c89889bb4f329214f936964ff827d0f6c512"
         }
       ],
-      "limitations": "源侧机制已验证，三类项目整体知识交付中目标项目仍待执行。"
+      "limitations": "context提供调查材料，适用规则仍按AGENTS完整读取；未证明任意模型的语义质量。"
     },
     {
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-020",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
       "outcome": "passed",
-      "observedAt": "2026-11-17T06:00:45.019Z",
+      "observedAt": "2026-11-17T06:16:10.902Z",
       "command": "双语三类完整写作示范核对；独立冷上下文通过prepare/apply连续修订；日志回调遗漏经独立审查后同步纠正文图；12组替身验证",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
@@ -474,9 +474,9 @@
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-021",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
       "outcome": "passed",
-      "observedAt": "2026-11-17T06:00:45.019Z",
+      "observedAt": "2026-11-17T06:16:10.902Z",
       "command": "正文/行号/括号保真与view-block回归；最终浏览器真实图文、字体与隔离解释器1项通过、axe零违规；独立源码/HTTP/Chrome复核",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
@@ -567,9 +567,9 @@
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-022",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
       "outcome": "passed",
-      "observedAt": "2026-11-17T06:00:45.019Z",
+      "observedAt": "2026-11-17T06:16:10.902Z",
       "command": "最终新正文副本浏览器11项通过（8视觉、1图文解释器、2性能）；中文1024/1280/1440、axe零违规、等效200%布局；实际文章/来源/图/指定字体与标识",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
@@ -625,9 +625,9 @@
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-023",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
       "outcome": "passed",
-      "observedAt": "2026-11-17T06:00:45.019Z",
+      "observedAt": "2026-11-17T06:16:10.902Z",
       "command": "新正文完整副本30次切页p95 151.55ms、冷启动正文297.44ms；最终核心30次正文29.453ms/关联16.821ms/目录51.547ms；离线包/字体/缓存与历史回执回归",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
@@ -723,10 +723,10 @@
       "specId": "lumine-wiki-product-experience",
       "acId": "AC-024",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "91197469f23a40544b46cee1e2d23ed93e1296b215314dc2f51c217c649339ab",
-      "outcome": "not_verified",
-      "observedAt": "2026-11-17T06:00:45.019Z",
-      "command": "源类型/构建/完整测试/生成/Skill/wrapper通过；完整副本升级和22篇知识同组应用、22章节迁移与资产保护通过；上游双源发布与正式项目采用待执行",
+      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
+      "outcome": "passed",
+      "observedAt": "2026-11-17T06:16:10.902Z",
+      "command": "完整构建回归与隔离恢复后双源发布957294a；正式项目升级659操作并同组应用22篇，319旧资产保护、22映射和202链接通过；实际阅读验收完成",
       "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
       "codeRefs": [
         {
@@ -780,7 +780,7 @@
           "sha256": "1ccc7387bf429f0e638103490894660caa98e62596738182dd9f642cdf9bb490"
         }
       ],
-      "limitations": "尚未发布或正式采用；35范围外知识警告保留，项目Git提交推送不在授权内。"
+      "limitations": "真实Trae与完整真实Hook链未验；29既存时效警告、原恢复资料保留；项目Git未提交推送。"
     }
   ],
   "knowledge": {
@@ -802,7 +802,7 @@
     ],
     "sync": {
       "contractVersion": 2,
-      "assessedAt": "2026-11-17T06:00:45.019Z",
+      "assessedAt": "2026-11-17T06:16:10.902Z",
       "changedSources": [
         {
           "repoId": "project",
@@ -984,7 +984,7 @@
         "本轮源仓上下文/影响/一致读取与公开维护协议",
         "阅读布局、中文字体、图文步骤、来源与隔离解释器",
         "源仓相关九篇知识及导航、覆盖；原三页未核实警告保留",
-        "不含尚未正式采用的目标项目知识同步"
+        "正式目标项目采用与知识同步由其本地任务和验证记录证实；源仓仅保留脱敏交付结果"
       ],
       "decisions": [
         {
