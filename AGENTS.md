@@ -1,4 +1,4 @@
-# AGENTS.md - Lumine Harness 源码仓库维护约定
+# Lumine Harness 源码仓库协作约定
 
 ## 适用范围
 

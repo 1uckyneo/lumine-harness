@@ -20,7 +20,7 @@ type AstNode = {
   data?: { hName?: string; hProperties?: Record<string, string> };
 };
 
-function editorialMarkup(sections: Section[], diagrams: Diagram[] = []) {
+function editorialMarkup(sections: Section[], diagrams: Diagram[] = [], lineOffset?: number) {
   const sectionByLine = new Map(sections.map((section) => [section.startLine, section]));
   return () => (tree: AstNode) => {
     let nextDiagram = 0;
@@ -53,6 +53,13 @@ function editorialMarkup(sections: Section[], diagrams: Diagram[] = []) {
       node.children?.forEach(visit);
     };
     visit(tree);
+    if (lineOffset !== undefined) for (const block of tree.children ?? []) {
+      const line = block.position?.start.line;
+      if (line !== undefined && block.type !== 'html') {
+        block.data ??= {};
+        block.data.hProperties = { ...block.data.hProperties, 'data-reading-line': String(line + lineOffset) };
+      }
+    }
   };
 }
 
@@ -122,7 +129,7 @@ function DiagramFigure({ diagram, doc, catalog, locale, onOpen, onSource }: {
 function proseHeadings(sections: Section[], titleId?: string): Components {
   const heading = (Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') => ({ node, children }: ExtraProps & { children?: ReactNode }) => {
     const id = node?.properties['data-section-id'] as string | undefined;
-    return !id || id !== titleId ? <Tag id={id} tabIndex={id ? -1 : undefined}>{children}</Tag> : null;
+    return !id || id !== titleId ? <Tag id={id} data-reading-line={node?.properties['data-reading-line']} tabIndex={id ? -1 : undefined}>{children}</Tag> : null;
   };
   return { h1: heading('h1'), h2: heading('h2'), h3: heading('h3'), h4: heading('h4'), h5: heading('h5'), h6: heading('h6') };
 }
@@ -146,18 +153,20 @@ function proseComponents(resolveLink: ResolveLink, locale: Locale, showDiagram?:
       const kind = node?.properties['data-wiki-component'];
       if (kind === 'diagram') return showDiagram?.(String(node?.properties['data-wiki-id'])) ?? null;
       if (kind === 'view') return showView?.(String(node?.properties['data-wiki-value'])) ?? <pre>{String(node?.properties['data-wiki-value'])}</pre>;
-      return <div>{children}</div>;
+      return <div data-reading-line={node?.properties['data-reading-line']}>{children}</div>;
     },
-    pre: ({ children }) => {
+    pre: ({ node, children }) => {
+      const readingLine = node?.properties['data-reading-line'];
       const child = Array.isArray(children) ? children[0] : children;
       if (isValidElement<{ className?: string; children?: ReactNode }>(child)) {
+        const blockLine = readingLine ?? (child.props as { 'data-reading-line'?: string })['data-reading-line'];
         const language = /(?:^|\s)language-([^\s]+)/.exec(child.props.className ?? '')?.[1] ?? 'text';
         const code = typeof child.props.children === 'string' ? child.props.children.replace(/\n$/, '') : undefined;
-        if (code !== undefined) return <CodeSnippet code={code} language={language} locale={locale} />;
+        if (code !== undefined) return <CodeSnippet code={code} language={language} locale={locale} readingLine={blockLine === undefined ? undefined : String(blockLine)} />;
       }
-      return <pre>{children}</pre>;
+      return <pre data-reading-line={readingLine}>{children}</pre>;
     },
-    table: ({ children }) => <div className="table-scroll" tabIndex={0} role="region" aria-label={translate(locale, 'table')}><table>{children}</table></div>,
+    table: ({ node, children }) => <div data-reading-line={node?.properties['data-reading-line']} className="table-scroll" tabIndex={0} role="region" aria-label={translate(locale, 'table')}><table>{children}</table></div>,
   };
 }
 
@@ -261,27 +270,18 @@ export function MarkdownBody({ doc, catalog, locale, fragment, titleId, onDocume
   </div>;
 }
 
-export function ReferenceMarkdown({ markdown, sections, path, locale, fragment, onReference, onFragment }: {
-  markdown: string; sections: Section[]; path: string; locale: Locale; fragment?: string;
-  onReference: (from: string, target: string) => void; onFragment: (fragment: string) => void;
+export const markdownFrontmatter = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/;
+
+export function ReferenceMarkdown({ markdown, sections, path, locale, lineOffset, onReference }: {
+  markdown: string; sections: Section[]; path: string; locale: Locale; lineOffset: number;
+  onReference: (from: string, target: string) => void;
 }) {
-  const root = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!fragment) return;
-    const frame = requestAnimationFrame(() => {
-      const target = root.current?.querySelector<HTMLElement>('[id="' + CSS.escape(fragment) + '"]');
-      target?.scrollIntoView({ block: 'start' });
-      target?.focus({ preventScroll: true });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [markdown, sections, fragment]);
-  const components = {
+  const plugins = useMemo(() => [remarkGfm, editorialMarkup(sections, [], lineOffset)], [sections, lineOffset]);
+  const components = useMemo(() => ({
     ...proseHeadings(sections),
     ...proseComponents((href) => ({ href: evidenceHref({ kind: 'reference', from: path, target: href }, location.href), open: () => onReference(path, href) }), locale),
-  };
-  return <div className="prose reference-prose" ref={root}>
-    <Markdown skipHtml urlTransform={safeUrl} remarkPlugins={[remarkGfm, editorialMarkup(sections)]} components={components}>
-      {markdown.replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/, '')}
-    </Markdown>
+  }), [sections, path, locale, onReference]);
+  return <div className="prose reference-prose">
+    <Markdown skipHtml urlTransform={safeUrl} remarkPlugins={plugins} components={components}>{markdown}</Markdown>
   </div>;
 }

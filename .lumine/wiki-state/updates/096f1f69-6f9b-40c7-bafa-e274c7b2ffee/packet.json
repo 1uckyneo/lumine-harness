@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 2,
+    "id": "096f1f69-6f9b-40c7-bafa-e274c7b2ffee",
+    "createdAt": "2026-11-17T10:17:27.789Z",
+    "configFingerprint": "cd33f34855b0ad1bb95a3ce45e6b0d8ee1b4444dbe6e7e33d435dbe8a7cd4918",
+    "scope": [
+      "lumine-wiki-reader",
+      "lumine-wiki",
+      "lumine-command-guide"
+    ],
+    "status": "applied",
+    "storageReceipt": true,
+    "units": [
+      {
+        "id": "lumine-wiki-reader",
+        "kind": "update",
+        "group": "collaboration-and-reading",
+        "path": "docs/repo-wiki/知识树、图解与来源阅读.md"
+      },
+      {
+        "id": "lumine-wiki",
+        "kind": "update",
+        "group": "collaboration-and-reading",
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md"
+      },
+      {
+        "id": "lumine-command-guide",
+        "kind": "update",
+        "group": "collaboration-and-reading",
+        "path": "docs/repo-wiki/guides/常用指令与阅读器.md"
+      }
+    ],
+    "results": [
+      {
+        "id": "lumine-wiki-reader",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "23e2577a211f05c0f83dfebf33b0a24039e5f8d08f6b19fa0f756babeaa408e7"
+      },
+      {
+        "id": "lumine-wiki",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "4d22b15fccab16dbe4d26394d3d46a3e60e0fa01d7a02a175bf16f23f5085631"
+      },
+      {
+        "id": "lumine-command-guide",
+        "status": "applied",
+        "reason": "Text, source observation and generation baseline saved together.",
+        "candidateHash": "437ee7cadc6674ce10dae3166773e666839d3db1eb0b9ae431ce13f0dbb1786d"
+      }
+    ],
+    "audit": {
+      "recordHash": "b32ec486b03ee7231ff3f77d4327be94a8646e896b6837a517cdd2422832d898",
+      "unitHashes": [
+        {
+          "id": "lumine-wiki-reader",
+          "sha256": "01e5715db9744f51a9fbfae97b316cdb06f78c6b8b9539edc658ccb0b0198cc3"
+        },
+        {
+          "id": "lumine-wiki",
+          "sha256": "3ac85416e981be31788d14c9b8d2f0fd9ee01740af9d14b7fd2fd1c8a8a93936"
+        },
+        {
+          "id": "lumine-command-guide",
+          "sha256": "9e1560f4a107d27c7b57f30d321442d0969cc616cf30c4cad01f404fd4895ed8"
+        }
+      ]
+    }
+  }
+}

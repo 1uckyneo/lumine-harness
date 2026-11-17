@@ -1,59 +1,30 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Locale } from '../harness/wiki/types.ts';
 import { parseViewBlock, type ViewBlock } from '../harness/wiki/view-blocks.ts';
-import type { HighlightResult } from './reader-common.ts';
+import { translate, type HighlightResult } from './reader-common.ts';
+import { CodeReadingContext, CodeTokens, useCodeHighlight } from './reader-code.tsx';
 import styles from './article.module.css';
 
-const highlightCache = new Map<string, Promise<HighlightResult | null>>();
-const hex = /^#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i;
-function validHighlight(value: HighlightResult | null, code: string): value is HighlightResult {
-  return Boolean(value && Array.isArray(value.tokens) && value.tokens.every((line) => Array.isArray(line) && line.every((token) => token && typeof token.content === 'string' && (token.color === undefined || (typeof token.color === 'string' && hex.test(token.color))))) && value.tokens.map((line) => line.map((token) => token.content).join('')).join('\n') === code);
-}
-function highlighter(code: string, language: string): Promise<HighlightResult | null> {
-  const query = new URLSearchParams({ language, code }).toString();
-  if (query.length > 7900) return Promise.resolve(null);
-  const previous = highlightCache.get(query);
-  if (previous) return previous;
-  const result = fetch(`/api/highlight?${query}`).then(async (response) => {
-    if (!response.ok) return null;
-    const value = await response.json() as HighlightResult;
-    return validHighlight(value, code) ? value : null;
-  }).catch(() => null);
-  if (highlightCache.size >= 100) highlightCache.delete(highlightCache.keys().next().value!);
-  highlightCache.set(query, result);
-  return result;
-}
-
-/** Highlighter failure never changes or delays the original code. */
-export function CodeSnippet({ code, language = 'text', locale, caption, source, onSource, highlighted }: {
-  code: string; language?: string; locale: Locale; caption?: string; source?: string; onSource?: (id: string) => void; highlighted?: HighlightResult;
+export function CodeSnippet({ code, language = 'text', locale, caption, source, onSource, highlighted, readingLine }: {
+  code: string; language?: string; locale: Locale; caption?: string; source?: string; onSource?: (id: string) => void;
+  highlighted?: HighlightResult; readingLine?: string;
 }) {
-  const [syntax, setSyntax] = useState<HighlightResult | null>(highlighted ?? null);
+  const { container, syntax } = useCodeHighlight(code, language, highlighted);
+  const readCode = useContext(CodeReadingContext);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
-  const container = useRef<HTMLDivElement>(null);
   const zh = locale === 'zh-CN';
-  useEffect(() => {
-    setSyntax(highlighted ?? null);
-    if (highlighted) return;
-    let active = true;
-    const load = () => { void highlighter(code, language).then((value) => { if (active) setSyntax(value); }); };
-    const observer = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) { observer?.disconnect(); load(); }
-    }, { rootMargin: '200px' });
-    if (container.current && observer) observer.observe(container.current); else load();
-    return () => { active = false; observer?.disconnect(); };
-  }, [code, language, highlighted]);
+  const title = caption || (language === 'text' ? translate(locale, 'code') : language);
   useEffect(() => { if (copied) { const timer = setTimeout(() => setCopied(false), 2000); return () => clearTimeout(timer); } }, [copied]);
-  const validSyntax = validHighlight(syntax, code) ? syntax : null;
-  return <div className={styles.code} ref={container}>
-    <div className={styles.codeToolbar}><span>{caption || language}</span><div>
+  return <div className={`article-code ${styles.code}`} ref={container} data-reading-line={readingLine}>
+    <div className={styles.codeToolbar}><span>{title}</span><div>
       {source && onSource && <button type="button" onClick={() => onSource(source)}>{zh ? '查看来源' : 'View source'}</button>}
+      {readCode && <button type="button" onClick={(event) => readCode({ code, language, title, highlighted: syntax ?? undefined }, event.currentTarget)}>{translate(locale, 'readCode')}</button>}
       <button type="button" onClick={() => { void navigator.clipboard?.writeText(code).then(() => { setCopied(true); setCopyError(false); }).catch(() => setCopyError(true)); if (!navigator.clipboard) setCopyError(true); }}>{copied ? (zh ? '已复制' : 'Copied') : (zh ? '复制代码' : 'Copy code')}</button>
     </div></div>
     {copyError && <p role="status" className={styles.codeStatus}>{zh ? '无法访问剪贴板，请选择下方代码复制。' : 'Clipboard unavailable. Select the code below to copy it.'}</p>}
-    <pre tabIndex={0} aria-label={caption || (zh ? '代码，可横向滚动' : 'Code, horizontally scrollable')}><code>{validSyntax ? validSyntax.tokens.map((line, index) => <span className={styles.codeLine} key={index}>{line.map((token, position) => <span key={position} style={token.color && hex.test(token.color) ? { color: token.color } : undefined}>{token.content}</span>)}{index < validSyntax.tokens.length - 1 ? '\n' : ''}</span>) : code}</code></pre>
+    <pre tabIndex={0} aria-label={caption || (zh ? '代码，可横向滚动' : 'Code, horizontally scrollable')}><code>{syntax ? syntax.tokens.map((line, index) => <span className={styles.codeLine} key={index}><CodeTokens tokens={line} line="" />{index < syntax.tokens.length - 1 ? '\n' : ''}</span>) : code}</code></pre>
   </div>;
 }
 

@@ -3,7 +3,7 @@
   "taskId": "lumine-editorial-wiki-20261116",
   "mode": "implement",
   "goal": "重构 Lumine Repo Wiki 阅读、业务知识交付与持续编排能力并验证双源分发",
-  "scope": "2026-11-17 已批准完整重构：项目理解、任务上下文与增量维护；声明式 HTML、隔离解释器；中文字体、阅读器视觉与性能；隔离迁移验证，上游双源发布后采用到项目。无 Windows 专项验证，无业务功能改动。",
+  "scope": "已批准的协作入口、私有来源保护、宽屏阅读和 Git 同步后可选知识维护修订。完整隔离升级演练通过后，同一 main 提交分别推送 GitHub 与 Gitee。",
   "specRef": "lumine-wiki-product-experience",
   "planRef": "lumine-editorial-wiki-execution",
   "selectedSkills": [
@@ -14,900 +14,244 @@
   "acceptanceRefs": [
     {
       "specId": "lumine-wiki-product-experience",
-      "acId": "AC-015",
-      "baselineHash": "3ef8fb504de66054b837fc2b3a0478e8c3e7031c6b745098b2cd788056d8ed44"
+      "acId": "AC-025",
+      "baselineHash": "6c826a78c7dfb6144a46b89534398f7af0c6a198468340666962d828a954b3b4"
     },
     {
       "specId": "lumine-wiki-product-experience",
-      "acId": "AC-016",
-      "baselineHash": "bcf9e205c58dbda4ffddc2eafd3fed89d07c47d58458c98a1eaec78488447735"
+      "acId": "AC-026",
+      "baselineHash": "d1ddf7f37e270199e6b43678466deeffdadad79be229162fcac01f119eb056d6"
     },
     {
       "specId": "lumine-wiki-product-experience",
-      "acId": "AC-017",
-      "baselineHash": "5b5fcae9100fddf1184d05df9d2279b90c9451e34edee25a9ae7c6c766c3280d"
+      "acId": "AC-027",
+      "baselineHash": "2d8061a3f273feba808d5989da6371fb3073de42344be0f7e123c406898226dd"
     },
     {
       "specId": "lumine-wiki-product-experience",
-      "acId": "AC-018",
-      "baselineHash": "01a6fe9b37e8d9ed7b596bb102f0af2b8d1bedbbfd60b760dade3b7aeeeff8e4"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-019",
-      "baselineHash": "060acde25d76e9fdf9389182887fc4b1eafcd194a860e7aa6467856ee71882cb"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-020",
-      "baselineHash": "dcb98332a7697ae252ed081085c4a47ae83b65fc71180d44ba640f5371cdc7ee"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-021",
-      "baselineHash": "e3d5fe90ae141cfd0cc707624242b602bf503eb2f9ad027b32616655b0d4be4d"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-022",
-      "baselineHash": "25adfc8f1d3ed34a16d890545c3520151202de05d2eef6b61e2bcbf43f91850d"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-023",
-      "baselineHash": "539e0ad7c81fb931bcb09cf02c9e0b35bf11689cfcc50ec71f8a2c9fbbcb767a"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-024",
-      "baselineHash": "95c5540b321249cffefaea37042043352d46e997c9fc48f0edeb7e5fc55f7d1b"
+      "acId": "AC-028",
+      "baselineHash": "6aff2eebcfa42d9e03de93558a313dbb123c438c226a80c222beb584d393103c"
     }
   ],
-  "summary": "源头三条主线与正式项目采用已完成：双源发布、当前知识重组、实际浏览器与独立复读、候选保护和性能证据均已记录；原有验证限制保留。",
-  "nextStep": "本轮已授权交付完成；保留真实宿主、特定日常模型与独立真人长期评价的验证边界。项目Git发布仍需后续明确指令。",
+  "summary": "协作入口、私有来源保护、可选知识维护和宽屏阅读均完成分发与实际副本验证。浏览器历史导航问题已修复并纳入回归。",
+  "nextStep": "将此发行提交推送至两个源并分别核对，随后按该固定版本在目标项目采用。",
   "blockers": [],
   "evidence": [
     {
       "specId": "lumine-wiki-product-experience",
-      "acId": "AC-015",
+      "acId": "AC-025",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
+      "sha256": "60f3a11dd1de27de5a2e37cc88e229b23a84bccf92e799125f406e59fc7282d5",
       "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "正式项目从首页到概念、协作、业务及平台的实际浏览器阅读；17页独立复读与4页作者源码核查，来源和规范可追溯",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
+      "observedAt": "2026-11-17T10:54:12.321Z",
+      "command": "全量采用回归核对中英文标题、人工规则入口保护与自定义标题路由，源仓验证双语维护说明；完整项目副本安装核对1757个原始文件。",
+      "environment": "macOS arm64，Node.js 24.14.0，Chrome，脱敏 Git 夹具和完整项目副本。",
       "codeRefs": [
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
-          "sha256": "a8e58319042140493d0dbfdb7bae304221de3d1e18c774c4d5d4985e03b844e8"
+          "path": "AGENTS.md",
+          "sha256": "1f3eb7cb304d9ec33a3d3035d573e2ece3c3e4655ff90dcfc0adcd3b50e0b92a"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-evolution.test.ts",
-          "sha256": "6793386ba5402a251b56606a7966218de9113ff57e5292c21fe25df842853559"
+          "path": "skills/lumine-harness/assets/root/AGENTS.md",
+          "sha256": "653ea21359def1a40261f620757c79bf6914fea844772e97d5c9a1926b3b228e"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
-          "sha256": "9a0783fb427dda9ad4fc0f70344525d5f54cf5223ecca1133a05c0045982843d"
+          "path": "skills/lumine-harness/assets/locales/en/root/AGENTS.md",
+          "sha256": "cd3fec0ea2068506b0788e9a41b15a43af530ef0fa0d39918e329e6a5739769b"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/写作与编排.md",
-          "sha256": "a8159aecac4c086c2c5e62943afbfe9a65d69fba973841ad0b32610e108006a7"
+          "path": "skills/lumine-harness/references/adoption.md",
+          "sha256": "659a5759fd71fbbec19ca066f434b8e187ef392c943a6db720453ad952143a04"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
-          "sha256": "fd70ed2388c03fefc67c7ff5896024cca2e01ff1859a3662143b0b858c535c89"
+          "path": "skills/lumine-harness/references/en/adoption.md",
+          "sha256": "a8a64b2e629de7cdc0518c0ea72c0c80f6906f97031eaa0e49a5f12385177789"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/building.md",
-          "sha256": "c4ee18d41f0dd4a3be1eed87d25a3f07b6a2e0eefe34a2154c4b24819e250772"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md",
-          "sha256": "d18e70af15d81e66098a171cb8d1899f7bd21a8067378a50aabab5b9f13478bf"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
-          "sha256": "004ff55d1fd114fc3c7e298cb383c89889bb4f329214f936964ff827d0f6c512"
+          "path": "skills/lumine-harness/src/harness/tests/adoption-manager.test.ts",
+          "sha256": "8c7b249eb0587cc27a6810eb24e32b784779d689f87f7aafc555dd608088410f"
         }
       ],
-      "limitations": "Agent复读和实际浏览器操作，不冒充独立真人或业务运行验收。"
+      "limitations": "真实宿主自动分派、Windows 专项及独立真人使用不在本组验证范围。"
     },
     {
       "specId": "lumine-wiki-product-experience",
-      "acId": "AC-016",
+      "acId": "AC-026",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
+      "sha256": "60f3a11dd1de27de5a2e37cc88e229b23a84bccf92e799125f406e59fc7282d5",
       "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "wiki-evolution 连续六类公开维护回归；无前文背景 SDK/CLI 维护与独立源码复核；12组内存替身断言",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
+      "observedAt": "2026-11-17T10:54:12.321Z",
+      "command": "五项生成包Git忽略专项测试及完整分发回归，覆盖扫源、快照和直接HTTP端点。",
+      "environment": "macOS arm64，Node.js 24.14.0，Chrome，脱敏 Git 夹具和完整项目副本。",
       "codeRefs": [
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/context.ts",
-          "sha256": "8da969f86071aeea4e1104d293c979c204ae9451c130e6c7589542d6b93256ef"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/transactions.ts",
-          "sha256": "3b630333aebcdf80c51accd227904b8332671c8a754d3e1c38970482ad2b2f8a"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
-          "sha256": "0ce574752017ae4eddff6975e1c51f60179cec7eccdcfcd15fbdfc575564b087"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-context.test.ts",
-          "sha256": "1ccc7387bf429f0e638103490894660caa98e62596738182dd9f642cdf9bb490"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
-          "sha256": "a8e58319042140493d0dbfdb7bae304221de3d1e18c774c4d5d4985e03b844e8"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-evolution.test.ts",
-          "sha256": "6793386ba5402a251b56606a7966218de9113ff57e5292c21fe25df842853559"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
-          "sha256": "9a0783fb427dda9ad4fc0f70344525d5f54cf5223ecca1133a05c0045982843d"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/写作与编排.md",
-          "sha256": "a8159aecac4c086c2c5e62943afbfe9a65d69fba973841ad0b32610e108006a7"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
-          "sha256": "fd70ed2388c03fefc67c7ff5896024cca2e01ff1859a3662143b0b858c535c89"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/building.md",
-          "sha256": "c4ee18d41f0dd4a3be1eed87d25a3f07b6a2e0eefe34a2154c4b24819e250772"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md",
-          "sha256": "d18e70af15d81e66098a171cb8d1899f7bd21a8067378a50aabab5b9f13478bf"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
-          "sha256": "004ff55d1fd114fc3c7e298cb383c89889bb4f329214f936964ff827d0f6c512"
-        }
-      ],
-      "limitations": "受控样本和独立Agent，未证明任意弱模型或真人长期体验。"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-017",
-      "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
-      "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "完整Runtime回归344通过1跳过；最终生成核心54项；659操作完整副本中断/恢复/回滚保护1713文件；22篇知识集成保护原319文件、202链接无失效",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
-      "codeRefs": [
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/context.ts",
-          "sha256": "8da969f86071aeea4e1104d293c979c204ae9451c130e6c7589542d6b93256ef"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/transactions.ts",
-          "sha256": "3b630333aebcdf80c51accd227904b8332671c8a754d3e1c38970482ad2b2f8a"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
-          "sha256": "0ce574752017ae4eddff6975e1c51f60179cec7eccdcfcd15fbdfc575564b087"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-context.test.ts",
-          "sha256": "1ccc7387bf429f0e638103490894660caa98e62596738182dd9f642cdf9bb490"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/build-reader.ts",
-          "sha256": "63d8e12bb1d5d53f2d36c67263920d87979f9a7d6f879636447b982c7542eff5"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/build-runtime.ts",
-          "sha256": "23127a8425e71ed8700362a46a702af117e9055fbc45e917b2b7f6e07cf6a59a"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/reader-performance.spec.ts",
-          "sha256": "be9fa158b5d914f539fe2906dc2f9d14b25c495d42bbfc073954948dfc00d314"
-        },
-        {
-          "repoId": "project",
-          "path": "pnpm-lock.yaml",
-          "sha256": "f2eaffe89f5fdb7725762f1d6daaaccdb48e6638f6855fa2fc7ae8414fb43e91"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/wiki-reader/manifest.json",
-          "sha256": "27b725fe3344e69b15847cec62ee393ff920a7de4339a76977399f56c928c6fc"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-storage.test.ts",
-          "sha256": "16d57fd4f0d7cbd130f0d7f06fc787d6745daa4ab319c6457968a752285aff1f"
-        }
-      ],
-      "limitations": "原18prepared/14partial的71目录文件及175递归引用对象，合并9历史正文和任务共319文件保持14032133字节；schemaVersion 4/workflowVersion 2不变，真实Trae未验。"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-018",
-      "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
-      "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "设计方式按目标选择；三类项目使用不同导航；实现957294a分别发布GitHub/Gitee并读取相同SHA，正式项目采用该发行",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
-      "codeRefs": [
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader.tsx",
-          "sha256": "d885e1bdbd12880891e314f0d5afe8152da546512818e8473d22ea1abceff37c"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-article.tsx",
-          "sha256": "bbb54ec2a27975efed411f4d721c3f5b35e81a6896a463a76150ab25818b7ba0"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
-          "sha256": "726cc776a167f34e4a0f0f6b1ee4eeb8f4c73fee239e2b28aa0fe0425ff729be"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-diagrams.tsx",
-          "sha256": "8f482c31c34cae09b2f355ab0e4c9615ffc16b9841e5548c9c43110d0a3478c5"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-diagram-dialog.tsx",
-          "sha256": "02171e6595c46e1b2902eddc44a35a03330593b38877569a446efe0ef90e5565"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/article.module.css",
-          "sha256": "5bb6ef00f08c450ea7ed3b1ca5d19cc1f1e21eb3d5f55062a157bad75701d31d"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/styles.css",
-          "sha256": "10240e383249d340e373a83b69275f8318536f3d6501c391eb582a300f292919"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/fonts.css",
-          "sha256": "98b5a2330591ea37455b768aa36019b2874bc4d12d103e2d9d0ed0eecbc0ebbf"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/reader-visual.spec.ts",
-          "sha256": "e479bc7310de678dbd8c03820d6d4b224784fd69280d5f15ce7e0511e8b198df"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/build-reader.ts",
-          "sha256": "63d8e12bb1d5d53f2d36c67263920d87979f9a7d6f879636447b982c7542eff5"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/build-runtime.ts",
-          "sha256": "23127a8425e71ed8700362a46a702af117e9055fbc45e917b2b7f6e07cf6a59a"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/reader-performance.spec.ts",
-          "sha256": "be9fa158b5d914f539fe2906dc2f9d14b25c495d42bbfc073954948dfc00d314"
-        },
-        {
-          "repoId": "project",
-          "path": "pnpm-lock.yaml",
-          "sha256": "f2eaffe89f5fdb7725762f1d6daaaccdb48e6638f6855fa2fc7ae8414fb43e91"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/wiki-reader/manifest.json",
-          "sha256": "27b725fe3344e69b15847cec62ee393ff920a7de4339a76977399f56c928c6fc"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-storage.test.ts",
-          "sha256": "16d57fd4f0d7cbd130f0d7f06fc787d6745daa4ab319c6457968a752285aff1f"
-        }
-      ],
-      "limitations": "未增加真实客户端应用或图片探索的独立产品，真实Trae宿主仍待验收。"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-019",
-      "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
-      "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "Lumine自用、正式管理项目和SDK/CLI样本采用不同组织；真实context/impact与源码回归验证相关上下文、完整规范入口、直接和关联影响",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
-      "codeRefs": [
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/context.ts",
-          "sha256": "8da969f86071aeea4e1104d293c979c204ae9451c130e6c7589542d6b93256ef"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/transactions.ts",
-          "sha256": "3b630333aebcdf80c51accd227904b8332671c8a754d3e1c38970482ad2b2f8a"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
-          "sha256": "0ce574752017ae4eddff6975e1c51f60179cec7eccdcfcd15fbdfc575564b087"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-context.test.ts",
-          "sha256": "1ccc7387bf429f0e638103490894660caa98e62596738182dd9f642cdf9bb490"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
-          "sha256": "a8e58319042140493d0dbfdb7bae304221de3d1e18c774c4d5d4985e03b844e8"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-evolution.test.ts",
-          "sha256": "6793386ba5402a251b56606a7966218de9113ff57e5292c21fe25df842853559"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
-          "sha256": "9a0783fb427dda9ad4fc0f70344525d5f54cf5223ecca1133a05c0045982843d"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/写作与编排.md",
-          "sha256": "a8159aecac4c086c2c5e62943afbfe9a65d69fba973841ad0b32610e108006a7"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
-          "sha256": "fd70ed2388c03fefc67c7ff5896024cca2e01ff1859a3662143b0b858c535c89"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/building.md",
-          "sha256": "c4ee18d41f0dd4a3be1eed87d25a3f07b6a2e0eefe34a2154c4b24819e250772"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md",
-          "sha256": "d18e70af15d81e66098a171cb8d1899f7bd21a8067378a50aabab5b9f13478bf"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
-          "sha256": "004ff55d1fd114fc3c7e298cb383c89889bb4f329214f936964ff827d0f6c512"
-        }
-      ],
-      "limitations": "context提供调查材料，适用规则仍按AGENTS完整读取；未证明任意模型的语义质量。"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-020",
-      "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
-      "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "双语三类完整写作示范核对；独立冷上下文通过prepare/apply连续修订；日志回调遗漏经独立审查后同步纠正文图；12组替身验证",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
-      "codeRefs": [
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
-          "sha256": "a8e58319042140493d0dbfdb7bae304221de3d1e18c774c4d5d4985e03b844e8"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-evolution.test.ts",
-          "sha256": "6793386ba5402a251b56606a7966218de9113ff57e5292c21fe25df842853559"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
-          "sha256": "9a0783fb427dda9ad4fc0f70344525d5f54cf5223ecca1133a05c0045982843d"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/写作与编排.md",
-          "sha256": "a8159aecac4c086c2c5e62943afbfe9a65d69fba973841ad0b32610e108006a7"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
-          "sha256": "fd70ed2388c03fefc67c7ff5896024cca2e01ff1859a3662143b0b858c535c89"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/building.md",
-          "sha256": "c4ee18d41f0dd4a3be1eed87d25a3f07b6a2e0eefe34a2154c4b24819e250772"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md",
-          "sha256": "d18e70af15d81e66098a171cb8d1899f7bd21a8067378a50aabab5b9f13478bf"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
-          "sha256": "004ff55d1fd114fc3c7e298cb383c89889bb4f329214f936964ff827d0f6c512"
-        }
-      ],
-      "limitations": "初轮遗漏与修正过程保留；未测试特定日常弱模型，无质量普遍保证。"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-021",
-      "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
-      "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "正文/行号/括号保真与view-block回归；最终浏览器真实图文、字体与隔离解释器1项通过、axe零违规；独立源码/HTTP/Chrome复核",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
-      "codeRefs": [
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/view-blocks.ts",
-          "sha256": "2c686bf3fb0102f67338440562d1fb8989b51e06d2ce221da02fc7b1c697792e"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/explainers.ts",
-          "sha256": "a065a3bf7e5421bef5de3792bb14f7a37a183b3f381c12c44ea56a0af776dfa9"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/highlight.ts",
-          "sha256": "90c0f30b350ef7bd8f518e73d809fb800ec4481bc3ef22c28437c2260160fa3b"
+          "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+          "sha256": "e04646257e02b253433bb0e5aa4d831603ab44e954bc4881a3dfea66e92bac60"
         },
         {
           "repoId": "project",
           "path": "skills/lumine-harness/src/harness/wiki/server.ts",
-          "sha256": "de5e89fb7f35224ebd74e21e625653425bfd2aa2e638491e679f86eed33b7864"
+          "sha256": "0d8d81aa18964acd6e22bd7d953512b95e03d1612ebbb6c668647777a95ff84e"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-explainers.test.ts",
-          "sha256": "f6fd30ee4fef8a0b2e71998b33d0e712a4ddd4f84a27aeb2018f2d94159aa9fd"
-        },
+          "path": "skills/lumine-harness/src/harness/tests/wiki-git-ignore.test.ts",
+          "sha256": "2f6b415932f45f4b366b9ad64d9267233287d686941c6bea1e686365b574eb88"
+        }
+      ],
+      "limitations": "真实宿主自动分派、Windows 专项及独立真人使用不在本组验证范围。"
+    },
+    {
+      "specId": "lumine-wiki-product-experience",
+      "acId": "AC-027",
+      "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
+      "sha256": "60f3a11dd1de27de5a2e37cc88e229b23a84bccf92e799125f406e59fc7282d5",
+      "outcome": "passed",
+      "observedAt": "2026-11-17T10:54:12.321Z",
+      "command": "新版安装副本中的17项Chrome回归，验证国内中文内容及宽屏操作、原始复制、聚焦行、重试与浏览器历史切换。",
+      "environment": "macOS arm64，Node.js 24.14.0，Chrome，脱敏 Git 夹具和完整项目副本。",
+      "codeRefs": [
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-view-blocks.test.ts",
-          "sha256": "dcb4b5f983bc845648a43cbfe34ce657ea087f872eb5d128c40f653cc933c1c0"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/阅读表达.md",
-          "sha256": "3c676864cb852d82ee19abfff07983678c33dcfda5f927d02a269b0b0e0a03cf"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader.tsx",
-          "sha256": "d885e1bdbd12880891e314f0d5afe8152da546512818e8473d22ea1abceff37c"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-article.tsx",
-          "sha256": "bbb54ec2a27975efed411f4d721c3f5b35e81a6896a463a76150ab25818b7ba0"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
-          "sha256": "726cc776a167f34e4a0f0f6b1ee4eeb8f4c73fee239e2b28aa0fe0425ff729be"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-diagrams.tsx",
-          "sha256": "8f482c31c34cae09b2f355ab0e4c9615ffc16b9841e5548c9c43110d0a3478c5"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-diagram-dialog.tsx",
-          "sha256": "02171e6595c46e1b2902eddc44a35a03330593b38877569a446efe0ef90e5565"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/article.module.css",
-          "sha256": "5bb6ef00f08c450ea7ed3b1ca5d19cc1f1e21eb3d5f55062a157bad75701d31d"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/styles.css",
-          "sha256": "10240e383249d340e373a83b69275f8318536f3d6501c391eb582a300f292919"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/fonts.css",
-          "sha256": "98b5a2330591ea37455b768aa36019b2874bc4d12d103e2d9d0ed0eecbc0ebbf"
+          "path": "scripts/reader-evidence.spec.ts",
+          "sha256": "e706b4c51490d812d669992fc9ff86669a6532c98b2fd24e187db80fe37a4ad2"
         },
         {
           "repoId": "project",
           "path": "scripts/reader-visual.spec.ts",
           "sha256": "e479bc7310de678dbd8c03820d6d4b224784fd69280d5f15ce7e0511e8b198df"
-        }
-      ],
-      "limitations": "首次最终样例误缺环境变量导致skip已纠正重跑，不把退出码0当作通过。"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-022",
-      "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
-      "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "最终新正文副本浏览器11项通过（8视觉、1图文解释器、2性能）；中文1024/1280/1440、axe零违规、等效200%布局；实际文章/来源/图/指定字体与标识",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
-      "codeRefs": [
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-evidence.tsx",
+          "sha256": "ff2e4cbeb16a5b2900440b9b2be4394b107fe0c29f7cdd8a4577e193ff5d168d"
+        },
+        {
+          "repoId": "project",
+          "path": "skills/lumine-harness/src/browser/reader-code.tsx",
+          "sha256": "28c4b7bd7d114e4ce503b6821a22cbf009b0e3305ddc779379433aec274ba8d8"
+        },
         {
           "repoId": "project",
           "path": "skills/lumine-harness/src/browser/reader.tsx",
-          "sha256": "d885e1bdbd12880891e314f0d5afe8152da546512818e8473d22ea1abceff37c"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-article.tsx",
-          "sha256": "bbb54ec2a27975efed411f4d721c3f5b35e81a6896a463a76150ab25818b7ba0"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
-          "sha256": "726cc776a167f34e4a0f0f6b1ee4eeb8f4c73fee239e2b28aa0fe0425ff729be"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-diagrams.tsx",
-          "sha256": "8f482c31c34cae09b2f355ab0e4c9615ffc16b9841e5548c9c43110d0a3478c5"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-diagram-dialog.tsx",
-          "sha256": "02171e6595c46e1b2902eddc44a35a03330593b38877569a446efe0ef90e5565"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/article.module.css",
-          "sha256": "5bb6ef00f08c450ea7ed3b1ca5d19cc1f1e21eb3d5f55062a157bad75701d31d"
+          "sha256": "4218a0ddd52fbe7bd33c312b3392efcfbc9bbe4ffe592995bb5c9dc13c659d36"
         },
         {
           "repoId": "project",
           "path": "skills/lumine-harness/src/browser/styles.css",
-          "sha256": "10240e383249d340e373a83b69275f8318536f3d6501c391eb582a300f292919"
+          "sha256": "a8a6e2feab526edf238ead20892eeb7e5abebf34b0de120a6dfd9c5d844d328d"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/fonts.css",
-          "sha256": "98b5a2330591ea37455b768aa36019b2874bc4d12d103e2d9d0ed0eecbc0ebbf"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/reader-visual.spec.ts",
-          "sha256": "e479bc7310de678dbd8c03820d6d4b224784fd69280d5f15ce7e0511e8b198df"
+          "path": "skills/lumine-harness/assets/wiki-reader/reader.js",
+          "sha256": "b87a0075484658907966978d2ed574aecba9f31ae27036a81f60d63e82000b64"
         }
       ],
-      "limitations": "200%采用CSS布局和设备像素比等效检查，未操作真实菜单缩放；Agent审美观察不是真人接受。"
+      "limitations": "真实宿主自动分派、Windows 专项及独立真人使用不在本组验证范围。"
     },
     {
       "specId": "lumine-wiki-product-experience",
-      "acId": "AC-023",
+      "acId": "AC-028",
       "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
+      "sha256": "60f3a11dd1de27de5a2e37cc88e229b23a84bccf92e799125f406e59fc7282d5",
       "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "新正文完整副本30次切页p95 151.55ms、冷启动正文297.44ms；最终核心30次正文29.453ms/关联16.821ms/目录51.547ms；离线包/字体/缓存与历史回执回归",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
+      "observedAt": "2026-11-17T10:54:12.321Z",
+      "command": "隔离bare origin真实拉取、1006路径分批影响评估、工作包三方合并、失败无写入及类型、构建、完整分发、Skill包和wrapper检查。",
+      "environment": "macOS arm64，Node.js 24.14.0，Chrome，脱敏 Git 夹具和完整项目副本。",
       "codeRefs": [
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/context.ts",
-          "sha256": "8da969f86071aeea4e1104d293c979c204ae9451c130e6c7589542d6b93256ef"
+          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
+          "sha256": "96f1e0dbf682f385a60f08687c8ee17624dd23c06eab99264449f8fe59d43edc"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/transactions.ts",
-          "sha256": "3b630333aebcdf80c51accd227904b8332671c8a754d3e1c38970482ad2b2f8a"
+          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
+          "sha256": "fffc48a07cff2edf1479c9194c51d65ee2d9950f00a78e15519d601ef5440c60"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
-          "sha256": "0ce574752017ae4eddff6975e1c51f60179cec7eccdcfcd15fbdfc575564b087"
+          "path": "skills/lumine-harness/assets/locales/en/skills/lumine-knowledge/references/maintenance.md",
+          "sha256": "74ecf364daffff6bb5c67c41afdc5b01ba16eaf002730c5ae53b365fb44a0425"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-context.test.ts",
-          "sha256": "1ccc7387bf429f0e638103490894660caa98e62596738182dd9f642cdf9bb490"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/build-reader.ts",
-          "sha256": "63d8e12bb1d5d53f2d36c67263920d87979f9a7d6f879636447b982c7542eff5"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/build-runtime.ts",
-          "sha256": "23127a8425e71ed8700362a46a702af117e9055fbc45e917b2b7f6e07cf6a59a"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/reader-performance.spec.ts",
-          "sha256": "be9fa158b5d914f539fe2906dc2f9d14b25c495d42bbfc073954948dfc00d314"
-        },
-        {
-          "repoId": "project",
-          "path": "pnpm-lock.yaml",
-          "sha256": "f2eaffe89f5fdb7725762f1d6daaaccdb48e6638f6855fa2fc7ae8414fb43e91"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/wiki-reader/manifest.json",
-          "sha256": "27b725fe3344e69b15847cec62ee393ff920a7de4339a76977399f56c928c6fc"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-storage.test.ts",
-          "sha256": "16d57fd4f0d7cbd130f0d7f06fc787d6745daa4ab319c6457968a752285aff1f"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/view-blocks.ts",
-          "sha256": "2c686bf3fb0102f67338440562d1fb8989b51e06d2ce221da02fc7b1c697792e"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/explainers.ts",
-          "sha256": "a065a3bf7e5421bef5de3792bb14f7a37a183b3f381c12c44ea56a0af776dfa9"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/highlight.ts",
-          "sha256": "90c0f30b350ef7bd8f518e73d809fb800ec4481bc3ef22c28437c2260160fa3b"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
-          "sha256": "de5e89fb7f35224ebd74e21e625653425bfd2aa2e638491e679f86eed33b7864"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-explainers.test.ts",
-          "sha256": "f6fd30ee4fef8a0b2e71998b33d0e712a4ddd4f84a27aeb2018f2d94159aa9fd"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-view-blocks.test.ts",
-          "sha256": "dcb4b5f983bc845648a43cbfe34ce657ea087f872eb5d128c40f653cc933c1c0"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/阅读表达.md",
-          "sha256": "3c676864cb852d82ee19abfff07983678c33dcfda5f927d02a269b0b0e0a03cf"
+          "path": "skills/lumine-harness/assets/locales/en/skills/lumine-run/SKILL.md.template",
+          "sha256": "a7c98276b6451485606e35b1884a721f19dbbfa1f6ea1652a1cf96c67e954dfc"
         }
       ],
-      "limitations": "浏览器为两代表篇间切换，核心为进程内API；正式项目采用另记。全量字库发行体积不等于实际字体传输1504960字节。"
-    },
-    {
-      "specId": "lumine-wiki-product-experience",
-      "acId": "AC-024",
-      "artifact": "docs/validation/知识底层与中文阅读重构验证.md",
-      "sha256": "2a69b7c98ea8e72076164a0b01ff0a276d668f48bc7a1528f3d333eedd627287",
-      "outcome": "passed",
-      "observedAt": "2026-11-17T06:16:10.902Z",
-      "command": "完整构建回归与隔离恢复后双源发布957294a；正式项目升级659操作并同组应用22篇，319旧资产保护、22映射和202链接通过；实际阅读验收完成",
-      "environment": "Node.js 24.14.0；macOS arm64；Chromium；脱敏SDK/CLI样本与完整项目隔离副本",
-      "codeRefs": [
-        {
-          "repoId": "project",
-          "path": "scripts/build-reader.ts",
-          "sha256": "63d8e12bb1d5d53f2d36c67263920d87979f9a7d6f879636447b982c7542eff5"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/build-runtime.ts",
-          "sha256": "23127a8425e71ed8700362a46a702af117e9055fbc45e917b2b7f6e07cf6a59a"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/reader-performance.spec.ts",
-          "sha256": "be9fa158b5d914f539fe2906dc2f9d14b25c495d42bbfc073954948dfc00d314"
-        },
-        {
-          "repoId": "project",
-          "path": "pnpm-lock.yaml",
-          "sha256": "f2eaffe89f5fdb7725762f1d6daaaccdb48e6638f6855fa2fc7ae8414fb43e91"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/wiki-reader/manifest.json",
-          "sha256": "27b725fe3344e69b15847cec62ee393ff920a7de4339a76977399f56c928c6fc"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-storage.test.ts",
-          "sha256": "16d57fd4f0d7cbd130f0d7f06fc787d6745daa4ab319c6457968a752285aff1f"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/context.ts",
-          "sha256": "8da969f86071aeea4e1104d293c979c204ae9451c130e6c7589542d6b93256ef"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/transactions.ts",
-          "sha256": "3b630333aebcdf80c51accd227904b8332671c8a754d3e1c38970482ad2b2f8a"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
-          "sha256": "0ce574752017ae4eddff6975e1c51f60179cec7eccdcfcd15fbdfc575564b087"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-context.test.ts",
-          "sha256": "1ccc7387bf429f0e638103490894660caa98e62596738182dd9f642cdf9bb490"
-        }
-      ],
-      "limitations": "真实Trae与完整真实Hook链未验；29既存时效警告、原恢复资料保留；项目Git未提交推送。"
+      "limitations": "真实宿主自动分派、Windows 专项及独立真人使用不在本组验证范围。"
     }
   ],
   "knowledge": {
     "required": true,
     "status": "synchronized",
     "refs": [
-      "lumine-project-overview",
       "lumine-wiki",
       "lumine-wiki-reader",
       "lumine-command-guide",
-      "lumine-adapters",
-      "lumine-architecture",
-      "lumine-root-config",
-      "lumine-adoption",
-      "reader-explanation",
-      ".lumine/wiki-state/navigation.json",
-      ".lumine/wiki-state/coverage.json",
       "AGENTS.md"
     ],
     "sync": {
       "contractVersion": 2,
-      "assessedAt": "2026-11-17T06:16:10.902Z",
+      "assessedAt": "2026-11-17T10:54:12.321Z",
       "changedSources": [
         {
           "repoId": "project",
           "path": "AGENTS.md",
-          "sha256": "2e0fa6af8ff859e36542348cf90a07fac4c8fd40c1677441e35332bce8955abf"
+          "sha256": "1f3eb7cb304d9ec33a3d3035d573e2ece3c3e4655ff90dcfc0adcd3b50e0b92a"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/context.ts",
-          "sha256": "8da969f86071aeea4e1104d293c979c204ae9451c130e6c7589542d6b93256ef"
+          "path": "skills/lumine-harness/assets/root/AGENTS.md",
+          "sha256": "653ea21359def1a40261f620757c79bf6914fea844772e97d5c9a1926b3b228e"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/transactions.ts",
-          "sha256": "3b630333aebcdf80c51accd227904b8332671c8a754d3e1c38970482ad2b2f8a"
+          "path": "skills/lumine-harness/assets/locales/en/root/AGENTS.md",
+          "sha256": "cd3fec0ea2068506b0788e9a41b15a43af530ef0fa0d39918e329e6a5739769b"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/documents.ts",
-          "sha256": "0ce574752017ae4eddff6975e1c51f60179cec7eccdcfcd15fbdfc575564b087"
+          "path": "skills/lumine-harness/references/adoption.md",
+          "sha256": "659a5759fd71fbbec19ca066f434b8e187ef392c943a6db720453ad952143a04"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-context.test.ts",
-          "sha256": "1ccc7387bf429f0e638103490894660caa98e62596738182dd9f642cdf9bb490"
+          "path": "skills/lumine-harness/references/en/adoption.md",
+          "sha256": "a8a64b2e629de7cdc0518c0ea72c0c80f6906f97031eaa0e49a5f12385177789"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/engine.ts",
-          "sha256": "a8e58319042140493d0dbfdb7bae304221de3d1e18c774c4d5d4985e03b844e8"
+          "path": "skills/lumine-harness/src/harness/tests/adoption-manager.test.ts",
+          "sha256": "8c7b249eb0587cc27a6810eb24e32b784779d689f87f7aafc555dd608088410f"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-evolution.test.ts",
-          "sha256": "6793386ba5402a251b56606a7966218de9113ff57e5292c21fe25df842853559"
+          "path": "skills/lumine-harness/src/harness/wiki/files.ts",
+          "sha256": "e04646257e02b253433bb0e5aa4d831603ab44e954bc4881a3dfea66e92bac60"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/SKILL.md",
-          "sha256": "9a0783fb427dda9ad4fc0f70344525d5f54cf5223ecca1133a05c0045982843d"
+          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
+          "sha256": "0d8d81aa18964acd6e22bd7d953512b95e03d1612ebbb6c668647777a95ff84e"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/写作与编排.md",
-          "sha256": "a8159aecac4c086c2c5e62943afbfe9a65d69fba973841ad0b32610e108006a7"
+          "path": "skills/lumine-harness/src/harness/tests/wiki-git-ignore.test.ts",
+          "sha256": "2f6b415932f45f4b366b9ad64d9267233287d686941c6bea1e686365b574eb88"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
-          "sha256": "fd70ed2388c03fefc67c7ff5896024cca2e01ff1859a3662143b0b858c535c89"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/building.md",
-          "sha256": "c4ee18d41f0dd4a3be1eed87d25a3f07b6a2e0eefe34a2154c4b24819e250772"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-plan/SKILL.md",
-          "sha256": "d18e70af15d81e66098a171cb8d1899f7bd21a8067378a50aabab5b9f13478bf"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
-          "sha256": "004ff55d1fd114fc3c7e298cb383c89889bb4f329214f936964ff827d0f6c512"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader.tsx",
-          "sha256": "d885e1bdbd12880891e314f0d5afe8152da546512818e8473d22ea1abceff37c"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-article.tsx",
-          "sha256": "bbb54ec2a27975efed411f4d721c3f5b35e81a6896a463a76150ab25818b7ba0"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-markdown.tsx",
-          "sha256": "726cc776a167f34e4a0f0f6b1ee4eeb8f4c73fee239e2b28aa0fe0425ff729be"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-diagrams.tsx",
-          "sha256": "8f482c31c34cae09b2f355ab0e4c9615ffc16b9841e5548c9c43110d0a3478c5"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/reader-diagram-dialog.tsx",
-          "sha256": "02171e6595c46e1b2902eddc44a35a03330593b38877569a446efe0ef90e5565"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/article.module.css",
-          "sha256": "5bb6ef00f08c450ea7ed3b1ca5d19cc1f1e21eb3d5f55062a157bad75701d31d"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/styles.css",
-          "sha256": "10240e383249d340e373a83b69275f8318536f3d6501c391eb582a300f292919"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/browser/fonts.css",
-          "sha256": "98b5a2330591ea37455b768aa36019b2874bc4d12d103e2d9d0ed0eecbc0ebbf"
+          "path": "scripts/reader-evidence.spec.ts",
+          "sha256": "e706b4c51490d812d669992fc9ff86669a6532c98b2fd24e187db80fe37a4ad2"
         },
         {
           "repoId": "project",
@@ -916,148 +260,78 @@
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/view-blocks.ts",
-          "sha256": "2c686bf3fb0102f67338440562d1fb8989b51e06d2ce221da02fc7b1c697792e"
+          "path": "skills/lumine-harness/src/browser/reader-evidence.tsx",
+          "sha256": "ff2e4cbeb16a5b2900440b9b2be4394b107fe0c29f7cdd8a4577e193ff5d168d"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/explainers.ts",
-          "sha256": "a065a3bf7e5421bef5de3792bb14f7a37a183b3f381c12c44ea56a0af776dfa9"
+          "path": "skills/lumine-harness/src/browser/reader-code.tsx",
+          "sha256": "28c4b7bd7d114e4ce503b6821a22cbf009b0e3305ddc779379433aec274ba8d8"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/highlight.ts",
-          "sha256": "90c0f30b350ef7bd8f518e73d809fb800ec4481bc3ef22c28437c2260160fa3b"
+          "path": "skills/lumine-harness/src/browser/reader.tsx",
+          "sha256": "4218a0ddd52fbe7bd33c312b3392efcfbc9bbe4ffe592995bb5c9dc13c659d36"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/wiki/server.ts",
-          "sha256": "de5e89fb7f35224ebd74e21e625653425bfd2aa2e638491e679f86eed33b7864"
+          "path": "skills/lumine-harness/src/browser/styles.css",
+          "sha256": "a8a6e2feab526edf238ead20892eeb7e5abebf34b0de120a6dfd9c5d844d328d"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-explainers.test.ts",
-          "sha256": "f6fd30ee4fef8a0b2e71998b33d0e712a4ddd4f84a27aeb2018f2d94159aa9fd"
+          "path": "skills/lumine-harness/assets/wiki-reader/reader.js",
+          "sha256": "b87a0075484658907966978d2ed574aecba9f31ae27036a81f60d63e82000b64"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-view-blocks.test.ts",
-          "sha256": "dcb4b5f983bc845648a43cbfe34ce657ea087f872eb5d128c40f653cc933c1c0"
+          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/maintenance.md",
+          "sha256": "96f1e0dbf682f385a60f08687c8ee17624dd23c06eab99264449f8fe59d43edc"
         },
         {
           "repoId": "project",
-          "path": "skills/lumine-harness/assets/skills/lumine-knowledge/references/阅读表达.md",
-          "sha256": "3c676864cb852d82ee19abfff07983678c33dcfda5f927d02a269b0b0e0a03cf"
+          "path": "skills/lumine-harness/assets/skills/lumine-run/SKILL.md",
+          "sha256": "fffc48a07cff2edf1479c9194c51d65ee2d9950f00a78e15519d601ef5440c60"
         },
         {
           "repoId": "project",
-          "path": "scripts/build-reader.ts",
-          "sha256": "63d8e12bb1d5d53f2d36c67263920d87979f9a7d6f879636447b982c7542eff5"
+          "path": "skills/lumine-harness/assets/locales/en/skills/lumine-knowledge/references/maintenance.md",
+          "sha256": "74ecf364daffff6bb5c67c41afdc5b01ba16eaf002730c5ae53b365fb44a0425"
         },
         {
           "repoId": "project",
-          "path": "scripts/build-runtime.ts",
-          "sha256": "23127a8425e71ed8700362a46a702af117e9055fbc45e917b2b7f6e07cf6a59a"
-        },
-        {
-          "repoId": "project",
-          "path": "scripts/reader-performance.spec.ts",
-          "sha256": "be9fa158b5d914f539fe2906dc2f9d14b25c495d42bbfc073954948dfc00d314"
-        },
-        {
-          "repoId": "project",
-          "path": "pnpm-lock.yaml",
-          "sha256": "f2eaffe89f5fdb7725762f1d6daaaccdb48e6638f6855fa2fc7ae8414fb43e91"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/assets/wiki-reader/manifest.json",
-          "sha256": "27b725fe3344e69b15847cec62ee393ff920a7de4339a76977399f56c928c6fc"
-        },
-        {
-          "repoId": "project",
-          "path": "skills/lumine-harness/src/harness/tests/wiki-storage.test.ts",
-          "sha256": "16d57fd4f0d7cbd130f0d7f06fc787d6745daa4ab319c6457968a752285aff1f"
+          "path": "skills/lumine-harness/assets/locales/en/skills/lumine-run/SKILL.md.template",
+          "sha256": "a7c98276b6451485606e35b1884a721f19dbbfa1f6ea1652a1cf96c67e954dfc"
         }
       ],
       "verifiedScope": [
-        "本轮源仓上下文/影响/一致读取与公开维护协议",
-        "阅读布局、中文字体、图文步骤、来源与隔离解释器",
-        "源仓相关九篇知识及导航、覆盖；原三页未核实警告保留",
-        "正式目标项目采用与知识同步由其本地任务和验证记录证实；源仓仅保留脱敏交付结果"
+        "复读三篇公开知识、源码和双语技能。",
+        "真实应用源码、浏览器和生成包均核对，项目采用由项目任务记录。"
       ],
       "decisions": [
         {
-          "ref": "lumine-project-overview",
-          "action": "revised",
-          "reason": "首页把知识纠正直接引向变化与知识影响解释，保持Lumine职责和阅读路径。",
-          "sha256": "be4df7767c46217b66bbe9477942708ce87f548396468972dba68c8fc996f2d3"
-        },
-        {
           "ref": "lumine-wiki",
           "action": "revised",
-          "reason": "同步上下文、增量影响、公开工作包和一致读取的机制与边界。",
-          "sha256": "00968fc5df38cb90f9377cf059ea61465f57f0f15094f423535bd989c6375286"
+          "sha256": "264dd4e737ccd3ba91165a2767643827073684237a1f83331e34ed4e218362c2",
+          "reason": "补上本地忽略保护和同步后按请求评估的机制。"
         },
         {
           "ref": "lumine-wiki-reader",
           "action": "revised",
-          "reason": "解释新阅读布局、中文字体、图文步骤、来源和隔离解释资源。",
-          "sha256": "be8f24d0f6d07d62c6ab79865d6fd2107899b437025302f3934eacbd24bb9f38"
+          "sha256": "60d7fa493129609fcfefbd1aa71ef5470f6af00693d6289eed6c48518169fd4f",
+          "reason": "说明宽屏、原始行、代码复制与来源边界。"
         },
         {
           "ref": "lumine-command-guide",
           "action": "revised",
-          "reason": "补充公开context/impact与日常阅读入口，不要求用户手改状态。",
-          "sha256": "737c6b47567d1e004f022d37a7787d70b96d72ff4fc3e974beaaefd9f3d7c67a"
-        },
-        {
-          "ref": "lumine-adapters",
-          "action": "revised",
-          "reason": "按宿主协议解释入口、观测和实际验收差异，保留稳定来源及限制。",
-          "sha256": "dba4eecd8e8af0d9d5c7bb2ef5714b9168d68d9d586cbac39a699762659819c2"
-        },
-        {
-          "ref": "lumine-architecture",
-          "action": "revised",
-          "reason": "按职责与发行链路重组说明，保留稳定ID、章节和来源。",
-          "sha256": "57da81c022069ed7d685e3a681acc1b73a6a302b9ac57ea2a1b0290f9c63e91d"
-        },
-        {
-          "ref": "lumine-root-config",
-          "action": "revised",
-          "reason": "解释项目根、仓库身份和当前版本范围，核对schema与workflow版本。",
-          "sha256": "0fd724d6898ef538057f173c6bf44a4b59e0a124218a24d3eba5e07c0cb0d60e"
-        },
-        {
-          "ref": "lumine-adoption",
-          "action": "revised",
-          "reason": "按采用/升级/恢复问题组织说明，保留显式提案与人工修改保护。",
-          "sha256": "20e5a349412849cb4dfcab3cb832995bc69357d1a72d6530abfabefa2f801d09"
-        },
-        {
-          "ref": "reader-explanation",
-          "action": "created",
-          "reason": "用真实知识影响规则提供文本、步骤、比较及交互解释；候选不冒充语义结论。",
-          "sha256": "01ba2a768546e126e5e538db09f512c43fc0e20c730a29785a36a2fda2207eb0"
-        },
-        {
-          "ref": ".lumine/wiki-state/navigation.json",
-          "action": "revised",
-          "reason": "新解释在核心能力及首页阅读路径中可发现。",
-          "sha256": "dec52a620e5f6234e8d232572ada959f76a221077c8a64777415473641f9b59e"
-        },
-        {
-          "ref": ".lumine/wiki-state/coverage.json",
-          "action": "revised",
-          "reason": "登记知识影响主题、问题和真实来源范围，不复制正文事实。",
-          "sha256": "3d53b3e03c88b200cb35fa3716915e6179ce385c7d7d2e11f383c78531f69b83"
+          "sha256": "a8d2c6e3fb3e31739d8918e50ed5c259396187a15e21456106ee899c2d0aeb78",
+          "reason": "加入按需检查和按授权局部更新的自然语言入口。"
         },
         {
           "ref": "AGENTS.md",
           "action": "revised",
-          "reason": "按本轮明确批准的专题解释资源方案，调整仅限Markdown/Mermaid的旧表述，允许经登记隔离的静态HTML并要求等价文字与单一事实源；这是明确规则变更，不当作普通知识同步。",
-          "sha256": "2e0fa6af8ff859e36542348cf90a07fac4c8fd40c1677441e35332bce8955abf"
+          "sha256": "1f3eb7cb304d9ec33a3d3035d573e2ece3c3e4655ff90dcfc0adcd3b50e0b92a",
+          "reason": "优化文件用途标题，保留源仓当前规则和路由。"
         }
       ]
     }

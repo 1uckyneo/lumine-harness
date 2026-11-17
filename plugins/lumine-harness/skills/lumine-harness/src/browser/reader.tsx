@@ -1,22 +1,23 @@
 import './fonts.css';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Button as AriaButton, Dialog, DialogTrigger, Heading, Modal, ModalOverlay, Popover } from 'react-aria-components';
+import { Button as AriaButton, Dialog, DialogTrigger, Popover } from 'react-aria-components';
 import { BookOpen, Copy, Focus, List, Menu, PanelLeftOpen, RefreshCw, Search, X } from 'lucide-react';
 import type { CoverageMap, Diagram, EditorialNavigation, KnowledgeDocument, KnowledgeMap, Locale } from '../harness/wiki/types.ts';
 import { coverageSummary, shouldResetProject, splitReference } from '../harness/wiki/reader-model.ts';
 import {
   api, copyText, decode, documentHref, download, evidenceHref, parseEvidence, withoutEvidence, sourceTitle, formatDate, safeRead, safeWrite, translate, documentLabel, type Catalog,
-  type CatalogDocument, type ReaderConfig, type ReferenceResult, type RelatedResult, type SourceResult, type EvidencePanel,
+  type CatalogDocument, type ReaderConfig, type RelatedResult, type EvidencePanel,
 } from './reader-common.ts';
-import { MarkdownBody, ReferenceMarkdown } from './reader-markdown.tsx';
+import { MarkdownBody } from './reader-markdown.tsx';
+import { CodeReadingContext, type CodeReading } from './reader-code.tsx';
+import { EvidenceDialog, type ReaderPanel } from './reader-evidence.tsx';
 import { DiagramDialog } from './reader-diagrams.tsx';
 import { SearchView } from './reader-search.tsx';
 
 type Route = { kind: 'home' } | { kind: 'search'; query: string; legacyCollection?: string } | { kind: 'topic'; id: string } | { kind: 'section'; id: string } | { kind: 'doc'; id: string; fragment: string };
 type Bootstrap = { config: ReaderConfig; catalog: CatalogDocument[]; map: CoverageMap; navigation: EditorialNavigation; issues: NonNullable<Catalog['issues']> };
 type DocumentResponse = KnowledgeDocument & { canonicalReference?: string };
-type Panel = EvidencePanel | { kind: 'text'; title: string; content: string };
 
 function parseRoute(): Route {
   const params = new URL(location.href).searchParams;
@@ -272,69 +273,6 @@ function DocumentView({ doc, data, locale, projectId, fragment, onDocument, onTo
   </article><aside className="doc-aside"><p className="contents-title">{t('contents')}</p>{contents}</aside></div>;
 }
 
-function EvidenceDialog({ panel, catalog, locale, onClose, onDocument, onSource, onReference, onCopy }: {
-  panel: Panel; catalog: CatalogDocument[]; locale: Locale; onClose: () => void; onDocument: (id: string, fragment?: string) => void;
-  onSource: (documentId: string, sourceId: string, focusStartLine?: number, focusEndLine?: number, replace?: boolean) => void;
-  onReference: (from: string, target: string) => void; onCopy: (value: string) => void;
-}) {
-  const t = (key: string) => translate(locale, key);
-  const dialog = useRef<HTMLDivElement>(null);
-  const [source, setSource] = useState<SourceResult | null>(null);
-  const [reference, setReference] = useState<ReferenceResult | null>(null);
-  const [error, setError] = useState('');
-  const [pending, setPending] = useState(false);
-  const [retry, setRetry] = useState(0);
-  const [raw, setRaw] = useState(false);
-  useEffect(() => {
-    const controller = new AbortController();
-    setSource(null); setReference(null); setError(''); setRaw(panel.kind === 'source' && panel.focusStartLine !== undefined);
-    if (panel.kind === 'text') return;
-    setPending(true);
-    const endpoint = panel.kind === 'source'
-      ? `/api/source?${new URLSearchParams({ document: panel.documentId, id: panel.sourceId })}`
-      : `/api/reference?${new URLSearchParams({ from: panel.from, target: panel.target })}`;
-    void api<SourceResult | ReferenceResult>(endpoint, controller.signal).then((result) => {
-      if (controller.signal.aborted) return;
-      if (panel.kind === 'source') setSource(result as SourceResult);
-      else {
-        const resolved = result as ReferenceResult;
-        if (resolved.kind === 'document' && resolved.id) { onDocument(resolved.id, resolved.fragment); return; }
-        if (resolved.kind === 'source' && resolved.documentId && resolved.sourceId) { onSource(resolved.documentId, resolved.sourceId, resolved.focusStartLine, resolved.focusEndLine, true); return; }
-        setReference(resolved);
-      }
-    }).catch(() => { if (!controller.signal.aborted) setError(panel.kind === 'source' ? t('sourceUnavailable') : t('referenceError')); })
-      .finally(() => { if (!controller.signal.aborted) setPending(false); });
-    return () => controller.abort();
-  }, [panel, retry]);
-  useEffect(() => {
-    if (source && panel.kind === 'source' && panel.focusStartLine) {
-      dialog.current?.querySelector(`[data-source-line="${panel.focusStartLine}"]`)?.scrollIntoView({ block: 'center' });
-    }
-  }, [source, panel, raw]);
-
-  const location = source ? `${source.source.repoId}:${source.source.path}#L${source.startLine}-L${source.endLine}` : '';
-  const comparison = source ? !source.baselineFingerprint ? 'sourceUnknown' : source.baselineFingerprint === source.fingerprint ? 'sourceSame' : 'sourceDrift' : '';
-  const readingMarkdown = source?.markdown;
-  return <ModalOverlay className="reader-overlay" isOpen isDismissable onOpenChange={(open) => { if (!open) onClose(); }}><Modal className={panel.kind === 'source' && !readingMarkdown ? 'evidence-dialog source-drawer' : 'evidence-dialog'}><Dialog ref={dialog} aria-labelledby="evidence-dialog-title">
-    <header className="dialog-header"><Heading slot="title" id="evidence-dialog-title">{panel.kind === 'source' ? source ? sourceTitle(source.source, catalog, locale, source.title) : t('sources') : panel.kind === 'text' ? panel.title : reference?.title ?? t('relatedDocuments')}</Heading><AriaButton className="icon-button" aria-label={t('close')} onPress={onClose}><X size={20} /></AriaButton></header>
-    {pending && <p className="dialog-message" role="status">{t('loading')}</p>}
-    {error && <div className="status-panel error" role="alert"><p>{error}</p><button onClick={() => setRetry((value) => value + 1)}>{t('retry')}</button></div>}
-    {panel.kind === 'text' && <pre className="text-content" tabIndex={0}>{panel.content}</pre>}
-    {source && panel.kind === 'source' && <>
-      <div className="dialog-tools">{readingMarkdown && <div className="reading-modes" role="group" aria-label={t('sourceDetails')}><button aria-pressed={!raw} onClick={() => setRaw(false)}>{t('readingView')}</button><button aria-pressed={raw} onClick={() => setRaw(true)}>{t('rawView')}</button></div>}<button onClick={() => onCopy(window.location.href)}>{t('copyLink')}</button><button onClick={() => onCopy(source.text)}><Copy size={15} aria-hidden="true" />{locale === 'zh-CN' ? '复制源码' : 'Copy source'}</button></div>
-      <p className={`source-comparison ${comparison === 'sourceDrift' ? 'warning' : ''}`}>{t(comparison)}</p>
-      {(!readingMarkdown || raw) && <p className="source-location"><code>{source.source.path}</code><span> : {source.startLine}–{source.endLine}</span></p>}
-      {readingMarkdown && !raw ? <ReferenceMarkdown markdown={readingMarkdown.body} sections={readingMarkdown.sections} path={readingMarkdown.referenceFrom ?? readingMarkdown.path} locale={locale} onReference={onReference} onFragment={(fragment) => dialog.current?.querySelector(`[id="${CSS.escape(fragment)}"]`)?.scrollIntoView({ block: 'start' })} /> : <>{source.startLine > 1 || source.endLine < source.totalLines ? <p className="dialog-message subtle-note">{t('sourceScope')}</p> : null}<div className="source-lines" tabIndex={0}>{source.text.split('\n').map((line, index) => {
-        const number = source.startLine + index;
-        return <div key={number} data-source-line={number} className={panel.focusStartLine !== undefined && number >= panel.focusStartLine && number <= (panel.focusEndLine ?? panel.focusStartLine) ? 'source-line-target' : ''}><span className="line-number" aria-hidden="true">{number}</span><code>{source.highlighted?.tokens[index]?.map((token, tokenIndex) => <span key={tokenIndex} style={token.color && /^#[0-9a-f]{3,8}$/i.test(token.color) ? { color: token.color } : undefined}>{token.content}</span>) ?? (line || ' ')}</code></div>;
-      })}</div></>}
-      <details className="evidence-metadata"><summary>{t('evidenceDetails')}</summary><p className="dialog-path">{location}</p><div className="dialog-tools"><button onClick={() => onCopy(location)}>{t('copyLocation')}</button><button onClick={() => onCopy(`${panel.documentId}#source:${panel.sourceId}`)}>{t('copiedReference')}</button></div><dl className="source-versions"><div><dt>{t('sourceVersion')}</dt><dd><code>{source.fingerprint}</code></dd></div><div><dt>{t('baselineVersion')}</dt><dd><code>{source.baselineFingerprint ?? '—'}</code></dd></div><div><dt>{t('checkedAt')}</dt><dd>{formatDate(locale, source.observedAt)}</dd></div><div><dt>{t('readAt')}</dt><dd>{formatDate(locale, source.readAt)}</dd></div></dl></details>
-    </>}
-    {reference && reference.kind === 'markdown' && <><div className="dialog-tools"><div className="reading-modes" role="group" aria-label={t('sourceDetails')}><button aria-pressed={!raw} onClick={() => setRaw(false)}>{t('readingView')}</button><button aria-pressed={raw} onClick={() => setRaw(true)}>{t('rawView')}</button></div><button onClick={() => onCopy(window.location.href)}>{t('copyLink')}</button><button onClick={() => download(`${reference.title ?? 'reference'}.md`, reference.markdown ?? '', 'text/markdown;charset=utf-8')}>{t('exportMarkdown')}</button></div>{raw ? <pre className="text-content" tabIndex={0}>{reference.markdown}</pre> : <ReferenceMarkdown markdown={reference.markdown ?? ''} sections={reference.sections ?? []} path={reference.referenceFrom ?? reference.path} locale={locale} fragment={reference.fragment} onReference={onReference} onFragment={(fragment) => dialog.current?.querySelector(`[id="${CSS.escape(fragment)}"]`)?.scrollIntoView({ block: 'start' })} />}<details className="evidence-metadata"><summary>{t('evidenceDetails')}</summary><p className="dialog-path">{reference.path} · {reference.revision}</p></details></>}
-    {reference && reference.kind === 'attachment' && <div className="dialog-message"><p>{t('attachment')}</p><code>{reference.path}</code></div>}
-  </Dialog></Modal></ModalOverlay>;
-}
-
 function ReaderApp() {
   const [route, setRoute] = useState<Route>(parseRoute);
   const [data, setData] = useState<Bootstrap | null>(null);
@@ -346,10 +284,11 @@ function ReaderApp() {
   const [docRetry, setDocRetry] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [focusReading, setFocusReading] = useState(false);
-  const [panel, setPanel] = useState<Panel | null>(() => parseEvidence(location.href));
+  const [panel, setPanel] = useState<ReaderPanel | null>(() => parseEvidence(location.href));
   const [diagram, setDiagram] = useState<Diagram | null>(null);
   const [toast, setToast] = useState('');
   const menuButton = useRef<HTMLButtonElement>(null);
+  const readingOrigin = useRef<{ url: string; scroll: number; trigger: HTMLElement | null; offset: number } | null>(null);
   const dataRef = useRef<Bootstrap | null>(null);
   const bootstrapRevision = useRef(0);
   const t = (key: string) => translate(locale, key);
@@ -382,12 +321,17 @@ function ReaderApp() {
     target?.scrollIntoView({ block: 'start' });
     target?.focus({ preventScroll: true });
   }, [locale, notify]);
+  const rememberReadingOrigin = useCallback(() => {
+    const trigger = document.activeElement instanceof HTMLElement && document.activeElement.closest('.document') ? document.activeElement : null;
+    readingOrigin.current = { url: withoutEvidence(location.href), scroll: window.scrollY, trigger, offset: trigger?.getBoundingClientRect().top ?? 0 };
+  }, []);
   const openEvidence = useCallback((next: EvidencePanel, replace = false) => {
+    if (!parseEvidence(location.href)) rememberReadingOrigin();
     const href = evidenceHref(next, location.href);
     if (replace) history.replaceState(history.state, '', href);
     else history.pushState({ ...history.state, evidenceDepth: (Number(history.state?.evidenceDepth) || 0) + 1 }, '', href);
     setPanel(next);
-  }, []);
+  }, [rememberReadingOrigin]);
   const onSource = useCallback((documentId: string, sourceId: string, focusStartLine?: number, focusEndLine?: number, replace = false) => openEvidence({ kind: 'source', documentId, sourceId, focusStartLine, focusEndLine }, replace), [openEvidence]);
   const onReference = useCallback((from: string, target: string) => openEvidence({ kind: 'reference', from, target }), [openEvidence]);
   const closeEvidence = useCallback(() => {
@@ -403,6 +347,11 @@ function ReaderApp() {
     history.replaceState({}, '', documentHref(id, fragment));
     setPanel(null); setRoute(parseRoute()); window.scrollTo(0, 0); focusWorkspace();
   }, [focusWorkspace]);
+  const readCode = useCallback((reading: CodeReading, trigger: HTMLButtonElement) => {
+    trigger.focus({ preventScroll: true });
+    rememberReadingOrigin();
+    setPanel({ kind: 'code', reading });
+  }, [rememberReadingOrigin]);
   const onText = useCallback((title: string, content: string) => setPanel({ kind: 'text', title, content }), []);
   const onCopy = useCallback((value: string) => { void copyText(value).then((copied) => { if (copied) notify(translate(locale, 'copied')); else { notify(translate(locale, 'copyUnavailable')); setPanel({ kind: 'text', title: translate(locale, 'copyManually'), content: value }); } }); }, [locale, notify]);
 
@@ -428,6 +377,19 @@ function ReaderApp() {
   }, [locale]);
 
   useEffect(() => { void loadBootstrap(); }, []);
+  useEffect(() => {
+    if (panel || !readingOrigin.current) return;
+    const origin = readingOrigin.current;
+    readingOrigin.current = null;
+    const frame = requestAnimationFrame(() => {
+      if (origin.url !== withoutEvidence(location.href) || parseEvidence(location.href)) return;
+      if (origin.trigger?.isConnected) {
+        origin.trigger.focus({ preventScroll: true });
+        window.scrollBy({ top: origin.trigger.getBoundingClientRect().top - origin.offset, behavior: 'instant' });
+      } else window.scrollTo({ top: origin.scroll, behavior: 'instant' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [panel]);
   useEffect(() => {
     const changed = () => { const evidence = parseEvidence(location.href); setRoute(parseRoute()); setPanel(evidence); if (!panel && !evidence) focusWorkspace(); };
     window.addEventListener('popstate', changed);
@@ -517,7 +479,7 @@ function ReaderApp() {
   const closeMenu = () => { setMenuOpen(false); menuButton.current?.focus(); };
   const activeDoc = docState.value;
   const displayedDoc = route.kind === 'doc' && activeDoc?.id === route.id ? activeDoc : null;
-  return <>
+  return <CodeReadingContext.Provider value={readCode}>
     <a className="skip-link" href="#workspace">{t('skip')}</a>
     <div className={`shell ${menuOpen ? 'menu-open' : ''} ${focusReading ? 'focus-reading' : ''}`}>
       {menuOpen && <button className="nav-backdrop" aria-label={t('closeMenu')} onClick={closeMenu} />}
@@ -554,9 +516,9 @@ function ReaderApp() {
       </div>
     </div>
     <div className={`toast ${toast ? 'visible' : ''}`} role="status" aria-live="polite">{toast}</div>
-    {panel && <EvidenceDialog panel={panel} catalog={data.catalog} locale={locale} onClose={closeEvidence} onDocument={resolveDocument} onSource={onSource} onReference={onReference} onCopy={onCopy} />}
-    {diagram && activeDoc && <DiagramDialog diagram={diagram} document={activeDoc} locale={locale} onClose={() => setDiagram(null)} onCopy={onCopy} onText={(title, text) => { setDiagram(null); onText(title, text); }} />}
-  </>;
+    {panel && <EvidenceDialog panel={panel} catalog={data.catalog} locale={locale} onClose={closeEvidence} onDocument={resolveDocument} onSource={onSource} onReference={onReference} />}
+    {!panel && diagram && activeDoc && <DiagramDialog diagram={diagram} document={activeDoc} locale={locale} onClose={() => setDiagram(null)} onCopy={onCopy} onText={(title, text) => { setDiagram(null); onText(title, text); }} />}
+  </CodeReadingContext.Provider>;
 }
 
 const app = document.getElementById('app');

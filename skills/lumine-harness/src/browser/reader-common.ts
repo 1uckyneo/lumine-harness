@@ -63,6 +63,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
   'zh-CN': {
     explore: '继续深入', sectionToggle: '展开或收起目录', sourceDocument: '参考文档', sourceFile: '实现文件',
     readingView: '阅读文档', rawView: '查看原文', evidenceDetails: '版本与定位', copyLink: '复制链接', sourceScope: '当前仅显示引用的行范围。',
+    readCode: '放大阅读', code: '代码', copyCode: '复制代码', copySource: '复制源码', fullWindow: '全窗口查看', restoreSize: '还原大小',
+    codeLayout: '代码排版', wrapCode: '自动换行', originalLines: '保留原行',
     understand: '理解项目', operate: '开发与运行', reference: '查找与核实',
     moreDetail: '更多说明', table: '表格，可横向滚动', home: '项目首页', knowledge: '仓库知识', search: '搜索知识', tree: '知识目录', contents: '本页导航',
     relatedDocuments: '关联文档', specs: '产品方案', plans: '执行计划', validation: '验证记录', maintenance: '知识维护',
@@ -116,6 +118,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
   en: {
     explore: 'Explore further', sectionToggle: 'Expand or collapse section', sourceDocument: 'Reference document', sourceFile: 'Implementation file',
     readingView: 'Read document', rawView: 'View original', evidenceDetails: 'Version and location', copyLink: 'Copy link', sourceScope: 'Only the referenced line range is shown.',
+    readCode: 'Expand code', code: 'Code', copyCode: 'Copy code', copySource: 'Copy source', fullWindow: 'Fill window', restoreSize: 'Restore size',
+    codeLayout: 'Code layout', wrapCode: 'Wrap lines', originalLines: 'Preserve lines',
     understand: 'Understand the project', operate: 'Develop and operate', reference: 'Find and verify',
     moreDetail: 'More detail', table: 'Scrollable table', home: 'Project home', knowledge: 'Repo Wiki', search: 'Search knowledge', tree: 'Knowledge tree', contents: 'On this page',
     relatedDocuments: 'Related documents', specs: 'Product specs', plans: 'Execution plans', validation: 'Validation record', maintenance: 'Knowledge maintenance',

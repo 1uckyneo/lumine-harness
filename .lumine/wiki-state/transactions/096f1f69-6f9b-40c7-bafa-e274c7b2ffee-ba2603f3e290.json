@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 3,
+  "kind": "lumine-wiki-state",
+  "value": {
+    "schemaVersion": 1,
+    "id": "096f1f69-6f9b-40c7-bafa-e274c7b2ffee-ba2603f3e290",
+    "status": "complete",
+    "storageReceipt": true,
+    "mutations": [],
+    "candidateHashes": {
+      "lumine-wiki-reader": "23e2577a211f05c0f83dfebf33b0a24039e5f8d08f6b19fa0f756babeaa408e7",
+      "lumine-wiki": "4d22b15fccab16dbe4d26394d3d46a3e60e0fa01d7a02a175bf16f23f5085631",
+      "lumine-command-guide": "437ee7cadc6674ce10dae3166773e666839d3db1eb0b9ae431ce13f0dbb1786d"
+    },
+    "mutationHashes": [
+      {
+        "path": "docs/repo-wiki/知识树、图解与来源阅读.md",
+        "beforeHash": "be8f24d0f6d07d62c6ab79865d6fd2107899b437025302f3934eacbd24bb9f38",
+        "afterHash": "60d7fa493129609fcfefbd1aa71ef5470f6af00693d6289eed6c48518169fd4f"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/898a5b13231c2c9c18873ec4012a34e8f2d6d47b30a94972fdcdc0d909d347e9.json",
+        "beforeHash": "a3f7544eff2f5cda56cf5c18f5f1552ea245c88c72ae4f8ea743373bf6024f45",
+        "afterHash": "13800635a5cb3f7698c0104a6fc2341f2a48753a3e1d510a4190e25720c7e28e"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/898a5b13231c2c9c18873ec4012a34e8f2d6d47b30a94972fdcdc0d909d347e9.json",
+        "beforeHash": "c96f7fff248d499736fe0a0792f7c10ffd3b7610a30a30c33d8309af4a0c6290",
+        "afterHash": "9cfccae575785349aedeb6f503dce081e36b11aaf0a221f0e6fbdc6bd010edff"
+      },
+      {
+        "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
+        "beforeHash": "00968fc5df38cb90f9377cf059ea61465f57f0f15094f423535bd989c6375286",
+        "afterHash": "264dd4e737ccd3ba91165a2767643827073684237a1f83331e34ed4e218362c2"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/644f388d251fd2bd3cea369d7d36c63f688f22c24ccbb8a04fee423cf0fe6dac.json",
+        "beforeHash": "c392402353216fa8603c8c729a8915e73282a9c32a259f4870e76bd81e250289",
+        "afterHash": "48ab0f265256fe3400267946d11118626264e523a801d0c055eba0a44d1269f0"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/644f388d251fd2bd3cea369d7d36c63f688f22c24ccbb8a04fee423cf0fe6dac.json",
+        "beforeHash": "9a73a29aaf46968b5fd8e08d86303121209e2bb48846ac01378259e0ed5a55f9",
+        "afterHash": "f791f50c2f99d478fb2ddad6d12cdbc89f03033e3630d6d5d950042433a790ec"
+      },
+      {
+        "path": "docs/repo-wiki/guides/常用指令与阅读器.md",
+        "beforeHash": "737c6b47567d1e004f022d37a7787d70b96d72ff4fc3e974beaaefd9f3d7c67a",
+        "afterHash": "a8d2c6e3fb3e31739d8918e50ed5c259396187a15e21456106ee899c2d0aeb78"
+      },
+      {
+        "path": ".lumine/wiki-state/documents/3c1059fda4f05f22f01f8513fc04010a924e26a84e5d87f5731e034b3a4f6894.json",
+        "beforeHash": "e5555e4a5c8e969bf3a622c7faa2c56482f028dea3663b628586d06c28b759f5",
+        "afterHash": "e2d25241773195131c4d95b97ce8c7aca9a0dc260d66a6f30c8e17803e659802"
+      },
+      {
+        "path": ".lumine/wiki-state/observations/3c1059fda4f05f22f01f8513fc04010a924e26a84e5d87f5731e034b3a4f6894.json",
+        "beforeHash": "83c88d97c652e42654fbf1199bbd87e2a84ac561efc7702de08bf67fb349685d",
+        "afterHash": "59f97123196e19788e1424470715e1c5e66ab231230eaff86bcdd2d27ddd0fa8"
+      }
+    ]
+  }
+}

@@ -2,7 +2,7 @@
 // Source: skills/lumine-harness/src/harness/wiki/server.ts
 import { loadProjectConfig } from "../core/project-config.mjs";
 import { resolveHarnessRuntimeRoot } from "../core/runtime-layout.mjs";
-import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConfig } from "./files.mjs";
+import { containedPath, hash, isExcluded, readSource, slash, sourcePath, walkFiles, wikiConfig } from "./files.mjs";
 import { parseSections } from "./sections.mjs";
 import { baselineFor, parseDocument } from "./documents.mjs";
 import { explainerFonts, readExplainer } from "./explainers.mjs";
@@ -288,6 +288,7 @@ async function serveWiki(root, options = {}) {
 				if (target.startsWith("source:")) {
 					const document = showKnowledge(root, owner), source = document.sources.find((item) => item.id === target.slice(7));
 					if (!source) throw new Error("SOURCE_NOT_IN_DOCUMENT");
+					sourcePath(root, config, source.repoId, source.path);
 					json(response, 200, {
 						kind: "source",
 						path: source.path,

@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, renameSync, writeFileSync, openSync, closeSync, unlinkSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import ignore, { type Ignore } from 'ignore';
@@ -55,20 +56,89 @@ export function repositoryRoot(root: string, config: WikiConfig, repoId: string)
   if (!existsSync(absolute) || !statSync(absolute).isDirectory()) throw new Error('REPOSITORY_MISSING');
   return realpathSync(absolute);
 }
-const ignoreCache = new Map<string, { fingerprint: string; matcher: Ignore }>();
-function ignoredByGitFiles(repoRoot: string, relative: string): boolean {
-  if (relative === '.') return false;
-  const segments = relative.split('/');
-  for (let depth = 0; depth < segments.length; depth++) {
-    const folder = path.join(repoRoot, ...segments.slice(0, depth)), file = path.join(folder, '.gitignore');
-    if (!existsSync(file) || lstatSync(file).isSymbolicLink()) continue;
-    const stat = statSync(file), fingerprint = `${stat.mtimeMs}:${stat.size}`;
-    let item = ignoreCache.get(file);
-    if (!item || item.fingerprint !== fingerprint) { item = { fingerprint, matcher: ignore().add(readFileSync(file, 'utf8')) }; ignoreCache.set(file, item); }
-    const local = segments.slice(depth).join('/');
-    if (item.matcher.ignores(local)) return true;
+function hasGitMarker(directory: string): boolean {
+  return lstatSync(path.join(directory, '.git'), { throwIfNoEntry: false }) !== undefined;
+}
+
+function gitWorkTree(directory: string): string | null {
+  for (;;) {
+    // A linked worktree or submodule declares its metadata in a .git file.
+    if (hasGitMarker(directory)) return directory;
+    const parent = path.dirname(directory);
+    if (parent === directory) return null;
+    directory = parent;
   }
-  return false;
+}
+
+class SourceIgnoreRules {
+  readonly gitRoot: string | null;
+  private decisions = new Map<string, boolean>();
+  private nonGitMatchers = new Map<string, Ignore | null>();
+  private gitRootVerified = false;
+
+  constructor(private readonly root: string) {
+    this.gitRoot = gitWorkTree(root);
+  }
+
+  check(paths: readonly string[]): void {
+    const pending = [...new Set(paths)].filter((relative) => relative !== '.' && !this.decisions.has(relative));
+    if (!pending.length) return;
+    if (!this.gitRoot) {
+      for (const relative of pending) this.decisions.set(relative, this.matchesNonGitRules(relative));
+      return;
+    }
+
+    // Git hooks may carry another repository's index, worktree, or pathspec settings.
+    // Keep normal global ignore configuration but always inspect our own worktree.
+    const env = { ...process.env };
+    for (const key of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_INDEX_FILE', 'GIT_PREFIX', 'GIT_CEILING_DIRECTORIES',
+      'GIT_LITERAL_PATHSPECS', 'GIT_GLOB_PATHSPECS', 'GIT_NOGLOB_PATHSPECS', 'GIT_ICASE_PATHSPECS']) delete env[key];
+    env.LC_ALL = 'C';
+    const options = { cwd: this.gitRoot, env, encoding: 'utf8' as const, timeout: 20_000, maxBuffer: 8 * 1024 * 1024 };
+    if (!this.gitRootVerified) {
+      const tree = spawnSync('git', ['rev-parse', '--show-toplevel'], options);
+      // A broken nested .git directory must not fall back to the parent's ignore rules.
+      if (tree.error || tree.status !== 0 || path.resolve(tree.stdout.replace(/\r?\n$/, '')) !== this.gitRoot) throw new Error('SOURCE_GIT_IGNORE_FAILED');
+      this.gitRootVerified = true;
+    }
+
+    const prefix = slash(path.relative(this.gitRoot, this.root));
+    for (let offset = 0; offset < pending.length; offset += 512) {
+      const batch = pending.slice(offset, offset + 512);
+      // Keep a literal ./ prefix so names beginning with ":" cannot be pathspec magic.
+      const inputs = batch.map((relative) => `./${prefix ? `${prefix}/` : ''}${relative}`);
+      const result = spawnSync('git', ['check-ignore', '--no-index', '-z', '--stdin'], {
+        ...options, input: inputs.join('\0') + '\0'
+      });
+      if (result.error || (result.status !== 0 && result.status !== 1) || /(?:^|\n)warning: unable to access /i.test(result.stderr)) {
+        throw new Error('SOURCE_GIT_IGNORE_FAILED');
+      }
+      const ignored = new Set(result.stdout.split('\0').filter(Boolean));
+      if ((result.status === 0) !== Boolean(ignored.size) || [...ignored].some((item) => !inputs.includes(item))) throw new Error('SOURCE_GIT_IGNORE_FAILED');
+      batch.forEach((relative, index) => this.decisions.set(relative, ignored.has(inputs[index])));
+    }
+  }
+
+  ignores(relative: string): boolean {
+    this.check([relative]);
+    return this.decisions.get(relative) ?? false;
+  }
+
+  private matchesNonGitRules(relative: string): boolean {
+    const segments = relative.replace(/\/$/, '').split('/');
+    for (let depth = 0; depth < segments.length; depth++) {
+      const file = path.join(this.root, ...segments.slice(0, depth), '.gitignore');
+      let matcher = this.nonGitMatchers.get(file);
+      if (matcher === undefined) {
+        const info = lstatSync(file, { throwIfNoEntry: false });
+        matcher = info?.isFile() ? ignore().add(readFileSync(file, 'utf8')) : null;
+        this.nonGitMatchers.set(file, matcher);
+      }
+      const local = segments.slice(depth).join('/') + (relative.endsWith('/') ? '/' : '');
+      if (matcher?.ignores(local)) return true;
+    }
+    return false;
+  }
 }
 function belongsToNestedRepository(root: string, config: WikiConfig, repoId: string, relative: string): boolean {
   const repo = config.repositories.find((entry) => entry.id === repoId);
@@ -76,13 +146,33 @@ function belongsToNestedRepository(root: string, config: WikiConfig, repoId: str
   const base = path.resolve(root, repo.path), target = path.resolve(base, relative);
   return config.repositories.some((entry) => entry.id !== repoId && path.resolve(root, entry.path) !== base && inside(base, path.resolve(root, entry.path)) && inside(path.resolve(root, entry.path), target));
 }
-export function sourcePath(root: string, config: WikiConfig, repoId: string, relative: string): string {
+function sourceLocation(root: string, config: WikiConfig, repoId: string, relative: string, repoRoot: string, rules: SourceIgnoreRules) {
   relative = relativePath(relative);
-  if (isExcluded(relative) || (config.repositories.find((repo) => repo.id === repoId)?.path === '.' && (relative === config.root || relative.startsWith(`${config.root}/`)))) throw new Error('SOURCE_EXCLUDED');
-  const repoRoot = repositoryRoot(root, config, repoId);
-  if (belongsToNestedRepository(root, config, repoId, relative)) throw new Error('SOURCE_BELONGS_TO_OTHER_REPOSITORY');
-  if (ignoredByGitFiles(repoRoot, relative)) throw new Error('SOURCE_GITIGNORED');
-  return containedPath(repoRoot, relative);
+  const checkPath = (candidate: string): void => {
+    if (isExcluded(candidate) || (config.repositories.find((repo) => repo.id === repoId)?.path === '.' && (candidate === config.root || candidate.startsWith(`${config.root}/`)))) throw new Error('SOURCE_EXCLUDED');
+    if (belongsToNestedRepository(root, config, repoId, candidate)) throw new Error('SOURCE_BELONGS_TO_OTHER_REPOSITORY');
+  };
+  checkPath(relative);
+  const file = containedPath(repoRoot, relative);
+  const realFile = realpathSync(file), isDirectory = statSync(file).isDirectory();
+  const real = slash(path.relative(repoRoot, realFile)) || '.';
+  if (real !== relative) checkPath(real);
+  for (const absolute of new Set([file, realFile])) {
+    if (gitWorkTree(isDirectory ? absolute : path.dirname(absolute)) !== rules.gitRoot) throw new Error('SOURCE_BELONGS_TO_OTHER_REPOSITORY');
+  }
+  const paths = [...new Set([relative, real])].map((candidate) => isDirectory && candidate !== '.' ? `${candidate}/` : candidate);
+  return { file: realFile, paths };
+}
+
+function checkedSourceLocation(location: ReturnType<typeof sourceLocation>, rules: SourceIgnoreRules): string {
+  rules.check(location.paths);
+  if (location.paths.some((relative) => rules.ignores(relative))) throw new Error('SOURCE_GITIGNORED');
+  return location.file;
+}
+
+export function sourcePath(root: string, config: WikiConfig, repoId: string, relative: string): string {
+  const repoRoot = repositoryRoot(root, config, repoId), rules = new SourceIgnoreRules(repoRoot);
+  return checkedSourceLocation(sourceLocation(root, config, repoId, relative, repoRoot, rules), rules);
 }
 export function readSource(root: string, config: WikiConfig, source: SourceRef): { text: string; fingerprint: string; startLine: number; endLine: number; totalLines: number } {
   const file = sourcePath(root, config, source.repoId, source.path);
@@ -95,26 +185,57 @@ export function readSource(root: string, config: WikiConfig, source: SourceRef):
   return { text: lines.slice(start - 1, end).join('\n'), fingerprint: hash(full), startLine: start, endLine: end, totalLines: lines.length };
 }
 export function walkFiles(root: string, relative = '.', limit = 40000, omit: (relative: string) => boolean = () => false): string[] {
+  const repoRoot = realpathSync(root);
+  return walkSourceFiles(repoRoot, relative, limit, omit, new SourceIgnoreRules(repoRoot));
+}
+
+function walkSourceFiles(root: string, relative: string, limit: number, omit: (relative: string) => boolean, rules: SourceIgnoreRules): string[] {
+  relative = relativePath(relative);
+  if (relative !== '.' && (isExcluded(relative) || omit(relative))) return [];
+  let start: string;
+  try { start = containedPath(root, relative); } catch { return []; }
+  const info = lstatSync(start);
+  if ((!info.isDirectory() && !info.isFile()) || realpathSync(start) !== start || gitWorkTree(info.isDirectory() ? start : path.dirname(start)) !== rules.gitRoot) return [];
+
   const found: string[] = [];
-  const visit = (current: string): void => {
-    if ((isExcluded(current) || ignoredByGitFiles(root, current) || omit(current)) && current !== '.') return;
-    let absolute: string;
-    try { absolute = containedPath(root, current); } catch { return; }
-    if (lstatSync(absolute).isSymbolicLink()) return;
-    if (statSync(absolute).isFile()) { found.push(current); return; }
-    for (const entry of readdirSync(absolute, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-      if (found.length >= limit) throw new Error('SOURCE_SCAN_LIMIT_EXCEEDED');
-      if (entry.isSymbolicLink()) continue;
-      const next = current === '.' ? entry.name : `${current}/${entry.name}`;
-      if (!isExcluded(next)) visit(next);
+  let level = [{ relative, directory: info.isDirectory() }];
+  while (level.length) {
+    const nextLevel: typeof level = [];
+    const ignorePath = (entry: (typeof level)[number]) => entry.directory && entry.relative !== '.' ? `${entry.relative}/` : entry.relative;
+    rules.check(level.map(ignorePath));
+    for (const entry of level) {
+      if (rules.ignores(ignorePath(entry))) continue;
+      if (!entry.directory) {
+        if (found.length >= limit) throw new Error('SOURCE_SCAN_LIMIT_EXCEEDED');
+        found.push(entry.relative);
+        continue;
+      }
+      const directory = path.join(root, entry.relative);
+      for (const child of readdirSync(directory, { withFileTypes: true })) {
+        if (!child.isFile() && !child.isDirectory()) continue;
+        const relative = entry.relative === '.' ? child.name : `${entry.relative}/${child.name}`;
+        if (isExcluded(relative) || omit(relative)) continue;
+        if (child.isDirectory() && hasGitMarker(path.join(directory, child.name))) continue;
+        nextLevel.push({ relative, directory: child.isDirectory() });
+      }
     }
-  };
-  visit(relative);
+    level = nextLevel;
+  }
   return found.sort();
 }
+
+const snapshotIgnoreRules = new WeakMap<Map<string, SourceSnapshot>, Map<string, SourceIgnoreRules>>();
+
 /** The optional cache belongs to one scan/prepare operation, never to a process-wide index. */
 export function snapshotSources(root: string, sources: SourceRef[], scopes: WatchScope[], cache = new Map<string, SourceSnapshot>()): SourceSnapshot {
   const config = wikiConfig(root), prefix = `${path.resolve(root)}\0`;
+  let rulesByRepository = snapshotIgnoreRules.get(cache);
+  if (!rulesByRepository) { rulesByRepository = new Map(); snapshotIgnoreRules.set(cache, rulesByRepository); }
+  const rulesFor = (repoRoot: string): SourceIgnoreRules => {
+    let rules = rulesByRepository.get(repoRoot);
+    if (!rules) { rules = new SourceIgnoreRules(repoRoot); rulesByRepository.set(repoRoot, rules); }
+    return rules;
+  };
   const fingerprints: Record<string, string | null> = {}, files: Record<string, string> = {}, scopeFingerprints: Record<string, string> = {}, missing: string[] = [];
   const includes = (parent: string, child: string) => parent === '.' || child === parent || child.startsWith(`${parent}/`);
   const digest = (repoId: string, relative: string, file: string): string => {
@@ -136,7 +257,8 @@ export function snapshotSources(root: string, sources: SourceRef[], scopes: Watc
     const result: SourceSnapshot = { fingerprints: {}, files: {}, scopeFingerprints: {}, missing: [] };
     try {
       const repoRoot = repositoryRoot(root, config, scope.repoId);
-      sourcePath(root, config, scope.repoId, relative);
+      const rules = rulesFor(repoRoot);
+      checkedSourceLocation(sourceLocation(root, config, scope.repoId, relative, repoRoot, rules), rules);
       const available = [...cache].flatMap(([key, snapshot]) => key.startsWith(scopePrefix) && !snapshot.missing.length
         ? [{ relative: key.slice(scopePrefix.length), snapshot }] : []);
       const ancestor = available.find((entry) => includes(entry.relative, relative));
@@ -156,9 +278,10 @@ export function snapshotSources(root: string, sources: SourceRef[], scopes: Watc
         const omit = (file: string) => descendants.some((entry) => includes(entry.relative, file))
           || belongsToNestedRepository(root, config, scope.repoId, file)
           || (config.repositories.find((entry) => entry.id === scope.repoId)?.path === '.' && (file === config.root || file.startsWith(`${config.root}/`)));
-        for (const file of walkFiles(repoRoot, relative, 40000, omit)) {
+        for (const file of walkSourceFiles(repoRoot, relative, 40000, omit, rules)) {
           let absolute: string;
-          try { absolute = sourcePath(root, config, scope.repoId, file); } catch { continue; }
+          try { absolute = checkedSourceLocation(sourceLocation(root, config, scope.repoId, file, repoRoot, rules), rules); }
+          catch (error) { if (error instanceof Error && error.message === 'SOURCE_GIT_IGNORE_FAILED') throw error; continue; }
           const info = statSync(absolute);
           entries[file] = info.size > 2_000_000 ? `large:${info.size}:${info.mtimeMs}` : digest(scope.repoId, file, absolute);
         }
@@ -169,7 +292,7 @@ export function snapshotSources(root: string, sources: SourceRef[], scopes: Watc
       result.files = Object.fromEntries(Object.entries(ordered).map(([file, fingerprint]) => [`${scope.repoId}:${file}`, fingerprint]));
       result.scopeFingerprints[`${scope.repoId}:${relative}`] = hash(JSON.stringify(ordered));
     } catch (error) {
-      if (error instanceof Error && error.message === 'SOURCE_SCAN_LIMIT_EXCEEDED') throw error;
+      if (error instanceof Error && ['SOURCE_SCAN_LIMIT_EXCEEDED', 'SOURCE_GIT_IGNORE_FAILED'].includes(error.message)) throw error;
       result.scopeFingerprints[`${scope.repoId}:${relative}`] = 'missing'; result.missing.push(`${scope.repoId}:${relative}`);
     }
     cache.set(cacheKey, result); return result;
@@ -183,12 +306,24 @@ export function snapshotSources(root: string, sources: SourceRef[], scopes: Watc
     Object.assign(files, snapshot.files);
     if (snapshot.missing.length) missing.push(key);
   }
+  const exact = new Map<SourceIgnoreRules, { source: SourceRef; location: ReturnType<typeof sourceLocation> }[]>();
   for (const source of sources) {
     const key = `${source.repoId}:${source.path}`;
     try {
-      const file = sourcePath(root, config, source.repoId, source.path);
-      fingerprints[key] = digest(source.repoId, relativePath(source.path), file);
+      const repoRoot = repositoryRoot(root, config, source.repoId), rules = rulesFor(repoRoot);
+      const location = sourceLocation(root, config, source.repoId, source.path, repoRoot, rules);
+      let entries = exact.get(rules);
+      if (!entries) { entries = []; exact.set(rules, entries); }
+      entries.push({ source, location });
     } catch { fingerprints[key] = null; missing.push(key); }
+  }
+  for (const [rules, entries] of exact) {
+    rules.check(entries.flatMap(({ location }) => location.paths));
+    for (const { source, location } of entries) {
+      const key = `${source.repoId}:${source.path}`;
+      try { fingerprints[key] = digest(source.repoId, relativePath(source.path), checkedSourceLocation(location, rules)); }
+      catch { fingerprints[key] = null; missing.push(key); }
+    }
   }
   return { fingerprints, scopeFingerprints, files, missing: [...new Set(missing)] };
 }

@@ -1,4 +1,4 @@
-# AGENTS.md - {{project_name}}
+# 项目协作约定
 
 ## 范围与基础约束
 

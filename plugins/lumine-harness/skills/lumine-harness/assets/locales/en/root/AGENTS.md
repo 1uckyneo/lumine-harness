@@ -1,4 +1,4 @@
-# AGENTS.md - {{project_name}}
+# Project collaboration guidelines
 
 ## Scope and basic constraints
 

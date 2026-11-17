@@ -5,18 +5,18 @@
     "schemaVersion": 2,
     "id": "lumine-wiki",
     "path": "docs/repo-wiki/Wiki 扫描、检索、增量更新与阅读.md",
-    "generation": 15,
+    "generation": 16,
     "generatedMarkdown": {
-      "$lumineObject": "00968fc5df38cb90f9377cf059ea61465f57f0f15094f423535bd989c6375286",
+      "$lumineObject": "264dd4e737ccd3ba91165a2767643827073684237a1f83331e34ed4e218362c2",
       "kind": "text",
-      "bytes": 23683
+      "bytes": 24090
     },
-    "appliedRevision": "00968fc5df38cb90f9377cf059ea61465f57f0f15094f423535bd989c6375286",
+    "appliedRevision": "264dd4e737ccd3ba91165a2767643827073684237a1f83331e34ed4e218362c2",
     "sources": {
-      "$lumineObject": "69f729b22e2dd364d205a8db5337832999e459c7b9366150f25b711d5ed4144f",
+      "$lumineObject": "4a0216fd7bef045469e935fd86fe9235458087b5ef04e07c9a7e7d883b6d01ce",
       "kind": "json",
       "bytes": 7152
     },
-    "updatedAt": "2026-11-17T05:06:23.017Z"
+    "updatedAt": "2026-11-17T10:17:28.790Z"
   }
 }

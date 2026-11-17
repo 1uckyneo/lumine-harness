@@ -3,6 +3,8 @@
 <!-- LH-BUILD-01 -->
 Inspect real entry points, registrations, configuration, tests, and valid decisions to identify major capabilities, shared mechanisms, dependencies, and runtime boundaries. Structure the hierarchy around project purpose and reader questions. Libraries, CLIs, single-client apps, and multi-repository systems need different structures. Include getting started, API, frontend, or deployment topics only when relevant; do not create empty categories. Label examples, unconnected modules, and historical content. Keep architecture maps in Wiki, organizing standards, examples, guides, confirmed language, and lasting decisions by role rather than adding root architecture or domain/decisions ledgers. During adoption/upgrades follow [Delivery guidance](delivery.md) for applicable artifacts and material destinations.
 
+Distinguish shared team rules from machine-local conventions. Apply personal conventions to the current task when relevant. Keep personal branches, private Skill contents, private paths, and individual workflows out of shared AGENTS, Wiki pages, and knowledge sources unless explicitly authorized for sharing.
+
 <!-- LH-BUILD-02 -->
 Use editorial navigation for the reading order, and coverage for source scopes, topic questions, status, and gaps. Group pages by understanding the project, developing and operating it, or finding and verifying information. Lead with business features or project capabilities. Give pages one primary location, or record why a page is not listed. Use stable section identities for progressive reading and update the structure as capabilities evolve.
 

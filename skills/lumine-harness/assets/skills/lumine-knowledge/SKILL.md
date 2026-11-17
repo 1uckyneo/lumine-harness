@@ -14,6 +14,8 @@ description: 定位实现、查询和维护 Repo Wiki，或打开、启动、重
 <!-- LH-KNOWLEDGE-03 -->
 首次建库读取[理解项目与建库](references/building.md)，默认深入覆盖所有主要模块，目录由项目决定；用户可以缩小范围或延后。采用／升级同时读取[采用交付与验收](references/delivery.md)，服务扩展按需读取[服务指导](references/services.md)。维护读取[知识维护](references/maintenance.md)，写作与结构调整同时读取[写作与编排](references/写作与编排.md)中的七步方法和三类完整示范。Agent／模型理解来源、判断过期影响、撰写正文和 Mermaid；`scan` 只提供变化线索，`update` 只校验并保护性保存 Agent 的文本，不调用模型生产知识。无活动 Agent 时只登记待处理内容。
 
+按要求检查或更新拉取、合并或补丁影响的知识时，读取[同步代码后按需维护知识](references/maintenance.md#同步代码后按需维护知识)。
+
 <!-- LH-KNOWLEDGE-04 -->
 正文、摘要、Mermaid 文本和来源是人／Agent 共用的一份内容。需要图文联动、比较或就地代码时使用明确的 `lumine-view` 声明块，格式见[阅读表达](references/阅读表达.md)；专用交互资源经登记、隔离显示并提供完整文字，不能触发真实写入。卡片由 HTML DOM 呈现，图由浏览器即时渲染。知识扫描、生成、更新、查询和审阅只接收文本，不调用图片生成、截图识别或视觉模型，不生成卡片图片或缩略图文件，不把渲染后的 SVG 送入模型。文本复制／导出使用 Markdown 或 Mermaid。浏览器专项 UI 验证与知识流水线分开。
 

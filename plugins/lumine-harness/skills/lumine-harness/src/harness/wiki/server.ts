@@ -3,7 +3,7 @@ import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { resolveHarnessRuntimeRoot } from '../core/runtime-layout.ts';
 import { loadProjectConfig } from '../core/project-config.ts';
-import { containedPath, hash, isExcluded, readSource, slash, walkFiles, wikiConfig } from './files.ts';
+import { containedPath, hash, isExcluded, readSource, slash, sourcePath, walkFiles, wikiConfig } from './files.ts';
 import { inspectKnowledge, mapKnowledge, navigationKnowledge, queryKnowledge, relatedKnowledge, resolveKnowledgeReference, showKnowledge } from './engine.ts';
 import { searchKnowledgePage } from './search.ts';
 import { isRegisteredValidationDocumentId, registeredValidationDocuments, showRegisteredValidation } from './validation-documents.ts';
@@ -148,6 +148,7 @@ export async function serveWiki(root: string, options: { port?: number; assetsRo
         if (target.startsWith('source:')) {
           const document = showKnowledge(root, owner), source = document.sources.find((item) => item.id === target.slice(7));
           if (!source) throw new Error('SOURCE_NOT_IN_DOCUMENT');
+          sourcePath(root, config, source.repoId, source.path);
           json(response, 200, { kind: 'source', path: source.path, documentId: document.id, sourceId: source.id }); return;
         }
         const address = new URL(target, `https://wiki.invalid/${fromPath}`);

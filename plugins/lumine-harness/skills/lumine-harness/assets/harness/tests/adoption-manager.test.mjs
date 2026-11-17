@@ -40,6 +40,9 @@ test("locale is pinned before proposal content; clean installation has four new 
 			applyProposal(file);
 			const cfg = JSON.parse(readFileSync(path.join(f.root, ".lumine/project.json"), "utf8"));
 			assert.equal(cfg.locale, locale);
+			const instructions = readFileSync(path.join(f.root, "AGENTS.md"), "utf8");
+			const [title] = instructions.split("\n");
+			assert.equal(title, locale === "zh-CN" ? "# 项目协作约定" : "# Project collaboration guidelines");
 			for (const rootDoc of ["AGENTS.md", "docs/index.md"]) assert.doesNotMatch(readFileSync(path.join(f.root, rootDoc), "utf8"), /\{\{[a-z_]+\}\}/);
 			for (const name of [
 				"plan",
@@ -80,6 +83,7 @@ test("adoption and upgrade preserve unreviewed document rules and a human-mainta
 			if (mode === "upgrade") applyProposal(f.save(createProposal(f.root, { locale: "en" })));
 			mkdirSync(path.join(f.root, "docs"), { recursive: true });
 			const bodies = {
+				"AGENTS.md": "# Team working agreement\n\n## Required standards\n[Project documentation](docs/index.md)\n",
 				"docs/index.md": "# Project documentation\nKeep this human-maintained entry.\n",
 				"docs/workflow-artifacts.md": "# Project approval rules\nKeep the unique product approval boundary.\n",
 				"docs/FRONTEND.md": "# Project interface rules\nPreserve keyboard focus during dialogs.\n"
